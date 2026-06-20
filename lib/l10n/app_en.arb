@@ -1,0 +1,37 @@
+{
+  "settings": "Settings",
+  "appLanguage": "App Language",
+  "selectLanguage": "Select Language",
+  "preferences": "Preferences",
+  "appTheme": "App Theme",
+  "themeCream": "Cream",
+  "themeDark": "Dark",
+  "themeWhite": "White",
+  "dailyNotifications": "Daily Notifications",
+  "dailyNotificationsDesc": "Receive daily verses & reminders",
+  "storageAndData": "Storage & Data",
+  "clearDownloadedAudio": "Clear Downloaded Audio",
+  "freeUpSpace": "Free up space on your device",
+  "audioCacheCleared": "Audio cache cleared.",
+  "noAudioFound": "No audio files found.",
+  "supportAndAbout": "Support & About",
+  "shareApp": "Share App",
+  "shareAppText": "Download the Quran & Dawah app to read the Quran and listen to Islamic scholars!",
+  "rateUs": "Rate Us",
+  "contactUs": "Contact Us",
+  "aboutApp": "About Quran & Dawah App",
+  "madeWithLove": "Made with ♥ for the Ummah",
+  "navQuran": "Quran",
+  "navDawah": "Dawah",
+  "navSettings": "Settings",
+  "dawahScholars": "Dawah Scholars",
+  "availableItems": "{count} Available Items",
+  "@availableItems": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "downloadAll": "Download All",
+  "lectures": "Lectures",
+  "version": "Version"
+}

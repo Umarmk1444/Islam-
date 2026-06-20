@@ -1,0 +1,37 @@
+{
+  "settings": "الإعدادات",
+  "appLanguage": "لغة التطبيق",
+  "selectLanguage": "اختر اللغة",
+  "preferences": "التفضيلات",
+  "appTheme": "مظهر التطبيق",
+  "themeCream": "كريمي",
+  "themeDark": "داكن",
+  "themeWhite": "أبيض",
+  "dailyNotifications": "الإشعارات اليومية",
+  "dailyNotificationsDesc": "تلقي آيات وتذكيرات يومية",
+  "storageAndData": "التخزين والبيانات",
+  "clearDownloadedAudio": "مسح الصوتيات المحملة",
+  "freeUpSpace": "تفريغ مساحة على جهازك",
+  "audioCacheCleared": "تم مسح ذاكرة التخزين المؤقت للصوت.",
+  "noAudioFound": "لم يتم العثور على ملفات صوتية.",
+  "supportAndAbout": "الدعم وحول التطبيق",
+  "shareApp": "مشاركة التطبيق",
+  "shareAppText": "قم بتنزيل تطبيق القرآن والدعوة لقراءة القرآن والاستماع إلى العلماء الإسلاميين!",
+  "rateUs": "قيمنا",
+  "contactUs": "اتصل بنا",
+  "aboutApp": "حول تطبيق القرآن والدعوة",
+  "madeWithLove": "صُنع بـ ♥ للأمة",
+  "navQuran": "القرآن",
+  "navDawah": "الدعوة",
+  "navSettings": "الإعدادات",
+  "dawahScholars": "علماء الدعوة",
+  "availableItems": "{count} عناصر متاحة",
+  "@availableItems": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "downloadAll": "تحميل الكل",
+  "lectures": "المحاضرات",
+  "version": "الإصدار"
+}

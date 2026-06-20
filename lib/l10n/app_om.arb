@@ -1,0 +1,37 @@
+{
+  "settings": "Qindaa'ina",
+  "appLanguage": "Afaan Appilikeeshinii",
+  "selectLanguage": "Afaan Filadhu",
+  "preferences": "Filannoowwan",
+  "appTheme": "Bifa Appilikeeshinii",
+  "themeCream": "Kirimii",
+  "themeDark": "Dukkanaa'aa",
+  "themeWhite": "Adii",
+  "dailyNotifications": "Beeksisoota Guyyaa",
+  "dailyNotificationsDesc": "Aayata fi yaadachiisota guyyaa guyyaan argadhu",
+  "storageAndData": "Kuusaa fi Daataa",
+  "clearDownloadedAudio": "Sagalee Buufame Haqi",
+  "freeUpSpace": "Iddoo bilbila keetii irraa qulqulleessi",
+  "audioCacheCleared": "Kaashiin sagalee haqame.",
+  "noAudioFound": "Faayilli sagalee hin argamne.",
+  "supportAndAbout": "Deeggarsa fi Waa'ee",
+  "shareApp": "Appilikeeshinii Qoodi",
+  "shareAppText": "Qur'aana dubbisuu fi Ulamaa'ii Islaamaa dhaggeeffachuuf appilikeeshinii Qur'aanaa fi Da'awaa buufadhaa!",
+  "rateUs": "Nu Madaali",
+  "contactUs": "Nu Quunnamaa",
+  "aboutApp": "Waa'ee Appilikeeshinii Qur'aanaa fi Da'awaa",
+  "madeWithLove": "Ummataaf ♥ tiin hojjetame",
+  "navQuran": "Qur'aana",
+  "navDawah": "Da'awaa",
+  "navSettings": "Qindaa'ina",
+  "dawahScholars": "Ulamaa'ii Da'awaa",
+  "availableItems": "Wantootni {count} jiru",
+  "@availableItems": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "downloadAll": "Hunda Buufadhu",
+  "lectures": "Barnoota",
+  "version": "Vershinii"
+}

@@ -1,0 +1,37 @@
+{
+  "settings": "ቅንብሮች",
+  "appLanguage": "የመተግበሪያ ቋንቋ",
+  "selectLanguage": "ቋንቋ ይምረጡ",
+  "preferences": "ምርጫዎች",
+  "appTheme": "የመተግበሪያ ገጽታ",
+  "themeCream": "ክሬም",
+  "themeDark": "ጨለማ",
+  "themeWhite": "ነጭ",
+  "dailyNotifications": "ዕለታዊ ማሳወቂያዎች",
+  "dailyNotificationsDesc": "ዕለታዊ ጥቅሶች እና ማሳሰቢያዎችን ይቀበሉ",
+  "storageAndData": "ማከማቻ እና ውሂብ",
+  "clearDownloadedAudio": "የወረዱ ድምጾችን ያጽዱ",
+  "freeUpSpace": "በመሣሪያዎ ላይ ቦታ ነፃ ያድርጉ",
+  "audioCacheCleared": "የድምፅ ካሽ ጸድቷል።",
+  "noAudioFound": "ምንም የድምፅ ፋይሎች አልተገኙም።",
+  "supportAndAbout": "ድጋፍ እና ስለ",
+  "shareApp": "መተግበሪያን ያጋሩ",
+  "shareAppText": "ቁርኣን ለማንበብ እና የእስልምና ሊቃውንትን ለማዳመጥ የቁርኣን እና ዳዕዋ መተግበሪያን ያውርዱ!",
+  "rateUs": "ደረጃ ይስጡን",
+  "contactUs": "ያግኙን",
+  "aboutApp": "ስለ ቁርኣን እና ዳዕዋ መተግበሪያ",
+  "madeWithLove": "ለኡምማ በ ♥ ተሠርቷል",
+  "navQuran": "ቁርኣን",
+  "navDawah": "ዳዕዋ",
+  "navSettings": "ቅንብሮች",
+  "dawahScholars": "የዳዕዋ ሊቃውንት",
+  "availableItems": "{count} ዝርዝሮች አሉ",
+  "@availableItems": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "downloadAll": "ሁሉንም አውርድ",
+  "lectures": "ትምህርቶች",
+  "version": "ስሪት"
+}
