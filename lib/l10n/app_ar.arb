@@ -33,5 +33,41 @@
   },
   "downloadAll": "تحميل الكل",
   "lectures": "المحاضرات",
-  "version": "الإصدار"
+  "version": "الإصدار",
+  "contactDeveloper": "تواصل مع المطور",
+  "contactDeveloperDesc": "رابط مباشر مع المطور @UMER_jr",
+  "contactDeveloperText": "لأي مشكلة أو اقتراح أو استفسار، لا تتردد في التواصل معي مباشرة عبر تليجرام.",
+  "chatOnTelegram": "دردش عبر تليجرام",
+  "copyUsername": "نسخ اسم المستخدم",
+  "copiedToClipboard": "تم النسخ إلى الحافظة: @UMER_jr",
+  "translation": "الترجمة",
+  "tafsir": "التفسير",
+  "nextAyah": "الآية التالية",
+  "previousAyah": "الآية السابقة",
+  "repetition": "التكرار",
+  "delayInterval": "الانتظار بين الآيتين",
+  "reciterAlafasy": "مشاري راشد العفاسي",
+  "infinite": "لا نهائي",
+  "none": "بدون",
+  "secondsShort": "{count}ث",
+  "@secondsShort": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "verseDuration": "طول الآية",
+  "actionTafsir": "التفسير",
+  "actionTranslation": "الترجمة",
+  "actionListen": "استماع",
+  "actionCopyAyah": "نسخ الآية",
+  "actionCopyPage": "نسخ الصفحة",
+  "actionShareText": "مشاركة النص",
+  "actionShareImage": "مشاركة الصورة",
+  "actionSaveBookmark": "حفظ العلامة",
+  "actionGoToBookmark": "الذهاب للعلامة",
+  "actionIndex": "الفهرس",
+  "actionClose": "إغلاق",
+  "audioReciter": "القارئ",
+  "loading": "جاري التحميل...",
+  "errorFetchingData": "خطأ في جلب البيانات"
 }

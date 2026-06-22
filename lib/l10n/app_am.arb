@@ -33,5 +33,41 @@
   },
   "downloadAll": "ሁሉንም አውርድ",
   "lectures": "ትምህርቶች",
-  "version": "ስሪት"
+  "version": "ስሪት",
+  "contactDeveloper": "አዘጋጁን ያግኙ",
+  "contactDeveloperDesc": "ከአዘጋጁ @UMER_jr ጋር ቀጥተኛ ግንኙነት",
+  "contactDeveloperText": "ለማንኛውም ችግር፣ አስተያየት ወይም ጥያቄ በቀጥታ በቴሌግራም ያግኙኝ።",
+  "chatOnTelegram": "በቴሌግራም ያውሩን",
+  "copyUsername": "የተጠቃሚ ስም ቅዳ",
+  "copiedToClipboard": "ወደ ክሊፕቦርድ ተቀድቷል፡ @UMER_jr",
+  "translation": "ትርጉም",
+  "tafsir": "ተፍሲር",
+  "nextAyah": "ቀጣይ አያህ",
+  "previousAyah": "ያለፈው አያህ",
+  "repetition": "ድግግሞሽ",
+  "delayInterval": "በአያህ መካከል መቆየት",
+  "reciterAlafasy": "ሚሻሪ ራሺድ አል-አፋሲ",
+  "infinite": "ያልተገደበ",
+  "none": "ምንም",
+  "secondsShort": "{count}ሰ",
+  "@secondsShort": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "verseDuration": "የአያህ ርዝመት",
+  "actionTafsir": "ተፍሲር",
+  "actionTranslation": "ትርጉም",
+  "actionListen": "አዳምጥ / ድምጽ",
+  "actionCopyAyah": "አያህን ቅዳ",
+  "actionCopyPage": "ገጹን ቅዳ",
+  "actionShareText": "ጽሑፍ አጋራ",
+  "actionShareImage": "ምስል አጋራ",
+  "actionSaveBookmark": "ዕልባት አስቀምጥ",
+  "actionGoToBookmark": "ወደ ዕልባት ሂድ",
+  "actionIndex": "ማውጫ",
+  "actionClose": "ዝጋ",
+  "audioReciter": "አንባቢ",
+  "loading": "በመጫን ላይ...",
+  "errorFetchingData": "መረጃ ማምጣት አልተቻለም"
 }

@@ -7,6 +7,7 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
+  flutter_skill: ^0.2.6
   flutter:
     sdk: flutter
   scrollable_positioned_list: ^0.3.8
@@ -31,6 +32,8 @@ flutter:
   generate: true
   assets:
     - assets/quran.json
+    - assets/images/
+    - assets/images/
   fonts:
     - family: Amiri
       fonts:

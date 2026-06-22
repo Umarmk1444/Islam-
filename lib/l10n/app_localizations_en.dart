@@ -100,4 +100,100 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get version => 'Version';
+
+  @override
+  String get contactDeveloper => 'Contact Developer';
+
+  @override
+  String get contactDeveloperDesc => 'Direct link with developer @UMER_jr';
+
+  @override
+  String get contactDeveloperText =>
+      'For any issues, recommendations, or general inquiries, please feel free to contact me directly via Telegram.';
+
+  @override
+  String get chatOnTelegram => 'Chat on Telegram';
+
+  @override
+  String get copyUsername => 'Copy Username';
+
+  @override
+  String get copiedToClipboard => 'Saved to clipboard: @UMER_jr';
+
+  @override
+  String get translation => 'Translation';
+
+  @override
+  String get tafsir => 'Tafsir';
+
+  @override
+  String get nextAyah => 'Next Ayah';
+
+  @override
+  String get previousAyah => 'Previous Ayah';
+
+  @override
+  String get repetition => 'Repetition';
+
+  @override
+  String get delayInterval => 'Delay Between Ayahs';
+
+  @override
+  String get reciterAlafasy => 'Mishary Rashid Alafasy';
+
+  @override
+  String get infinite => 'Infinite';
+
+  @override
+  String get none => 'None';
+
+  @override
+  String secondsShort(int count) {
+    return '${count}s';
+  }
+
+  @override
+  String get verseDuration => 'Verse Length';
+
+  @override
+  String get actionTafsir => 'Tafsir';
+
+  @override
+  String get actionTranslation => 'Translation';
+
+  @override
+  String get actionListen => 'Listen / Audio';
+
+  @override
+  String get actionCopyAyah => 'Copy Ayah Text';
+
+  @override
+  String get actionCopyPage => 'Copy Page Text';
+
+  @override
+  String get actionShareText => 'Share Text';
+
+  @override
+  String get actionShareImage => 'Share Image';
+
+  @override
+  String get actionSaveBookmark => 'Save Bookmark';
+
+  @override
+  String get actionGoToBookmark => 'Go to Bookmark';
+
+  @override
+  String get actionIndex => 'Index';
+
+  @override
+  String get actionClose => 'Close';
+
+  @override
+  String get audioReciter => 'Reciter';
+
+  @override
+  String get loading => 'Loading...';
+
+  @override
+  String get errorFetchingData => 'Error fetching data';
 }

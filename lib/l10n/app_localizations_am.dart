@@ -100,4 +100,100 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get version => 'ስሪት';
+
+  @override
+  String get contactDeveloper => 'አዘጋጁን ያግኙ';
+
+  @override
+  String get contactDeveloperDesc => 'ከአዘጋጁ @UMER_jr ጋር ቀጥተኛ ግንኙነት';
+
+  @override
+  String get contactDeveloperText =>
+      'ለማንኛውም ችግር፣ አስተያየት ወይም ጥያቄ በቀጥታ በቴሌግራም ያግኙኝ።';
+
+  @override
+  String get chatOnTelegram => 'በቴሌግራም ያውሩን';
+
+  @override
+  String get copyUsername => 'የተጠቃሚ ስም ቅዳ';
+
+  @override
+  String get copiedToClipboard => 'ወደ ክሊፕቦርድ ተቀድቷል፡ @UMER_jr';
+
+  @override
+  String get translation => 'ትርጉም';
+
+  @override
+  String get tafsir => 'ተፍሲር';
+
+  @override
+  String get nextAyah => 'ቀጣይ አያህ';
+
+  @override
+  String get previousAyah => 'ያለፈው አያህ';
+
+  @override
+  String get repetition => 'ድግግሞሽ';
+
+  @override
+  String get delayInterval => 'በአያህ መካከል መቆየት';
+
+  @override
+  String get reciterAlafasy => 'ሚሻሪ ራሺድ አል-አፋሲ';
+
+  @override
+  String get infinite => 'ያልተገደበ';
+
+  @override
+  String get none => 'ምንም';
+
+  @override
+  String secondsShort(int count) {
+    return '$countሰ';
+  }
+
+  @override
+  String get verseDuration => 'የአያህ ርዝመት';
+
+  @override
+  String get actionTafsir => 'ተፍሲር';
+
+  @override
+  String get actionTranslation => 'ትርጉም';
+
+  @override
+  String get actionListen => 'አዳምጥ / ድምጽ';
+
+  @override
+  String get actionCopyAyah => 'አያህን ቅዳ';
+
+  @override
+  String get actionCopyPage => 'ገጹን ቅዳ';
+
+  @override
+  String get actionShareText => 'ጽሑፍ አጋራ';
+
+  @override
+  String get actionShareImage => 'ምስል አጋራ';
+
+  @override
+  String get actionSaveBookmark => 'ዕልባት አስቀምጥ';
+
+  @override
+  String get actionGoToBookmark => 'ወደ ዕልባት ሂድ';
+
+  @override
+  String get actionIndex => 'ማውጫ';
+
+  @override
+  String get actionClose => 'ዝጋ';
+
+  @override
+  String get audioReciter => 'አንባቢ';
+
+  @override
+  String get loading => 'በመጫን ላይ...';
+
+  @override
+  String get errorFetchingData => 'መረጃ ማምጣት አልተቻለም';
 }

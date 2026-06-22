@@ -281,6 +281,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Version'**
   String get version;
+
+  /// No description provided for @contactDeveloper.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Developer'**
+  String get contactDeveloper;
+
+  /// No description provided for @contactDeveloperDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct link with developer @UMER_jr'**
+  String get contactDeveloperDesc;
+
+  /// No description provided for @contactDeveloperText.
+  ///
+  /// In en, this message translates to:
+  /// **'For any issues, recommendations, or general inquiries, please feel free to contact me directly via Telegram.'**
+  String get contactDeveloperText;
+
+  /// No description provided for @chatOnTelegram.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat on Telegram'**
+  String get chatOnTelegram;
+
+  /// No description provided for @copyUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Username'**
+  String get copyUsername;
+
+  /// No description provided for @copiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to clipboard: @UMER_jr'**
+  String get copiedToClipboard;
+
+  /// No description provided for @translation.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation'**
+  String get translation;
+
+  /// No description provided for @tafsir.
+  ///
+  /// In en, this message translates to:
+  /// **'Tafsir'**
+  String get tafsir;
+
+  /// No description provided for @nextAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Ayah'**
+  String get nextAyah;
+
+  /// No description provided for @previousAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Ayah'**
+  String get previousAyah;
+
+  /// No description provided for @repetition.
+  ///
+  /// In en, this message translates to:
+  /// **'Repetition'**
+  String get repetition;
+
+  /// No description provided for @delayInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Delay Between Ayahs'**
+  String get delayInterval;
+
+  /// No description provided for @reciterAlafasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Mishary Rashid Alafasy'**
+  String get reciterAlafasy;
+
+  /// No description provided for @infinite.
+  ///
+  /// In en, this message translates to:
+  /// **'Infinite'**
+  String get infinite;
+
+  /// No description provided for @none.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get none;
+
+  /// No description provided for @secondsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}s'**
+  String secondsShort(int count);
+
+  /// No description provided for @verseDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Verse Length'**
+  String get verseDuration;
+
+  /// No description provided for @actionTafsir.
+  ///
+  /// In en, this message translates to:
+  /// **'Tafsir'**
+  String get actionTafsir;
+
+  /// No description provided for @actionTranslation.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation'**
+  String get actionTranslation;
+
+  /// No description provided for @actionListen.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen / Audio'**
+  String get actionListen;
+
+  /// No description provided for @actionCopyAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Ayah Text'**
+  String get actionCopyAyah;
+
+  /// No description provided for @actionCopyPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Page Text'**
+  String get actionCopyPage;
+
+  /// No description provided for @actionShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Text'**
+  String get actionShareText;
+
+  /// No description provided for @actionShareImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Image'**
+  String get actionShareImage;
+
+  /// No description provided for @actionSaveBookmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Bookmark'**
+  String get actionSaveBookmark;
+
+  /// No description provided for @actionGoToBookmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Bookmark'**
+  String get actionGoToBookmark;
+
+  /// No description provided for @actionIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'Index'**
+  String get actionIndex;
+
+  /// No description provided for @actionClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get actionClose;
+
+  /// No description provided for @audioReciter.
+  ///
+  /// In en, this message translates to:
+  /// **'Reciter'**
+  String get audioReciter;
+
+  /// No description provided for @loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get loading;
+
+  /// No description provided for @errorFetchingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Error fetching data'**
+  String get errorFetchingData;
 }
 
 class _AppLocalizationsDelegate

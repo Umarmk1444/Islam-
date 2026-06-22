@@ -153,7 +153,7 @@ class StrictQcfPage extends StatelessWidget {
         child: HeaderWidget(suraNumber: line.headerSurah!, theme: theme),
       );
     }
-    
+
     if (line.isBasmala) {
       return Center(
         child: Text(
@@ -173,8 +173,42 @@ class StrictQcfPage extends StatelessWidget {
       return const SizedBox();
     }
 
-    // Determine if the line should be centered rather than fully justified.
-    // Lines are centered if they are exceptionally short (e.g. the last line of a Surah).
+    // For pages 1 & 2: force center alignment without any word spacing stretching
+    final bool isOpeningPage = pageNumber == 1 || pageNumber == 2;
+
+    if (isOpeningPage) {
+      return FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: line.words.map((word) {
+            return GestureDetector(
+              onTap: () {
+                if (onTap != null) {
+                  onTap!(word.surah, word.verse);
+                }
+              },
+              child: Text(
+                word.text,
+                style: TextStyle(
+                  fontFamily: pageFont,
+                  package: 'qcf_quran',
+                  fontSize: baseFontSize,
+                  color: word.isVerseNumber ? theme.verseNumberColor : theme.verseTextColor,
+                  height: 1.0,
+                  wordSpacing: 0.0,
+                  letterSpacing: 0.0,
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      );
+    }
+
+    // For normal pages: determine if line should be centered or justified
     final bool isShortLine = line.words.length < 8 && (index == totalLines - 1 || _isEndOfSurah(line));
 
     return FittedBox(

@@ -100,5 +100,101 @@ class AppLocalizationsOm extends AppLocalizations {
   String get lectures => 'Barnoota';
 
   @override
-  String get version => 'Vershinii';
+  String get version => 'Verzyinii';
+
+  @override
+  String get contactDeveloper => 'Ogeessa Qunnamaa';
+
+  @override
+  String get contactDeveloperDesc => 'Kallattiin ogeessa @UMER_jr wajjin';
+
+  @override
+  String get contactDeveloperText =>
+      'Rakkoo kamiyyuu, yaada ykn gaaffii kamiyyuuf, kallattiin karaa Telegram na qunnamaa.';
+
+  @override
+  String get chatOnTelegram => 'Telegram irratti haasa\'aa';
+
+  @override
+  String get copyUsername => 'Maqaa copii';
+
+  @override
+  String get copiedToClipboard => 'Koppii ta\'eera: @UMER_jr';
+
+  @override
+  String get translation => 'Hiikkaa';
+
+  @override
+  String get tafsir => 'Tafsiira';
+
+  @override
+  String get nextAyah => 'Aayaa Ittaanu';
+
+  @override
+  String get previousAyah => 'Aayaa Darbe';
+
+  @override
+  String get repetition => 'Irra deebii';
+
+  @override
+  String get delayInterval => 'Turii Aayawwan Gidduu';
+
+  @override
+  String get reciterAlafasy => 'Mishary Rashid Alafasy';
+
+  @override
+  String get infinite => 'Dhuma hin qabne';
+
+  @override
+  String get none => 'Homaa';
+
+  @override
+  String secondsShort(int count) {
+    return 's $count';
+  }
+
+  @override
+  String get verseDuration => 'Dheerina Aayaa';
+
+  @override
+  String get actionTafsir => 'Tafsiira';
+
+  @override
+  String get actionTranslation => 'Hiikkaa';
+
+  @override
+  String get actionListen => 'Dhaggeeffadhu / Sagalee';
+
+  @override
+  String get actionCopyAyah => 'Aayaa Coppii';
+
+  @override
+  String get actionCopyPage => 'Fuula Coppii';
+
+  @override
+  String get actionShareText => 'Barreeffama Qoodi';
+
+  @override
+  String get actionShareImage => 'Fakkii Qoodi';
+
+  @override
+  String get actionSaveBookmark => 'Mallattoo Olkaa\'i';
+
+  @override
+  String get actionGoToBookmark => 'Gara Mallattoo Deemi';
+
+  @override
+  String get actionIndex => 'Baafata';
+
+  @override
+  String get actionClose => 'Cufi';
+
+  @override
+  String get audioReciter => 'Qara\'aa';
+
+  @override
+  String get loading => 'Fe\'aa jira...';
+
+  @override
+  String get errorFetchingData => 'Ragaa fiduun hin danda\'amne';
 }

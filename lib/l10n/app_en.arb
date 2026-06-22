@@ -33,5 +33,41 @@
   },
   "downloadAll": "Download All",
   "lectures": "Lectures",
-  "version": "Version"
+  "version": "Version",
+  "contactDeveloper": "Contact Developer",
+  "contactDeveloperDesc": "Direct link with developer @UMER_jr",
+  "contactDeveloperText": "For any issues, recommendations, or general inquiries, please feel free to contact me directly via Telegram.",
+  "chatOnTelegram": "Chat on Telegram",
+  "copyUsername": "Copy Username",
+  "copiedToClipboard": "Saved to clipboard: @UMER_jr",
+  "translation": "Translation",
+  "tafsir": "Tafsir",
+  "nextAyah": "Next Ayah",
+  "previousAyah": "Previous Ayah",
+  "repetition": "Repetition",
+  "delayInterval": "Delay Between Ayahs",
+  "reciterAlafasy": "Mishary Rashid Alafasy",
+  "infinite": "Infinite",
+  "none": "None",
+  "secondsShort": "{count}s",
+  "@secondsShort": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "verseDuration": "Verse Length",
+  "actionTafsir": "Tafsir",
+  "actionTranslation": "Translation",
+  "actionListen": "Listen / Audio",
+  "actionCopyAyah": "Copy Ayah Text",
+  "actionCopyPage": "Copy Page Text",
+  "actionShareText": "Share Text",
+  "actionShareImage": "Share Image",
+  "actionSaveBookmark": "Save Bookmark",
+  "actionGoToBookmark": "Go to Bookmark",
+  "actionIndex": "Index",
+  "actionClose": "Close",
+  "audioReciter": "Reciter",
+  "loading": "Loading...",
+  "errorFetchingData": "Error fetching data"
 }

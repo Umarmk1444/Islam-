@@ -33,5 +33,41 @@
   },
   "downloadAll": "Hunda Buufadhu",
   "lectures": "Barnoota",
-  "version": "Vershinii"
+  "version": "Verzyinii",
+  "contactDeveloper": "Ogeessa Qunnamaa",
+  "contactDeveloperDesc": "Kallattiin ogeessa @UMER_jr wajjin",
+  "contactDeveloperText": "Rakkoo kamiyyuu, yaada ykn gaaffii kamiyyuuf, kallattiin karaa Telegram na qunnamaa.",
+  "chatOnTelegram": "Telegram irratti haasa'aa",
+  "copyUsername": "Maqaa copii",
+  "copiedToClipboard": "Koppii ta'eera: @UMER_jr",
+  "translation": "Hiikkaa",
+  "tafsir": "Tafsiira",
+  "nextAyah": "Aayaa Ittaanu",
+  "previousAyah": "Aayaa Darbe",
+  "repetition": "Irra deebii",
+  "delayInterval": "Turii Aayawwan Gidduu",
+  "reciterAlafasy": "Mishary Rashid Alafasy",
+  "infinite": "Dhuma hin qabne",
+  "none": "Homaa",
+  "secondsShort": "s {count}",
+  "@secondsShort": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "verseDuration": "Dheerina Aayaa",
+  "actionTafsir": "Tafsiira",
+  "actionTranslation": "Hiikkaa",
+  "actionListen": "Dhaggeeffadhu / Sagalee",
+  "actionCopyAyah": "Aayaa Coppii",
+  "actionCopyPage": "Fuula Coppii",
+  "actionShareText": "Barreeffama Qoodi",
+  "actionShareImage": "Fakkii Qoodi",
+  "actionSaveBookmark": "Mallattoo Olkaa'i",
+  "actionGoToBookmark": "Gara Mallattoo Deemi",
+  "actionIndex": "Baafata",
+  "actionClose": "Cufi",
+  "audioReciter": "Qara'aa",
+  "loading": "Fe'aa jira...",
+  "errorFetchingData": "Ragaa fiduun hin danda'amne"
 }

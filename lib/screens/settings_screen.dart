@@ -136,19 +136,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // Localized support translations for global Telegram card
-  String _getTelegramBannerText() {
-    switch (_selectedLanguage) {
-      case 'Amharic':
-        return 'ለማንኛውም ጥያቄ፣ አስተያየት ወይም ስራ በቀጥታ በአለም አቀፍ ትብብር በቴሌግራም @UMER_jr ያግኙን።';
-      case 'Oromo':
-        return 'Gaaffii, yaada ykn qeeqa kamiifiyyuu, karaaTelegram @UMER_jr nu qunnamaa.';
-      case 'Arabic':
-        return 'للدعم والتعاون العالمي أو الاستفسارات، يرجى التواصل مباشرة معنا عبر تليجرام @UMER_jr.';
-      default:
-        return 'For global support, feedback, or collaborations, please reach out via Telegram @UMER_jr';
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +159,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
             children: [
               // Premium Telegram Collaboration Card
-              _buildTelegramSupportCard(primaryColor, mainTextColor, cardBgColor, borderColor),
+              _buildTelegramSupportCard(primaryColor, mainTextColor, cardBgColor, borderColor, l10n),
               const SizedBox(height: 24),
 
               _buildSectionHeader(l10n.preferences, primaryColor),
@@ -293,7 +281,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildTelegramSupportCard(Color primaryColor, Color textColor, Color bgColor, Color borderColor) {
+  Widget _buildTelegramSupportCard(Color primaryColor, Color textColor, Color bgColor, Color borderColor, AppLocalizations l10n) {
     return Container(
       decoration: BoxDecoration(
         color: primaryColor.withOpacity(0.08),
@@ -320,12 +308,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Global Collaboration Support',
+                      l10n.contactDeveloper,
                       style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: primaryColor),
                     ),
-                    const Text(
-                      'Direct link with developer @UMER_jr',
-                      style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500),
+                    Text(
+                      l10n.contactDeveloperDesc,
+                      style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
@@ -334,7 +322,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            _getTelegramBannerText(),
+            l10n.contactDeveloperText,
             style: TextStyle(fontSize: 13, height: 1.4, color: textColor.withOpacity(0.9), fontStyle: FontStyle.italic),
           ),
           const SizedBox(height: 16),
@@ -348,7 +336,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   }
                 },
                 icon: const Icon(Icons.telegram, size: 18),
-                label: const Text('Chat on Telegram'),
+                label: Text(l10n.chatOnTelegram),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
                   foregroundColor: Colors.white,
@@ -363,7 +351,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Clipboard.setData(const ClipboardData(text: '@UMER_jr')).then((_) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: const Text('Saved to clipboard: @UMER_jr'),
+                        content: Text(l10n.copiedToClipboard),
                         backgroundColor: primaryColor,
                         behavior: SnackBarBehavior.floating,
                       ),
@@ -371,7 +359,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   });
                 },
                 icon: const Icon(Icons.copy, size: 16),
-                label: const Text('Copy Username'),
+                label: Text(l10n.copyUsername),
                 style: TextButton.styleFrom(
                   foregroundColor: primaryColor,
                   textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
