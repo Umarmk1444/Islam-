@@ -295,21 +295,21 @@ class _QuranScreenState extends State<QuranScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            Material(
+                        Material(
               color: Colors.transparent,
               child: ListTile(
                 leading: Icon(Icons.menu_book, color: _goldTextColor),
                 title: Text('التفسير', style: TextStyle(color: _mainTextColor, fontFamily: 'Amiri', fontSize: 18)),
                 onTap: () {
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('سيتم إضافة التفسير قريباً', style: TextStyle(fontFamily: 'Amiri')),
-                    backgroundColor: _borderColor,
-                  ),
-                );
-              },
-            ),
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('سيتم إضافة التفسير قريباً', style: TextStyle(fontFamily: 'Amiri')),
+                      backgroundColor: _borderColor,
+                    ),
+                  );
+                },
+              ),
             ),
             Material(
               color: Colors.transparent,
@@ -317,17 +317,17 @@ class _QuranScreenState extends State<QuranScreen> {
                 leading: Icon(Icons.copy, color: _goldTextColor),
                 title: Text('نسخ الآية', style: TextStyle(color: _mainTextColor, fontFamily: 'Amiri', fontSize: 18)),
                 onTap: () {
-                Navigator.pop(ctx);
-                final textToCopy = '${verse['text']} ﴿${_toArabicNumerals(verse['ayahNumber'])}﴾';
-                Clipboard.setData(ClipboardData(text: textToCopy));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('تم نسخ الآية بنجاح', style: TextStyle(fontFamily: 'Amiri')),
-                    backgroundColor: _borderColor,
-                  ),
-                );
-              },
-            ),
+                  Navigator.pop(ctx);
+                  final textToCopy = '${verse['text']} ﴿${_toArabicNumerals(verse['ayahNumber'])}﴾';
+                  Clipboard.setData(ClipboardData(text: textToCopy));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('تم نسخ الآية بنجاح', style: TextStyle(fontFamily: 'Amiri')),
+                      backgroundColor: _borderColor,
+                    ),
+                  );
+                },
+              ),
             ),
             Material(
               color: Colors.transparent,
@@ -335,11 +335,11 @@ class _QuranScreenState extends State<QuranScreen> {
                 leading: Icon(Icons.share, color: _goldTextColor),
                 title: Text('مشاركة', style: TextStyle(color: _mainTextColor, fontFamily: 'Amiri', fontSize: 18)),
                 onTap: () {
-                Navigator.pop(ctx);
-                final shareText = '﴿${verse['text']}﴾ [${verse['surahName']}: ${verse['ayahNumber']}]';
-                Share.share(shareText);
-              },
-            ),
+                  Navigator.pop(ctx);
+                  final shareText = '﴿${verse['text']}﴾ [${verse['surahName']}: ${verse['ayahNumber']}]';
+                  Share.share(shareText);
+                },
+              ),
             ),
             Material(
               color: Colors.transparent,
@@ -347,27 +347,28 @@ class _QuranScreenState extends State<QuranScreen> {
                 leading: Icon(Icons.bookmark_add, color: _goldTextColor),
                 title: Text('حفظ العلامة', style: TextStyle(color: _mainTextColor, fontFamily: 'Amiri', fontSize: 18)),
                 onTap: () async {
-                Navigator.pop(ctx);
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.setInt(_bookmarkPageKey, verse['page']);
-                await prefs.setInt(_bookmarkSurahKey, verse['surahNumber']);
-                await prefs.setInt(_bookmarkAyahKey, verse['ayahNumber']);
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('تم حفظ العلامة', style: TextStyle(fontFamily: 'Amiri')),
-                      backgroundColor: _borderColor,
-                    ),
-                  );
-                }
-              },
-            ),
+                  Navigator.pop(ctx);
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setInt(_bookmarkPageKey, verse['page']);
+                  await prefs.setInt(_bookmarkSurahKey, verse['surahNumber']);
+                  await prefs.setInt(_bookmarkAyahKey, verse['ayahNumber']);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('تم حفظ العلامة', style: TextStyle(fontFamily: 'Amiri')),
+                        backgroundColor: _borderColor,
+                      ),
+                    );
+                  }
+                },
+              ),
             ),
           ],
         ),
       ),
     );
   }
+
 
   void _goToBookmark() async {
     final prefs = await SharedPreferences.getInstance();
