@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:qcf_quran/qcf_quran.dart';
 import '../theme_notifier.dart';
+import '../controllers/quran_audio_controller.dart';
 import '../widgets/islamic_border.dart';
 import '../widgets/opening_pages_illumination.dart';
 import '../widgets/strict_qcf_page.dart';
@@ -622,7 +623,7 @@ class _QuranScreenState extends State<QuranScreen> {
                                   color: Theme.of(context).scaffoldBackgroundColor,
                                   child: Stack(
                                     children: [
-                                      // Layer 1 (Bottom): CustomPaint border drawn first
+                                      // Layer 1: Background & Islamic Borders - CustomPaint inside Positioned.fill
                                       Positioned.fill(
                                         child: CustomPaint(
                                           painter: TezhibBorderPainter(
@@ -642,76 +643,77 @@ class _QuranScreenState extends State<QuranScreen> {
                                         ),
                                       ),
 
-                                      // Layer 2 (Top): Text content positioned on top with safe padding
+                                      // Layer 2: Main Content Architecture (Column with dynamic, flexible layout)
                                       Positioned.fill(
                                         child: Padding(
-                                          padding: const EdgeInsets.only(
-                                            top: 60.0,    // Safe top padding for headers
-                                            bottom: 55.0, // Safe bottom padding for page number
-                                            left: 55.0,
-                                            right: 55.0,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 24.0,
+                                            vertical: 20.0,
                                           ),
                                           child: Column(
                                             children: [
-                                              // Surah name and Juz header with individual styled containers
-                                              Padding(
-                                                padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                                                child: Row(
-                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                  textDirection: TextDirection.rtl,
-                                                  children: [
-                                                    Container(
-                                                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-                                                      decoration: BoxDecoration(
-                                                        color: Theme.of(context).scaffoldBackgroundColor,
-                                                        borderRadius: BorderRadius.circular(6),
-                                                        border: Border.all(
-                                                          color: _goldTextColor.withOpacity(0.5),
-                                                          width: 1.2,
-                                                        ),
-                                                      ),
-                                                      child: Text(
-                                                        'سُورَةُ $surahName',
-                                                        style: TextStyle(
-                                                          fontFamily: 'Amiri',
-                                                          fontSize: 14,
-                                                          fontWeight: FontWeight.bold,
-                                                          color: _goldTextColor,
-                                                        ),
+                                              // Element 1: Header (Juz number and Surah name)
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                textDirection: TextDirection.rtl,
+                                                children: [
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(
+                                                      horizontal: 10.0,
+                                                      vertical: 6.0,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color: Theme.of(context).scaffoldBackgroundColor,
+                                                      borderRadius: BorderRadius.circular(6),
+                                                      border: Border.all(
+                                                        color: _goldTextColor.withOpacity(0.5),
+                                                        width: 1.2,
                                                       ),
                                                     ),
-                                                    Container(
-                                                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-                                                      decoration: BoxDecoration(
-                                                        color: Theme.of(context).scaffoldBackgroundColor,
-                                                        borderRadius: BorderRadius.circular(6),
-                                                        border: Border.all(
-                                                          color: _goldTextColor.withOpacity(0.5),
-                                                          width: 1.2,
-                                                        ),
-                                                      ),
-                                                      child: Text(
-                                                        'الجُزْءُ $juzNumber',
-                                                        style: TextStyle(
-                                                          fontFamily: 'Amiri',
-                                                          fontSize: 14,
-                                                          fontWeight: FontWeight.bold,
-                                                          color: _goldTextColor,
-                                                        ),
+                                                    child: Text(
+                                                      'سُورَةُ $surahName',
+                                                      style: TextStyle(
+                                                        fontFamily: 'Amiri',
+                                                        fontSize: 14,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: _goldTextColor,
                                                       ),
                                                     ),
-                                                  ],
-                                                ),
+                                                  ),
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(
+                                                      horizontal: 10.0,
+                                                      vertical: 6.0,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color: Theme.of(context).scaffoldBackgroundColor,
+                                                      borderRadius: BorderRadius.circular(6),
+                                                      border: Border.all(
+                                                        color: _goldTextColor.withOpacity(0.5),
+                                                        width: 1.2,
+                                                      ),
+                                                    ),
+                                                    child: Text(
+                                                      'الجُزْءُ $juzNumber',
+                                                      style: TextStyle(
+                                                        fontFamily: 'Amiri',
+                                                        fontSize: 14,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: _goldTextColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
+                                              const SizedBox(height: 8),
 
-                                              // Divider line
-                                              Container(
-                                                margin: const EdgeInsets.symmetric(vertical: 6),
-                                                height: 0.8,
-                                                color: _borderColor.withOpacity(0.3),
+                                              // Element 2: Reminder Widget
+                                              QuranReminderWidget(
+                                                languageCode: 'om',
                                               ),
+                                              const SizedBox(height: 12),
 
-                                              // Quranic text content (main area)
+                                              // Element 3: Main Quran Text (Core Section) - Expanded
                                               Expanded(
                                                 child: Directionality(
                                                   textDirection: TextDirection.rtl,
@@ -722,33 +724,20 @@ class _QuranScreenState extends State<QuranScreen> {
                                                   ),
                                                 ),
                                               ),
+                                              const SizedBox(height: 8),
 
-                                              // Divider line
-                                              Container(
-                                                margin: const EdgeInsets.symmetric(vertical: 6),
-                                                height: 0.8,
-                                                color: _borderColor.withOpacity(0.3),
-                                              ),
+                                              // Element 4: Bottom Audio Player Widget
+                                              const _BottomAudioPlayerWidget(),
+                                              const SizedBox(height: 4),
 
-                                              // Page number footer with background and border
-                                              Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
-                                                decoration: BoxDecoration(
-                                                  color: Theme.of(context).scaffoldBackgroundColor,
-                                                  borderRadius: BorderRadius.circular(6),
-                                                  border: Border.all(
-                                                    color: _goldTextColor.withOpacity(0.5),
-                                                    width: 1.2,
-                                                  ),
-                                                ),
-                                                child: Text(
-                                                  _toArabicNumerals(pageNum),
-                                                  style: TextStyle(
-                                                    fontFamily: 'Amiri',
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: _mainTextColor,
-                                                  ),
+                                              // Element 5: Page Number Footer
+                                              Text(
+                                                _toArabicNumerals(pageNum),
+                                                style: TextStyle(
+                                                  fontFamily: 'Amiri',
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: _mainTextColor,
                                                 ),
                                               ),
                                             ],
@@ -1809,12 +1798,12 @@ final List<Map<String, String>> quranReminders = [
 
 /// ودجت التذكير التفاعلي المحمي ضد تجاوز حدود المساحة الرأسية والأفقية.
 class QuranReminderWidget extends StatefulWidget {
-  final int pageNum;
+  final int? pageNum; // Optional: if null, returns non-positioned version for flexible layouts
   final String languageCode; // 'ar', 'en', 'am', 'om'
 
   const QuranReminderWidget({
     Key? key,
-    required this.pageNum,
+    this.pageNum,
     required this.languageCode,
   }) : super(key: key);
 
@@ -1834,68 +1823,202 @@ class _QuranReminderWidgetState extends State<QuranReminderWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // يظهر الودجت فقط في الصفحتين 1 و 2 كما هو محدد بالشروط
-    if (widget.pageNum != 1 && widget.pageNum != 2) {
-      return const SizedBox.shrink();
-    }
-
     final Map<String, String> selectedItem = quranReminders[_randomIndex];
     
     // جلب النص حسب لغة الجهاز وفي حال غيابها نعود للعربية كلغة افتراضية
     final String localizedText = selectedItem[widget.languageCode] ?? selectedItem['ar'] ?? '';
 
-    return Positioned(
-      top: 155,
-      left: 45,
-      right: 45,
-      bottom: 650,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        alignment: Alignment.center,
-        // برواز جمالي يحيط بالتذكير
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.95),
-          borderRadius: BorderRadius.circular(12.0),
-          border: Border.all(
-            color: const Color(0xFFD4AF37), // لون ذهبي هادئ يناسب مصحف القرآن
-            width: 1.5,
+    // For opening pages (1-2): Return Positioned version for dome layout
+    if (widget.pageNum != null && (widget.pageNum == 1 || widget.pageNum == 2)) {
+      return Positioned(
+        top: 155,
+        left: 45,
+        right: 45,
+        bottom: 650,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          alignment: Alignment.center,
+          // برواز جمالي يحيط بالتذكير
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.95),
+            borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(
+              color: const Color(0xFFD4AF37), // لون ذهبي هادئ يناسب مصحف القرآن
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              )
+            ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            )
-          ],
-        ),
-        // استخدام تخطيط القيود الصارمة (LayoutBuilder & FittedBox) لمنع تسرب النصوص الطويلة كالأورومية
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            return FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.center,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: constraints.maxWidth,
-                  maxHeight: constraints.maxHeight,
-                ),
-                child: Text(
-                  localizedText,
-                  textAlign: TextAlign.center,
-                  maxLines: 4, // حد أقصى للحفاظ على شكل التنسيق
-                  overflow: TextOverflow.ellipsis, // إلحاق النقاط (...) في حال عدم اتساع النص نهائياً بعد التصغير المسموح
-                  style: const TextStyle(
-                    fontSize: 18.0, // الحجم الافتراضي المفضل وسيتم تصغيره برمجياً تلقائياً إذا تطلب الأمر لضمان الحماية من الـ Overflow
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF2C3E50),
-                    height: 1.4,
+          // استخدام تخطيط القيود الصارمة (LayoutBuilder & FittedBox) لمنع تسرب النصوص الطويلة كالأورومية
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.center,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: constraints.maxWidth,
+                    maxHeight: constraints.maxHeight,
+                  ),
+                  child: Text(
+                    localizedText,
+                    textAlign: TextAlign.center,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF2C3E50),
+                      height: 1.4,
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
+      );
+    }
+
+    // For regular pages (3-604): Return non-positioned version for Column layout
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(
+          color: const Color(0xFFD4AF37),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          )
+        ],
       ),
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.center,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: constraints.maxWidth,
+                maxHeight: constraints.maxHeight,
+              ),
+              child: Text(
+                localizedText,
+                textAlign: TextAlign.center,
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF2C3E50),
+                  height: 1.4,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Bottom Audio Player Widget for Pages 3-604
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _BottomAudioPlayerWidget extends StatelessWidget {
+  const _BottomAudioPlayerWidget({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // Only show if audio is active
+    return ValueListenableBuilder<QuranAudioController>(
+      valueListenable: QuranAudioController.instance,
+      builder: (context, controller, _) {
+        // Hide if no audio is playing
+        if (!controller.isActive) {
+          return const SizedBox.shrink();
+        }
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: const Color(0xFFD4AF37).withOpacity(0.6),
+              width: 1.0,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              )
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            textDirection: TextDirection.rtl,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      controller.currentSurahName,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2C3E50),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      'الآية ${controller.currentAyah}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF7F8C8D),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              GestureDetector(
+                onTap: () async {
+                  if (controller.isPlaying) {
+                    await controller.pause();
+                  } else {
+                    await controller.resume();
+                  }
+                },
+                child: Icon(
+                  controller.isPlaying ? Icons.pause_circle : Icons.play_circle,
+                  color: const Color(0xFFD4AF37),
+                  size: 24,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
