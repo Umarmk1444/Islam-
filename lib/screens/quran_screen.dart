@@ -295,7 +295,7 @@ class _QuranScreenState extends State<QuranScreen> {
               ),
             ),
             const SizedBox(height: 16),
-                        Material(
+            Material(
               color: Colors.transparent,
               child: ListTile(
                 leading: Icon(Icons.menu_book, color: _goldTextColor),
