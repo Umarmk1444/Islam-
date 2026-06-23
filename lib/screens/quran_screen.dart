@@ -56,7 +56,6 @@ class _QuranScreenState extends State<QuranScreen> {
       pageBackgroundColor: _screenBgColor,
       basmalaColor: _mainTextColor,
       headerTextColor: _goldTextColor,
-      // Option to add verse highlights if needed.
     );
   }
 
@@ -152,6 +151,7 @@ class _QuranScreenState extends State<QuranScreen> {
       }
     } catch (e) {
       debugPrint('Error loading Quran: $e');
+      _pageController ??= PageController(initialPage: 0);
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -258,13 +258,12 @@ class _QuranScreenState extends State<QuranScreen> {
   // ── Ayah Interactive Actions ──────────────────────────────────────────────
 
   void _showAyahActionSheet(int surahNumber, int ayahNumber) {
-    // Find the verse from our loaded data to get its text & page info.
     final page = _findPageForAyah(surahNumber, ayahNumber);
     final versesOnPage = _pagesData[page] ?? [];
     final verse = versesOnPage.firstWhere(
       (v) => v['surahNumber'] == surahNumber && v['ayahNumber'] == ayahNumber,
       orElse: () => {
-        'surahName': 'سورة', // Fallback
+        'surahName': 'سورة',
         'text': '',
         'page': page,
         'surahNumber': surahNumber,
@@ -369,10 +368,10 @@ class _QuranScreenState extends State<QuranScreen> {
     );
   }
 
-
   void _goToBookmark() async {
     final prefs = await SharedPreferences.getInstance();
     final page = prefs.getInt(_bookmarkPageKey);
+    if (!mounted) return;
     if (page != null) {
       _jumpToPage(page);
     } else {
@@ -474,7 +473,6 @@ class _QuranScreenState extends State<QuranScreen> {
                   itemBuilder: (context, index) {
                     final pageNum = index + 1;
 
-                    // جلب بيانات الصفحة الحالية ديناميكياً (اسم السورة والجزء) لعرضها في الأعلى
                     final List<Map<String, dynamic>> versesOnPage = _pagesData[pageNum] ?? [];
                     String surahName = "";
                     String juzNumber = "";
@@ -543,11 +541,17 @@ class _QuranScreenState extends State<QuranScreen> {
                                     ),
                                   ),
 
-                                    // Reminder Widget Layer: positioned before the main text layer
-                                    QuranReminderWidget(
+                                  // Reminder Widget Layer: Positioned with valid height
+                                  Positioned(
+                                    top: 140,
+                                    left: 45,
+                                    right: 45,
+                                    height: 75,
+                                    child: QuranReminderWidget(
                                       pageNum: pageNum,
                                       languageCode: Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar',
                                     ),
+                                  ),
 
                                   // Main Quranic Text Layer: positioned inside white text area
                                   Positioned(
@@ -1508,7 +1512,7 @@ final List<Map<String, String>> quranReminders = [
   {
     'ar': '🚨 سيأتي زمانٌ يُسرى على كتاب الله في ليلة فلا يبقى في الأرض منه آية، وتُغلق التوبة.. ماذا أنت فاعلٌ بمصحفك اليوم؟',
     'en': '🚨 A time will come when the Book of Allah will be taken away in a single night, leaving not a single verse on Earth, and repentance will be closed... What are you doing with your Mus-haf today?',
-    'am': '🚨 የአላህ መጽሐፍ (ቁርኣን) በአንድ ሌሊት የሚነጠቅበትና በምድር ላይ አንዲትም አንቀጽ የማይቀርበት፣ ተውበትም የሚዘጋበት ጊዜ ይመጣል። ዛሬ ከቁርኣንህ ጋር ምን እያደረግክ ነው?',
+    'am': '🚨 የአላህ መጽሐፍ (ቁርኣን) በአንድ ሌሊት የሚነጠቅበትና በምድር ላይ አንዲትም አንቀጽ የማይቀርበት، ተውበትም የሚዘጋበት ጊዜ ይመጣል። ዛሬ ከቁርኣንህ ጋር ምን እያደረግክ ነው?',
     'om': "🚨 Yeroon Kitaabni Allaah halkan tokkotti ol fudhamuufi dachii irratti aayanni tokkollee hin hafne, tawbaanis cufamu ni dhufa... Har'a immoo ati qur'aana keetiin maal gochaa jirtaa?",
   },
   {
@@ -1520,25 +1524,25 @@ final List<Map<String, String>> quranReminders = [
   {
     'ar': '📖 قال النبي ﷺ: «اقرؤوا القرآن فإنه يأتي يوم القيامة شفيعاً لأصحابه».. فضمن شفاعته الآن.',
     'en': '📖 The Prophet ﷺ said: "Read the Qur\'an, for it will come on the Day of Resurrection as an intercessor for its companions." Secure its intercession now.',
-    'am': '📖 ነቢዩ ﷺ እንዲህ ብለዋል፡- «ቁርኣንን አንብቡ፤ በትንሳኤ ቀን ለጓደኞቹ አማላጅ ሆኖ ይመጣልና።» አሁኑኑ አማላጅነቱን አረጋግጥ።',
+    'am': '📖 @u` y_ \x15\x13L \x1a\x17\x10L \x1c\x13V\x13\x1aL \x10\x1a\x17`S\x13L \x1a\x10L L`\x1c\x1aL \x10L \x12L \x17\x1a\x17L \x15V\x13L \x10\x13L \x12\x15L \x15L \x1a\x1aL \x1aL \x12L \x15L \x1a\x15L \x1aL \x10L \x1a\x1a\x1aL `\x1c\x1a\x13L \x13``\x1c\x12L \x13L \x1aL \x1aL \x1a`L \x10\x1a\x13\x12\x15L \x15\x13L \x10`\x15V\x10\x12L \x15\x1a`L \x1aL \x12\x15L \x10\x1a`\x17\x10L \x1c\x13V\x13\x1aL \x12`\x13L \x1c`\x1c\x1a\x12L \x1aL \x12\x15L \x10`\x15\x12\x17\x1a`\x13L \x13L',
     'om': '📖 Nabiyyiin ﷺ jedhan: "Qur’aana dubbisaa, inni Guyyaa Qiyamaa saahiboota isaatiif shafaa’aa (mangaastuu) ta’ee ni dhufaa." Ammuma shafaa’ummaa isaa mirkaneeffadhu.',
   },
   {
     'ar': '💎 قال النبي ﷺ: «الماهر بالقرآن مع السفرة الكرام البررة».. جاهد لتكون معهم.',
     'en': '💎 The Prophet ﷺ said: "The one who is proficient in the Qur\'an will be with the noble and obedient scribes (angels)." Strive to be with them.',
-    'am': '💎 ነቢዩ ﷺ እንዲህ ብለዋል፡- «በቁርኣን ጎበዝ የሆነው ከተከበሩትና ታዛዦች መላእክት ጋር ነው።» ከእነሱ ጋር ለመሆን ታገል።',
+    'am': '💎 ነቢዩ ﷺ እንዲህ ብለዋል፡- «በቁرኣን ጎበز የሆነው ከተከበሩትና ታዛዦች መላእክት ጋር ነው።» ከእነሱ ጋር ለመሆን ታገል።',
     'om': '💎 Nabiyyiin ﷺ jedhan: "Inni qur’aana ogummaan dubbisu malaykoota kabajamoo fi qajeeloo waliin ta\'a." Isaaniin waliin ta\'uuf qabsaa\'i.',
   },
   {
     'ar': '🔥 قال النبي ﷺ: «يؤتى بالقرآن يوم القيامة تقدمه سورة البقرة وآل عمران تحاجان عن صاحبهما».. لا تترك صاحبيك اليوم.',
     'en': '🔥 The Prophet ﷺ said: "The Qur\'an will be brought on the Day of Resurrection, preceded by Surah Al-Baqarah and Al-Imran, arguing on behalf of their companion." Do not abandon your two companions today.',
-    'am': '🔥 ነቢዩ ﷺ እንዲህ ብለዋል፡- «ቁርኣን በትንሳኤ ቀን ይመጣል፤ ሱረቱ አል-በቀራህና አሊ-ዒምራን እየመሩት ለባለቤታቸው ይሟገታሉ።» ዛሬ ሁለቱን ጓደኞችህን أتተዋቸው።',
+    'am': '🔥 ነቢዩ ﷺ እንዲህ ብለዋል፡- «ቁርኣን በትንሳኤ ቀን ይመጣል؛ ሱረቱ አል-በቀራህና אሊ-ዒምራን እየመሩት ለባለቤታቸው ይሟገتاሉ።» ዛሬ ሁለቱን ጓደኞችህን አትተዋቸው።',
     'om': '🔥 Nabiyyiin ﷺ jedhan: "Qur’aanni Guyyaa Qiyamaa ni fidama, Suuraa Al-Baqaraafi Al-Imraan dursanii dhufeen saahiba isaaniitiif falmu." Har\'a saahiboota kee lamaan kana hin dhiisin.',
   },
   {
     'ar': '⚖️ قال النبي ﷺ: «القرآن حجة لك أو عليك».. فتأمل في آياتك؛ هل تقودك إلى الجنة أم تشهد عليك؟',
     'en': '⚖️ The Prophet ﷺ said: "The Qur\'an is a proof for you or against you." So reflect upon your verses; are they leading you to Paradise or testifying against you?',
-    'am': '⚖️ ነቢዩ ﷺ እንዲህ ብለዋል፡- «ቁርኣን ለአንተ أو በአንተ ላይ ምስክር ነው።» ስለዚህ አንቀጾችህን አሰላስል፤ ወደ ጀነት እየመሩህ ነው ወይስ በአንተ ላይ እየመሰከሩብህ?',
+    'am': '⚖️ ነቢዩ ﷺ እንዲህ ብለዋል፡- «ቁርኣን ለአንተ ወይም በአንተ ላይ ምስክር ነው።» ስለዚህ አንቀጾችህን አሰላስል፤ ወደ ጀነት እየመሩህ ነው ወይስ በአንተ ላይ እየመሰከሩብህ؟',
     'om': '⚖️ Nabiyyiin ﷺ jedhan: "Qur’aanni siif ragaa ykn sitti ragaa dha." Sila aayatoota kee xiinxali; gara Jannataa si geessaa jiran moo sitti ragaa bahaa jiru?',
   },
   {
@@ -1596,13 +1600,13 @@ final List<Map<String, String>> quranReminders = [
   {
     'ar': 'قيل للإمام أحمد: بمَ يتقرب المتقربون إلى الله؟ قال: «بِكَلَامِهِ». قيل: بفهمٍ أو بغير فهم؟ قال: «بِفَهْمٍ وَبِغَيْرِ فَهْمٍ».',
     'en': 'It was said to Imam Ahmad: "With what do those drawing close to Allah draw close?" He said: "With His Speech." It was asked: "With understanding or without understanding?" He said: "With understanding and without understanding."',
-    'am': 'ለኢማም አሕመድ ተባለ፡ «ወደ አላህ ተቃራኒዎች በምን ይቃረባሉ?» እርሳቸውም «በቃሉ» አሉ። «በመረዳት ወይስ ያለመረዳት?» ተብለው ተጠየቁ። «በመረዳትም ያለመረዳትም» አሉ።',
+    'am': 'ለኢማም አሕመድ ተባለ፡ «ወደ አلاህ ተቃራኒዎች በምን ይቃረባሉ?» እርሳቸውም «በቃሉ» አሉ። «በመረዳት ወይስ ያለመረዳት?» ተብለው ተጠየቁ። «በመረዳትም ያለመረዳትም» አሉ።',
     'om': 'Imaam Ahmadaniin jedhame: "Warri gara Allaah dhiyaatan maaliin dhiyaatu?" Innis: "Jecha Isaatiin" jedhe. "Hubannoodhaan moo hubannoo malee?" jedhamee gaafatame. Innis: "Hubannoodhaanis hubannoo malees" jedhe.',
   },
   {
     'ar': 'قال الإمام مالك رحمه الله: «ما من شيء من أعمال البر إلا وله حدٌّ ينتهي إليه، إلا ذكر الله وتلاوة كتابه.»',
     'en': 'Imam Malik (may Allah have mercy on him) said: "There is no righteous deed except that it has a limit where it ends, except the remembrance of Allah and the recitation of His Book."',
-    'am': 'ኢማም ማሊክ (ረሂመሁላህ) እንዲህ ብለዋል፡- «ከመልካም ስራዎች ሁሉ የሚቆምበት ወሰን የሌለው የለም، አላህን ማውساتና መጽሐፉን ማንበብ ሲቀር።»',
+    'am': 'ኢማም ማሊክ (ረሂመሁላህ) እንዲህ ብለዋል፡- «ከመልካም ስራዎች ሁሉ የሚቆምበት ወሰን የሌለው የለም، አላህን ማውሳትና መጽሐፉን ማንበብ ሲቀር።»',
     'om': 'Imaam Maalik (R.H) jedhan: "Hojiiwwan gaarii keessaa waan daangaa qabu malee hin jiru, zikrii Allaah fi Kitaaba Isaa dubbisuu malee."',
   },
   {
@@ -1626,7 +1630,7 @@ final List<Map<String, String>> quranReminders = [
   {
     'ar': 'قال الإمام الحسن البصري: «تفقَّدوا الحلاوة في ثلاثة أشياء: في الصلاة، وفي الذكر، وفي قراءة القرآن.»',
     'en': 'Imam Al-Hasan al-Basri said: "Seek sweetness in three things: in prayer, in remembrance, and in the recitation of the Qur\'an."',
-    'am': 'ኢማም አል-ሀሰን አል-በስሪ እንዲህ ብለዋል፡- «ጣፋጭነትን በሶስት ነገሮች ውስጥ ፈልጉ፡ በሶላት، በዚክር እና ቁርኣን በማንበብ ውስጥ።»',
+    'am': 'ኢማም አል-ሀሰن አል-በስሪ እንዲህ ብለዋል፡- «ጣፋጭነትን በሶስት ነገሮች ውስጥ ፈልጉ፡ በሶላት، በዚክር እና ቁرኣን በማንበብ ውስጥ።»',
     'om': 'Imaam Al-Hasan Al-Basrii jedhan: "Miyaawaa waan sadii keessatti barbaadaa: salaata keessatti, zikrii keessatti fi Qur’aana dubbisuu keessatti."',
   },
   {
@@ -1646,13 +1650,13 @@ final List<Map<String, String>> quranReminders = [
   {
     'ar': '⚰️ الأموات في قبورهم يتمنون سجدة أو آية، وأنت كتاب الله بين يديك كاملاً.. اغتنم حياتك قبل حسرتك!',
     'en': '⚰️ The deceased in their graves wish for a single prostration or a single verse, while the Book of Allah is fully in your hands... Seize your life before your regret!',
-    'am': '⚰️ ሙታን በመቃብራቸው ውስጥ ሆነው አንዲት ሱጁድ ወይም አንቀጽ ይመኛሉ፣ አንተ ግን የአላህ መጽሐፍ ሙሉ በሙሉ በእጅህ ነው... ከቆጨህ በፊት ሕይወትህን ተጠቀምባት!',
+    'am': '⚰️ ሙታን በመቃብራቸው ውስጥ ሆነው አንዲት ሱጁድ ወይም አንቀጽ ይመኛሉ، አንተ ግን የአላህ መጽሐፍ ሙሉ በሙሉ በእጅህ ነው... ከቆጨህ በፊት ሕይወትህን ተጠቀምባት!',
     'om': "⚰️ Warri du'an qabrii keessatti sujuuda tokko ykn aayata tokko hawwu, ati immoo Kitaabni Allaah guutuun harka kee jira... Osoo hin gaabin jireenya kee gorfadhu!",
   },
   {
     'ar': '🕯️ اقرأ بتمهل.. فرُبّ آيةٍ تتلوها وتتدبرها اليوم، تكون هي أنيسك والضياء الشافي لك في ظلمات قبرك.',
     'en': '🕯️ Read slowly... For perhaps a verse you recite and ponder today will be your companion and healing light in the darkness of your grave.',
-    'am': '🕯️ ቀስ ብለህ አንብብ... ዛሬ የምታነባትና የምታስተነትናት አንቀጽ ነገ በመቃብርህ ጨለማ ውስጥ አጋዥህና ፈዋሽ ብርሃንህ ትሆን ይሆናል።',
+    'am': '🕯️ ቀስ ብለህ አንብብ... ዛሬ የምታነባትና የምታስተነትናት አንቀጽ ነገ በመቃብርህ ጨለما ውስጥ አጋዥህና ፈዋሽ ብርሃንህ ትሆን ይሆናል።',
     'om': "🕯️ Suuta jedhii dubbisi... Tarii aayanni ati har'a qaraatanii xiinxaltu, dukkana qabrii keetii keessatti hiriyaa keefi ibsaa si fayyisu ta'uu danda'a.",
   },
   {
@@ -1664,17 +1668,17 @@ final List<Map<String, String>> quranReminders = [
   {
     'ar': '🪙 الحرف بعشر حسنات، والحسنات جبالٌ تثقل الميزان يوم القيامة.. ابدأ تجارتك الرابحة الآن مع الله.',
     'en': '🪙 A letter earns ten good deeds, and good deeds are mountains that weigh heavy on the Scale on the Day of Resurrection... Start your profitable trade with Allah now.',
-    'am': '🪙 እያንዳንዱ ፊደل በአስር መልካም ስራዎች ነው، መልካም ስራዎች ደግሞ በትንساኤ ቀን ሚዛኑን የሚያከብዱ ተራሮች ናቸው... አሁኑኑ ከአላህ ጋር አتራፊ ንግድህን ጀምር።',
-    'om': '🪙 Harfiin tokko tola kudhaniin, tolaa immoo gaarren Guyyaa Qiyamaa mizaana ulfeessanidha... Ammuma daldala kee kan bu\'aa qabu Allaah waliin jalqabi.',
+    'am': '🪙 እያንዳንዱ ፊደል በአስር መልካም ስራዎች ነው، መልካم ስራዎች ደግሞ በትንሳኤ ቀን ሚዛኑን የሚያከብዱ ተራሮች ናቸው... አሁኑኑ ከአлаህ ጋር አترافي ንግድህን ጀምር።',
+    'om': '🪙 Harfiin tokko tola kudhaniin, tolaa immoo gaarren Guyyaa Qiyamaa mizaana ulfeessanidha... Ammuma daldala kee kan bu\'aa qabu Allaah waliin jalقabi.',
   },
   {
     'ar': '❤️ القرآن لا يترك صاحبه أبداً؛ يرافقك في الدنيا، ويحميك في القبر، ويجادل عنك يوم القيامة حتى تدخل الجنة.',
     'en': '❤️ The Qur\'an never leaves its companion; it accompanies you in this world, protects you in the grave, and advocates for you on the Day of Resurrection until you enter Paradise.',
-    'am': '❤️ ቁርኣን ባለቤቱን በፍጹም አይተውም፤ በዱንያ አብሮህ ይሆናል، በመቃብር ይጠብቅሃል، በትንሳኤ ቀንም ጀነት እስክትገባ ድረስ ይከራከርልሃል።',
+    'am': '❤️ ቁርኣን ባለቤቱን በፍጹም አይተውም፤ በዱንያ አብሮህ ይሆናል، በመቃብር ይጠብቅሃل، በትንሳኤ ቀንም ጀነት እስክትገባ ድረስ ይከراكرلሃል።',
     'om': '❤️ Qur’aanni saahiba isaa hin dhiisu; addunyaa keessatti si waliin ta\'a, qabrii keessatti si eega, Guyyaa Qiyamaas hamma Jannata seentutti siif falma.',
   },
   {
-    'ar': '🌟 لا تجعل مصحفك مهجوراً؛ فالقلب الذي لا يقرأ القرآن كالبيت الخرب الذي لا يسكنه أحد.',
+    'ar': '🌟 لا تجعل مصحفك مهجوراً； فالقلب الذي لا يقرأ القرآن كالبيت الخرب الذي لا يسكنه أحد.',
     'en': '🌟 Do not leave your Mus-haf abandoned; for the heart that does not read the Qur\'an is like a ruined house in which no one dwells.',
     'am': '🌟 ቁርኣንህን የተተወ አታድርገው፤ ቁርኣን የማይነበብበት ልብ ማንም እንደማይኖርበት የፈረሰ ቤት ነውና።',
     'om': '🌟 Qur’aana kee gatamoo hin godhin; onneen Qur’aana hin dubbisne akka mana diigamee nama keessa hin jirreeti.',
@@ -1694,31 +1698,31 @@ final List<Map<String, String>> quranReminders = [
   {
     'ar': '👑 يُقال لقارئ القرآن يوم القيامة: اقرأ وارتق ورتل كما كنت ترتل في الدنيا، فإن منزلتك عند آخر آية تقرؤها.',
     'en': '👑 It will be said to the companion of the Qur\'an on the Day of Resurrection: "Read and ascend, and recite smoothly as you used to recite in the world, for your status will be at the last verse you read."',
-    'am': '👑 በትንሳኤ ቀን ለቁርኣን አንባቢ እንዲህ ይባላል፡- «አንብብና ከፍ በል፤ በዱንያ ላይ እንደምታነበው አሳምረህ አንብብ፤ ደረጃህ የመጨረሻዋ የምታነባት አንቀጽ ጋ ነውና።»',
+    'am': '👑 በትንሳኤ ቀን ለቁርኣን አንባቢ እንዲህ ይባላል፡- «አንብብና ከፍ በል፤ በዱንያ ላይ እንደምታነበው አሳምረህ አንብብ፤ ደረጃህ የመጨረሻዋ የምታነባት አንቀጽ ጋ ነውና।»',
     'om': '👑 Guyyaa Qiyamaa qaraataa Qur’aanaatiin ni jedhama: "Dubbisi ol ka\'i, akkuma addunyaa keessatti suuta dubbisaa turtetti suuta dubbisi, sadarkaan kee aayata dhumaa ati dubbistu biratti dha."',
   },
   {
     'ar': '🚨 لا تخرج من الدنيا صفر اليدين، والقرآن حجة لك أو عليك.. اجعله حجة لك.',
     'en': '🚨 Do not leave this world empty-handed, while the Qur\'an is a proof for you or against you... Make it a proof for you.',
-    'am': '🚨 ከዱንያ ባዶ እጅህን አትውጣ، ቁርኣን ለአንته أو በአንተ ላይ ምስክር ነው... ለአንተ ምስክር አድርገው।',
+    'am': '🚨 ከዱንያ ባዶ እጅህን አትውጣ، ቁርኣን ለአንተ ወይም በአንተ ላይ ምስክር ነው... ለአንተ ምስክር አድርገው።',
     'om': '🚨 Harka duwwaa addunyaa irraa hin ba\'in, Qur’aanni siif ragaa ykn sitti ragaa dha... Ofiif ragaa godhadhu.',
   },
   {
     'ar': '🗺️ إذا تاهت بك السبل وضاق صدرك، فافتح مصحفك؛ ففيه نبأ من قبلكم، وخبر ما بعدكم، وحكم ما بينكم.',
     'en': '🗺️ If the ways confuse you and your chest feels tight, open your Mus-haf; for in it is the news of those before you, information of what is after you, and judgment for what is between you.',
-    'am': '🗺️ መንገዶች ቢጠፉብህና ደረትህ ቢጠበብ ቁርኣንህን ክፈት፤ በእሱ ውስጥ የእናንተ በፊት የነበሩት ወሬ، ከእናንተ በኋላ የሚመጣው ዜና እና በመካከላችሁ ያለው ፍርድ አለና።',
+    'am': '🗺️ መንገዶች ቢጠፉብህና ደረትህ ቢጠበብ ቁርኣንህን ክፈት؛ በእሱ ውስጥ የእናንተ በፊት የነበሩት ወሬ، ከእናንተ በኋላ የሚመጣው ዜና እና በመካከላችሁ ያለው ፍርድ አለና።',
     'om': '🗺️ Yoo karaaleen sitti badanii garaan kee dhiphate, Qur\'aana kee bani; isa keessa oduu warra isiniin duraa, oduu warra isiniin boodaa fi murtii gidduu keessanii jirutu jira.',
   },
   {
     'ar': '⚡ شعلة الحماس لا تنطفئ في قلبٍ أدمن تلاوة كلام ربه.. ابدأ قراءتك بهمة عالية.',
     'en': '⚡ The flame of enthusiasm does not die out in a heart addicted to reciting the speech of its Lord... Start your reading with high resolve.',
-    'am': '⚡ የጌታውን ቃል ማንበብ በለመደ ልብ ውስጥ የንቃት እሳት አይጠፋም... ንባብህን በከፍተኛ ጉጉት ጀምር።',
+    'am': '⚡ የጌታውን ቃል ማንበብ በለመደ ልብ ውስጥ የنቃት እሳት አይጠፋም... ንባብህን በከፍተኛ ጉጉት ጀምር።',
     'om': '⚡ Labbiin fedhii onnee keessa jiru kan daddabalatee jecha Rabbii isaa dubbisuun adiktee ta\'e hin dhabamu... Dubbisa kee hamilee olaanaan jalqabi.',
   },
   {
     'ar': '🤝 ليكن القرآن صاحبك المفضل؛ فكل الأصحاب يفارقونك عند الموت، إلا القرآن يدخل معك قبرك.',
     'en': '🤝 Let the Qur\'an be your favorite companion; for all companions part with you at death, except the Qur\'an, which enters your grave with you.',
-    'am': '🤝 ቁርኣን ተወዳጅ ጓደኛህ ይሁን፤ ጓደኞች ሁሉ ሲሞቱ ይለዩሃል، ቁርኣን ግን ካንተ ጋር ወደ መቃብርህ ይገባል።',
+    'am': '🤝 ቁርኣن ተወዳጅ ጓደኛህ ይሁን፤ ጓደኞች ሁሉ ሲሞቱ ይለዩሃል، ቁርኣን ግን ካንተ ጋር ወደ መቃብርህ ይገባል።',
     'om': '🤝 Qur’aanni saahiba kee filatamaa haa ta’u; saahiboonni hundi yeroo du\'aa si biraa deemu, Qur’aana malee kan qabrii kee si waliin seenu.',
   },
   {
@@ -1730,25 +1734,25 @@ final List<Map<String, String>> quranReminders = [
   {
     'ar': '🛑 احذر الحرمان! أن يمر عليك يومك المكتظ بالمشاغل دون أن تفتح لقلبك نافذة نور من كلام ربك.',
     'en': '🛑 Beware of deprivation! That your day crowded with concerns passes by without opening a window of light for your heart from the speech of your Lord.',
-    'am': '🛑 ከመነፈግ ተጠንቀቅ! በስራ የተጠመደው ቀንህ ለልብህ ከጌታህ ቃል የብርሃን መስኮት ሳትከፍት ማለፉ።',
+    'am': '🛑 ከመነፈግ ተጠንቀቅ! በስራ የተጠመደው ቀንህ ለልብህ ከጌታህ ቃል የብርሃن መስኮት ሳትከፍት ማለፉ።',
     'om': '🛑 Akka hin dhabamne of eeggaddhu! Guyyaan kee kan hojiidhaan dhiphate osoo onnee keetiif foddaa ifaa jecha Rabbii keetii irraa hin banin akka hin dabarre.',
   },
   {
     'ar': '🥀 ما جفّت دماء القلوب ولا قست، إلا بعد أن هجرت تدبر المصحف الكريم.. رطّب قلبك بآياته.',
     'en': '🥀 The blood of the hearts did not dry up nor harden, except after they abandoned contemplating the Noble Mus-haf... Moisten your heart with its verses.',
-    'am': '🥀 የልቦች ደም አልደረቀም ወይም አልጠነከረም، የተከበረውን ቁርኣን ማስተንተን ከተዉ በኋላ ቢሆን እንጂ... ልብህን በአንቀጾቹ አርጥብ።',
+    'am': '🥀 የልቦች ደም አልደረቀም ወይም አልጠነከረም، የተከበረውን ቁርኣን ማስተንተن ከተዉ በኋላ ቢሆን እንጂ... ልብህን በአንቀጾቹ አርጥብ።',
     'om': '🥀 Dhiigni onnee hin gogne, hin jabaannes, osoo xiinxala Qur\'aana kabajamaa dhiisanii booda malee... Onnee kee aayatoota isaatiin jiisi.',
   },
   {
     'ar': '🔍 تفكّر في عاقبتك.. لو قُبضت روحك الليلة، أيسرّك أن يكون آخر عهدك بالدنيا آية قرأتها أم تفاهة تصفحتها؟',
     'en': '🔍 Think about your end... If your soul were taken tonight, would it please you for your last moment in the world to be a verse you read, or triviality you scrolled through?',
-    'am': '🔍 ስለ መጨረሻህ አስብ... ዛሬ ማታ ነፍስህ ብትወሰድ، በዱንያ ላይ የመጨረሻ ጊዜህ ያነበብከው አንቀጽ መሆኑ ወይስ የተመለከትከው ከንቱ ነገር መሆኑ ያስደስትሃል؟',
+    'am': '🔍 ስለ መጨረሻህ አስብ... ዛሬ ማታ ነፍስህ ብትወሰድ، በዱንያ ላይ የመጨረሻ ጊዜህ ያነበብከው አንቀጽ መሆኑ ወይس የተመለከትከው ከንቱ ነገር መሆኑ ያስደስትሃል؟',
     'om': '🔍 Gara dhuma keetii xiinxali... Yoo lubbuun kee halkan kana fudhatamte, addunyaa irratti yeroon kee dhumaa aayata ati dubbifte ta\'u moo waan faayidaa hin qabne kan ati laaltee dabarsitedha kan si gammachiisu?',
   },
   {
     'ar': '🏹 آيات الوعيد كالسِّهام، تفلق صخور القلوب القاسية.. فقف عند وعيد الله خاشعاً منيباً.',
     'en': '🏹 The verses of warning are like arrows, splitting the rocks of hard hearts... So halt at the warning of Allah in humility and repentance.',
-    'am': '🏹 የማسጠንቀቂያ አንቀጾች እንደ ቀስት ናቸው، የጠነከሩ ልቦችን ዓለቶች ይሰነጥቃሉ... ስለዚህ በአلاህ ማስጠንቀቂያ ላይ በትህትናና በመጸጸت ቁም።',
+    'am': '🏹 የማስጠንቀቂያ አንቀጾች እንደ ቀስት ናቸው، የጠነከሩ ልቦችን ዓለቶች ይሰነጥቃሉ... ስለዚህ በአላህ ማስጠንቀቂያ ላይ በትህتናና በመጸጸት ቁም።',
     'om': '🏹 Aayatoonni akeekkachiisaa akka xiyyaati, dhagaa onnee gantuu dhoosu... Kanaaf sodaa fi tawbaadhaan akeekkachiisa Allaah biratti dhaabbadhu.',
   },
   {
@@ -1760,13 +1764,13 @@ final List<Map<String, String>> quranReminders = [
   {
     'ar': '🌌 لو علم القارئ ما ينتظره من الإكرام عند منتهى سورة يرتلها، لسالت روحه شوقاً لتلاوة كتاب ربه.',
     'en': '🌌 If the reader knew what honor awaits them at the end of a Surah they recite, their soul would have flowed with longing to recite the Book of their Lord.',
-    'am': '🌌 አንባቢው በሚያነበው ሱራ መጨረሻ ላይ ምን ዓይነት ክብር እንደሚጠبቀው ቢያውቅ ኖሮ، ነፍሱ የጌታውን መጽሐፍ ለማንበብ በጉጉት ትፈስ ነበር።',
+    'am': '🌌 አንባቢው በሚያነበው ሱራ መጨረሻ ላይ ምን ዓይነት ክብር እንደሚጠብቀው ቢያውቅ ኖሮ، ነፍሱ የጌታውን መጽሐፍ ለማንبه በጉጉት ትፈስ ነበር።',
     'om': '🌌 Osoo qaraataan kabaja dhuma suuraa inni qara\'u biratti isa eeggatu beekee, lubbuun isaa kitaaba Rabbii isaa qara\'uuf hawwiidhaan yaati turte.',
   },
   {
     'ar': '🚪 باب الإقبال على الله مفتوح الآن عبر هذه الشاشة.. ادخل بقلب منكسر خاشع عسى أن يُرحم.',
     'en': '🚪 The door of turning to Allah is open now through this screen... Enter with a broken, humble heart, so you may be shown mercy.',
-    'am': '🚪 ወደ አላህ የመመለሻ በር አሁን በዚህ ስክሪን በኩል ክፍት ነው... ምሕረት ይደረግልህ ዘንድ በሰበረና በትሑት ልብ ግባ።',
+    'am': '🚪 ወደ አላህ የመመለሻ በር አሁን በዚህ ስክሪን በኩል ክፍት ነው... ምሕረት ይደረግልህ ዘንድ በሰበረና በትሑት ልብ ግبا።',
     'om': '🚪 Balbalonni gara Allaah deebi\'u amma iskiriinii kanaan banameera... Qalbii cabduu fi gadi jedheen seeni, tarii rahmanni siif godhama.',
   },
   {
@@ -1796,14 +1800,14 @@ final List<Map<String, String>> quranReminders = [
   {
     'ar': '🌊 اغسل هموم صدرك الـمُتعبة بفيضان من آيات الطمأنينة.. أنصت لخطاب الله لك.',
     'en': '🌊 Wash away the tired worries of your chest with a flood of verses of tranquility... Listen to Allah\'s discourse to you.',
-    'am': '🌊 የደረትህን የዛሉ ጭንቀቶች በእርጋታ አንቀጾች ጎርፍ እጠባቸው... አላህ ለአንተ የሚናገረውን ንግግር አድምጥ।',
+    'am': '🌊 የደረትህን የዛሉ ጭንቀቶች በእርጋታ አንቀጾች ጎርፍ እጠባቸው... አላህ ለአንተ የሚናገረውን ንግግር አድምጥ።',
     'om': '🌊 Yaaddoo garba dhiphina garaa keetii dambalii aayatoota tasgabbii kanaan dhuqi... Dubbii Allaah kan sitti dubbatu dhaggeeffadhu.',
   },
   {
     'ar': '🤲 اللهم اجعلنا ممن يقرأ القرآن فيرقى، ولا تجعلنا ممن يقرأه فيشقى.. ابدأ قراءتك مستعيناً بالله.',
     'en': '🤲 O Allah, make us of those who read the Qur\'an and ascend, and do not make us of those who read it and are miserable... Start your reading seeking help from Allah.',
     'am': '🤲 አላህ ሆይ! ቁርኣን አንብበው ከፍ ከሚሉት አድርገን، አንብበው ከሚቸገሩት አታድርገን... አላህን በመታገዝ ንባብህን ጀምር።',
-    'om': '🤲 Ya Allaah! warra Qur’aana qara’ee ol ka’u nu taasisi, warra qara’ee hoonga’u nu hin taasisin... Gargaarsa Allaah barbaacha dubbisa kee jalqabi.',
+    'om': 'Ya Allaah! warra Qur’aana qara’ee ol ka’u nu taasisi, warra qara’ee hoonga’u nu hin taasisin... Gargaarsa Allaah barbaacha dubbisa kee jalqabi.',
   },
 ];
 
@@ -1828,73 +1832,61 @@ class _QuranReminderWidgetState extends State<QuranReminderWidget> {
   @override
   void initState() {
     super.initState();
-    // اختيار عشوائي للعبارة عند بدء بناء الصفحة لأول مرة
     _randomIndex = math.Random().nextInt(quranReminders.length);
   }
 
   @override
   Widget build(BuildContext context) {
-    // يظهر الودجت فقط في الصفحتين 1 و 2 كما هو محدد بالشروط
     if (widget.pageNum != 1 && widget.pageNum != 2) {
       return const SizedBox.shrink();
     }
 
     final Map<String, String> selectedItem = quranReminders[_randomIndex];
-    
-    // جلب النص حسب لغة الجهاز وفي حال غيابها نعود للعربية كلغة افتراضية
     final String localizedText = selectedItem[widget.languageCode] ?? selectedItem['ar'] ?? '';
 
-    return Positioned(
-      top: 155,
-      left: 45,
-      right: 45,
-      bottom: 650,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        alignment: Alignment.center,
-        // برواز جمالي يحيط بالتذكير
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.95),
-          borderRadius: BorderRadius.circular(12.0),
-          border: Border.all(
-            color: const Color(0xFFD4AF37), // لون ذهبي هادئ يناسب مصحف القرآن
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            )
-          ],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(
+          color: const Color(0xFFD4AF37),
+          width: 1.5,
         ),
-        // استخدام تخطيط القيود الصارمة (LayoutBuilder & FittedBox) لمنع تسرب النصوص الطويلة كالأورومية
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            return FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.center,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: constraints.maxWidth,
-                  maxHeight: constraints.maxHeight,
-                ),
-                child: Text(
-                  localizedText,
-                  textAlign: TextAlign.center,
-                  maxLines: 4, // حد أقصى للحفاظ على شكل التنسيق
-                  overflow: TextOverflow.ellipsis, // إلحاق النقاط (...) في حال عدم اتساع النص نهائياً بعد التصغير المسموح
-                  style: const TextStyle(
-                    fontSize: 18.0, // الحجم الافتراضي المفضل وسيتم تصغيره برمجياً تلقائياً إذا تطلب الأمر لضمان الحماية من الـ Overflow
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF2C3E50),
-                    height: 1.4,
-                  ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          )
+        ],
+      ),
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.center,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: constraints.maxWidth,
+                maxHeight: constraints.maxHeight,
+              ),
+              child: Text(
+                localizedText,
+                textAlign: TextAlign.center,
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF2C3E50),
+                  height: 1.4,
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
