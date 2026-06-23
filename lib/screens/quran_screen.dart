@@ -295,10 +295,12 @@ class _QuranScreenState extends State<QuranScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            ListTile(
-              leading: Icon(Icons.menu_book, color: _goldTextColor),
-              title: Text('التفسير', style: TextStyle(color: _mainTextColor, fontFamily: 'Amiri', fontSize: 18)),
-              onTap: () {
+            Material(
+              color: Colors.transparent,
+              child: ListTile(
+                leading: Icon(Icons.menu_book, color: _goldTextColor),
+                title: Text('التفسير', style: TextStyle(color: _mainTextColor, fontFamily: 'Amiri', fontSize: 18)),
+                onTap: () {
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -308,10 +310,13 @@ class _QuranScreenState extends State<QuranScreen> {
                 );
               },
             ),
-            ListTile(
-              leading: Icon(Icons.copy, color: _goldTextColor),
-              title: Text('نسخ الآية', style: TextStyle(color: _mainTextColor, fontFamily: 'Amiri', fontSize: 18)),
-              onTap: () {
+            ),
+            Material(
+              color: Colors.transparent,
+              child: ListTile(
+                leading: Icon(Icons.copy, color: _goldTextColor),
+                title: Text('نسخ الآية', style: TextStyle(color: _mainTextColor, fontFamily: 'Amiri', fontSize: 18)),
+                onTap: () {
                 Navigator.pop(ctx);
                 final textToCopy = '${verse['text']} ﴿${_toArabicNumerals(verse['ayahNumber'])}﴾';
                 Clipboard.setData(ClipboardData(text: textToCopy));
@@ -323,19 +328,25 @@ class _QuranScreenState extends State<QuranScreen> {
                 );
               },
             ),
-            ListTile(
-              leading: Icon(Icons.share, color: _goldTextColor),
-              title: Text('مشاركة', style: TextStyle(color: _mainTextColor, fontFamily: 'Amiri', fontSize: 18)),
-              onTap: () {
+            ),
+            Material(
+              color: Colors.transparent,
+              child: ListTile(
+                leading: Icon(Icons.share, color: _goldTextColor),
+                title: Text('مشاركة', style: TextStyle(color: _mainTextColor, fontFamily: 'Amiri', fontSize: 18)),
+                onTap: () {
                 Navigator.pop(ctx);
                 final shareText = '﴿${verse['text']}﴾ [${verse['surahName']}: ${verse['ayahNumber']}]';
                 Share.share(shareText);
               },
             ),
-            ListTile(
-              leading: Icon(Icons.bookmark_add, color: _goldTextColor),
-              title: Text('حفظ العلامة', style: TextStyle(color: _mainTextColor, fontFamily: 'Amiri', fontSize: 18)),
-              onTap: () async {
+            ),
+            Material(
+              color: Colors.transparent,
+              child: ListTile(
+                leading: Icon(Icons.bookmark_add, color: _goldTextColor),
+                title: Text('حفظ العلامة', style: TextStyle(color: _mainTextColor, fontFamily: 'Amiri', fontSize: 18)),
+                onTap: () async {
                 Navigator.pop(ctx);
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.setInt(_bookmarkPageKey, verse['page']);
@@ -350,6 +361,7 @@ class _QuranScreenState extends State<QuranScreen> {
                   );
                 }
               },
+            ),
             ),
           ],
         ),
@@ -1663,7 +1675,7 @@ final List<Map<String, String>> quranReminders = [
   {
     'ar': '🌟 لا تجعل مصحفك مهجوراً؛ فالقلب الذي لا يقرأ القرآن كالبيت الخرب الذي لا يسكنه أحد.',
     'en': '🌟 Do not leave your Mus-haf abandoned; for the heart that does not read the Qur\'an is like a ruined house in which no one dwells.',
-    'am': '🌟 ቁርኣንህን የተተወ አتاድርገው፤ ቁርኣን የማይነበብበት ልብ ማንም እንደማይኖርበት የፈረሰ ቤት ነውና።',
+    'am': '🌟 ቁርኣንህን የተተወ አታድርገው፤ ቁርኣን የማይነበብበት ልብ ማንም እንደማይኖርበት የፈረሰ ቤት ነውና።',
     'om': '🌟 Qur’aana kee gatamoo hin godhin; onneen Qur’aana hin dubbisne akka mana diigamee nama keessa hin jirreeti.',
   },
   {
