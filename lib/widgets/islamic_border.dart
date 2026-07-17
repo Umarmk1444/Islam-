@@ -64,8 +64,8 @@ class TezhibBorderPainter extends CustomPainter {
     final Color darkBlue = primaryColor;
     final Color gold = accentColor;
     final Color darkRed = tertiaryColor;
-    final Color lightTeal = primaryColor.withOpacity(0.3);
-    final Color greyAccent = gold.withOpacity(0.5);
+    final Color lightTeal = primaryColor.withValues(alpha: 0.3);
+    final Color greyAccent = gold.withValues(alpha: 0.5);
 
     // 1. رسم الخطوط الداخلية الصلبة التي تحيط بالنص (كما في الصورة)
     final Rect innerRect = Rect.fromLTRB(thickness, thickness, w - thickness, h - thickness);
@@ -105,7 +105,7 @@ class TezhibBorderPainter extends CustomPainter {
         ..quadraticBezierTo(width * 0.3, -height * 0.4, width * 0.5, -height * 0.8)
         ..quadraticBezierTo(width * 0.7, -height * 0.4, width * 0.85, 0);
       canvas.drawPath(innerShape, Paint()..color = darkBlue..style = PaintingStyle.fill);
-      canvas.drawPath(innerShape, Paint()..color = Colors.white.withOpacity(0.4)..style = PaintingStyle.stroke..strokeWidth = 0.5);
+      canvas.drawPath(innerShape, Paint()..color = Colors.white.withValues(alpha: 0.4)..style = PaintingStyle.stroke..strokeWidth = 0.5);
 
       // اللمسة الحمراء في المنتصف
       Path redAccent = Path()
@@ -249,11 +249,14 @@ class TezhibBorderPainter extends CustomPainter {
               final double angle = (math.pi / 3) * i;
               final double px = cx + (tileSize * 0.35) * math.cos(angle);
               final double py = cy + (tileSize * 0.35) * math.sin(angle);
-              if (i == 0) hexStar.moveTo(px, py);
-              else hexStar.lineTo(px, py);
+              if (i == 0) {
+                hexStar.moveTo(px, py);
+              } else {
+                hexStar.lineTo(px, py);
+              }
             }
             hexStar.close();
-            canvas.drawPath(hexStar, Paint()..color = gold.withOpacity(0.5)..style = PaintingStyle.fill);
+            canvas.drawPath(hexStar, Paint()..color = gold.withValues(alpha: 0.5)..style = PaintingStyle.fill);
             canvas.drawPath(hexStar, Paint()..color = navy..style = PaintingStyle.stroke..strokeWidth = 0.3);
             break;
 
@@ -265,7 +268,7 @@ class TezhibBorderPainter extends CustomPainter {
               ..lineTo(cx, dy + tileSize)
               ..lineTo(dx, cy)
               ..close();
-            canvas.drawPath(diamond, Paint()..color = red.withOpacity(0.5)..style = PaintingStyle.fill);
+            canvas.drawPath(diamond, Paint()..color = red.withValues(alpha: 0.5)..style = PaintingStyle.fill);
             canvas.drawPath(diamond, Paint()..color = gold..style = PaintingStyle.stroke..strokeWidth = 0.2);
             break;
 
@@ -287,7 +290,7 @@ class TezhibBorderPainter extends CustomPainter {
               canvas.drawRect(
                 Rect.fromCenter(center: Offset(cx, cy), width: size, height: size),
                 Paint()
-                  ..color = i == 0 ? gold.withOpacity(0.4) : red.withOpacity(0.3)
+                  ..color = i == 0 ? gold.withValues(alpha: 0.4) : red.withValues(alpha: 0.3)
                   ..style = PaintingStyle.stroke
                   ..strokeWidth = 0.2,
               );
@@ -316,7 +319,7 @@ class TezhibBorderPainter extends CustomPainter {
               ..lineTo(dx + tileSize * 0.7, cy + tileSize * 0.3)
               ..lineTo(dx + tileSize * 0.3, cy + tileSize * 0.6)
               ..close();
-            canvas.drawPath(triangle, Paint()..color = gold.withOpacity(0.3)..style = PaintingStyle.fill);
+            canvas.drawPath(triangle, Paint()..color = gold.withValues(alpha: 0.3)..style = PaintingStyle.fill);
             canvas.drawPath(triangle, Paint()..color = navy..style = PaintingStyle.stroke..strokeWidth = 0.2);
             break;
         }

@@ -82,6 +82,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navDawah => 'الدعوة';
 
   @override
+  String get navDashboard => 'لوحة المعلومات';
+
+  @override
+  String get navMinbar => 'المنبر';
+
+  @override
   String get navSettings => 'الإعدادات';
 
   @override
@@ -189,6 +195,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get actionClose => 'إغلاق';
 
   @override
+  String get actionSearch => 'البحث';
+
+  @override
+  String get actionTheme => 'المظهر';
+
+  @override
   String get audioReciter => 'القارئ';
 
   @override
@@ -196,4 +208,226 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errorFetchingData => 'خطأ في جلب البيانات';
+
+  @override
+  String get selectAction => 'اختر إجراء';
+
+  @override
+  String get selectLanguageTafsir => 'اختر لغة التفسير';
+
+  @override
+  String get selectLanguageTranslation => 'اختر لغة الترجمة';
+
+  @override
+  String get selectTafsirBook => 'اختر كتاب التفسير';
+
+  @override
+  String get languageArabic => 'العربية';
+
+  @override
+  String get languageEnglish => 'الإنجليزية';
+
+  @override
+  String get languageAmharic => 'الأمهرية';
+
+  @override
+  String get languageOromo => 'الأورومية';
+
+  @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
+  String get noTafsirAvailable => 'لا يتوفر تفسير لهذه اللغة';
+
+  @override
+  String get noTranslationAvailable => 'الترجمة غير متوفرة';
+
+  @override
+  String get prayerTimes => 'مواقيت الصلاة';
+
+  @override
+  String get nextPrayer => 'الصلاة القادمة';
+
+  @override
+  String get countdown => 'العد التنازلي';
+
+  @override
+  String get prayerFajr => 'الفجر';
+
+  @override
+  String get prayerSunrise => 'الشروق';
+
+  @override
+  String get prayerDhuhr => 'الظهر';
+
+  @override
+  String get prayerAsr => 'العصر';
+
+  @override
+  String get prayerMaghrib => 'المغرب';
+
+  @override
+  String get prayerIsha => 'العشاء';
+
+  @override
+  String get calcMethod => 'طريقة الحساب';
+
+  @override
+  String get madhab => 'المذهب (العصر)';
+
+  @override
+  String get locationSync => 'مزامنة الموقع';
+
+  @override
+  String get notifEnabled => 'الإشعار مفعّل';
+
+  @override
+  String get notifDisabled => 'الإشعار معطّل';
+
+  @override
+  String get methodUmmAlQura => 'أم القرى';
+
+  @override
+  String get methodEgyptian => 'الهيئة المصرية';
+
+  @override
+  String get methodMWL => 'رابطة العالم الإسلامي';
+
+  @override
+  String get methodISNA => 'ISNA';
+
+  @override
+  String get methodKarachi => 'كراتشي';
+
+  @override
+  String get madhabHanafi => 'حنفي';
+
+  @override
+  String get madhabShafi => 'شافعي / مالكي / حنبلي';
+
+  @override
+  String get gpsPermissionDenied => 'تم رفض إذن الموقع';
+
+  @override
+  String get usingFallbackLocation => 'استخدام الموقع الاحتياطي: مكة';
+
+  @override
+  String get prayerSettingsTitle => 'إعدادات الصلاة';
+
+  @override
+  String get qiblaTitle => 'اتجاه القبلة';
+
+  @override
+  String get qiblaAlignPhone => 'ضع هاتفك بشكل مسطح للحصول على دقة أفضل';
+
+  @override
+  String get qiblaDistance => 'المسافة إلى الكعبة';
+
+  @override
+  String get qiblaAngle => 'زاوية القبلة';
+
+  @override
+  String get qiblaKm => 'كم';
+
+  @override
+  String qiblaCompassError(String error) {
+    return 'خطأ في قراءة مستشعر البوصلة: $error';
+  }
+
+  @override
+  String get qiblaNoCompass => 'لم يتم الكشف عن مستشعر البوصلة.';
+
+  @override
+  String qiblaStaticAngle(String angle) {
+    return 'زاوية القبلة الثابتة: $angle°';
+  }
+
+  @override
+  String get qiblaLocationDisabled => 'خدمات الموقع معطلة.';
+
+  @override
+  String get qiblaPermissionDenied => 'تم رفض إذن الموقع.';
+
+  @override
+  String get qiblaPermissionPermanentlyDenied => 'تم رفض إذن الموقع بشكل دائم.';
+
+  @override
+  String qiblaFailedInit(String error) {
+    return 'فشل تهيئة الموقع: $error';
+  }
+
+  @override
+  String get qiblaNorth => 'الشمال';
+
+  @override
+  String get qiblaEast => 'الشرق';
+
+  @override
+  String get qiblaSouth => 'الجنوب';
+
+  @override
+  String get qiblaWest => 'الغرب';
+
+  @override
+  String get qiblaPermissionRequired => 'إذن الموقع مطلوب';
+
+  @override
+  String get qiblaEnableLocation => 'تمكين الموقع';
+
+  @override
+  String get athanNotifDesc => 'تفعيل التنبيه بصوت الأذان';
+
+  @override
+  String get preAthanWarning => 'تنبيه اقتراب الصلاة';
+
+  @override
+  String get off => 'إيقاف';
+
+  @override
+  String get minLabel => 'د';
+
+  @override
+  String get custom => 'مخصص';
+
+  @override
+  String get timeAdjustment => 'تعديل الوقت (يدوي)';
+
+  @override
+  String get adjustAthan => 'تقديم أو تأخير الأذان';
+
+  @override
+  String get muezzinVoice => 'صوت المؤذن';
+
+  @override
+  String get customTimeMin => 'وقت مخصص (بالدقائق)';
+
+  @override
+  String get example30 => 'مثال: 30';
+
+  @override
+  String get cancel => 'إلغاء';
+
+  @override
+  String get save => 'حفظ';
+
+  @override
+  String get chooseMuezzin => 'اختر المؤذن';
+
+  @override
+  String get muezzinMecca => 'الحرم المكي - علي ملا';
+
+  @override
+  String get muezzinNasser => 'ناصر القطامي';
+
+  @override
+  String get muezzinZahrani => 'منصور الزهراني';
+
+  @override
+  String get muezzinDosari => 'ياسر الدوسري';
+
+  @override
+  String get muezzinAbdulbasit => 'عبدالباسط عبدالصمد';
+
+  @override
+  String get muezzinAlafasy => 'مشاري العفاسي';
 }

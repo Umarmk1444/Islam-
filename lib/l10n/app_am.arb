@@ -23,12 +23,16 @@
   "madeWithLove": "ለኡምማ በ ♥ ተሠርቷል",
   "navQuran": "ቁርኣን",
   "navDawah": "ዳዕዋ",
+  "navDashboard": "ዳሽቦርድ",
+  "navMinbar": "ሚንበር",
   "navSettings": "ቅንብሮች",
   "dawahScholars": "የዳዕዋ ሊቃውንት",
   "availableItems": "{count} ዝርዝሮች አሉ",
   "@availableItems": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "downloadAll": "ሁሉንም አውርድ",
@@ -52,7 +56,9 @@
   "secondsShort": "{count}ሰ",
   "@secondsShort": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "verseDuration": "የአያህ ርዝመት",
@@ -67,7 +73,102 @@
   "actionGoToBookmark": "ወደ ዕልባት ሂድ",
   "actionIndex": "ማውጫ",
   "actionClose": "ዝጋ",
+  "actionSearch": "ፈልግ",
+  "actionTheme": "መየታ",
   "audioReciter": "አንባቢ",
   "loading": "በመጫን ላይ...",
-  "errorFetchingData": "መረጃ ማምጣት አልተቻለም"
+  "errorFetchingData": "መረጃ ማምጣት አልተቻለም",
+  "selectAction": "ድርጊት ይምረጡ",
+  "selectLanguageTafsir": "የተፍሲር ቋንቋ ይምረጡ",
+  "selectLanguageTranslation": "የትርጉም ቋንቋ ይምረጡ",
+  "selectTafsirBook": "የተፍሲር መጽሐፍ ይምረጡ",
+  "languageArabic": "ዓረብኛ",
+  "languageEnglish": "እንግሊዝኛ",
+  "languageAmharic": "አማርኛ",
+  "languageOromo": "ኦሮምኛ",
+  "retry": "ድገም",
+  "noTafsirAvailable": "ለዚህ ቋንቋ ተፍሲር የለም",
+  "noTranslationAvailable": "ትርጉም አልተገኘም",
+  "prayerTimes": "የሶላት ወቅት",
+  "nextPrayer": "ቀጣይ ሶላት",
+  "countdown": "ቀሪ ጊዜ",
+  "prayerFajr": "ፈጅር",
+  "prayerSunrise": "ሸምስ",
+  "prayerDhuhr": "ዙሁር",
+  "prayerAsr": "ዓሥር",
+  "prayerMaghrib": "ማግሪብ",
+  "prayerIsha": "ዒሻ",
+  "calcMethod": "የሒሳብ ዘዴ",
+  "madhab": "መዝሀብ (ዓሥር)",
+  "locationSync": "GPS ያሳምኑ",
+  "notifEnabled": "ማሳወቂያ ተሰናዷል",
+  "notifDisabled": "ማሳወቂያ ተቋርጧል",
+  "methodUmmAlQura": "ኡም አልቁራ",
+  "methodEgyptian": "ግብጽ",
+  "methodMWL": "የዓለም እስልምና ማህበር",
+  "methodISNA": "ISNA",
+  "methodKarachi": "ካራቺ",
+  "madhabHanafi": "ሐነፊ",
+  "madhabShafi": "ሻፊዒ / ማሊኪ / ሓምበሊ",
+  "gpsPermissionDenied": "የቦታ ፈቃድ ተከልክሏል",
+  "usingFallbackLocation": "ምትኬ ቦታ ጥቅም ላይ ዋለ: መካ",
+  "prayerSettingsTitle": "የሶላት ቅንብሮች",
+  "qiblaTitle": "የቂብላ አቅጣጫ",
+  "qiblaAlignPhone": "ለትክክለኛነት ስልክዎን ጠፍጣፋ አድርገው ይያዙ",
+  "qiblaDistance": "እስከ ካዕባ ያለው ርቀት",
+  "qiblaAngle": "የቂብላ አንግል",
+  "qiblaKm": "ኪ.ሜ",
+  "qiblaCompassError": "የኮምፓስ ሴንሰር ማንበብ ላይ ስህተት ተከስቷል: {error}",
+  "@qiblaCompassError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "qiblaNoCompass": "የኮምፓስ ሃርድዌር አልተገኘም።",
+  "qiblaStaticAngle": "የማይቀየር የቂብላ አንግል: {angle}°",
+  "@qiblaStaticAngle": {
+    "placeholders": {
+      "angle": {
+        "type": "String"
+      }
+    }
+  },
+  "qiblaLocationDisabled": "የቦታ አገልግሎት ተዘግቷል።",
+  "qiblaPermissionDenied": "የቦታ ፈቃድ ተከልክሏል።",
+  "qiblaPermissionPermanentlyDenied": "የቦታ ፈቃድ በቋሚነት ተከልክሏል።",
+  "qiblaFailedInit": "የቦታ አገልግሎትን ማስጀመር አልተሳካም: {error}",
+  "@qiblaFailedInit": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "qiblaNorth": "ሰሜን",
+  "qiblaEast": "ምስራቅ",
+  "qiblaSouth": "ደቡብ",
+  "qiblaWest": "ምዕራብ",
+  "qiblaPermissionRequired": "የቦታ ፈቃድ ያስፈልጋል",
+  "qiblaEnableLocation": "ቦታ ፍቀድ",
+  "athanNotifDesc": "የአዛን ድምጽ ማንቂያን አንቃ",
+  "preAthanWarning": "የቅድመ-ሶላት ማስጠንቀቂያ",
+  "off": "አጥፋ",
+  "minLabel": "ደ",
+  "custom": "ብጁ",
+  "timeAdjustment": "የጊዜ ማስተካከያ (በእጅ)",
+  "adjustAthan": "አዛን ወደፊት ወይም ወደ ኋላ",
+  "muezzinVoice": "የሙአዚን ድምጽ",
+  "customTimeMin": "ብጁ ጊዜ (በደቂቃዎች)",
+  "example30": "ምሳሌ፡ 30",
+  "cancel": "ሰርዝ",
+  "save": "አስቀምጥ",
+  "chooseMuezzin": "ሙአዚን ይምረጡ",
+  "muezzinMecca": "መካ - አሊ ሙላ",
+  "muezzinNasser": "ናስር አል ቀጣሚ",
+  "muezzinZahrani": "መንሱር አል ዘህራኒ",
+  "muezzinDosari": "ያሲር አል ዶሳሪ",
+  "muezzinAbdulbasit": "አብዱልባሲጥ አብዱልሰመድ",
+  "muezzinAlafasy": "ሚሻሪ አል አፋሲ"
 }

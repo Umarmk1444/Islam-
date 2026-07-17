@@ -114,22 +114,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
             l10n.selectLanguage,
             style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: _languages.map((lang) {
-              return RadioListTile<String>(
-                title: Text(lang, style: TextStyle(color: mainTextColor, fontWeight: FontWeight.w500)),
-                value: lang,
-                groupValue: _selectedLanguage,
-                activeColor: primaryColor,
-                onChanged: (val) {
-                  if (val != null) {
-                    _setLanguage(val);
-                    Navigator.pop(ctx);
-                  }
-                },
-              );
-            }).toList(),
+          content: RadioGroup<String>(
+            groupValue: _selectedLanguage,
+            onChanged: (val) {
+              if (val != null) {
+                _setLanguage(val);
+                Navigator.pop(ctx);
+              }
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: _languages.map((lang) {
+                return RadioListTile<String>(
+                  title: Text(lang, style: TextStyle(color: mainTextColor, fontWeight: FontWeight.w500)),
+                  value: lang,
+                  activeColor: primaryColor,
+                );
+              }).toList(),
+            ),
           ),
         );
       },
@@ -182,7 +184,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: Text(l10n.dailyNotifications, style: TextStyle(color: mainTextColor, fontWeight: FontWeight.w600)),
                       subtitle: Text(l10n.dailyNotificationsDesc, style: const TextStyle(color: Colors.grey, fontSize: 13)),
                       value: _notificationsEnabled,
-                      activeColor: primaryColor,
+                      activeThumbColor: primaryColor,
                       secondary: Icon(Icons.notifications_active, color: primaryColor),
                       onChanged: _toggleNotifications,
                     ),
@@ -284,9 +286,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildTelegramSupportCard(Color primaryColor, Color textColor, Color bgColor, Color borderColor, AppLocalizations l10n) {
     return Container(
       decoration: BoxDecoration(
-        color: primaryColor.withOpacity(0.08),
+        color: primaryColor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: primaryColor.withOpacity(0.3), width: 1.5),
+        border: Border.all(color: primaryColor.withValues(alpha: 0.3), width: 1.5),
       ),
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -323,10 +325,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 12),
           Text(
             l10n.contactDeveloperText,
-            style: TextStyle(fontSize: 13, height: 1.4, color: textColor.withOpacity(0.9), fontStyle: FontStyle.italic),
+            style: TextStyle(fontSize: 13, height: 1.4, color: textColor.withValues(alpha: 0.9), fontStyle: FontStyle.italic),
           ),
           const SizedBox(height: 16),
-          Row(
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
             children: [
               ElevatedButton.icon(
                 onPressed: () async {
@@ -345,7 +350,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                 ),
               ),
-              const Spacer(),
               TextButton.icon(
                 onPressed: () {
                   Clipboard.setData(const ClipboardData(text: '@UMER_jr')).then((_) {
@@ -393,7 +397,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       color: bgColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.withOpacity(0.15)),
+        side: BorderSide(color: Colors.grey.withValues(alpha: 0.15)),
       ),
       child: child,
     );
@@ -422,7 +426,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildDivider(Color color) {
-    return Divider(height: 1, thickness: 1, color: color.withOpacity(0.15), indent: 56);
+    return Divider(height: 1, thickness: 1, color: color.withValues(alpha: 0.15), indent: 56);
   }
 
   Widget _buildThemeSelector(QuranTheme currentTheme, Color primaryColor, Color mainTextColor, Color borderColor, AppLocalizations l10n) {
@@ -502,11 +506,11 @@ class _ThemeOption extends StatelessWidget {
               color: color,
               shape: BoxShape.circle,
               border: Border.all(
-                color: isSelected ? activeColor : Colors.grey.withOpacity(0.3),
+                color: isSelected ? activeColor : Colors.grey.withValues(alpha: 0.3),
                 width: isSelected ? 3 : 1.5,
               ),
               boxShadow: isSelected
-                  ? [BoxShadow(color: activeColor.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 4))]
+                  ? [BoxShadow(color: activeColor.withValues(alpha: 0.2), blurRadius: 8, offset: const Offset(0, 4))]
                   : null,
             ),
             child: isSelected 

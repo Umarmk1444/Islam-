@@ -1,0 +1,42 @@
+name: Main Config
+version: 1.0.0
+schema: v1
+models:
+  - name: Gemini 3 Pro Preview
+    provider: gemini
+    model: gemini-3-pro-preview
+    apiKey: AIzaSyD9wbVfC4hL2_IKsywLLsrDHh4Qp1CxfRs
+    roles:
+      - chat
+      - edit
+      - apply
+    defaultCompletionOptions:
+      contextLength: 1048576
+      maxTokens: 65536
+    capabilities:
+      - tool_use
+      - image_input
+  - name: Gemini 3 Flash Preview
+    provider: gemini
+    model: gemini-3-flash-preview
+    apiKey: AIzaSyD9wbVfC4hL2_IKsywLLsrDHh4Qp1CxfRs
+    roles:
+      - chat
+      - edit
+      - apply
+    defaultCompletionOptions:
+      contextLength: 1048576
+      maxTokens: 65536
+    capabilities:
+      - tool_use
+      - image_input
+
+# --- ADDED FOR MCP SERVER ---
+mcpServers:
+  - name: "New MCP server"
+    command: "npx"
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-everything" # Replace with your target server package
+    env:
+      YOUR_API_KEY_HERE: "value_if_needed"

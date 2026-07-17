@@ -82,6 +82,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navDawah => 'Dawah';
 
   @override
+  String get navDashboard => 'Dashboard';
+
+  @override
+  String get navMinbar => 'Minbar';
+
+  @override
   String get navSettings => 'Settings';
 
   @override
@@ -189,6 +195,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionClose => 'Close';
 
   @override
+  String get actionSearch => 'Search';
+
+  @override
+  String get actionTheme => 'Theme';
+
+  @override
   String get audioReciter => 'Reciter';
 
   @override
@@ -196,4 +208,227 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorFetchingData => 'Error fetching data';
+
+  @override
+  String get selectAction => 'Select Action';
+
+  @override
+  String get selectLanguageTafsir => 'Select Tafsir Language';
+
+  @override
+  String get selectLanguageTranslation => 'Select Translation Language';
+
+  @override
+  String get selectTafsirBook => 'Select Tafsir Book';
+
+  @override
+  String get languageArabic => 'Arabic';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String get languageAmharic => 'Amharic';
+
+  @override
+  String get languageOromo => 'Oromo';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get noTafsirAvailable => 'No tafsir available for this language';
+
+  @override
+  String get noTranslationAvailable => 'No translation available';
+
+  @override
+  String get prayerTimes => 'Prayer Times';
+
+  @override
+  String get nextPrayer => 'Next Prayer';
+
+  @override
+  String get countdown => 'Countdown';
+
+  @override
+  String get prayerFajr => 'Fajr';
+
+  @override
+  String get prayerSunrise => 'Sunrise';
+
+  @override
+  String get prayerDhuhr => 'Dhuhr';
+
+  @override
+  String get prayerAsr => 'Asr';
+
+  @override
+  String get prayerMaghrib => 'Maghrib';
+
+  @override
+  String get prayerIsha => 'Isha';
+
+  @override
+  String get calcMethod => 'Calculation Method';
+
+  @override
+  String get madhab => 'Madhab (Asr)';
+
+  @override
+  String get locationSync => 'Sync GPS Location';
+
+  @override
+  String get notifEnabled => 'Notification On';
+
+  @override
+  String get notifDisabled => 'Notification Off';
+
+  @override
+  String get methodUmmAlQura => 'Umm al-Qura';
+
+  @override
+  String get methodEgyptian => 'Egyptian';
+
+  @override
+  String get methodMWL => 'Muslim World League';
+
+  @override
+  String get methodISNA => 'ISNA';
+
+  @override
+  String get methodKarachi => 'Karachi';
+
+  @override
+  String get madhabHanafi => 'Hanafi';
+
+  @override
+  String get madhabShafi => 'Shafi / Maliki / Hanbali';
+
+  @override
+  String get gpsPermissionDenied => 'Location permission denied';
+
+  @override
+  String get usingFallbackLocation => 'Using fallback: Makkah';
+
+  @override
+  String get prayerSettingsTitle => 'Prayer Settings';
+
+  @override
+  String get qiblaTitle => 'Qibla Direction';
+
+  @override
+  String get qiblaAlignPhone => 'Align your phone flat for accuracy';
+
+  @override
+  String get qiblaDistance => 'Distance to Kaaba';
+
+  @override
+  String get qiblaAngle => 'Qibla Angle';
+
+  @override
+  String get qiblaKm => 'KM';
+
+  @override
+  String qiblaCompassError(String error) {
+    return 'Error reading compass sensor: $error';
+  }
+
+  @override
+  String get qiblaNoCompass => 'Compass hardware not detected.';
+
+  @override
+  String qiblaStaticAngle(String angle) {
+    return 'Static Qibla Angle: $angle°';
+  }
+
+  @override
+  String get qiblaLocationDisabled => 'Location services are disabled.';
+
+  @override
+  String get qiblaPermissionDenied => 'Location permissions are denied.';
+
+  @override
+  String get qiblaPermissionPermanentlyDenied =>
+      'Location permissions are permanently denied.';
+
+  @override
+  String qiblaFailedInit(String error) {
+    return 'Failed to initialize: $error';
+  }
+
+  @override
+  String get qiblaNorth => 'North';
+
+  @override
+  String get qiblaEast => 'East';
+
+  @override
+  String get qiblaSouth => 'South';
+
+  @override
+  String get qiblaWest => 'West';
+
+  @override
+  String get qiblaPermissionRequired => 'Location Permission Required';
+
+  @override
+  String get qiblaEnableLocation => 'Enable Location';
+
+  @override
+  String get athanNotifDesc => 'Enable Athan sound alert';
+
+  @override
+  String get preAthanWarning => 'Pre-Prayer Warning';
+
+  @override
+  String get off => 'Off';
+
+  @override
+  String get minLabel => 'm';
+
+  @override
+  String get custom => 'Custom';
+
+  @override
+  String get timeAdjustment => 'Time Adjustment (Manual)';
+
+  @override
+  String get adjustAthan => 'Advance or delay Athan';
+
+  @override
+  String get muezzinVoice => 'Muezzin Voice';
+
+  @override
+  String get customTimeMin => 'Custom Time (Minutes)';
+
+  @override
+  String get example30 => 'Example: 30';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get chooseMuezzin => 'Choose Muezzin';
+
+  @override
+  String get muezzinMecca => 'Mecca - Ali Mulla';
+
+  @override
+  String get muezzinNasser => 'Nasser Al Qatami';
+
+  @override
+  String get muezzinZahrani => 'Mansour Al Zahrani';
+
+  @override
+  String get muezzinDosari => 'Yasser Al Dosari';
+
+  @override
+  String get muezzinAbdulbasit => 'Abdulbasit Abdulsamad';
+
+  @override
+  String get muezzinAlafasy => 'Mishary Alafasy';
 }

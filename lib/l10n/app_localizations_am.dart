@@ -82,6 +82,12 @@ class AppLocalizationsAm extends AppLocalizations {
   String get navDawah => 'ዳዕዋ';
 
   @override
+  String get navDashboard => 'ዳሽቦርድ';
+
+  @override
+  String get navMinbar => 'ሚንበር';
+
+  @override
   String get navSettings => 'ቅንብሮች';
 
   @override
@@ -189,6 +195,12 @@ class AppLocalizationsAm extends AppLocalizations {
   String get actionClose => 'ዝጋ';
 
   @override
+  String get actionSearch => 'ፈልግ';
+
+  @override
+  String get actionTheme => 'መየታ';
+
+  @override
   String get audioReciter => 'አንባቢ';
 
   @override
@@ -196,4 +208,226 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get errorFetchingData => 'መረጃ ማምጣት አልተቻለም';
+
+  @override
+  String get selectAction => 'ድርጊት ይምረጡ';
+
+  @override
+  String get selectLanguageTafsir => 'የተፍሲር ቋንቋ ይምረጡ';
+
+  @override
+  String get selectLanguageTranslation => 'የትርጉም ቋንቋ ይምረጡ';
+
+  @override
+  String get selectTafsirBook => 'የተፍሲር መጽሐፍ ይምረጡ';
+
+  @override
+  String get languageArabic => 'ዓረብኛ';
+
+  @override
+  String get languageEnglish => 'እንግሊዝኛ';
+
+  @override
+  String get languageAmharic => 'አማርኛ';
+
+  @override
+  String get languageOromo => 'ኦሮምኛ';
+
+  @override
+  String get retry => 'ድገም';
+
+  @override
+  String get noTafsirAvailable => 'ለዚህ ቋንቋ ተፍሲር የለም';
+
+  @override
+  String get noTranslationAvailable => 'ትርጉም አልተገኘም';
+
+  @override
+  String get prayerTimes => 'የሶላት ወቅት';
+
+  @override
+  String get nextPrayer => 'ቀጣይ ሶላት';
+
+  @override
+  String get countdown => 'ቀሪ ጊዜ';
+
+  @override
+  String get prayerFajr => 'ፈጅር';
+
+  @override
+  String get prayerSunrise => 'ሸምስ';
+
+  @override
+  String get prayerDhuhr => 'ዙሁር';
+
+  @override
+  String get prayerAsr => 'ዓሥር';
+
+  @override
+  String get prayerMaghrib => 'ማግሪብ';
+
+  @override
+  String get prayerIsha => 'ዒሻ';
+
+  @override
+  String get calcMethod => 'የሒሳብ ዘዴ';
+
+  @override
+  String get madhab => 'መዝሀብ (ዓሥር)';
+
+  @override
+  String get locationSync => 'GPS ያሳምኑ';
+
+  @override
+  String get notifEnabled => 'ማሳወቂያ ተሰናዷል';
+
+  @override
+  String get notifDisabled => 'ማሳወቂያ ተቋርጧል';
+
+  @override
+  String get methodUmmAlQura => 'ኡም አልቁራ';
+
+  @override
+  String get methodEgyptian => 'ግብጽ';
+
+  @override
+  String get methodMWL => 'የዓለም እስልምና ማህበር';
+
+  @override
+  String get methodISNA => 'ISNA';
+
+  @override
+  String get methodKarachi => 'ካራቺ';
+
+  @override
+  String get madhabHanafi => 'ሐነፊ';
+
+  @override
+  String get madhabShafi => 'ሻፊዒ / ማሊኪ / ሓምበሊ';
+
+  @override
+  String get gpsPermissionDenied => 'የቦታ ፈቃድ ተከልክሏል';
+
+  @override
+  String get usingFallbackLocation => 'ምትኬ ቦታ ጥቅም ላይ ዋለ: መካ';
+
+  @override
+  String get prayerSettingsTitle => 'የሶላት ቅንብሮች';
+
+  @override
+  String get qiblaTitle => 'የቂብላ አቅጣጫ';
+
+  @override
+  String get qiblaAlignPhone => 'ለትክክለኛነት ስልክዎን ጠፍጣፋ አድርገው ይያዙ';
+
+  @override
+  String get qiblaDistance => 'እስከ ካዕባ ያለው ርቀት';
+
+  @override
+  String get qiblaAngle => 'የቂብላ አንግል';
+
+  @override
+  String get qiblaKm => 'ኪ.ሜ';
+
+  @override
+  String qiblaCompassError(String error) {
+    return 'የኮምፓስ ሴንሰር ማንበብ ላይ ስህተት ተከስቷል: $error';
+  }
+
+  @override
+  String get qiblaNoCompass => 'የኮምፓስ ሃርድዌር አልተገኘም።';
+
+  @override
+  String qiblaStaticAngle(String angle) {
+    return 'የማይቀየር የቂብላ አንግል: $angle°';
+  }
+
+  @override
+  String get qiblaLocationDisabled => 'የቦታ አገልግሎት ተዘግቷል።';
+
+  @override
+  String get qiblaPermissionDenied => 'የቦታ ፈቃድ ተከልክሏል።';
+
+  @override
+  String get qiblaPermissionPermanentlyDenied => 'የቦታ ፈቃድ በቋሚነት ተከልክሏል።';
+
+  @override
+  String qiblaFailedInit(String error) {
+    return 'የቦታ አገልግሎትን ማስጀመር አልተሳካም: $error';
+  }
+
+  @override
+  String get qiblaNorth => 'ሰሜን';
+
+  @override
+  String get qiblaEast => 'ምስራቅ';
+
+  @override
+  String get qiblaSouth => 'ደቡብ';
+
+  @override
+  String get qiblaWest => 'ምዕራብ';
+
+  @override
+  String get qiblaPermissionRequired => 'የቦታ ፈቃድ ያስፈልጋል';
+
+  @override
+  String get qiblaEnableLocation => 'ቦታ ፍቀድ';
+
+  @override
+  String get athanNotifDesc => 'የአዛን ድምጽ ማንቂያን አንቃ';
+
+  @override
+  String get preAthanWarning => 'የቅድመ-ሶላት ማስጠንቀቂያ';
+
+  @override
+  String get off => 'አጥፋ';
+
+  @override
+  String get minLabel => 'ደ';
+
+  @override
+  String get custom => 'ብጁ';
+
+  @override
+  String get timeAdjustment => 'የጊዜ ማስተካከያ (በእጅ)';
+
+  @override
+  String get adjustAthan => 'አዛን ወደፊት ወይም ወደ ኋላ';
+
+  @override
+  String get muezzinVoice => 'የሙአዚን ድምጽ';
+
+  @override
+  String get customTimeMin => 'ብጁ ጊዜ (በደቂቃዎች)';
+
+  @override
+  String get example30 => 'ምሳሌ፡ 30';
+
+  @override
+  String get cancel => 'ሰርዝ';
+
+  @override
+  String get save => 'አስቀምጥ';
+
+  @override
+  String get chooseMuezzin => 'ሙአዚን ይምረጡ';
+
+  @override
+  String get muezzinMecca => 'መካ - አሊ ሙላ';
+
+  @override
+  String get muezzinNasser => 'ናስር አል ቀጣሚ';
+
+  @override
+  String get muezzinZahrani => 'መንሱር አል ዘህራኒ';
+
+  @override
+  String get muezzinDosari => 'ያሲር አል ዶሳሪ';
+
+  @override
+  String get muezzinAbdulbasit => 'አብዱልባሲጥ አብዱልሰመድ';
+
+  @override
+  String get muezzinAlafasy => 'ሚሻሪ አል አፋሲ';
 }

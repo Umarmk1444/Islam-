@@ -1,21 +1,10 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import '../l10n/app_localizations.dart';
 import '../theme_notifier.dart';
-import '../services/quran_api_service.dart';
 import '../controllers/quran_audio_controller.dart';
-
-// ─────────────────────────────────────────────────────────────────────────────
-// View state enum
-// ─────────────────────────────────────────────────────────────────────────────
-
-enum _BottomSheetView { grid, translation, tafsir }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Widget
-// ─────────────────────────────────────────────────────────────────────────────
+import 'verse_content_sheet.dart';
 
 class AyahInteractionBottomSheet extends StatefulWidget {
   final int initialSurahNumber;
@@ -47,35 +36,11 @@ class AyahInteractionBottomSheet extends StatefulWidget {
 
 class _AyahInteractionBottomSheetState
     extends State<AyahInteractionBottomSheet> {
-  _BottomSheetView _view = _BottomSheetView.grid;
-
-  // Dynamic content state
-  bool _isLoadingData = false;
-  String _fetchedData  = '';
-
   QuranTheme get _theme    => AppTheme.notifier.value;
   Color get _pageBg        => AppTheme.getPageBgColor(_theme);
   Color get _border        => AppTheme.getBorderColor(_theme);
   Color get _gold          => AppTheme.getGoldTextColor(_theme);
   Color get _textColor     => AppTheme.getMainTextColor(_theme);
-
-  // ── Dynamic fetch helpers ──────────────────────────────────────────────────
-
-  Future<void> _fetchTranslation() async {
-    setState(() { _isLoadingData = true; _fetchedData = ''; });
-    final locale = Localizations.localeOf(context).languageCode;
-    final res = await QuranApiService.fetchTranslation(
-        widget.initialSurahNumber, widget.initialAyahNumber, locale);
-    if (mounted) setState(() { _fetchedData = res; _isLoadingData = false; });
-  }
-
-  Future<void> _fetchTafsir() async {
-    setState(() { _isLoadingData = true; _fetchedData = ''; });
-    final locale = Localizations.localeOf(context).languageCode;
-    final res = await QuranApiService.fetchTafsir(
-        widget.initialSurahNumber, widget.initialAyahNumber, locale);
-    if (mounted) setState(() { _fetchedData = res; _isLoadingData = false; });
-  }
 
   void _copyToClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text));
@@ -95,6 +60,22 @@ class _AyahInteractionBottomSheetState
       totalVerses:    widget.totalVersesInQuran,
       getVerseData:   widget.getVerseData,
       onAyahChanged:  widget.onAyahChanged,
+    );
+  }
+
+  void _showVerseContentSheet(bool isTafsir) {
+    Navigator.pop(context); // Close grid bottom sheet
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => VerseContentSheet(
+        initialIsTafsir: isTafsir,
+        surahNumber: widget.initialSurahNumber,
+        ayahNumber: widget.initialAyahNumber,
+        verseText: widget.initialVerseText,
+        surahName: widget.initialSurahName,
+      ),
     );
   }
 
@@ -129,19 +110,11 @@ class _AyahInteractionBottomSheetState
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                if (_view != _BottomSheetView.grid)
-                  IconButton(
-                    icon: Icon(Icons.arrow_back, color: _textColor, size: 20),
-                    onPressed: () => setState(() => _view = _BottomSheetView.grid),
-                    padding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                  ),
+                const SizedBox(width: 40), // Balance the close button
                 Expanded(
                   child: Text(
                     'سورة ${widget.initialSurahName} · الآية ${widget.initialAyahNumber}',
-                    textAlign: _view == _BottomSheetView.grid
-                        ? TextAlign.start
-                        : TextAlign.center,
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Amiri',
                       fontSize: 19,
@@ -164,9 +137,7 @@ class _AyahInteractionBottomSheetState
           Divider(color: _border.withValues(alpha: 0.25), height: 12),
 
           Expanded(
-            child: _view == _BottomSheetView.grid
-                ? _buildGrid(l10n)
-                : _buildDynamicContent(),
+            child: _buildGrid(l10n),
           ),
         ],
       ),
@@ -180,18 +151,12 @@ class _AyahInteractionBottomSheetState
       _ActionItem(
         icon: Icons.menu_book,
         label: l10n.actionTafsir,
-        onTap: () {
-          setState(() => _view = _BottomSheetView.tafsir);
-          _fetchTafsir();
-        },
+        onTap: () => _showVerseContentSheet(true),
       ),
       _ActionItem(
         icon: Icons.translate,
         label: l10n.actionTranslation,
-        onTap: () {
-          setState(() => _view = _BottomSheetView.translation);
-          _fetchTranslation();
-        },
+        onTap: () => _showVerseContentSheet(false),
       ),
       _ActionItem(
         icon: Icons.volume_up_rounded,
@@ -294,50 +259,7 @@ class _AyahInteractionBottomSheetState
       ),
     );
   }
-
-  // ── Phase 2: Dynamic Content (Translation / Tafsir) ───────────────────────
-
-  Widget _buildDynamicContent() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Verse text
-          Text(
-            widget.initialVerseText,
-            textAlign: TextAlign.center,
-            textDirection: TextDirection.rtl,
-            style: TextStyle(
-              fontFamily: 'Amiri',
-              fontSize: 22,
-              height: 2.0,
-              color: _textColor,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Divider(color: _border.withValues(alpha: 0.25)),
-          const SizedBox(height: 20),
-
-          // Fetched content
-          if (_isLoadingData)
-            Center(child: CircularProgressIndicator(color: _gold))
-          else
-            Text(
-              _fetchedData.isEmpty ? '—' : _fetchedData,
-              style: TextStyle(fontSize: 15, height: 1.7, color: _textColor.withValues(alpha: 0.85)),
-              textAlign: TextAlign.justify,
-            ),
-        ],
-      ),
-    );
-  }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Model
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _ActionItem {
   final IconData icon;

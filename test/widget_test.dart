@@ -1,30 +1,42 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:quran_dawah/main.dart';
+import 'package:quran_dawah/screens/quran_screen.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const QuranDawahApp());
+  testWidgets('adds bottom padding when an overlay bar is shown', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: QuranPageContentWrapper(
+            hasOverlay: true,
+            child: SizedBox(height: 200, width: 200),
+          ),
+        ),
+      ),
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    final padding = tester.widget<Padding>(find.byType(Padding).first);
+    final edgeInsets = padding.padding as EdgeInsets;
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    expect(edgeInsets.bottom, equals(120.0));
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('does not add bottom padding when no overlay bar is shown', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: QuranPageContentWrapper(
+            hasOverlay: false,
+            child: SizedBox(height: 200, width: 200),
+          ),
+        ),
+      ),
+    );
+
+    final padding = tester.widget<Padding>(find.byType(Padding).first);
+    final edgeInsets = padding.padding as EdgeInsets;
+
+    expect(edgeInsets.bottom, equals(0.0));
   });
 }

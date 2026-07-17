@@ -23,12 +23,16 @@
   "madeWithLove": "Ummataaf ♥ tiin hojjetame",
   "navQuran": "Qur'aana",
   "navDawah": "Da'awaa",
+  "navDashboard": "Dashboard",
+  "navMinbar": "Minbar",
   "navSettings": "Qindaa'ina",
   "dawahScholars": "Ulamaa'ii Da'awaa",
   "availableItems": "Wantootni {count} jiru",
   "@availableItems": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "downloadAll": "Hunda Buufadhu",
@@ -52,22 +56,119 @@
   "secondsShort": "s {count}",
   "@secondsShort": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "verseDuration": "Dheerina Aayaa",
   "actionTafsir": "Tafsiira",
   "actionTranslation": "Hiikkaa",
-  "actionListen": "Dhaggeeffadhu / Sagalee",
-  "actionCopyAyah": "Aayaa Coppii",
-  "actionCopyPage": "Fuula Coppii",
-  "actionShareText": "Barreeffama Qoodi",
-  "actionShareImage": "Fakkii Qoodi",
-  "actionSaveBookmark": "Mallattoo Olkaa'i",
-  "actionGoToBookmark": "Gara Mallattoo Deemi",
+  "actionListen": "Dhagefadhu",
+  "actionCopyAyah": "Aaya Copi",
+  "actionCopyPage": "Fula Copi",
+  "actionShareText": "sheerii",
+  "actionShareImage": "foto Qodi",
+  "actionSaveBookmark": "Malato qabi",
+  "actionGoToBookmark": "Gara Malato",
   "actionIndex": "Baafata",
   "actionClose": "Cufi",
-  "audioReciter": "Qara'aa",
+  "actionSearch": "Barbadi",
+  "actionTheme": "bifa",
+  "audioReciter": "Qaari'a",
   "loading": "Fe'aa jira...",
-  "errorFetchingData": "Ragaa fiduun hin danda'amne"
+  "errorFetchingData": "Ragaa fiduun hin danda'amne",
+  "selectAction": "Gochaa Filadhu",
+  "selectLanguageTafsir": "Afaan Tafsiiraa Filadhu",
+  "selectLanguageTranslation": "Afaan Hiikkaa Filadhu",
+  "selectTafsirBook": "Kitaaba Tafsiiraa Filadhu",
+  "languageArabic": "Afaan Arabaa",
+  "languageEnglish": "Afaan Ingilizii",
+  "languageAmharic": "Afaan Amaaraa",
+  "languageOromo": "Afaan Oromoo",
+  "retry": "Irra deebi'i",
+  "noTafsirAvailable": "Afaan kanaaf tafsiirri hin jiru",
+  "noTranslationAvailable": "Hiikkaan hin argamne",
+  "prayerTimes": "Yeroo Salaataa",
+  "nextPrayer": "Salaata Itti Aanu",
+  "countdown": "Yeroo Hafee",
+  "prayerFajr": "Fajrii",
+  "prayerSunrise": "Ba'uu Aduu",
+  "prayerDhuhr": "Zuhr",
+  "prayerAsr": "Asar",
+  "prayerMaghrib": "Magrib",
+  "prayerIsha": "Ishaa",
+  "calcMethod": "Mala Herregaa",
+  "madhab": "Mazhaba (Asar)",
+  "locationSync": "Bakka GPS Wixinee",
+  "notifEnabled": "Beeksisni Banaa",
+  "notifDisabled": "Beeksisni Cufaa",
+  "methodUmmAlQura": "Umm al-Qura",
+  "methodEgyptian": "Masrii",
+  "methodMWL": "Dhaabbata Islaamaa Addunyaa",
+  "methodISNA": "ISNA",
+  "methodKarachi": "Karachi",
+  "madhabHanafi": "Hanafii",
+  "madhabShafi": "Shaafi'ii / Maalikii / Hanbalii",
+  "gpsPermissionDenied": "Hayyamni bakka didan",
+  "usingFallbackLocation": "Bakka yaaddannoo fayyadamaa: Makkaa",
+  "prayerSettingsTitle": "Qindaa'ina Salaataa",
+  "qiblaTitle": "Kallattii Qiblaa",
+  "qiblaAlignPhone": "Daqiiqaa sirriitiif bilbila keessan diriirsaatti qabaa",
+  "qiblaDistance": "Fageenya Ka'abaatti",
+  "qiblaAngle": "Kofa Qiblaa",
+  "qiblaKm": "KM",
+  "qiblaCompassError": "Dhaqna kompaasii dubbisuun dogoggora: {error}",
+  "@qiblaCompassError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "qiblaNoCompass": "Meeshaan kompaasii hin argamne.",
+  "qiblaStaticAngle": "Kofa Qiblaa Dhaabbataa: {angle}°",
+  "@qiblaStaticAngle": {
+    "placeholders": {
+      "angle": {
+        "type": "String"
+      }
+    }
+  },
+  "qiblaLocationDisabled": "Tajaajilli bakka argamaa cufameera.",
+  "qiblaPermissionDenied": "Hayyamni bakkaa dhorkameera.",
+  "qiblaPermissionPermanentlyDenied": "Hayyamni bakkaa guutumaan guutuutti dhorkameera.",
+  "qiblaFailedInit": "Bakka argamaa jalqabsiisuun hin danda'amne: {error}",
+  "@qiblaFailedInit": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "qiblaNorth": "Kaaba",
+  "qiblaEast": "Baha",
+  "qiblaSouth": "Kibba",
+  "qiblaWest": "Dhiha",
+  "qiblaPermissionRequired": "Hayyama bakkaa barbaachisaa",
+  "qiblaEnableLocation": "Bakka Argamaa Bani",
+  "athanNotifDesc": "Akeekkachiisa sagalee Azaan banaa",
+  "preAthanWarning": "Akeekkachiisa Salaata Duraa",
+  "off": "Cufaa",
+  "minLabel": "d",
+  "custom": "Hunda'aa",
+  "timeAdjustment": "Sirreeffama Yeroo (Harkaan)",
+  "adjustAthan": "Azaan dura ykn booda",
+  "muezzinVoice": "Sagalee Muezzin",
+  "customTimeMin": "Yeroo Hunda'aa (Daqiiqaa)",
+  "example30": "Fakkeenya: 30",
+  "cancel": "Haquu",
+  "save": "Olkaa'uu",
+  "chooseMuezzin": "Muezzin Filadhu",
+  "muezzinMecca": "Makkaa - Alii Mullaa",
+  "muezzinNasser": "Naasir Al Qataamii",
+  "muezzinZahrani": "Mansuur Al Zahraanii",
+  "muezzinDosari": "Yaasir Al Dosaarii",
+  "muezzinAbdulbasit": "Abdulbaasit Abdulsamad",
+  "muezzinAlafasy": "Mishaarii Al Afaasii"
 }

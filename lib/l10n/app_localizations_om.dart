@@ -83,6 +83,12 @@ class AppLocalizationsOm extends AppLocalizations {
   String get navDawah => 'Da\'awaa';
 
   @override
+  String get navDashboard => 'Dashboard';
+
+  @override
+  String get navMinbar => 'Minbar';
+
+  @override
   String get navSettings => 'Qindaa\'ina';
 
   @override
@@ -163,25 +169,25 @@ class AppLocalizationsOm extends AppLocalizations {
   String get actionTranslation => 'Hiikkaa';
 
   @override
-  String get actionListen => 'Dhaggeeffadhu / Sagalee';
+  String get actionListen => 'Dhagefadhu';
 
   @override
-  String get actionCopyAyah => 'Aayaa Coppii';
+  String get actionCopyAyah => 'Aaya Copi';
 
   @override
-  String get actionCopyPage => 'Fuula Coppii';
+  String get actionCopyPage => 'Fula Copi';
 
   @override
-  String get actionShareText => 'Barreeffama Qoodi';
+  String get actionShareText => 'sheerii';
 
   @override
-  String get actionShareImage => 'Fakkii Qoodi';
+  String get actionShareImage => 'foto Qodi';
 
   @override
-  String get actionSaveBookmark => 'Mallattoo Olkaa\'i';
+  String get actionSaveBookmark => 'Malato qabi';
 
   @override
-  String get actionGoToBookmark => 'Gara Mallattoo Deemi';
+  String get actionGoToBookmark => 'Gara Malato';
 
   @override
   String get actionIndex => 'Baafata';
@@ -190,11 +196,241 @@ class AppLocalizationsOm extends AppLocalizations {
   String get actionClose => 'Cufi';
 
   @override
-  String get audioReciter => 'Qara\'aa';
+  String get actionSearch => 'Barbadi';
+
+  @override
+  String get actionTheme => 'bifa';
+
+  @override
+  String get audioReciter => 'Qaari\'a';
 
   @override
   String get loading => 'Fe\'aa jira...';
 
   @override
   String get errorFetchingData => 'Ragaa fiduun hin danda\'amne';
+
+  @override
+  String get selectAction => 'Gochaa Filadhu';
+
+  @override
+  String get selectLanguageTafsir => 'Afaan Tafsiiraa Filadhu';
+
+  @override
+  String get selectLanguageTranslation => 'Afaan Hiikkaa Filadhu';
+
+  @override
+  String get selectTafsirBook => 'Kitaaba Tafsiiraa Filadhu';
+
+  @override
+  String get languageArabic => 'Afaan Arabaa';
+
+  @override
+  String get languageEnglish => 'Afaan Ingilizii';
+
+  @override
+  String get languageAmharic => 'Afaan Amaaraa';
+
+  @override
+  String get languageOromo => 'Afaan Oromoo';
+
+  @override
+  String get retry => 'Irra deebi\'i';
+
+  @override
+  String get noTafsirAvailable => 'Afaan kanaaf tafsiirri hin jiru';
+
+  @override
+  String get noTranslationAvailable => 'Hiikkaan hin argamne';
+
+  @override
+  String get prayerTimes => 'Yeroo Salaataa';
+
+  @override
+  String get nextPrayer => 'Salaata Itti Aanu';
+
+  @override
+  String get countdown => 'Yeroo Hafee';
+
+  @override
+  String get prayerFajr => 'Fajrii';
+
+  @override
+  String get prayerSunrise => 'Ba\'uu Aduu';
+
+  @override
+  String get prayerDhuhr => 'Zuhr';
+
+  @override
+  String get prayerAsr => 'Asar';
+
+  @override
+  String get prayerMaghrib => 'Magrib';
+
+  @override
+  String get prayerIsha => 'Ishaa';
+
+  @override
+  String get calcMethod => 'Mala Herregaa';
+
+  @override
+  String get madhab => 'Mazhaba (Asar)';
+
+  @override
+  String get locationSync => 'Bakka GPS Wixinee';
+
+  @override
+  String get notifEnabled => 'Beeksisni Banaa';
+
+  @override
+  String get notifDisabled => 'Beeksisni Cufaa';
+
+  @override
+  String get methodUmmAlQura => 'Umm al-Qura';
+
+  @override
+  String get methodEgyptian => 'Masrii';
+
+  @override
+  String get methodMWL => 'Dhaabbata Islaamaa Addunyaa';
+
+  @override
+  String get methodISNA => 'ISNA';
+
+  @override
+  String get methodKarachi => 'Karachi';
+
+  @override
+  String get madhabHanafi => 'Hanafii';
+
+  @override
+  String get madhabShafi => 'Shaafi\'ii / Maalikii / Hanbalii';
+
+  @override
+  String get gpsPermissionDenied => 'Hayyamni bakka didan';
+
+  @override
+  String get usingFallbackLocation => 'Bakka yaaddannoo fayyadamaa: Makkaa';
+
+  @override
+  String get prayerSettingsTitle => 'Qindaa\'ina Salaataa';
+
+  @override
+  String get qiblaTitle => 'Kallattii Qiblaa';
+
+  @override
+  String get qiblaAlignPhone =>
+      'Daqiiqaa sirriitiif bilbila keessan diriirsaatti qabaa';
+
+  @override
+  String get qiblaDistance => 'Fageenya Ka\'abaatti';
+
+  @override
+  String get qiblaAngle => 'Kofa Qiblaa';
+
+  @override
+  String get qiblaKm => 'KM';
+
+  @override
+  String qiblaCompassError(String error) {
+    return 'Dhaqna kompaasii dubbisuun dogoggora: $error';
+  }
+
+  @override
+  String get qiblaNoCompass => 'Meeshaan kompaasii hin argamne.';
+
+  @override
+  String qiblaStaticAngle(String angle) {
+    return 'Kofa Qiblaa Dhaabbataa: $angle°';
+  }
+
+  @override
+  String get qiblaLocationDisabled => 'Tajaajilli bakka argamaa cufameera.';
+
+  @override
+  String get qiblaPermissionDenied => 'Hayyamni bakkaa dhorkameera.';
+
+  @override
+  String get qiblaPermissionPermanentlyDenied =>
+      'Hayyamni bakkaa guutumaan guutuutti dhorkameera.';
+
+  @override
+  String qiblaFailedInit(String error) {
+    return 'Bakka argamaa jalqabsiisuun hin danda\'amne: $error';
+  }
+
+  @override
+  String get qiblaNorth => 'Kaaba';
+
+  @override
+  String get qiblaEast => 'Baha';
+
+  @override
+  String get qiblaSouth => 'Kibba';
+
+  @override
+  String get qiblaWest => 'Dhiha';
+
+  @override
+  String get qiblaPermissionRequired => 'Hayyama bakkaa barbaachisaa';
+
+  @override
+  String get qiblaEnableLocation => 'Bakka Argamaa Bani';
+
+  @override
+  String get athanNotifDesc => 'Akeekkachiisa sagalee Azaan banaa';
+
+  @override
+  String get preAthanWarning => 'Akeekkachiisa Salaata Duraa';
+
+  @override
+  String get off => 'Cufaa';
+
+  @override
+  String get minLabel => 'd';
+
+  @override
+  String get custom => 'Hunda\'aa';
+
+  @override
+  String get timeAdjustment => 'Sirreeffama Yeroo (Harkaan)';
+
+  @override
+  String get adjustAthan => 'Azaan dura ykn booda';
+
+  @override
+  String get muezzinVoice => 'Sagalee Muezzin';
+
+  @override
+  String get customTimeMin => 'Yeroo Hunda\'aa (Daqiiqaa)';
+
+  @override
+  String get example30 => 'Fakkeenya: 30';
+
+  @override
+  String get cancel => 'Haquu';
+
+  @override
+  String get save => 'Olkaa\'uu';
+
+  @override
+  String get chooseMuezzin => 'Muezzin Filadhu';
+
+  @override
+  String get muezzinMecca => 'Makkaa - Alii Mullaa';
+
+  @override
+  String get muezzinNasser => 'Naasir Al Qataamii';
+
+  @override
+  String get muezzinZahrani => 'Mansuur Al Zahraanii';
+
+  @override
+  String get muezzinDosari => 'Yaasir Al Dosaarii';
+
+  @override
+  String get muezzinAbdulbasit => 'Abdulbaasit Abdulsamad';
+
+  @override
+  String get muezzinAlafasy => 'Mishaarii Al Afaasii';
 }

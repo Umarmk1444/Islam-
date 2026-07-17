@@ -23,12 +23,16 @@
   "madeWithLove": "Made with ♥ for the Ummah",
   "navQuran": "Quran",
   "navDawah": "Dawah",
+  "navDashboard": "Dashboard",
+  "navMinbar": "Minbar",
   "navSettings": "Settings",
   "dawahScholars": "Dawah Scholars",
   "availableItems": "{count} Available Items",
   "@availableItems": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "downloadAll": "Download All",
@@ -52,7 +56,9 @@
   "secondsShort": "{count}s",
   "@secondsShort": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "verseDuration": "Verse Length",
@@ -67,7 +73,102 @@
   "actionGoToBookmark": "Go to Bookmark",
   "actionIndex": "Index",
   "actionClose": "Close",
+  "actionSearch": "Search",
+  "actionTheme": "Theme",
   "audioReciter": "Reciter",
   "loading": "Loading...",
-  "errorFetchingData": "Error fetching data"
+  "errorFetchingData": "Error fetching data",
+  "selectAction": "Select Action",
+  "selectLanguageTafsir": "Select Tafsir Language",
+  "selectLanguageTranslation": "Select Translation Language",
+  "selectTafsirBook": "Select Tafsir Book",
+  "languageArabic": "Arabic",
+  "languageEnglish": "English",
+  "languageAmharic": "Amharic",
+  "languageOromo": "Oromo",
+  "retry": "Retry",
+  "noTafsirAvailable": "No tafsir available for this language",
+  "noTranslationAvailable": "No translation available",
+  "prayerTimes": "Prayer Times",
+  "nextPrayer": "Next Prayer",
+  "countdown": "Countdown",
+  "prayerFajr": "Fajr",
+  "prayerSunrise": "Sunrise",
+  "prayerDhuhr": "Dhuhr",
+  "prayerAsr": "Asr",
+  "prayerMaghrib": "Maghrib",
+  "prayerIsha": "Isha",
+  "calcMethod": "Calculation Method",
+  "madhab": "Madhab (Asr)",
+  "locationSync": "Sync GPS Location",
+  "notifEnabled": "Notification On",
+  "notifDisabled": "Notification Off",
+  "methodUmmAlQura": "Umm al-Qura",
+  "methodEgyptian": "Egyptian",
+  "methodMWL": "Muslim World League",
+  "methodISNA": "ISNA",
+  "methodKarachi": "Karachi",
+  "madhabHanafi": "Hanafi",
+  "madhabShafi": "Shafi / Maliki / Hanbali",
+  "gpsPermissionDenied": "Location permission denied",
+  "usingFallbackLocation": "Using fallback: Makkah",
+  "prayerSettingsTitle": "Prayer Settings",
+  "qiblaTitle": "Qibla Direction",
+  "qiblaAlignPhone": "Align your phone flat for accuracy",
+  "qiblaDistance": "Distance to Kaaba",
+  "qiblaAngle": "Qibla Angle",
+  "qiblaKm": "KM",
+  "qiblaCompassError": "Error reading compass sensor: {error}",
+  "@qiblaCompassError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "qiblaNoCompass": "Compass hardware not detected.",
+  "qiblaStaticAngle": "Static Qibla Angle: {angle}°",
+  "@qiblaStaticAngle": {
+    "placeholders": {
+      "angle": {
+        "type": "String"
+      }
+    }
+  },
+  "qiblaLocationDisabled": "Location services are disabled.",
+  "qiblaPermissionDenied": "Location permissions are denied.",
+  "qiblaPermissionPermanentlyDenied": "Location permissions are permanently denied.",
+  "qiblaFailedInit": "Failed to initialize: {error}",
+  "@qiblaFailedInit": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "qiblaNorth": "North",
+  "qiblaEast": "East",
+  "qiblaSouth": "South",
+  "qiblaWest": "West",
+  "qiblaPermissionRequired": "Location Permission Required",
+  "qiblaEnableLocation": "Enable Location",
+  "athanNotifDesc": "Enable Athan sound alert",
+  "preAthanWarning": "Pre-Prayer Warning",
+  "off": "Off",
+  "minLabel": "m",
+  "custom": "Custom",
+  "timeAdjustment": "Time Adjustment (Manual)",
+  "adjustAthan": "Advance or delay Athan",
+  "muezzinVoice": "Muezzin Voice",
+  "customTimeMin": "Custom Time (Minutes)",
+  "example30": "Example: 30",
+  "cancel": "Cancel",
+  "save": "Save",
+  "chooseMuezzin": "Choose Muezzin",
+  "muezzinMecca": "Mecca - Ali Mulla",
+  "muezzinNasser": "Nasser Al Qatami",
+  "muezzinZahrani": "Mansour Al Zahrani",
+  "muezzinDosari": "Yasser Al Dosari",
+  "muezzinAbdulbasit": "Abdulbasit Abdulsamad",
+  "muezzinAlafasy": "Mishary Alafasy"
 }

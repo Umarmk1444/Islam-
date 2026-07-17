@@ -246,6 +246,18 @@ abstract class AppLocalizations {
   /// **'Dawah'**
   String get navDawah;
 
+  /// No description provided for @navDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get navDashboard;
+
+  /// No description provided for @navMinbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Minbar'**
+  String get navMinbar;
+
   /// No description provided for @navSettings.
   ///
   /// In en, this message translates to:
@@ -450,6 +462,18 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get actionClose;
 
+  /// No description provided for @actionSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get actionSearch;
+
+  /// No description provided for @actionTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get actionTheme;
+
   /// No description provided for @audioReciter.
   ///
   /// In en, this message translates to:
@@ -467,6 +491,438 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error fetching data'**
   String get errorFetchingData;
+
+  /// No description provided for @selectAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Action'**
+  String get selectAction;
+
+  /// No description provided for @selectLanguageTafsir.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Tafsir Language'**
+  String get selectLanguageTafsir;
+
+  /// No description provided for @selectLanguageTranslation.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Translation Language'**
+  String get selectLanguageTranslation;
+
+  /// No description provided for @selectTafsirBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Tafsir Book'**
+  String get selectTafsirBook;
+
+  /// No description provided for @languageArabic.
+  ///
+  /// In en, this message translates to:
+  /// **'Arabic'**
+  String get languageArabic;
+
+  /// No description provided for @languageEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get languageEnglish;
+
+  /// No description provided for @languageAmharic.
+  ///
+  /// In en, this message translates to:
+  /// **'Amharic'**
+  String get languageAmharic;
+
+  /// No description provided for @languageOromo.
+  ///
+  /// In en, this message translates to:
+  /// **'Oromo'**
+  String get languageOromo;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @noTafsirAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No tafsir available for this language'**
+  String get noTafsirAvailable;
+
+  /// No description provided for @noTranslationAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No translation available'**
+  String get noTranslationAvailable;
+
+  /// No description provided for @prayerTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer Times'**
+  String get prayerTimes;
+
+  /// No description provided for @nextPrayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Prayer'**
+  String get nextPrayer;
+
+  /// No description provided for @countdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Countdown'**
+  String get countdown;
+
+  /// No description provided for @prayerFajr.
+  ///
+  /// In en, this message translates to:
+  /// **'Fajr'**
+  String get prayerFajr;
+
+  /// No description provided for @prayerSunrise.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunrise'**
+  String get prayerSunrise;
+
+  /// No description provided for @prayerDhuhr.
+  ///
+  /// In en, this message translates to:
+  /// **'Dhuhr'**
+  String get prayerDhuhr;
+
+  /// No description provided for @prayerAsr.
+  ///
+  /// In en, this message translates to:
+  /// **'Asr'**
+  String get prayerAsr;
+
+  /// No description provided for @prayerMaghrib.
+  ///
+  /// In en, this message translates to:
+  /// **'Maghrib'**
+  String get prayerMaghrib;
+
+  /// No description provided for @prayerIsha.
+  ///
+  /// In en, this message translates to:
+  /// **'Isha'**
+  String get prayerIsha;
+
+  /// No description provided for @calcMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculation Method'**
+  String get calcMethod;
+
+  /// No description provided for @madhab.
+  ///
+  /// In en, this message translates to:
+  /// **'Madhab (Asr)'**
+  String get madhab;
+
+  /// No description provided for @locationSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync GPS Location'**
+  String get locationSync;
+
+  /// No description provided for @notifEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification On'**
+  String get notifEnabled;
+
+  /// No description provided for @notifDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Off'**
+  String get notifDisabled;
+
+  /// No description provided for @methodUmmAlQura.
+  ///
+  /// In en, this message translates to:
+  /// **'Umm al-Qura'**
+  String get methodUmmAlQura;
+
+  /// No description provided for @methodEgyptian.
+  ///
+  /// In en, this message translates to:
+  /// **'Egyptian'**
+  String get methodEgyptian;
+
+  /// No description provided for @methodMWL.
+  ///
+  /// In en, this message translates to:
+  /// **'Muslim World League'**
+  String get methodMWL;
+
+  /// No description provided for @methodISNA.
+  ///
+  /// In en, this message translates to:
+  /// **'ISNA'**
+  String get methodISNA;
+
+  /// No description provided for @methodKarachi.
+  ///
+  /// In en, this message translates to:
+  /// **'Karachi'**
+  String get methodKarachi;
+
+  /// No description provided for @madhabHanafi.
+  ///
+  /// In en, this message translates to:
+  /// **'Hanafi'**
+  String get madhabHanafi;
+
+  /// No description provided for @madhabShafi.
+  ///
+  /// In en, this message translates to:
+  /// **'Shafi / Maliki / Hanbali'**
+  String get madhabShafi;
+
+  /// No description provided for @gpsPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission denied'**
+  String get gpsPermissionDenied;
+
+  /// No description provided for @usingFallbackLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Using fallback: Makkah'**
+  String get usingFallbackLocation;
+
+  /// No description provided for @prayerSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer Settings'**
+  String get prayerSettingsTitle;
+
+  /// No description provided for @qiblaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Qibla Direction'**
+  String get qiblaTitle;
+
+  /// No description provided for @qiblaAlignPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Align your phone flat for accuracy'**
+  String get qiblaAlignPhone;
+
+  /// No description provided for @qiblaDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance to Kaaba'**
+  String get qiblaDistance;
+
+  /// No description provided for @qiblaAngle.
+  ///
+  /// In en, this message translates to:
+  /// **'Qibla Angle'**
+  String get qiblaAngle;
+
+  /// No description provided for @qiblaKm.
+  ///
+  /// In en, this message translates to:
+  /// **'KM'**
+  String get qiblaKm;
+
+  /// No description provided for @qiblaCompassError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error reading compass sensor: {error}'**
+  String qiblaCompassError(String error);
+
+  /// No description provided for @qiblaNoCompass.
+  ///
+  /// In en, this message translates to:
+  /// **'Compass hardware not detected.'**
+  String get qiblaNoCompass;
+
+  /// No description provided for @qiblaStaticAngle.
+  ///
+  /// In en, this message translates to:
+  /// **'Static Qibla Angle: {angle}°'**
+  String qiblaStaticAngle(String angle);
+
+  /// No description provided for @qiblaLocationDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Location services are disabled.'**
+  String get qiblaLocationDisabled;
+
+  /// No description provided for @qiblaPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permissions are denied.'**
+  String get qiblaPermissionDenied;
+
+  /// No description provided for @qiblaPermissionPermanentlyDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permissions are permanently denied.'**
+  String get qiblaPermissionPermanentlyDenied;
+
+  /// No description provided for @qiblaFailedInit.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to initialize: {error}'**
+  String qiblaFailedInit(String error);
+
+  /// No description provided for @qiblaNorth.
+  ///
+  /// In en, this message translates to:
+  /// **'North'**
+  String get qiblaNorth;
+
+  /// No description provided for @qiblaEast.
+  ///
+  /// In en, this message translates to:
+  /// **'East'**
+  String get qiblaEast;
+
+  /// No description provided for @qiblaSouth.
+  ///
+  /// In en, this message translates to:
+  /// **'South'**
+  String get qiblaSouth;
+
+  /// No description provided for @qiblaWest.
+  ///
+  /// In en, this message translates to:
+  /// **'West'**
+  String get qiblaWest;
+
+  /// No description provided for @qiblaPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Permission Required'**
+  String get qiblaPermissionRequired;
+
+  /// No description provided for @qiblaEnableLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Location'**
+  String get qiblaEnableLocation;
+
+  /// No description provided for @athanNotifDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Athan sound alert'**
+  String get athanNotifDesc;
+
+  /// No description provided for @preAthanWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-Prayer Warning'**
+  String get preAthanWarning;
+
+  /// No description provided for @off.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get off;
+
+  /// No description provided for @minLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'m'**
+  String get minLabel;
+
+  /// No description provided for @custom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get custom;
+
+  /// No description provided for @timeAdjustment.
+  ///
+  /// In en, this message translates to:
+  /// **'Time Adjustment (Manual)'**
+  String get timeAdjustment;
+
+  /// No description provided for @adjustAthan.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance or delay Athan'**
+  String get adjustAthan;
+
+  /// No description provided for @muezzinVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Muezzin Voice'**
+  String get muezzinVoice;
+
+  /// No description provided for @customTimeMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Time (Minutes)'**
+  String get customTimeMin;
+
+  /// No description provided for @example30.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: 30'**
+  String get example30;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @chooseMuezzin.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Muezzin'**
+  String get chooseMuezzin;
+
+  /// No description provided for @muezzinMecca.
+  ///
+  /// In en, this message translates to:
+  /// **'Mecca - Ali Mulla'**
+  String get muezzinMecca;
+
+  /// No description provided for @muezzinNasser.
+  ///
+  /// In en, this message translates to:
+  /// **'Nasser Al Qatami'**
+  String get muezzinNasser;
+
+  /// No description provided for @muezzinZahrani.
+  ///
+  /// In en, this message translates to:
+  /// **'Mansour Al Zahrani'**
+  String get muezzinZahrani;
+
+  /// No description provided for @muezzinDosari.
+  ///
+  /// In en, this message translates to:
+  /// **'Yasser Al Dosari'**
+  String get muezzinDosari;
+
+  /// No description provided for @muezzinAbdulbasit.
+  ///
+  /// In en, this message translates to:
+  /// **'Abdulbasit Abdulsamad'**
+  String get muezzinAbdulbasit;
+
+  /// No description provided for @muezzinAlafasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Mishary Alafasy'**
+  String get muezzinAlafasy;
 }
 
 class _AppLocalizationsDelegate

@@ -23,12 +23,16 @@
   "madeWithLove": "صُنع بـ ♥ للأمة",
   "navQuran": "القرآن",
   "navDawah": "الدعوة",
+  "navDashboard": "لوحة المعلومات",
+  "navMinbar": "المنبر",
   "navSettings": "الإعدادات",
   "dawahScholars": "علماء الدعوة",
   "availableItems": "{count} عناصر متاحة",
   "@availableItems": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "downloadAll": "تحميل الكل",
@@ -52,7 +56,9 @@
   "secondsShort": "{count}ث",
   "@secondsShort": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "verseDuration": "طول الآية",
@@ -67,7 +73,102 @@
   "actionGoToBookmark": "الذهاب للعلامة",
   "actionIndex": "الفهرس",
   "actionClose": "إغلاق",
+  "actionSearch": "البحث",
+  "actionTheme": "المظهر",
   "audioReciter": "القارئ",
   "loading": "جاري التحميل...",
-  "errorFetchingData": "خطأ في جلب البيانات"
+  "errorFetchingData": "خطأ في جلب البيانات",
+  "selectAction": "اختر إجراء",
+  "selectLanguageTafsir": "اختر لغة التفسير",
+  "selectLanguageTranslation": "اختر لغة الترجمة",
+  "selectTafsirBook": "اختر كتاب التفسير",
+  "languageArabic": "العربية",
+  "languageEnglish": "الإنجليزية",
+  "languageAmharic": "الأمهرية",
+  "languageOromo": "الأورومية",
+  "retry": "إعادة المحاولة",
+  "noTafsirAvailable": "لا يتوفر تفسير لهذه اللغة",
+  "noTranslationAvailable": "الترجمة غير متوفرة",
+  "prayerTimes": "مواقيت الصلاة",
+  "nextPrayer": "الصلاة القادمة",
+  "countdown": "العد التنازلي",
+  "prayerFajr": "الفجر",
+  "prayerSunrise": "الشروق",
+  "prayerDhuhr": "الظهر",
+  "prayerAsr": "العصر",
+  "prayerMaghrib": "المغرب",
+  "prayerIsha": "العشاء",
+  "calcMethod": "طريقة الحساب",
+  "madhab": "المذهب (العصر)",
+  "locationSync": "مزامنة الموقع",
+  "notifEnabled": "الإشعار مفعّل",
+  "notifDisabled": "الإشعار معطّل",
+  "methodUmmAlQura": "أم القرى",
+  "methodEgyptian": "الهيئة المصرية",
+  "methodMWL": "رابطة العالم الإسلامي",
+  "methodISNA": "ISNA",
+  "methodKarachi": "كراتشي",
+  "madhabHanafi": "حنفي",
+  "madhabShafi": "شافعي / مالكي / حنبلي",
+  "gpsPermissionDenied": "تم رفض إذن الموقع",
+  "usingFallbackLocation": "استخدام الموقع الاحتياطي: مكة",
+  "prayerSettingsTitle": "إعدادات الصلاة",
+  "qiblaTitle": "اتجاه القبلة",
+  "qiblaAlignPhone": "ضع هاتفك بشكل مسطح للحصول على دقة أفضل",
+  "qiblaDistance": "المسافة إلى الكعبة",
+  "qiblaAngle": "زاوية القبلة",
+  "qiblaKm": "كم",
+  "qiblaCompassError": "خطأ في قراءة مستشعر البوصلة: {error}",
+  "@qiblaCompassError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "qiblaNoCompass": "لم يتم الكشف عن مستشعر البوصلة.",
+  "qiblaStaticAngle": "زاوية القبلة الثابتة: {angle}°",
+  "@qiblaStaticAngle": {
+    "placeholders": {
+      "angle": {
+        "type": "String"
+      }
+    }
+  },
+  "qiblaLocationDisabled": "خدمات الموقع معطلة.",
+  "qiblaPermissionDenied": "تم رفض إذن الموقع.",
+  "qiblaPermissionPermanentlyDenied": "تم رفض إذن الموقع بشكل دائم.",
+  "qiblaFailedInit": "فشل تهيئة الموقع: {error}",
+  "@qiblaFailedInit": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "qiblaNorth": "الشمال",
+  "qiblaEast": "الشرق",
+  "qiblaSouth": "الجنوب",
+  "qiblaWest": "الغرب",
+  "qiblaPermissionRequired": "إذن الموقع مطلوب",
+  "qiblaEnableLocation": "تمكين الموقع",
+  "athanNotifDesc": "تفعيل التنبيه بصوت الأذان",
+  "preAthanWarning": "تنبيه اقتراب الصلاة",
+  "off": "إيقاف",
+  "minLabel": "د",
+  "custom": "مخصص",
+  "timeAdjustment": "تعديل الوقت (يدوي)",
+  "adjustAthan": "تقديم أو تأخير الأذان",
+  "muezzinVoice": "صوت المؤذن",
+  "customTimeMin": "وقت مخصص (بالدقائق)",
+  "example30": "مثال: 30",
+  "cancel": "إلغاء",
+  "save": "حفظ",
+  "chooseMuezzin": "اختر المؤذن",
+  "muezzinMecca": "الحرم المكي - علي ملا",
+  "muezzinNasser": "ناصر القطامي",
+  "muezzinZahrani": "منصور الزهراني",
+  "muezzinDosari": "ياسر الدوسري",
+  "muezzinAbdulbasit": "عبدالباسط عبدالصمد",
+  "muezzinAlafasy": "مشاري العفاسي"
 }

@@ -56,7 +56,7 @@ class _IntricateIslamicPatternPainter extends CustomPainter {
     final Color navyBlue = primaryColor;
     final Color deepRed = Color.lerp(primaryColor, const Color(0xFF8B1C24), 0.5) ?? primaryColor;
     final Color gold = accentColor;
-    final Color creamBg = backgroundColor;
+//     final Color creamBg = backgroundColor;
 
     // 1. OUTER BORDER FRAME
     _paintOuterBorderFrame(canvas, w, h, navyBlue, gold);
@@ -78,7 +78,7 @@ class _IntricateIslamicPatternPainter extends CustomPainter {
     const double domeTop = 30;
     const double domeHeight = 120;
     const double domeLeft = 80;
-    const double domeRight = 80;
+//     const double domeRight = 80;
 
     // Main smooth dome arch - very circular at the top
     final Path domePath = Path()
@@ -132,7 +132,7 @@ class _IntricateIslamicPatternPainter extends CustomPainter {
     canvas.drawPath(
       innerDomePath,
       Paint()
-        ..color = gold.withOpacity(0.3)
+        ..color = gold.withValues(alpha: 0.3)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5,
     );
@@ -170,7 +170,7 @@ class _IntricateIslamicPatternPainter extends CustomPainter {
       )
       ..lineTo(8, cornerRadius)
       ..arcToPoint(
-        Offset(cornerRadius, 8),
+        const Offset(cornerRadius, 8),
         radius: const Radius.circular(cornerRadius),
         clockwise: true,
       )
@@ -202,7 +202,7 @@ class _IntricateIslamicPatternPainter extends CustomPainter {
       )
       ..lineTo(14, goldRadius + 6)
       ..arcToPoint(
-        Offset(goldRadius + 6, 14),
+        const Offset(goldRadius + 6, 14),
         radius: const Radius.circular(goldRadius),
         clockwise: true,
       )
@@ -234,7 +234,7 @@ class _IntricateIslamicPatternPainter extends CustomPainter {
       )
       ..lineTo(20, innerRadius + 12)
       ..arcToPoint(
-        Offset(innerRadius + 12, 20),
+        const Offset(innerRadius + 12, 20),
         radius: const Radius.circular(innerRadius),
         clockwise: true,
       )
@@ -251,7 +251,7 @@ class _IntricateIslamicPatternPainter extends CustomPainter {
     Color red,
     Color gold,
   ) {
-    const double borderWidth = 60;
+//     const double borderWidth = 60;
     const double patternSpacing = 15;
 
     // Fill ENTIRE border areas with geometric tessellations (full coverage)
@@ -331,8 +331,8 @@ class _IntricateIslamicPatternPainter extends CustomPainter {
     Color gold,
   ) {
     const double tileSize = 7;
-    final Paint navyPaint = Paint()..color = navy;
-    final Paint redPaint = Paint()..color = red;
+//     final Paint navyPaint = Paint()..color = navy;
+//     final Paint redPaint = Paint()..color = red;
     final Paint goldPaint = Paint()..color = gold;
 
     // Create a COMPLEX tessellating pattern with proper symmetry
@@ -352,8 +352,11 @@ class _IntricateIslamicPatternPainter extends CustomPainter {
               final double angle = (math.pi / 3) * i;
               final double px = cx + (tileSize * 0.35) * math.cos(angle);
               final double py = cy + (tileSize * 0.35) * math.sin(angle);
-              if (i == 0) hexStar.moveTo(px, py);
-              else hexStar.lineTo(px, py);
+              if (i == 0) {
+                hexStar.moveTo(px, py);
+              } else {
+                hexStar.lineTo(px, py);
+              }
             }
             hexStar.close();
             canvas.drawPath(hexStar, Paint()..color = gold..style = PaintingStyle.fill);
@@ -368,7 +371,7 @@ class _IntricateIslamicPatternPainter extends CustomPainter {
               ..lineTo(cx, dy + tileSize)
               ..lineTo(dx, cy)
               ..close();
-            canvas.drawPath(diamond, Paint()..color = red.withOpacity(0.6)..style = PaintingStyle.fill);
+            canvas.drawPath(diamond, Paint()..color = red.withValues(alpha: 0.6)..style = PaintingStyle.fill);
             canvas.drawPath(diamond, Paint()..color = gold..style = PaintingStyle.stroke..strokeWidth = 0.3);
             break;
 
@@ -387,11 +390,11 @@ class _IntricateIslamicPatternPainter extends CustomPainter {
             // Interlocking squares
             canvas.drawRect(
               Rect.fromCenter(center: Offset(cx, cy), width: tileSize * 0.4, height: tileSize * 0.4),
-              Paint()..color = gold.withOpacity(0.5)..style = PaintingStyle.fill,
+              Paint()..color = gold.withValues(alpha: 0.5)..style = PaintingStyle.fill,
             );
             canvas.drawRect(
               Rect.fromCenter(center: Offset(cx, cy), width: tileSize * 0.6, height: tileSize * 0.2),
-              Paint()..color = red.withOpacity(0.4)..style = PaintingStyle.fill,
+              Paint()..color = red.withValues(alpha: 0.4)..style = PaintingStyle.fill,
             );
             break;
 
@@ -414,11 +417,12 @@ class _IntricateIslamicPatternPainter extends CustomPainter {
     }
   }
 
+  // ignore: unused_element
   void _paintTopMihrAbArch(Canvas canvas, double w, double h, Color navy, Color gold, Color red) {
     const double archTop = 30;
     const double archHeight = 90;
     const double archLeft = 40;
-    const double archRight = 40;
+//     const double archRight = 40;
 
     // Outer arch curve
     final Path archPath = Path()
@@ -508,15 +512,15 @@ class _IntricateIslamicPatternPainter extends CustomPainter {
     const double insetY = 120;
 
     // Top-left corner curve
-    final Path cornerCurve = Path()
-      ..moveTo(insetX + 15, insetY)
-      ..quadraticBezierTo(insetX, insetY, insetX, insetY + 15);
+//     final Path cornerCurve = Path()
+//       ..moveTo(insetX + 15, insetY)
+//       ..quadraticBezierTo(insetX, insetY, insetX, insetY + 15);
 
     // Simplified inner frame outline
     canvas.drawRect(
       Rect.fromLTRB(insetX, insetY, w - insetX, h - insetY),
       Paint()
-        ..color = gold.withOpacity(0.6)
+        ..color = gold.withValues(alpha: 0.6)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.0,
     );
