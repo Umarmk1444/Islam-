@@ -285,10 +285,10 @@ void workmanagerDispatcher() {
           final bool isActive = await overlay.FlutterOverlayWindow.isActive();
           if (!isActive) {
             await overlay.FlutterOverlayWindow.showOverlay(
-              alignment: overlay.OverlayAlignment.centerRight,
+              alignment: overlay.OverlayAlignment.center,
               visibility: overlay.NotificationVisibility.visibilityPublic,
               positionGravity: overlay.PositionGravity.auto,
-              height: 150,
+              height: 480,
               width: overlay.WindowSize.matchParent,
               flag: overlay.OverlayFlag.defaultFlag,
             );

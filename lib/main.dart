@@ -8,39 +8,63 @@ import 'dashboard_scale_notifier.dart';
 import 'screens/splash_screen.dart';
 import 'services/notification_service.dart';
 import 'fallback_localizations.dart';
-import 'core/database/database_helper.dart';
 
 import 'package:just_audio_background/just_audio_background.dart';
 import 'core/services/background_engine.dart';
 import 'widgets/system_zekr_overlay.dart';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ENTRY POINT
+//
+// Performance contract:
+//   • Only lightweight SharedPrefs reads happen before runApp() — ~10 ms total.
+//   • All heavy I/O (WorkManager, audio background, notifications) is deferred
+//     to _initHeavyServices(), which runs after the first frame has been painted.
+//   • The database is opened lazily by DatabaseHelper on first use inside the
+//     SplashScreen — never blocking the UI thread here.
+// ─────────────────────────────────────────────────────────────────────────────
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await BackgroundEngine().init();
-  await AppTheme.init();
-  await AppLanguage.init();
-  await DashboardScale.init();
 
+  // ── Fast prefs reads: must happen before runApp to avoid theme/language
+  //    flash. SharedPreferences is cached after the first call, so all three
+  //    run against the same in-memory instance (~2 ms each).
+  await Future.wait([
+    AppTheme.init(),
+    AppLanguage.init(),
+    DashboardScale.init(),
+  ]);
+
+  runApp(const QuranDawahApp());
+}
+
+// ── Heavy services — called after the first frame is on screen ───────────────
+//    Registered via WidgetsBinding.addPostFrameCallback inside QuranDawahApp.
+Future<void> _initHeavyServices() async {
+  // 1. Workmanager + AndroidAlarmManager registration.
+  await BackgroundEngine().init();
+
+  // 2. Audio background service (required before any audio playback).
+  //    The Quran screen is several taps away, so this has plenty of time.
   await JustAudioBackground.init(
     androidNotificationChannelId: 'com.sadaga.quran_dawah.channel.audio',
     androidNotificationChannelName: 'Audio Playback',
     androidNotificationOngoing: true,
   );
 
-  // Only init notifications on mobile — not on web/chrome
+  // 3. Local notifications — channels + Islamic reminders scheduling.
+  //    Wrapped in try/catch: non-fatal if permissions aren't granted yet.
   try {
     await NotificationService().init();
   } catch (_) {}
-
-  // ── TEMPORARY DEBUG: dump raw DB text for Sajdah verses ───────────────
-  await _debugDumpAyah(surah: 32, ayah: 15);
-  await _debugDumpAyah(surah: 96, ayah: 19);
-  // ── END DEBUG ─────────────────────────────────────────────────────────────
-
-  runApp(const QuranDawahApp());
 }
 
-@pragma("vm:entry-point")
+// ─────────────────────────────────────────────────────────────────────────────
+// Overlay entry-point (flutter_overlay_window)
+// ─────────────────────────────────────────────────────────────────────────────
+
+@pragma('vm:entry-point')
 void overlayMain() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
@@ -56,38 +80,26 @@ void overlayMain() {
   );
 }
 
-/// Queries the raw `aya` column from the database for the given [surah]:[ayah]
-/// and prints every character with its Unicode code point. Remove when done.
-Future<void> _debugDumpAyah({required int surah, required int ayah}) async {
-  try {
-    final db = await DatabaseHelper.instance.database;
-    final rows = await db.rawQuery(
-      'SELECT aya FROM quran WHERE sura_num = ? AND aya_num = ? LIMIT 1',
-      [surah, ayah],
-    );
-    if (rows.isEmpty) {
-      debugPrint('[DB_DEBUG] No row found for $surah:$ayah');
-      return;
-    }
-    final text = rows.first['aya'] as String? ?? '';
-    debugPrint('════════════════════════════════════════════════');
-    debugPrint('[DB_DEBUG] RAW DB text for Surah $surah : Ayah $ayah');
-    debugPrint('[DB_DEBUG] Total chars: ${text.length}');
-    debugPrint('[DB_DEBUG] Full string: "$text"');
-    debugPrint('────────────────────────────────────────────────');
-    for (int i = 0; i < text.length; i++) {
-      final c = text[i];
-      final hex = c.codeUnitAt(0).toRadixString(16).toUpperCase().padLeft(4, '0');
-      debugPrint('[DB_DEBUG] [$i] char="$c"  U+$hex  (decimal=${c.codeUnitAt(0)})');
-    }
-    debugPrint('════════════════════════════════════════════════');
-  } catch (e) {
-    debugPrint('[DB_DEBUG] ERROR: $e');
-  }
+// ─────────────────────────────────────────────────────────────────────────────
+// Root application widget
+// ─────────────────────────────────────────────────────────────────────────────
+
+class QuranDawahApp extends StatefulWidget {
+  const QuranDawahApp({Key? key}) : super(key: key);
+
+  @override
+  State<QuranDawahApp> createState() => _QuranDawahAppState();
 }
 
-class QuranDawahApp extends StatelessWidget {
-  const QuranDawahApp({Key? key}) : super(key: key);
+class _QuranDawahAppState extends State<QuranDawahApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Defer all heavy I/O until the engine has rendered the first frame.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initHeavyServices();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -138,7 +150,9 @@ class QuranDawahApp extends StatelessWidget {
                 colorScheme: ColorScheme.fromSwatch().copyWith(
                   secondary: AppTheme.getPrimaryColor(theme),
                   primary: AppTheme.getPrimaryColor(theme),
-                  brightness: theme == QuranTheme.dark ? Brightness.dark : Brightness.light,
+                  brightness: theme == QuranTheme.dark
+                      ? Brightness.dark
+                      : Brightness.light,
                 ),
                 bottomNavigationBarTheme: BottomNavigationBarThemeData(
                   backgroundColor: AppTheme.getBottomBarBgColor(theme),
@@ -154,4 +168,3 @@ class QuranDawahApp extends StatelessWidget {
     );
   }
 }
-
