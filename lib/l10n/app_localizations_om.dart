@@ -433,4 +433,60 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get muezzinAlafasy => 'Mishaarii Al Afaasii';
+
+  @override
+  String get navLibrary => 'Library';
+
+  @override
+  String get libraryAll => 'All';
+
+  @override
+  String get libraryFavorites => 'Favorites';
+
+  @override
+  String get noStoriesFound => 'No stories found.';
+
+  @override
+  String readingsCount(int count) {
+    return 'Readings: $count';
+  }
+
+  @override
+  String get playbackSettings => 'Qindaa\'ina Tapha';
+
+  @override
+  String get intervalGap => 'Gidduu';
+
+  @override
+  String get playbackSpeed => 'Saffisa';
+
+  @override
+  String get noneOffLabel => 'Homaa';
+
+  @override
+  String get secLabel => 'Sek';
+
+  @override
+  String get ayahLabel => 'Aayata';
+
+  @override
+  String get sleepTimer => 'Taimarii Hirribaa';
+
+  @override
+  String get stopAudioAfter => 'Sagalee ofiin dhaabi erga:';
+
+  @override
+  String get minutesLabel => 'Daq';
+
+  @override
+  String get customMinHint => 'Daqiiqaa filatamaa...';
+
+  @override
+  String get start => 'Jalqabi';
+
+  @override
+  String get timerCanceled => 'Taimariin haqameera';
+
+  @override
+  String get cancelCurrentTimer => 'Taimarii ammaa haqi';
 }

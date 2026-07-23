@@ -334,9 +334,6 @@ class _VerseContentPageState extends State<VerseContentPage> {
   String? _error;
 
   String _verseText = '';
-  int _surahNum = 0;
-  int _ayahNum = 0;
-
   @override
   void initState() {
     super.initState();
@@ -371,9 +368,12 @@ class _VerseContentPageState extends State<VerseContentPage> {
       final ayahNum = row['aya_num'] as int;
       final text = row['aya'] as String;
 
-      _surahNum = surahNum;
-      _ayahNum = ayahNum;
-      _verseText = text;
+      String sanitizeQuranText(String t) {
+        String cleanedText = t.replaceAll(RegExp(r'([ۖۗۘۙۚۛۜ۞۩])\s+'), r'$1');
+        return cleanedText.trim();
+      }
+
+      _verseText = sanitizeQuranText(text);
 
       String resText;
       if (widget.isTafsir) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../core/database/database_helper.dart';
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_text_styles.dart';
@@ -6,12 +7,15 @@ import '../theme_notifier.dart';
 import 'quran_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
-import '../features/prayer_times/presentation/controllers/prayer_controller.dart';
 import '../features/prayer_times/presentation/screens/prayer_times_screen.dart';
+import '../features/prayer_times/presentation/controllers/prayer_controller.dart';
 import '../features/calendar/presentation/screens/hijri_calendar_screen.dart';
-import '../features/calendar/presentation/screens/date_converter_screen.dart';
 import '../features/qibla/presentation/screens/qibla_screen.dart';
 import 'azkar_screen.dart';
+import 'tasbih_screen.dart';
+import '../features/mosques/presentation/screens/nearest_mosques_screen.dart';
+import 'quiz_intro_screen.dart';
+import '../widgets/liquid_pressable.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MuslimDashboardTab — Tab 1
@@ -19,14 +23,20 @@ import 'azkar_screen.dart';
 // Layout uses Column + Expanded so everything fits on one screen — no scroll.
 // ─────────────────────────────────────────────────────────────────────────────
 
-class MuslimDashboardTab extends StatelessWidget {
+class MuslimDashboardTab extends StatefulWidget {
   const MuslimDashboardTab({super.key});
 
+  @override
+  State<MuslimDashboardTab> createState() => _MuslimDashboardTabState();
+}
+
+class _MuslimDashboardTabState extends State<MuslimDashboardTab>
+    with SingleTickerProviderStateMixin {
   static const _localizedTitle = {
-    'en': 'Muslim Hub',
-    'ar': 'مركز المسلم',
-    'am': 'የሙስሊም ማዕከል',
-    'om': 'Wiirtuu Muslimaa',
+    'en': 'Rafiquka',
+    'ar': 'رفيقك',
+    'am': 'Rafiquka',
+    'om': 'Rafiquka',
   };
 
   static const _sectionTitle = {
@@ -36,100 +46,120 @@ class MuslimDashboardTab extends StatelessWidget {
     'om': 'Meeshaalee Islaamaa',
   };
 
+  late final AnimationController _pulseCtrl;
+  late final Animation<double> _pulseAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat(reverse: true);
+    _pulseAnim = CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut);
+  }
+
+  @override
+  void dispose() {
+    _pulseCtrl.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isDark  = AppTheme.notifier.value == QuranTheme.dark;
-    final bg      = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-    final locale  = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
-    final title   = _localizedTitle[locale] ?? _localizedTitle['ar']!;
+    final isDark = AppTheme.notifier.value == QuranTheme.dark;
+    final bg = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
+    final title = _localizedTitle[locale] ?? _localizedTitle['ar']!;
     final secTitle = _sectionTitle[locale] ?? _sectionTitle['ar']!;
 
     return Scaffold(
       backgroundColor: bg,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // ── Header ───────────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 8, 6),
-              child: Row(
-                children: [
-                  const Text('🕌', style: TextStyle(fontSize: 20)),
-                  const SizedBox(width: 8),
-                  Text(
-                    title,
-                    style: AppTextStyles.headlineMedium.copyWith(
-                      color: isDark ? AppColors.textPrimary : AppColors.emeraldDeep,
-                      fontSize: 18,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: Icon(
-                      Icons.notifications_outlined,
-                      color: isDark ? AppColors.textSecondary : AppColors.emeraldDeep,
-                      size: 22,
-                    ),
-                    onPressed: () {},
-                    tooltip: 'Notification Settings',
-                  ),
-                ],
-              ),
-            ),
-
-            // ── 1. Miqat / Prayer Times Card ─────────────────────────────────
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: _MiqatCard(),
-            ),
-            const SizedBox(height: 10),
-
-            // ── 2. Quran Gateway Card ────────────────────────────────────────
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: _ResumeReadingCard(),
-            ),
-            const SizedBox(height: 10),
-
-            // ── Section Title ────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                secTitle,
-                style: AppTextStyles.headlineMedium.copyWith(fontSize: 15),
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            // ── 3. 8-Tools Grid — LayoutBuilder auto-fits; zero scroll ────
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                child: LayoutBuilder(
-                  builder: (_, constraints) {
-                    const int rows  = 4;
-                    const int cols  = 2;
-                    const double sp = 8.0;
-                    final cellH = (constraints.maxHeight - (rows - 1) * sp) / rows;
-                    final cellW = (constraints.maxWidth  - (cols - 1) * sp) / cols;
-                    final ratio = (cellW / cellH).clamp(0.8, 4.0);
-                    return GridView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: cols,
-                        mainAxisSpacing: sp,
-                        crossAxisSpacing: sp,
-                        childAspectRatio: ratio,
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ── Header ─────────────────────────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 8, 4),
+                child: Row(
+                  children: [
+                    const Text('🕌', style: TextStyle(fontSize: 18)),
+                    const SizedBox(width: 6),
+                    Text(
+                      title,
+                      style: AppTextStyles.headlineMedium.copyWith(
+                        color: isDark
+                            ? AppColors.textPrimary
+                            : AppColors.emeraldDeep,
+                        fontSize: 16,
                       ),
-                      itemCount: _tools.length,
-                      itemBuilder: (_, i) => _ToolGridCell(item: _tools[i]),
-                    );
-                  },
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: Icon(
+                        Icons.notifications_outlined,
+                        color: isDark
+                            ? AppColors.textSecondary
+                            : AppColors.emeraldDeep,
+                        size: 20,
+                      ),
+                      onPressed: () {},
+                      tooltip: 'Notification Settings',
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+
+              // ── 1. Miqat / Prayer Times Card ───────────────────────────────────
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: _MiqatCard(),
+              ),
+              const SizedBox(height: 8),
+
+              // ── 2. Quran Gateway Card ───────────────────────────────────────────
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: _ResumeReadingCard(),
+              ),
+              const SizedBox(height: 10),
+
+              // ── Section Title ───────────────────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Text(
+                  secTitle,
+                  style: AppTextStyles.headlineMedium.copyWith(fontSize: 13),
+                ),
+              ),
+              const SizedBox(height: 6),
+
+              // ── 3. Tools Grid — Fills list scroll view ─────────────────────────
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 1.18,
+                ),
+                itemCount: _tools.length,
+                itemBuilder: (context, index) {
+                  return _ToolGridCell(
+                    item: _tools[index],
+                    pulseAnim: _pulseAnim,
+                    phaseOffset: index * 0.15,
+                    entranceDelay: Duration(milliseconds: index * 80),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -150,7 +180,7 @@ class _MiqatCard extends StatelessWidget {
       'dhuhr': 'Dhuhr',
       'asr': 'Asr',
       'maghrib': 'Maghrib',
-      'isha': 'Isha',
+      'isha': 'Isha'
     },
     'ar': {
       'fajr': 'الفجر',
@@ -158,7 +188,7 @@ class _MiqatCard extends StatelessWidget {
       'dhuhr': 'الظهر',
       'asr': 'العصر',
       'maghrib': 'المغرب',
-      'isha': 'العشاء',
+      'isha': 'العشاء'
     },
     'am': {
       'fajr': 'ፈጅር',
@@ -166,7 +196,7 @@ class _MiqatCard extends StatelessWidget {
       'dhuhr': 'ዙሁር',
       'asr': 'ዓሥር',
       'maghrib': 'ማግሪብ',
-      'isha': 'ዒሻ',
+      'isha': 'ዒሻ'
     },
     'om': {
       'fajr': 'Fajrii',
@@ -174,7 +204,7 @@ class _MiqatCard extends StatelessWidget {
       'dhuhr': 'Zuhr',
       'asr': 'Asar',
       'maghrib': 'Magrib',
-      'isha': 'Ishaa',
+      'isha': 'Ishaa'
     },
   };
 
@@ -188,9 +218,8 @@ class _MiqatCard extends StatelessWidget {
       builder: (context, _) {
         final model = ctrl.model;
         if (model == null || ctrl.isLoading) {
-          // Compact skeleton or loading card
           return Container(
-            height: 90,
+            height: 140,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
@@ -211,9 +240,13 @@ class _MiqatCard extends StatelessWidget {
             ? model.hijriDate.formattedAr
             : model.hijriDate.formattedEn;
         final gregStr = DateFormat('d MMM yyyy').format(model.date);
-        final nextPrayerName = model.nextPrayer.prayer;
+        final nextPrayerEntry = model.nextPrayer;
+        final nameMap = _prayerNames[locale] ?? _prayerNames['en']!;
+        final nextPrayerName =
+            nameMap[nextPrayerEntry.prayer.name] ?? nextPrayerEntry.prayer.name;
+        final nextPrayerTime = DateFormat('HH:mm').format(nextPrayerEntry.time);
 
-        return GestureDetector(
+        return LiquidPressable(
           onTap: () {
             Navigator.push(
               context,
@@ -232,7 +265,8 @@ class _MiqatCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: model.miqatGradientColors.first.withValues(alpha: 0.45),
+                  color:
+                      model.miqatGradientColors.first.withValues(alpha: 0.45),
                   blurRadius: 14,
                   offset: const Offset(0, 6),
                 ),
@@ -244,91 +278,144 @@ class _MiqatCard extends StatelessWidget {
               children: [
                 // ── Date + Location ──────────────────────────────────────────
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                  child: Row(
-                    children: [
-                      Text(
-                        hijriStr,
-                        style: AppTextStyles.arabicSmall
-                            .copyWith(color: AppColors.goldLight, fontSize: 12),
-                      ),
-                      const SizedBox(width: 8),
-                      const Text('·',
-                          style: TextStyle(color: Colors.white38, fontSize: 12)),
-                      const SizedBox(width: 8),
-                      Text(
-                        gregStr,
-                        style: const TextStyle(color: Colors.white60, fontSize: 11),
-                      ),
-                      const Spacer(),
-                      const Icon(Icons.location_on_outlined,
-                          size: 12, color: Colors.white54),
-                      const SizedBox(width: 2),
-                      Text(
-                        model.locationLabel,
-                        style: const TextStyle(color: Colors.white54, fontSize: 10),
-                      ),
-                    ],
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Row(
+                      children: [
+                        Text(hijriStr,
+                            style: AppTextStyles.arabicSmall.copyWith(
+                                color: AppColors.goldLight, fontSize: 12)),
+                        const SizedBox(width: 8),
+                        const Text('·',
+                            style:
+                                TextStyle(color: Colors.white38, fontSize: 12)),
+                        const SizedBox(width: 8),
+                        Text(gregStr,
+                            style: const TextStyle(
+                                color: Colors.white60, fontSize: 11)),
+                        const SizedBox(width: 16),
+                        const Icon(Icons.location_on_outlined,
+                            size: 12, color: Colors.white54),
+                        const SizedBox(width: 4),
+                        Text(
+                          model.locationLabel,
+                          style: const TextStyle(
+                              color: Colors.white54, fontSize: 10),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
-                // ── Prayer Times Row ─────────────────────────────────────────
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(18),
-                      bottomRight: Radius.circular(18),
-                    ),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
+                // ── Next Prayer & Countdown ──────────────────────────────────
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: List.generate(model.entries.length, (i) {
-                      final entry = model.entries[i];
-                      final isNext = entry.prayer == nextPrayerName;
-                      final nameMap = _prayerNames[locale] ?? _prayerNames['en']!;
-                      final pName = nameMap[entry.prayer.name] ?? entry.prayer.name;
-                      final pTime = DateFormat('HH:mm').format(entry.time);
-
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            pName,
-                            style: TextStyle(
-                              color: isNext ? AppColors.goldLight : Colors.white60,
-                              fontSize: 10,
-                              fontWeight:
-                                  isNext ? FontWeight.w700 : FontWeight.w400,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            pTime,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight:
-                                  isNext ? FontWeight.w700 : FontWeight.w500,
-                              fontFeatures: const [FontFeature.tabularFigures()],
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          if (isNext)
-                            Container(
-                              width: 20,
-                              height: 2,
-                              decoration: BoxDecoration(
-                                color: AppColors.goldLight,
-                                borderRadius: BorderRadius.circular(1),
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: AlignmentDirectional.centerStart,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    locale == 'ar'
+                                        ? 'الصلاة القادمة'
+                                        : 'Next Prayer',
+                                    style: const TextStyle(
+                                        color: Colors.white60, fontSize: 12),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.baseline,
+                                    textBaseline: TextBaseline.alphabetic,
+                                    children: [
+                                      Text(
+                                        nextPrayerName,
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        nextPrayerTime,
+                                        style: const TextStyle(
+                                            color: AppColors.goldLight,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
-                            )
-                          else
-                            const SizedBox(height: 2),
-                        ],
-                      );
-                    }),
+                              const SizedBox(width: 24),
+                              ValueListenableBuilder<String>(
+                                valueListenable: ctrl.countdownNotifier,
+                                builder: (context, countdown, _) {
+                                  return Text(
+                                    '-$countdown',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      fontFeatures: [
+                                        FontFeature.tabularFigures()
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Material(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const QiblaScreen(),
+                              ),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.explore_outlined,
+                                    color: AppColors.goldLight, size: 24),
+                                const SizedBox(height: 4),
+                                Text(
+                                  locale == 'ar' ? 'القبلة' : 'Qibla',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -340,10 +427,6 @@ class _MiqatCard extends StatelessWidget {
   }
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// 2. QURAN GATEWAY CARD — Dynamic position + Compact
-// ═════════════════════════════════════════════════════════════════════════════
-
 class _ResumeReadingCard extends StatefulWidget {
   const _ResumeReadingCard();
 
@@ -351,21 +434,36 @@ class _ResumeReadingCard extends StatefulWidget {
   State<_ResumeReadingCard> createState() => _ResumeReadingCardState();
 }
 
-class _ResumeReadingCardState extends State<_ResumeReadingCard> {
-  int    _lastPage    = 1;
+class _ResumeReadingCardState extends State<_ResumeReadingCard>
+    with SingleTickerProviderStateMixin {
+  int _lastPage = 1;
   double _progressPct = 0.0016;
-  String _ayahNameAr  = 'سورة الفاتحة';
-  String _ayahNameEn  = 'Al-Fatihah 1:1';
+  String _ayahNameAr = 'سورة الفاتحة';
+  String _ayahNameEn = 'Al-Fatihah 1:1';
+
+  late final AnimationController _pulseCtrl;
+  late final Animation<double> _pulseAnim;
 
   @override
   void initState() {
     super.initState();
     _loadLastReadPosition();
+    _pulseCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat(reverse: true);
+    _pulseAnim = CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut);
+  }
+
+  @override
+  void dispose() {
+    _pulseCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _loadLastReadPosition() async {
     try {
-      final prefs    = await SharedPreferences.getInstance();
+      final prefs = await SharedPreferences.getInstance();
       final lastPage = prefs.getInt('last_quran_page') ?? 1;
 
       String foundAr = 'سورة الفاتحة';
@@ -382,7 +480,8 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard> {
         final String surahArabic = row['sura'] as String;
         final int surahNum = row['sura_num'] as int;
         final int ayahNum = row['aya_num'] as int;
-        final String translit = DatabaseHelper.surahTransliterations[surahNum - 1];
+        final String translit =
+            DatabaseHelper.surahTransliterations[surahNum - 1];
 
         foundAr = 'سورة $surahArabic';
         foundEn = '$translit $ayahNum';
@@ -390,10 +489,10 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard> {
 
       if (mounted) {
         setState(() {
-          _lastPage    = lastPage;
+          _lastPage = lastPage;
           _progressPct = lastPage / 604.0;
-          _ayahNameAr  = foundAr;
-          _ayahNameEn  = foundEn;
+          _ayahNameAr = foundAr;
+          _ayahNameEn = foundEn;
         });
       }
     } catch (_) {}
@@ -410,127 +509,272 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark   = AppTheme.notifier.value == QuranTheme.dark;
-    final locale   = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
-    final pctStr   = (_progressPct * 100).toStringAsFixed(0);
+    final isDark = AppTheme.notifier.value == QuranTheme.dark;
+    final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
+    final pctStr = (_progressPct * 100).toStringAsFixed(0);
 
-    final Color cardBg = isDark ? const Color(0xFF0F2B1D) : const Color(0xFFE8F5E9);
-    final Color border = isDark ? const Color(0xFF1E5B3C) : const Color(0xFFC8E6C9);
-    final Color accent = isDark ? const Color(0xFFA5D6A7) : const Color(0xFF2E7D32);
-    final Color textPrimary = isDark ? const Color(0xFFE0F2F1) : const Color(0xFF1B5E20);
+    // Royal emerald and gold color scheme
+    const Color emeraldDark = Color(0xFF063A20);
+    const Color emeraldDeep = Color(0xFF032212);
+    const Color emeraldLight = Color(0xFF0F6636);
+    const Color goldColor = Color(0xFFFFD54F);
+
+    final Color textPrimary = isDark ? Colors.white : const Color(0xFF0D3B23);
+    final Color textSecondary =
+        isDark ? Colors.white70 : const Color(0xFF1E5235);
+    final Color progressValColor = isDark ? goldColor : const Color(0xFF2E7D32);
 
     final String title, action, progress, ayah;
     if (locale == 'ar') {
-      title    = 'القرآن الكريم';
-      action   = 'استمر في القراءة ←';
+      title = 'القرآن الكريم';
+      action = 'استمر في القراءة ←';
       progress = 'صفحة $_lastPage · $pctStr٪';
-      ayah     = _ayahNameAr;
+      ayah = _ayahNameAr;
     } else if (locale == 'am') {
-      title    = 'ቅዱስ ቁርአን';
-      action   = 'ማንበብ ይቀጥሉ →';
+      title = 'ቅዱስ ቁርአን';
+      action = 'ማንበብ ይቀጥሉ →';
       progress = 'ገጽ $_lastPage · $pctStr%';
-      ayah     = _ayahNameEn;
+      ayah = _ayahNameEn;
     } else if (locale == 'om') {
-      title    = 'Quraana Qulqulluu';
-      action   = 'Dubbisuu Itti Fufi →';
+      title = 'Quraana Qulqulluu';
+      action = 'Dubbisuu Itti Fufi →';
       progress = 'Fuula $_lastPage · $pctStr%';
-      ayah     = _ayahNameEn;
+      ayah = _ayahNameEn;
     } else {
-      title    = 'The Holy Quran';
-      action   = 'Resume Reading →';
+      title = 'The Holy Quran';
+      action = 'Resume Reading →';
       progress = 'Page $_lastPage · $pctStr%';
-      ayah     = _ayahNameEn;
+      ayah = _ayahNameEn;
     }
 
-    return GestureDetector(
+    return LiquidPressable(
       onTap: () => _navigateToQuran(context),
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: border, width: 1.2),
-          boxShadow: [
-            BoxShadow(
-              color: isDark
-                  ? Colors.black.withValues(alpha: 0.3)
-                  : Colors.grey.shade300.withValues(alpha: 0.4),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        child: Row(
-          children: [
-            // Icon
-            Container(
-              width: 44,
-              height: 44,
+      scaleFactor: 0.96,
+      child: AnimatedBuilder(
+        animation: _pulseAnim,
+        builder: (context, child) {
+          final t = _pulseAnim.value;
+          final scale = 1.0 + 0.025 * t;
+
+          final Color currentBorder = Color.lerp(
+            isDark ? emeraldLight : const Color(0xFF81C784),
+            goldColor.withValues(alpha: 0.95),
+            t * 0.55,
+          )!;
+          final double borderWidth = 1.4 + 1.0 * t;
+
+          final glowColor = Color.lerp(
+            isDark ? emeraldLight : const Color(0xFF81C784),
+            goldColor,
+            0.65,
+          )!;
+          final double shadowAlpha =
+              isDark ? (0.20 + 0.35 * t) : (0.10 + 0.20 * t);
+          final double blurRadius = 10.0 + 20.0 * t;
+          final double spreadRadius = 0.8 + 3.0 * t;
+
+          return Transform.scale(
+            scale: scale,
+            child: Container(
+              height: 84, // Keep compact to fit screen perfectly
               decoration: BoxDecoration(
-                color: isDark
-                    ? const Color(0xFF1E4620)
-                    : const Color(0xFFC8E6C9),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(Icons.menu_book_rounded, color: accent, size: 24),
-            ),
-            const SizedBox(width: 12),
-            // Text
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(title,
-                          style: TextStyle(
-                              color: textPrimary,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold)),
-                      Text(action,
-                          style: TextStyle(
-                              color: accent,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(3),
-                    child: LinearProgressIndicator(
-                      value: _progressPct,
-                      backgroundColor: isDark
-                          ? const Color(0xFF123524)
-                          : const Color(0xFFDCEDC8),
-                      valueColor: AlwaysStoppedAnimation<Color>(accent),
-                      minHeight: 4,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(ayah,
-                          style: TextStyle(
-                              color: accent,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500)),
-                      Text(progress,
-                          style: TextStyle(
-                              color: isDark
-                                  ? Colors.white60
-                                  : Colors.grey.shade600,
-                              fontSize: 10)),
-                    ],
+                gradient: LinearGradient(
+                  colors: isDark
+                      ? [emeraldDark, emeraldDeep]
+                      : [const Color(0xFFE8F5E9), const Color(0xFFC8E6C9)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: currentBorder, width: borderWidth),
+                boxShadow: [
+                  BoxShadow(
+                    color: glowColor.withValues(alpha: shadowAlpha),
+                    blurRadius: blurRadius,
+                    spreadRadius: spreadRadius,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Stack(
+                  children: [
+                    // Gold radial glow orb (upper right) - intensified
+                    Positioned(
+                      top: -45,
+                      right: -25,
+                      child: Container(
+                        width: 150,
+                        height: 150,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              goldColor.withValues(
+                                  alpha: isDark ? 0.32 * t : 0.22 * t),
+                              goldColor.withValues(alpha: 0.0),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Emerald radial glow orb (lower left) - intensified
+                    Positioned(
+                      bottom: -35,
+                      left: -35,
+                      child: Container(
+                        width: 130,
+                        height: 130,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              emeraldLight.withValues(
+                                  alpha: isDark ? 0.38 * t : 0.26 * t),
+                              emeraldLight.withValues(alpha: 0.0),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Special golden glow orb right behind the book icon to make it emit light
+                    Positioned(
+                      left: 12,
+                      top: 10,
+                      child: Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              goldColor.withValues(
+                                  alpha: isDark ? 0.70 * t : 0.50 * t),
+                              goldColor.withValues(alpha: 0.0),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Main Content centered perfectly using Positioned.fill
+                    Positioned.fill(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 10),
+                        child: Row(
+                          children: [
+                            // Golden medal style book container
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [goldColor, Color(0xFFF57F17)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(14),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: goldColor.withValues(alpha: 0.4),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.menu_book_rounded,
+                                color: Colors.white,
+                                size: 26,
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          title,
+                                          style: TextStyle(
+                                            color: textPrimary,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          action,
+                                          style: TextStyle(
+                                            color: isDark
+                                                ? goldColor
+                                                : const Color(0xFFE65100),
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: LinearProgressIndicator(
+                                      value: _progressPct,
+                                      backgroundColor: isDark
+                                          ? Colors.white12
+                                          : const Color(0xFFC8E6C9),
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          progressValColor),
+                                      minHeight: 5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          ayah,
+                                          style: TextStyle(
+                                            color: isDark
+                                                ? goldColor
+                                                : const Color(0xFF2E7D32),
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Text(
+                                          progress,
+                                          style: TextStyle(
+                                            color: textSecondary,
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -543,94 +787,45 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard> {
 class _ToolItem {
   const _ToolItem({
     required this.key,
-    required this.icon,
+    required this.svgIconName,
     required this.color,
     required this.labels,
-    required this.sublabels,
   });
 
   final String key;
-  final IconData icon;
+  final String svgIconName;
   final Color color;
   final Map<String, String> labels;
-  final Map<String, String> sublabels;
 }
 
 const _tools = <_ToolItem>[
   // Row 1
   _ToolItem(
     key: 'moazin',
-    icon: Icons.access_time_rounded,
+    svgIconName: 'prayer_times',
     color: Color(0xFF00897B),
     labels: {
-      'en': 'Prayer Times',
+      'en': 'Moazin',
       'ar': 'مواقيت الصلاة',
-      'am': 'የሶላት ወቅት',
+      'am': 'ሙአዚን',
       'om': 'Yeroo Salaataa',
-    },
-    sublabels: {
-      'en': 'Al-Moazin',
-      'ar': 'المؤذن',
-      'am': 'አል-ሙአዚን',
-      'om': 'Al-Moazin',
     },
   ),
   _ToolItem(
     key: 'azkar',
-    icon: Icons.auto_stories_rounded,
+    svgIconName: 'quran',
     color: Color(0xFFE65100),
     labels: {
-      'en': 'Azkar Hub',
+      'en': 'Azkar',
       'ar': 'الأذكار',
       'am': 'አዝካር',
       'om': 'Azkaara',
     },
-    sublabels: {
-      'en': 'Daily Remembrance',
-      'ar': 'أذكار اليوم',
-      'am': 'የዕለት አዝካር',
-      'om': 'Dhikrii Guyyaa',
-    },
   ),
   // Row 2
   _ToolItem(
-    key: 'qibla',
-    icon: Icons.explore_rounded,
-    color: Color(0xFF1565C0),
-    labels: {
-      'en': 'Qibla',
-      'ar': 'القبلة',
-      'am': 'ቂብላ',
-      'om': 'Qiblaa',
-    },
-    sublabels: {
-      'en': 'Direction Finder',
-      'ar': 'اتجاه القبلة',
-      'am': 'ቂብላ ጠቋሚ',
-      'om': 'Kallattii Qiblaa',
-    },
-  ),
-  _ToolItem(
-    key: 'calendar',
-    icon: Icons.calendar_month_rounded,
-    color: Color(0xFF6A1B9A),
-    labels: {
-      'en': 'Hijri Calendar',
-      'ar': 'التقويم الهجري',
-      'am': 'የሂጅራ ቀን',
-      'om': 'Kalandara Hijraa',
-    },
-    sublabels: {
-      'en': 'Islamic Dates',
-      'ar': 'التاريخ الإسلامي',
-      'am': 'እስላማዊ ቀናት',
-      'om': 'Guyyoota Hijraa',
-    },
-  ),
-  // Row 3
-  _ToolItem(
     key: 'tasbih',
-    icon: Icons.touch_app_rounded,
+    svgIconName: 'tasbih',
     color: Color(0xFF558B2F),
     labels: {
       'en': 'Tasbih',
@@ -638,71 +833,58 @@ const _tools = <_ToolItem>[
       'am': 'ተስቢህ',
       'om': 'Tasbiiha',
     },
-    sublabels: {
-      'en': 'Dhikr Counter',
-      'ar': 'عداد الذكر',
-      'am': 'የዚክር ቆጣሪ',
-      'om': 'Lakkooftuu Dhikrii',
+  ),
+
+  // Row 3
+  _ToolItem(
+    key: 'quiz',
+    svgIconName: 'quiz',
+    color: Color(0xFFF9A825),
+    labels: {
+      'en': 'Quiz & Games',
+      'ar': 'مسابقات',
+      'am': 'ጥያቄና መልስ',
+      'om': 'Gaaffii fi Deebii',
     },
   ),
+
   _ToolItem(
     key: 'mosque',
-    icon: Icons.mosque_outlined,
+    svgIconName: 'nearby_mosques',
     color: Color(0xFF00838F),
     labels: {
-      'en': 'Mosques',
+      'en': 'Nearest Mosques',
       'ar': 'دليل المساجد',
-      'am': 'መስጊዶች',
-      'om': 'Masiidota',
-    },
-    sublabels: {
-      'en': 'Find Nearest',
-      'ar': 'أقرب المساجد',
       'am': 'የቅርብ መስጊዶች',
-      'om': 'Masiidota Dhiyoo',
+      'om': 'Masjiida Dhihoo',
     },
   ),
-  // Row 4
+  // Row 5
   _ToolItem(
-    key: 'converter',
-    icon: Icons.compare_arrows_rounded,
-    color: Color(0xFF4527A0),
+    key: 'calendar',
+    svgIconName: 'hijri_calendar',
+    color: Color(0xFF6A1B9A),
     labels: {
-      'en': 'Date Converter',
-      'ar': 'تحويل التاريخ',
-      'am': 'ቀን ቀያሪ',
-      'om': 'Jijiirraa Guyyaa',
-    },
-    sublabels: {
-      'en': 'Hijri ↔ Gregorian',
-      'ar': 'هجري ↔ ميلادي',
-      'am': 'ሂጅራ ↔ ሚላዲ',
-      'om': 'Hijraa ↔ Gregorian',
-    },
-  ),
-  _ToolItem(
-    key: 'ruqyah',
-    icon: Icons.health_and_safety_rounded,
-    color: Color(0xFFB71C1C),
-    labels: {
-      'en': 'Al-Ruqyah',
-      'ar': 'الرقية الشرعية',
-      'am': 'ሩቅያህ',
-      'om': 'Ruqiyaa',
-    },
-    sublabels: {
-      'en': 'Reader & Audio',
-      'ar': 'قراءة واستماع',
-      'am': 'ንባብ እና ድምፅ',
-      'om': 'Dubbisaa & Sagalee',
+      'en': 'Calendar',
+      'ar': 'التقويم الهجري',
+      'am': 'ካላንደር',
+      'om': 'Kalandara Hijraa',
     },
   ),
 ];
 
-
 class _ToolGridCell extends StatefulWidget {
-  const _ToolGridCell({required this.item});
+  const _ToolGridCell({
+    required this.item,
+    required this.pulseAnim,
+    required this.phaseOffset,
+    required this.entranceDelay,
+  });
+
   final _ToolItem item;
+  final Animation<double> pulseAnim;
+  final double phaseOffset;
+  final Duration entranceDelay;
 
   @override
   State<_ToolGridCell> createState() => _ToolGridCellState();
@@ -710,171 +892,265 @@ class _ToolGridCell extends StatefulWidget {
 
 class _ToolGridCellState extends State<_ToolGridCell>
     with SingleTickerProviderStateMixin {
-  late AnimationController _ctrl;
+  late final AnimationController _entranceCtrl;
+  late final Animation<double> _fadeAnim;
+  late final Animation<Offset> _slideAnim;
 
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(
+    _entranceCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 110),
-      lowerBound: 0.95,
-      upperBound: 1.0,
-      value: 1.0,
+      duration: const Duration(milliseconds: 500),
     );
+    _fadeAnim = CurvedAnimation(parent: _entranceCtrl, curve: Curves.easeOut);
+    _slideAnim = Tween<Offset>(begin: const Offset(0, 0.22), end: Offset.zero)
+        .animate(
+            CurvedAnimation(parent: _entranceCtrl, curve: Curves.easeOutCubic));
+
+    Future.delayed(widget.entranceDelay, () {
+      if (mounted) _entranceCtrl.forward();
+    });
   }
 
   @override
   void dispose() {
-    _ctrl.dispose();
+    _entranceCtrl.dispose();
     super.dispose();
   }
 
-  void _down(_) => _ctrl.reverse();
-  void _up(_)   => _ctrl.forward();
+  double _phased(double raw) {
+    final shifted = (raw + widget.phaseOffset) % 1.0;
+    final tri = shifted < 0.5 ? shifted * 2.0 : (1.0 - shifted) * 2.0;
+    return Curves.easeInOut.transform(tri);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isDark   = AppTheme.notifier.value == QuranTheme.dark;
-    final locale   = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
-    final label    = widget.item.labels[locale]    ?? widget.item.labels['ar']!;
-    final sublabel = widget.item.sublabels[locale] ?? widget.item.sublabels['ar']!;
+    final isDark = AppTheme.notifier.value == QuranTheme.dark;
+    final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
+    final label = widget.item.labels[locale] ?? widget.item.labels['ar']!;
 
-    // ── Theme-correct surfaces (uses AppColors, not colorScheme.surface) ─────
-    final cardBg      = isDark ? AppColors.surfaceCard      : AppColors.surfaceCardLight;
-    final titleColor  = isDark ? Colors.white               : Colors.black87;
-    final subColor    = isDark ? Colors.white54             : Colors.black45;
-    final iconBg      = widget.item.color.withValues(alpha: 0.14);
-    // Vibrant colored border — visible in both dark & light
-    final borderColor = widget.item.color.withValues(alpha: isDark ? 0.60 : 0.50);
+    final titleColor = isDark ? Colors.white : Colors.black87;
+    final accent = widget.item.color;
+    final bright = Color.lerp(accent, Colors.white, 0.30)!;
 
-    return GestureDetector(
-      onTapDown: _down,
-      onTapUp: _up,
-      onTapCancel: () => _ctrl.forward(),
-      onTap: () {
-        switch (widget.item.key) {
-          case 'moazin':
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => PrayerTimesScreen(controller: PrayerController()),
-              ),
-            );
-            break;
-          case 'qibla':
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const QiblaScreen(),
-              ),
-            );
-            break;
-          case 'calendar':
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const HijriCalendarScreen(),
-              ),
-            );
-            break;
-          case 'converter':
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const DateConverterScreen(),
-              ),
-            );
-            break;
-          case 'azkar':
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const AzkarScreen(),
-              ),
-            );
-            break;
-        }
-      },
-      child: AnimatedBuilder(
-        animation: _ctrl,
-        builder: (_, child) =>
-            Transform.scale(scale: _ctrl.value, child: child),
-        child: Container(
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: borderColor, width: 1.5),
-            boxShadow: isDark
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.25),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+    return FadeTransition(
+      opacity: _fadeAnim,
+      child: SlideTransition(
+        position: _slideAnim,
+        child: LiquidPressable(
+          scaleFactor: 0.94,
+          onTap: () {
+            switch (widget.item.key) {
+              case 'moazin':
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          PrayerTimesScreen(controller: PrayerController()),
+                    ));
+                break;
+              case 'calendar':
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const HijriCalendarScreen(),
+                    ));
+                break;
+              case 'mosque':
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const NearestMosquesScreen(),
+                    ));
+                break;
+              case 'azkar':
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AzkarScreen(),
+                    ));
+                break;
+              case 'tasbih':
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const TasbihScreen(),
+                    ));
+                break;
+              case 'quiz':
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const QuizIntroScreen(),
+                    ));
+                break;
+            }
+          },
+          child: AnimatedBuilder(
+            animation: widget.pulseAnim,
+            builder: (_, child) {
+              final t = _phased(widget.pulseAnim.value);
+
+              // Scale: 1.00 -> 1.03
+              final scale = 1.0 + 0.03 * t;
+
+              // Glow breathing
+              final glowAlpha = isDark ? (0.10 + 0.35 * t) : (0.08 + 0.28 * t);
+              final glowBlur = 8.0 + 16.0 * t;
+              final glowSpread = 0.5 + 2.0 * t;
+
+              // Border breathing
+              final borderAlpha =
+                  isDark ? (0.22 + 0.38 * t) : (0.14 + 0.32 * t);
+              final borderWidth = 1.2 + 0.6 * t;
+
+              // Interpolate dynamic accent and create a dynamic deep color matching library's depth
+              final currentAccent = Color.lerp(accent, bright, t * 0.5)!;
+              final deep = Color.lerp(accent, const Color(0xFF0C0C14), 0.72)!;
+
+              // Fill gradient matching card style
+              final fillA = isDark ? (0.16 + 0.20 * t) : (0.08 + 0.12 * t);
+              final fillB = isDark ? (0.05 + 0.10 * t) : (0.02 + 0.05 * t);
+
+              return Transform.scale(
+                scale: scale,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        currentAccent.withValues(alpha: fillA),
+                        deep.withValues(alpha: fillB),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                  ]
-                : [
-                    BoxShadow(
-                      color: widget.item.color.withValues(alpha: 0.10),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: currentAccent.withValues(alpha: borderAlpha),
+                      width: borderWidth,
                     ),
-                  ],
-          ),
-          // Column layout: icon centred on top, labels below
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // ── Coloured circular icon ───────────────────────────────────
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: iconBg,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  widget.item.icon,
-                  color: widget.item.color,
-                  size: 26,
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // ── Tool name ─────────────────────────────────────────────────
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: titleColor,
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    height: 1.2,
+                    boxShadow: [
+                      BoxShadow(
+                        color: currentAccent.withValues(alpha: glowAlpha),
+                        blurRadius: glowBlur,
+                        spreadRadius: glowSpread,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(height: 2),
-
-              // ── Subtitle ──────────────────────────────────────────────────
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  sublabel,
-                  style: TextStyle(
-                    color: subColor,
-                    fontSize: 10,
-                    height: 1.2,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Stack(
+                      children: [
+                        // Accent color internal glowing orb
+                        Positioned(
+                          top: -25,
+                          left: -25,
+                          child: Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                colors: [
+                                  currentAccent.withValues(
+                                      alpha: isDark ? 0.35 * t : 0.28 * t),
+                                  currentAccent.withValues(alpha: 0.0),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        // Deep color internal glowing orb
+                        Positioned(
+                          bottom: -20,
+                          right: -20,
+                          child: Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                colors: [
+                                  deep.withValues(
+                                      alpha: isDark ? 0.28 * t : 0.20 * t),
+                                  deep.withValues(alpha: 0.0),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        // Main cell contents (centered correctly using Positioned.fill)
+                        Positioned.fill(child: child!),
+                      ],
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AnimatedBuilder(
+                    animation: widget.pulseAnim,
+                    builder: (_, __) {
+                      final t = _phased(widget.pulseAnim.value);
+                      final bright = Color.lerp(accent, Colors.white, 0.30)!;
+                      final currentAccent =
+                          Color.lerp(accent, bright, t * 0.5)!;
+                      final deep =
+                          Color.lerp(accent, const Color(0xFF0C0C14), 0.72)!;
+                      return Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [currentAccent, deep],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: currentAccent.withValues(
+                                  alpha: 0.35 + 0.30 * t),
+                              blurRadius: 10 + 14 * t,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: SvgPicture.asset(
+                            'assets/icons/${isDark ? 'dark' : 'light'}/${widget.item.svgIconName}.svg',
+                            width: 32,
+                            height: 32,
+                            colorFilter: const ColorFilter.mode(
+                                Colors.white, BlendMode.srcIn),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: titleColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      height: 1.25,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

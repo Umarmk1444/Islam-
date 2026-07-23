@@ -430,4 +430,60 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get muezzinAlafasy => 'مشاري العفاسي';
+
+  @override
+  String get navLibrary => 'المكتبة';
+
+  @override
+  String get libraryAll => 'الكل';
+
+  @override
+  String get libraryFavorites => 'المفضلة';
+
+  @override
+  String get noStoriesFound => 'لا توجد قصص.';
+
+  @override
+  String readingsCount(int count) {
+    return 'القراءات: $count';
+  }
+
+  @override
+  String get playbackSettings => 'إعدادات التشغيل';
+
+  @override
+  String get intervalGap => 'الفاصل';
+
+  @override
+  String get playbackSpeed => 'السرعة';
+
+  @override
+  String get noneOffLabel => 'لا';
+
+  @override
+  String get secLabel => 'ث';
+
+  @override
+  String get ayahLabel => 'آية';
+
+  @override
+  String get sleepTimer => 'مؤقت النوم';
+
+  @override
+  String get stopAudioAfter => 'إيقاف الصوت تلقائياً بعد:';
+
+  @override
+  String get minutesLabel => 'دقيقة';
+
+  @override
+  String get customMinHint => 'دقيقة مخصصة...';
+
+  @override
+  String get start => 'بدء';
+
+  @override
+  String get timerCanceled => 'تم إلغاء المؤقت';
+
+  @override
+  String get cancelCurrentTimer => 'إلغاء المؤقت الحالي';
 }

@@ -431,4 +431,60 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get muezzinAlafasy => 'Mishary Alafasy';
+
+  @override
+  String get navLibrary => 'Library';
+
+  @override
+  String get libraryAll => 'All';
+
+  @override
+  String get libraryFavorites => 'Favorites';
+
+  @override
+  String get noStoriesFound => 'No stories found.';
+
+  @override
+  String readingsCount(int count) {
+    return 'Readings: $count';
+  }
+
+  @override
+  String get playbackSettings => 'Playback Settings';
+
+  @override
+  String get intervalGap => 'Interval';
+
+  @override
+  String get playbackSpeed => 'Speed';
+
+  @override
+  String get noneOffLabel => 'None';
+
+  @override
+  String get secLabel => 'Sec';
+
+  @override
+  String get ayahLabel => 'Ayah';
+
+  @override
+  String get sleepTimer => 'Sleep Timer';
+
+  @override
+  String get stopAudioAfter => 'Stop audio automatically after:';
+
+  @override
+  String get minutesLabel => 'Min';
+
+  @override
+  String get customMinHint => 'Custom minute...';
+
+  @override
+  String get start => 'Start';
+
+  @override
+  String get timerCanceled => 'Timer canceled';
+
+  @override
+  String get cancelCurrentTimer => 'Cancel current timer';
 }

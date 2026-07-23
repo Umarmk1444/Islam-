@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../controllers/quran_audio_controller.dart';
 import '../theme_notifier.dart';
+import '../l10n/app_localizations.dart';
 
 /// A premium, compact mini-player bar that sits at the bottom of the
 /// Quran screen while audio is active.
@@ -26,7 +27,7 @@ class QuranMiniPlayerBar extends StatelessWidget {
         if (!ctrl.isActive) return const SizedBox.shrink();
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.only(left: 16, right: 16, top: 3, bottom: 13),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 360),
             child: ClipRRect(
@@ -34,7 +35,7 @@ class QuranMiniPlayerBar extends StatelessWidget {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
                 child: Container(
-                  padding: const EdgeInsets.only(left: 8, right: 8, bottom: 6, top: 12),
+                  padding: const EdgeInsets.only(left: 8, right: 8, bottom: 6, top: 7),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(20),
@@ -52,12 +53,49 @@ class QuranMiniPlayerBar extends StatelessWidget {
                   ),
                   child: SafeArea(
                     top: false,
-                    child: Stack(
-                      clipBehavior: Clip.none,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
+                        SizedBox(
+                          height: 28,
+                          child: StreamBuilder<Duration?>(
+                            key: ValueKey(ctrl.streamKey),
+                            stream: ctrl.durationStream,
+                            builder: (context, durationSnapshot) {
+                              final duration = durationSnapshot.data ?? Duration.zero;
+                              return StreamBuilder<Duration>(
+                                stream: ctrl.positionStream,
+                                builder: (context, positionSnapshot) {
+                                  var position = positionSnapshot.data ?? Duration.zero;
+                                  if (position > duration) position = duration;
+                                  return SliderTheme(
+                                    data: SliderTheme.of(context).copyWith(
+                                      trackHeight: 6.0,
+                                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
+                                      overlayShape: const RoundSliderOverlayShape(overlayRadius: 24.0),
+                                      activeTrackColor: gold,
+                                      inactiveTrackColor: border.withValues(alpha: 0.3),
+                                      thumbColor: gold,
+                                      overlayColor: gold.withValues(alpha: 0.2),
+                                      trackShape: const RectangularSliderTrackShape(),
+                                    ),
+                                    child: Slider(
+                                      min: 0.0,
+                                      max: duration.inMilliseconds.toDouble() > 0 ? duration.inMilliseconds.toDouble() : 1.0,
+                                      value: position.inMilliseconds.toDouble().clamp(0.0, duration.inMilliseconds.toDouble() > 0 ? duration.inMilliseconds.toDouble() : 1.0),
+                                      onChanged: (value) {
+                                        ctrl.seek(Duration(milliseconds: value.round()));
+                                      },
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ),
                         // ── Compact Single Row Layout ─────────────────────────────────────────
                         Padding(
-                          padding: const EdgeInsets.only(left: 4, right: 4, top: 4, bottom: 2),
+                          padding: const EdgeInsets.only(left: 4, right: 4, top: 0, bottom: 2),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -110,47 +148,6 @@ class QuranMiniPlayerBar extends StatelessWidget {
                                 ],
                               ),
                             ],
-                          ),
-                        ),
-                        
-                        // ── Progress Bar across the top edge ──────────────────────────
-                        Positioned(
-                          top: -12, // pull up exactly half the track height or thumb radius
-                          left: 0,
-                          right: 0,
-                          child: StreamBuilder<Duration?>(
-                            key: ValueKey(ctrl.streamKey),
-                            stream: ctrl.durationStream,
-                            builder: (context, durationSnapshot) {
-                              final duration = durationSnapshot.data ?? Duration.zero;
-                              return StreamBuilder<Duration>(
-                                stream: ctrl.positionStream,
-                                builder: (context, positionSnapshot) {
-                                  var position = positionSnapshot.data ?? Duration.zero;
-                                  if (position > duration) position = duration;
-                                  return SliderTheme(
-                                    data: SliderTheme.of(context).copyWith(
-                                      trackHeight: 2.0,
-                                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 4.0),
-                                      overlayShape: const RoundSliderOverlayShape(overlayRadius: 8.0),
-                                      activeTrackColor: gold,
-                                      inactiveTrackColor: border.withValues(alpha: 0.3),
-                                      thumbColor: gold,
-                                      overlayColor: gold.withValues(alpha: 0.2),
-                                      trackShape: const RectangularSliderTrackShape(), // full width
-                                    ),
-                                    child: Slider(
-                                      min: 0.0,
-                                      max: duration.inMilliseconds.toDouble() > 0 ? duration.inMilliseconds.toDouble() : 1.0,
-                                      value: position.inMilliseconds.toDouble().clamp(0.0, duration.inMilliseconds.toDouble() > 0 ? duration.inMilliseconds.toDouble() : 1.0),
-                                      onChanged: (value) {
-                                        ctrl.seek(Duration(milliseconds: value.round()));
-                                      },
-                                    ),
-                                  );
-                                },
-                              );
-                            },
                           ),
                         ),
                       ],
@@ -281,12 +278,12 @@ class _ReciterSelectionHeader extends StatelessWidget {
         String searchQuery = '';
         return StatefulBuilder(
           builder: (context, setState) {
-            final filteredReciters = [...kAllReciters]
-              ..sort((a, b) => a.name.compareTo(b.name));
             final lowerQuery = searchQuery.trim().toLowerCase();
+            final filteredReciters = [...sortedReciters]
+              ..retainWhere((r) => r.searchText.contains(lowerQuery));
             final visibleReciters = lowerQuery.isEmpty
-                ? filteredReciters
-                : filteredReciters.where((r) => r.searchText.contains(lowerQuery)).toList();
+                ? sortedReciters
+                : filteredReciters;
 
             return Align(
               alignment: Alignment.bottomCenter,
@@ -508,6 +505,7 @@ class _AudioControlsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = AppTheme.notifier.value == QuranTheme.dark;
     return ListenableBuilder(
       listenable: ctrl,
@@ -551,7 +549,7 @@ class _AudioControlsSheet extends StatelessWidget {
                             children: [
                               Icon(Icons.tune_rounded, size: 15, color: gold),
                               const SizedBox(width: 6),
-                              Text('إعدادات التشغيل',
+                              Text(l10n.playbackSettings,
                                 style: TextStyle(fontFamily: 'Amiri', fontSize: 15,
                                   fontWeight: FontWeight.bold, color: gold)),
                             ],
@@ -567,7 +565,7 @@ class _AudioControlsSheet extends StatelessWidget {
                                 context: context,
                                 isDark: isDark,
                                 icon: Icons.repeat_rounded,
-                                label: 'التكرار',
+                                label: l10n.repetition,
                                 options: ctrl.repetitionOptions,
                                 selectedIndex: ctrl.repetitionIndex,
                                 formatValue: (v) => v == -1 ? '∞' : '${v}x',
@@ -578,18 +576,18 @@ class _AudioControlsSheet extends StatelessWidget {
                                 context: context,
                                 isDark: isDark,
                                 icon: Icons.timer_outlined,
-                                label: 'الفاصل',
+                                label: l10n.intervalGap,
                                 options: ctrl.delayOptions,
                                 selectedIndex: ctrl.delayIndex,
                                 formatValue: (v) {
-                                  if (v == 0) return 'لا';
-                                  if (v == -1) return 'آية';
-                                  return '$vث';
+                                  if (v == 0) return l10n.noneOffLabel;
+                                  if (v == -1) return l10n.ayahLabel;
+                                  return '$v${l10n.secLabel}';
                                 },
                                 onSelect: (v) => ctrl.setDelay(v),
                               ),
                               const SizedBox(height: 10),
-                              _buildSpeedPillRow(context, isDark),
+                              _buildSpeedPillRow(context, isDark, l10n),
                             ],
                           ),
                         ),
@@ -666,14 +664,14 @@ class _AudioControlsSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildSpeedPillRow(BuildContext context, bool isDark) {
+  Widget _buildSpeedPillRow(BuildContext context, bool isDark, AppLocalizations l10n) {
     return Row(
       children: [
         Icon(Icons.speed_rounded, size: 14, color: gold),
         const SizedBox(width: 6),
         SizedBox(
           width: 52,
-          child: Text('السرعة',
+          child: Text(l10n.playbackSpeed,
             style: TextStyle(fontFamily: 'Amiri', fontSize: 13, color: textColor.withValues(alpha: 0.8))),
         ),
         const SizedBox(width: 8),

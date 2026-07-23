@@ -24,6 +24,7 @@ import 'package:http/http.dart' as http;
 
 import '../../data/models/prayer_config.dart';
 import '../../data/models/prayer_time_model.dart';
+import '../../../../core/services/background_engine.dart';
 import '../../../../services/notification_service.dart';
 import 'package:hijri/hijri_calendar.dart';
 
@@ -48,7 +49,7 @@ class PrayerController extends ChangeNotifier {
 
   PrayerConfig config = const PrayerConfig();
   PrayerTimeModel? model;           // null while loading
-  String countdown = '--:--:--';    // live HH:MM:SS string
+  final ValueNotifier<String> countdownNotifier = ValueNotifier<String>('--:--:--');
   bool isLoading = true;
   String? errorMessage;
 
@@ -436,13 +437,13 @@ class PrayerController extends ChangeNotifier {
       // Time has passed — recompute for next prayer.
       _compute();
       _scheduleNotifications();
+      notifyListeners(); // Notify full model change
     } else {
       final h = remaining.inHours.toString().padLeft(2, '0');
       final m = (remaining.inMinutes % 60).toString().padLeft(2, '0');
       final s = (remaining.inSeconds % 60).toString().padLeft(2, '0');
-      countdown = '$h:$m:$s';
+      countdownNotifier.value = '$h:$m:$s';
     }
-    notifyListeners();
   }
 
   // ── Public mutation methods ────────────────────────────────────────────────
@@ -559,7 +560,8 @@ class PrayerController extends ChangeNotifier {
 
       final upcomingEntries = [...todayEntries, ...tomorrowEntries];
 
-      NotificationService().scheduleAdhanNotifications(upcomingEntries, config);
+      NotificationService().cancelAdhanNotifications();
+      BackgroundEngine().scheduleAllAlarms(upcomingEntries, config);
     } catch (_) {
       // Silently ignore on platforms where notifications are unavailable.
     }

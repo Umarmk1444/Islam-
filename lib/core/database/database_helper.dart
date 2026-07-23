@@ -112,6 +112,9 @@ class DatabaseHelper {
       final dbPath = await _resolveDevicePath();
       await _copyFromAssetsIfAbsent(dbPath);
       _db = await _openDatabase(dbPath);
+      
+      await insertDuaAfterSalahIfNotExists(_db!);
+
       dev.log('Database ready → $dbPath', name: _kLogName);
       return _db!;
     } catch (e, st) {
@@ -220,7 +223,7 @@ class DatabaseHelper {
   Future<Database> _openDatabase(String dbPath) async {
     return openDatabase(
       dbPath,
-      readOnly: true,       // All bundled tables are static reference data.
+      readOnly: false,      // Changed to false to allow insertions
       singleInstance: true, // sqflite caches the handle per absolute path.
     );
   }
@@ -342,15 +345,15 @@ class DatabaseHelper {
         'SELECT $tafsirColumn FROM quran WHERE sura_num = ? AND aya_num = ? LIMIT 1',
         [surahNumber, ayahNumber],
       );
-      print('[DatabaseHelper] fetchTafsir query finished. Rows: ${rows.length}');
+      debugPrint('[DatabaseHelper] fetchTafsir query finished. Rows: ${rows.length}');
       if (rows.isNotEmpty) {
         final text = rows.first[tafsirColumn] as String?;
-        print('[DatabaseHelper] Tafsir content length: ${text?.length ?? 0}');
+        debugPrint('[DatabaseHelper] Tafsir content length: ${text?.length ?? 0}');
         if (text != null && text.isNotEmpty) return text;
       }
       return 'لا يوجد تفسير لهذه الآية.';
     } catch (e, stackTrace) {
-      print('[DatabaseHelper] CRITICAL ERROR fetching tafsir ($tafsirColumn) for $surahNumber:$ayahNumber: $e\n$stackTrace');
+      debugPrint('[DatabaseHelper] CRITICAL ERROR fetching tafsir ($tafsirColumn) for $surahNumber:$ayahNumber: $e\n$stackTrace');
       return 'خطأ في تحميل التفسير.';
     }
   }
@@ -369,7 +372,7 @@ class DatabaseHelper {
       _pageCache[pageNumber] = rows;
       return rows;
     } catch (e, stackTrace) {
-      print('[DatabaseHelper] ERROR fetching verses for page $pageNumber: $e\n$stackTrace');
+      debugPrint('[DatabaseHelper] ERROR fetching verses for page $pageNumber: $e\n$stackTrace');
       return [];
     }
   }
@@ -391,7 +394,7 @@ class DatabaseHelper {
         return page;
       }
     } catch (e, stackTrace) {
-      print('[DatabaseHelper] ERROR querying page for $surahNumber:$ayahNumber: $e\n$stackTrace');
+      debugPrint('[DatabaseHelper] ERROR querying page for $surahNumber:$ayahNumber: $e\n$stackTrace');
     }
     return 1; // Fallback to first page
   }
@@ -431,4 +434,119 @@ class DatabaseHelper {
     "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر",
     "المسد", "الإخلاص", "الفلق", "الناس"
   ];
+}
+
+final List<Map<String, dynamic>> duaAfterSalahData = [
+  {
+    'id': -13,
+    'type': 'دعاء بعد الصلاة',
+    'zekr': 'أَسْتَغْفِرُ اللهَ',
+    'zekr_info': 'I ask Allah to forgive me\nAlso recommended for: Dhikr',
+    'num_zekr': 3,
+    'zekr_sound': ''
+  },
+  {
+    'id': -12,
+    'type': 'دعاء بعد الصلاة',
+    'zekr': 'اللَّهُمَّ أَنْتَ السَّلامُ ، وَمِنْكَ السَّلَامُ ، تَبَارَكْتَ يَاذَ الْجَلَالِ وَالْإِكْرَامِ',
+    'zekr_info': 'O Allah! You are peace and from You comes peace. Blessed are You, O owner of Majesty and Honour.\nSahih Muslim 1/414 | Abu Dawood 2/62 | Ibn Majah 2/1267',
+    'num_zekr': 1,
+    'zekr_sound': ''
+  },
+  {
+    'id': -11,
+    'type': 'دعاء بعد الصلاة',
+    'zekr': 'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لا شَرِيكَ لَهُ ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ ، وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ',
+    'zekr_info': 'None has the right to be worshipped except Allah, alone, without partner, to Him belongs all sovereignty and He is over all things omnipotent.\nSahih Muslim 1/415',
+    'num_zekr': 1,
+    'zekr_sound': ''
+  },
+  {
+    'id': -10,
+    'type': 'دعاء بعد الصلاة',
+    'zekr': 'سُبْحَانَ اللهِ ، وَالْحَمْدُ للهِ ، وَاللَّهُ أَكْبَرُ',
+    'zekr_info': 'Glorious is Allah. Praises are due to Allah. Allah is the greatest.\nSahih Muslim 11/418',
+    'num_zekr': 33,
+    'zekr_sound': ''
+  },
+  {
+    'id': -9,
+    'type': 'دعاء بعد الصلاة',
+    'zekr': 'لا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ ، يُحْيِي وَيُمِيْتُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ',
+    'zekr_info': 'None has the right to be worshipped except Allah, alone, without partner, to Him belongs all sovereignty and praise, He gives life and causes death and He is over all things omnipotent.\nSahih Muslim 1/418/597 | Ahmed 2/371',
+    'num_zekr': 10,
+    'zekr_sound': ''
+  },
+  {
+    'id': -8,
+    'type': 'دعاء بعد الصلاة',
+    'zekr': 'اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ',
+    'zekr_info': 'Allah - there is no deity except Him... His Kursi extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great.\nSurah Al Baqarah 2: 255 | Al-Hakim 1/562',
+    'num_zekr': 1,
+    'zekr_sound': ''
+  },
+  {
+    'id': -7,
+    'type': 'دعاء بعد الصلاة',
+    'zekr': 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\nقُلْ هُوَ اللَّهُ أَحَدٌ * اللَّهُ الصَّمَدُ * لَمْ يَلِدْ وَلَمْ يُولَدْ * وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ',
+    'zekr_info': 'In the name of Allah, the Entirely Merciful, the Especially Merciful... Say, "He is Allah, [who is] One..."\nAl-Ikhlas 112 | Abu Dawood 2/86',
+    'num_zekr': 1,
+    'zekr_sound': ''
+  },
+  {
+    'id': -6,
+    'type': 'دعاء بعد الصلاة',
+    'zekr': 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\nقُلْ أَعُوذُ بِرَبِّ الْفَلَقِ * مِن شَرِّ مَا خَلَقَ * وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ * وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ * وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ',
+    'zekr_info': 'In the name of Allah, the Entirely Merciful, the Especially Merciful... Say, "I seek refuge in the Lord of daybreak..."\nAl-Falaq 113 | Abu Dawood 2/86',
+    'num_zekr': 1,
+    'zekr_sound': ''
+  },
+  {
+    'id': -5,
+    'type': 'دعاء بعد الصلاة',
+    'zekr': 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\nقُلْ أَعُوذُ بِرَبِّ النَّاسِ * مَلِكِ النَّاسِ * إِلَٰهِ النَّاسِ * مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ * الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ * مِنَ الْجِنَّةِ وَالنَّاسِ',
+    'zekr_info': 'In the name of Allah, the Entirely Merciful, the Especially Merciful... Say, "I seek refuge in the Lord of mankind..."\nAn-Naas 114 | Abu Dawood 2/86',
+    'num_zekr': 1,
+    'zekr_sound': ''
+  },
+  {
+    'id': -4,
+    'type': 'دعاء بعد الصلاة',
+    'zekr': 'اللَّهُمَّ إِنِّي أَسْأَلُكَ رِضَاكَ وَالْجَنَّةِ، وَأَعُوْذُبِكَ مِنْ سَخَطِكَ وَالنَّارِ',
+    'zekr_info': 'O Allah! We ask You to be pleased with us, reward us with the Paradise and we seek Your refuge from Your anger and the punishment of the Fire.\nAbu Dawood | Ibn Majah 2/328',
+    'num_zekr': 1,
+    'zekr_sound': ''
+  },
+  {
+    'id': -3,
+    'type': 'دعاء بعد الصلاة',
+    'zekr': 'اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ ، وَشُكْرِكَ ، وَحُسْنِ عِبَادَتِكَ',
+    'zekr_info': 'O Allah Assist me in remembering you, in thanking you, and worshipping you in the best of manners.\nAl Bhukari 4/95 | Sahih Muslim 4/2071',
+    'num_zekr': 1,
+    'zekr_sound': ''
+  },
+  {
+    'id': -2,
+    'type': 'دعاء بعد الصلاة',
+    'zekr': 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ، وَعَلَى آلِ مُحَمَّدٍ، كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيمَ، وَعَلَى آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ، اللَّهُمَّ بَارِكْ عَلَى مُحَمَّدٍ، وَعَلَى آلِ مُحَمَّدٍ، كَمَا بَارَكْتَ عَلَى إِبْرَاهِيمَ، وَعَلَى آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ',
+    'zekr_info': 'O Allah, let Your Blessings come upon Muhammad and the family of Muhammad, as you have blessed Ibrahim and his family. Truly, You are Praiseworthy and Glorious\nAl Bhukari 1/286 | Sahih Muslim 1/301',
+    'num_zekr': 1,
+    'zekr_sound': ''
+  }
+];
+
+Future<void> insertDuaAfterSalahIfNotExists(Database db) async {
+  for (var dua in duaAfterSalahData) {
+    try {
+      await db.insert(
+        'azkar',
+        dua,
+        conflictAlgorithm: ConflictAlgorithm.ignore, 
+      );
+    } catch (e) {
+      // Ignore if table structure differs slightly, though it should match.
+      debugPrint("Error inserting dua: $e");
+    }
+  }
+  debugPrint("Dua After Salah check complete. No existing entries were modified.");
 }

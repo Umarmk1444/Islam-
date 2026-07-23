@@ -170,5 +170,30 @@
   "muezzinZahrani": "Mansour Al Zahrani",
   "muezzinDosari": "Yasser Al Dosari",
   "muezzinAbdulbasit": "Abdulbasit Abdulsamad",
-  "muezzinAlafasy": "Mishary Alafasy"
+  "muezzinAlafasy": "Mishary Alafasy",
+  "navLibrary": "Library",
+  "libraryAll": "All",
+  "libraryFavorites": "Favorites",
+  "noStoriesFound": "No stories found.",
+  "readingsCount": "Readings: {count}",
+  "@readingsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "playbackSettings": "Playback Settings",
+  "intervalGap": "Interval",
+  "playbackSpeed": "Speed",
+  "noneOffLabel": "None",
+  "secLabel": "Sec",
+  "ayahLabel": "Ayah",
+  "sleepTimer": "Sleep Timer",
+  "stopAudioAfter": "Stop audio automatically after:",
+  "minutesLabel": "Min",
+  "customMinHint": "Custom minute...",
+  "start": "Start",
+  "timerCanceled": "Timer canceled",
+  "cancelCurrentTimer": "Cancel current timer"
 }

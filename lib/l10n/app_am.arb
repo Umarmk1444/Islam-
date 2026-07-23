@@ -170,5 +170,30 @@
   "muezzinZahrani": "መንሱር አል ዘህራኒ",
   "muezzinDosari": "ያሲር አል ዶሳሪ",
   "muezzinAbdulbasit": "አብዱልባሲጥ አብዱልሰመድ",
-  "muezzinAlafasy": "ሚሻሪ አል አፋሲ"
+  "muezzinAlafasy": "ሚሻሪ አል አፋሲ",
+  "navLibrary": "Library",
+  "libraryAll": "All",
+  "libraryFavorites": "Favorites",
+  "noStoriesFound": "No stories found.",
+  "readingsCount": "Readings: {count}",
+  "@readingsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "playbackSettings": "የማጫወቻ ቅንብሮች",
+  "intervalGap": "ክፍተት",
+  "playbackSpeed": "ፍጥነት",
+  "noneOffLabel": "ምንም",
+  "secLabel": "ሰከንድ",
+  "ayahLabel": "አያህ",
+  "sleepTimer": "የእንቅልፍ ጊዜ ቆጣሪ",
+  "stopAudioAfter": "ከዚህ በኋላ ድምጽን አጥፋ:",
+  "minutesLabel": "ደቂቃ",
+  "customMinHint": "የራስዎ ደቂቃ...",
+  "start": "ጀምር",
+  "timerCanceled": "ሰዓት ቆጣሪው ተሰርዟል",
+  "cancelCurrentTimer": "አሁን ያለውን ሰዓት ቆጣሪ ሰርዝ"
 }

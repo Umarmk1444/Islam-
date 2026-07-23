@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:just_audio/just_audio.dart';
+import '../l10n/app_localizations.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:share_plus/share_plus.dart';
 import '../core/database/database_helper.dart';
@@ -135,43 +136,92 @@ String getLocalizedHisnText(String arabicText, String langCode) {
 /// Static UI string translations for the Azkar screen.
 class _AzkarL10n {
   static String dailyAzkar(String lang) {
-    const m = {'ar': 'الأذكار اليومية', 'en': 'Daily Azkar', 'am': 'የዕለት አዝካር', 'om': 'Azkaara Guyyaa'};
+    const m = {
+      'ar': 'الأذكار اليومية',
+      'en': 'Daily Azkar',
+      'am': 'የዕለት አዝካር',
+      'om': 'Azkaara Guyyaa'
+    };
     return m[lang] ?? m['ar']!;
   }
+
   static String hisnAlMuslim(String lang) {
-    const m = {'ar': 'حصن المسلم', 'en': 'Hisn Al-Muslim', 'am': 'ሒስኑል ሙስሊም', 'om': 'Hisnul Muslim'};
+    const m = {
+      'ar': 'حصن المسلم',
+      'en': 'Hisn Al-Muslim',
+      'am': 'ሒስኑል ሙስሊም',
+      'om': 'Hisnul Muslim'
+    };
     return m[lang] ?? m['ar']!;
   }
+
   static String azkar(String lang) {
     const m = {'ar': 'الأذكار', 'en': 'Azkar', 'am': 'አዝካር', 'om': 'Azkaara'};
     return m[lang] ?? m['ar']!;
   }
+
   static String reset(String lang) {
     const m = {'ar': 'إعادة', 'en': 'Reset', 'am': 'ዳግም', 'om': 'Haaromsi'};
     return m[lang] ?? m['ar']!;
   }
+
   static String searchHint(String lang) {
-    const m = {'ar': 'ابحث في حصن المسلم...', 'en': 'Search Hisn Al-Muslim...', 'am': 'ፈልግ...', 'om': 'Barbaadi...'};
+    const m = {
+      'ar': 'ابحث في حصن المسلم...',
+      'en': 'Search Hisn Al-Muslim...',
+      'am': 'ፈልግ...',
+      'om': 'Barbaadi...'
+    };
     return m[lang] ?? m['ar']!;
   }
+
   static String vocabulary(String lang) {
-    const m = {'ar': 'معاني الكلمات', 'en': 'Vocabulary', 'am': 'የቃላት ትርጉም', 'om': 'Hiika Jechootaa'};
+    const m = {
+      'ar': 'معاني الكلمات',
+      'en': 'Vocabulary',
+      'am': 'የቃላት ትርጉም',
+      'om': 'Hiika Jechootaa'
+    };
     return m[lang] ?? m['ar']!;
   }
+
   static String explanation(String lang) {
-    const m = {'ar': 'شرح الحديث', 'en': 'Explanation', 'am': 'ማብራሪያ', 'om': 'Ibsa'};
+    const m = {
+      'ar': 'شرح الحديث',
+      'en': 'Explanation',
+      'am': 'ማብራሪያ',
+      'om': 'Ibsa'
+    };
     return m[lang] ?? m['ar']!;
   }
+
   static String hadithRef(String lang) {
-    const m = {'ar': 'التخريج', 'en': 'Hadith Reference', 'am': 'ሐዲስ ማጣቀሻ', 'om': 'Hadiisa'};
+    const m = {
+      'ar': 'التخريج',
+      'en': 'Hadith Reference',
+      'am': 'ሐዲስ ማጣቀሻ',
+      'om': 'Hadiisa'
+    };
     return m[lang] ?? m['ar']!;
   }
+
   static String noResults(String lang) {
-    const m = {'ar': 'لا توجد نتائج', 'en': 'No results', 'am': 'ውጤት የለም', 'om': 'Bu\'aa hin argamne'};
+    const m = {
+      'ar': 'لا توجد نتائج',
+      'en': 'No results',
+      'am': 'ውጤት የለም',
+      'om': 'Bu\'aa hin argamne'
+    };
     return m[lang] ?? m['ar']!;
   }
+
   static String mashAllah(String lang) {
-    const m = {'ar': 'ما شاء الله', 'en': 'Masha Allah', 'am': 'ማሻአላህ', 'om': 'Maa shaa Allaah'};
+    const m = {
+      'ar': 'ما شاء الله',
+      'en': 'Masha Allah',
+      'am': 'ማሻአላህ',
+      'om': 'Maa shaa Allaah'
+    };
     return m[lang] ?? m['ar']!;
   }
 }
@@ -186,7 +236,8 @@ class _AzkarPersistence {
   static const String _countPrefix = 'zekr_count_';
 
   /// Save the current count for a specific zekr and update the category timestamp.
-  static Future<void> saveCount(int zekrId, int count, String categoryType) async {
+  static Future<void> saveCount(
+      int zekrId, int count, String categoryType) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('$_countPrefix$zekrId', count);
     await prefs.setInt(
@@ -213,7 +264,8 @@ class _AzkarPersistence {
   }
 
   /// Clear all saved counts for a category's zekrs.
-  static Future<void> clearCategory(String categoryType, List<int> zekrIds) async {
+  static Future<void> clearCategory(
+      String categoryType, List<int> zekrIds) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('$_timestampPrefix$categoryType');
     for (final id in zekrIds) {
@@ -221,7 +273,6 @@ class _AzkarPersistence {
     }
   }
 }
-
 
 final ValueNotifier<bool> _showAutoPlayNotifier = ValueNotifier(false);
 final ValueNotifier<bool> _isAutoPlayingNotifier = ValueNotifier(false);
@@ -233,42 +284,42 @@ void showGlobalFontSizeDialog(BuildContext context) {
   final txt = AppTheme.getMainTextColor(themeVal);
   final primary = AppTheme.getPrimaryColor(themeVal);
   showModalBottomSheet(
-    context: context,
-    backgroundColor: bg,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    builder: (context) {
-      return ValueListenableBuilder<double>(
-        valueListenable: _fontSizeNotifier,
-        builder: (context, fontSize, _) {
-          return Container(
-            height: 150,
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                Text('حجم الخط', style: TextStyle(fontFamily: 'Amiri', fontSize: 18, color: txt)),
-                Slider(
-                  value: fontSize,
-                  min: 16.0,
-                  max: 40.0,
-                  activeColor: primary,
-                  onChanged: (val) => _fontSizeNotifier.value = val,
+      context: context,
+      backgroundColor: bg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return ValueListenableBuilder<double>(
+            valueListenable: _fontSizeNotifier,
+            builder: (context, fontSize, _) {
+              return Container(
+                height: 150,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Text('حجم الخط',
+                        style: TextStyle(
+                            fontFamily: 'Amiri', fontSize: 18, color: txt)),
+                    Slider(
+                      value: fontSize,
+                      min: 16.0,
+                      max: 40.0,
+                      activeColor: primary,
+                      onChanged: (val) => _fontSizeNotifier.value = val,
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          );
-        }
-      );
-    }
-  );
+              );
+            });
+      });
 }
+
 VoidCallback? _onAutoPlayTap;
 
 // ═════════════════════════════════════════════════════════════════════════════
 //  SECTION 4 — MAIN AZKAR SCREEN (2-TAB ARCHITECTURE)
 // ═════════════════════════════════════════════════════════════════════════════
-
 
 class AzkarScreen extends StatefulWidget {
   const AzkarScreen({super.key});
@@ -277,9 +328,11 @@ class AzkarScreen extends StatefulWidget {
   State<AzkarScreen> createState() => _AzkarScreenState();
 }
 
-class _AzkarScreenState extends State<AzkarScreen> with SingleTickerProviderStateMixin {
+class _AzkarScreenState extends State<AzkarScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final GlobalKey<_DailyAzkarTabState> _dailyTabKey = GlobalKey<_DailyAzkarTabState>();
+  final GlobalKey<_DailyAzkarTabState> _dailyTabKey =
+      GlobalKey<_DailyAzkarTabState>();
 
   @override
   void initState() {
@@ -309,86 +362,92 @@ class _AzkarScreenState extends State<AzkarScreen> with SingleTickerProviderStat
     return ValueListenableBuilder<QuranTheme>(
       valueListenable: AppTheme.notifier,
       builder: (context, theme, _) {
-        final appBarBg   = AppTheme.getAppBarBgColor(theme);
+        final appBarBg = AppTheme.getAppBarBgColor(theme);
         final appBarText = AppTheme.getAppBarTextColor(theme);
-        final borderClr  = AppTheme.getBorderColor(theme);
-        final screenBg   = AppTheme.getScreenBgColor(theme);
-        final lang       = AppLanguage.notifier.value.languageCode;
+        final borderClr = AppTheme.getBorderColor(theme);
+        final screenBg = AppTheme.getScreenBgColor(theme);
+        final lang = AppLanguage.notifier.value.languageCode;
 
         return Scaffold(
-            backgroundColor: screenBg,
-            appBar: AppBar(
-              backgroundColor: appBarBg,
-              elevation: 0,
-              centerTitle: true,
-              leading: IconButton(
-                icon: Icon(Icons.arrow_back_ios_new_rounded, color: appBarText, size: 20),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-              title: Text(
-                _AzkarL10n.azkar(lang),
-                style: TextStyle(
-                  fontFamily: 'Amiri',
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: appBarText,
-                ),
-              ),
-              actions: [
-                IconButton(
-                  icon: Icon(Icons.format_size_rounded, color: appBarText, size: 24),
-                  onPressed: () => showGlobalFontSizeDialog(context),
-                ),
-                ValueListenableBuilder<bool>(
-                  valueListenable: _showAutoPlayNotifier,
-                  builder: (context, show, child) {
-                    if (!show || _tabController.index != 0) return const SizedBox.shrink();
-                    return ValueListenableBuilder<bool>(
-                      valueListenable: _isAutoPlayingNotifier,
-                      builder: (context, isPlaying, child) {
-                        return IconButton(
-                          icon: Icon(isPlaying ? Icons.pause_circle_rounded : Icons.playlist_play_rounded),
-                          color: isPlaying ? AppColors.emeraldLight : appBarText,
-                          iconSize: 28,
-                          onPressed: () {
-                            if (_onAutoPlayTap != null) _onAutoPlayTap!();
-                          },
-                        );
-                      },
-                    );
-                  },
-                ),
-              ],
-              bottom: TabBar(
-                controller: _tabController,
-                indicatorColor: borderClr,
-                indicatorWeight: 2.5,
-                labelColor: appBarText,
-                unselectedLabelColor: appBarText.withValues(alpha: 0.5),
-                labelStyle: const TextStyle(
-                  fontFamily: 'Amiri',
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-                unselectedLabelStyle: const TextStyle(
-                  fontFamily: 'Amiri',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                ),
-                tabs: [
-                  Tab(text: _AzkarL10n.dailyAzkar(lang)),
-                  Tab(text: _AzkarL10n.hisnAlMuslim(lang)),
-                ],
+          backgroundColor: screenBg,
+          appBar: AppBar(
+            backgroundColor: appBarBg,
+            elevation: 0,
+            centerTitle: true,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back_ios_new_rounded,
+                  color: appBarText, size: 20),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            title: Text(
+              _AzkarL10n.azkar(lang),
+              style: TextStyle(
+                fontFamily: 'Amiri',
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: appBarText,
               ),
             ),
-            body: TabBarView(
+            actions: [
+              IconButton(
+                icon: Icon(Icons.format_size_rounded,
+                    color: appBarText, size: 24),
+                onPressed: () => showGlobalFontSizeDialog(context),
+              ),
+              ValueListenableBuilder<bool>(
+                valueListenable: _showAutoPlayNotifier,
+                builder: (context, show, child) {
+                  if (!show || _tabController.index != 0) {
+                    return const SizedBox.shrink();
+                  }
+                  return ValueListenableBuilder<bool>(
+                    valueListenable: _isAutoPlayingNotifier,
+                    builder: (context, isPlaying, child) {
+                      return IconButton(
+                        icon: Icon(isPlaying
+                            ? Icons.pause_circle_rounded
+                            : Icons.playlist_play_rounded),
+                        color: isPlaying ? AppColors.emeraldLight : appBarText,
+                        iconSize: 28,
+                        onPressed: () {
+                          if (_onAutoPlayTap != null) _onAutoPlayTap!();
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
+            bottom: TabBar(
+              controller: _tabController,
+              indicatorColor: borderClr,
+              indicatorWeight: 2.5,
+              labelColor: appBarText,
+              unselectedLabelColor: appBarText.withValues(alpha: 0.5),
+              labelStyle: const TextStyle(
+                fontFamily: 'Amiri',
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                fontFamily: 'Amiri',
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+              ),
+              tabs: [
+                Tab(text: _AzkarL10n.dailyAzkar(lang)),
+                Tab(text: _AzkarL10n.hisnAlMuslim(lang)),
+              ],
+            ),
+          ),
+          body: TabBarView(
             controller: _tabController,
-              children: [
-                _DailyAzkarTab(key: _dailyTabKey),
-                _HisnAlMuslimTab(),
-              ],
-            ),
-          );
+            children: [
+              _DailyAzkarTab(key: _dailyTabKey),
+              const _HisnAlMuslimTab(),
+            ],
+          ),
+        );
       },
     );
   }
@@ -428,28 +487,34 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
     _pageController = PageController();
     _audioPlayer = AudioPlayer();
     _onAutoPlayTap = _toggleAutoPlay;
-    int? _lastIndex;
+    int? lastIndex;
     _audioPlayer.currentIndexStream.listen((index) {
-      final last = _lastIndex;
+      final last = lastIndex;
       if (index != null && last != null && index != last) {
         _audioPlayer.pause();
         if (_isAutoPlayingNotifier.value) {
           _handleAutoPlayNext();
         } else {
           if (mounted) setState(() => _playingZekrId = null);
-          
+
           // If the user pressed Next/Prev in OS explicitly while auto-play is off
           int currentPage = _pageController.page?.round() ?? 0;
           if (index > last && currentPage < _azkar.length - 1) {
-            _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-            Future.delayed(const Duration(milliseconds: 300), () => _toggleAudio(_azkar[currentPage + 1]));
+            _pageController.nextPage(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut);
+            Future.delayed(const Duration(milliseconds: 300),
+                () => _toggleAudio(_azkar[currentPage + 1]));
           } else if (index < last && currentPage > 0) {
-            _pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-            Future.delayed(const Duration(milliseconds: 300), () => _toggleAudio(_azkar[currentPage - 1]));
+            _pageController.previousPage(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut);
+            Future.delayed(const Duration(milliseconds: 300),
+                () => _toggleAudio(_azkar[currentPage - 1]));
           }
         }
       }
-      _lastIndex = index;
+      lastIndex = index;
     });
 
     _audioPlayer.playerStateStream.listen((state) {
@@ -461,7 +526,7 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
         }
       }
     });
-    
+
     _loadCategories();
   }
 
@@ -475,7 +540,11 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
   }
 
   Future<void> _handleAutoPlayNext() async {
-    if (!mounted || !_pageController.hasClients || !_isAutoPlayingNotifier.value) return;
+    if (!mounted ||
+        !_pageController.hasClients ||
+        !_isAutoPlayingNotifier.value) {
+      return;
+    }
     int currentIndex = _pageController.page?.round() ?? 0;
     if (currentIndex >= _azkar.length) return;
 
@@ -483,7 +552,8 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
 
     if (!zekr.isCompleted) {
       setState(() => zekr.currentCount--);
-      _AzkarPersistence.saveCount(zekr.id, zekr.currentCount, _categories[_selectedCategoryIndex]);
+      _AzkarPersistence.saveCount(
+          zekr.id, zekr.currentCount, _categories[_selectedCategoryIndex]);
     }
 
     if (!zekr.isCompleted) {
@@ -492,7 +562,9 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
       await _audioPlayer.play();
     } else {
       if (currentIndex < _azkar.length - 1) {
-        await _pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
+        await _pageController.nextPage(
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut);
         _playCurrentAutoZekr();
       } else {
         _isAutoPlayingNotifier.value = false;
@@ -509,7 +581,8 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
     } else {
       _isAutoPlayingNotifier.value = true;
       int currentIndex = _pageController.page?.round() ?? 0;
-      if (currentIndex < _azkar.length && _playingZekrId == _azkar[currentIndex].id) {
+      if (currentIndex < _azkar.length &&
+          _playingZekrId == _azkar[currentIndex].id) {
         await _audioPlayer.play();
       } else {
         _playCurrentAutoZekr();
@@ -518,7 +591,11 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
   }
 
   Future<void> _playCurrentAutoZekr() async {
-    if (!mounted || !_pageController.hasClients || !_isAutoPlayingNotifier.value) return;
+    if (!mounted ||
+        !_pageController.hasClients ||
+        !_isAutoPlayingNotifier.value) {
+      return;
+    }
     int currentIndex = _pageController.page?.round() ?? 0;
     if (currentIndex >= _azkar.length) {
       _isAutoPlayingNotifier.value = false;
@@ -526,16 +603,18 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
     }
 
     final zekr = _azkar[currentIndex];
-    
+
     if (zekr.isCompleted) {
-       if (currentIndex < _azkar.length - 1) {
-           await _pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
-           _playCurrentAutoZekr();
-       } else {
-           _isAutoPlayingNotifier.value = false;
-           if (mounted) setState(() => _playingZekrId = null);
-       }
-       return;
+      if (currentIndex < _azkar.length - 1) {
+        await _pageController.nextPage(
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut);
+        _playCurrentAutoZekr();
+      } else {
+        _isAutoPlayingNotifier.value = false;
+        if (mounted) setState(() => _playingZekrId = null);
+      }
+      return;
     }
 
     if (mounted) setState(() => _playingZekrId = zekr.id);
@@ -599,13 +678,17 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
   Future<void> _loadCategories() async {
     try {
       final db = await DatabaseHelper.instance.database;
+
       final rows = await db.rawQuery(
-        "SELECT DISTINCT type FROM azkar WHERE type IS NOT NULL AND type != '' ORDER BY id",
+        "SELECT MIN(id) as first_id, type FROM azkar WHERE type IS NOT NULL AND type != '' GROUP BY type ORDER BY first_id",
       );
       final cats = rows
           .map((r) => (r['type'] as String?) ?? '')
           .where((t) => t.isNotEmpty)
           .toList();
+
+      cats.remove('دعاء بعد الصلاة');
+      cats.insert(0, 'دعاء بعد الصلاة');
       if (mounted) {
         setState(() => _categories = cats);
         if (cats.isNotEmpty) {
@@ -622,18 +705,24 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
 
   Future<void> _loadAzkarForCategory(String category) async {
     setState(() => _isLoading = true);
-    final isMorningOrEvening = category == 'أذكار الصباح' || category == 'أذكار المساء';
+    final isMorningOrEvening =
+        category == 'أذكار الصباح' || category == 'أذكار المساء';
     _showAutoPlayNotifier.value = isMorningOrEvening;
-    
-    try {
-      final db = await DatabaseHelper.instance.database;
-      final rows = await db.rawQuery(
-        "SELECT id, num_zekr, type, zekr, zekr_info, zekr_sound "
-        "FROM azkar WHERE type = ? ORDER BY id",
-        [category],
-      );
 
-      final azkarList = rows.map((r) => ZekrModel.fromMap(r)).toList();
+    try {
+      List<ZekrModel> azkarList = [];
+
+      if (category == 'دعاء بعد الصلاة') {
+        azkarList = duaAfterSalahData.map((e) => ZekrModel.fromMap(e)).toList();
+      } else {
+        final db = await DatabaseHelper.instance.database;
+        final rows = await db.rawQuery(
+          "SELECT id, num_zekr, type, zekr, zekr_info, zekr_sound "
+          "FROM azkar WHERE type = ? ORDER BY id",
+          [category],
+        );
+        azkarList = rows.map((r) => ZekrModel.fromMap(r)).toList();
+      }
 
       final isFresh = await _AzkarPersistence.isCategoryFresh(category);
       if (isFresh) {
@@ -659,14 +748,14 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
 
   void _onCategorySelected(int index) {
     if (index == _selectedCategoryIndex) return;
-    
+
     // Stop autoplay when changing categories
     if (_isAutoPlayingNotifier.value) {
       _isAutoPlayingNotifier.value = false;
       _audioPlayer.stop();
       _playingZekrId = null;
     }
-    
+
     setState(() => _selectedCategoryIndex = index);
     if (_pageController.hasClients) {
       _pageController.jumpToPage(0);
@@ -689,7 +778,9 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
     if (zekr.isCompleted) {
       HapticFeedback.heavyImpact();
       Future.delayed(const Duration(milliseconds: 400), () {
-        if (mounted && _pageController.hasClients && index < _azkar.length - 1) {
+        if (mounted &&
+            _pageController.hasClients &&
+            index < _azkar.length - 1) {
           // If auto playing, don't interrupt with manual page jump
           if (!_isAutoPlayingNotifier.value) {
             _pageController.nextPage(
@@ -722,9 +813,9 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
     if (zekr.zekrSound.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
+          content: const Text(
             'هذا الذكر لا يحتوي على ملف صوتي',
-            style: const TextStyle(fontFamily: 'Amiri', fontSize: 16),
+            style: TextStyle(fontFamily: 'Amiri', fontSize: 16),
             textAlign: TextAlign.center,
           ),
           backgroundColor: AppTheme.getPrimaryColor(AppTheme.notifier.value),
@@ -745,7 +836,11 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
         if (mounted) setState(() => _playingZekrId = zekr.id);
 
         String rawSound = zekr.zekrSound;
-        String soundName = rawSound.replaceAll(RegExp(r'\s+'), '').replaceAll('assets/audio/', '').replaceAll('assets/', '').replaceAll('/', '');
+        String soundName = rawSound
+            .replaceAll(RegExp(r'\s+'), '')
+            .replaceAll('assets/audio/', '')
+            .replaceAll('assets/', '')
+            .replaceAll('/', '');
         if (!soundName.endsWith('.mp3')) soundName = '$soundName.mp3';
 
         List<AudioSource> playlist = [];
@@ -753,13 +848,20 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
 
         // 1. Dummy/Prev
         if (zekrIndex > 0) {
-          String prevSound = _azkar[zekrIndex - 1].zekrSound.replaceAll(RegExp(r'\s+'), '').replaceAll('assets/audio/', '').replaceAll('assets/', '').replaceAll('/', '');
+          String prevSound = _azkar[zekrIndex - 1]
+              .zekrSound
+              .replaceAll(RegExp(r'\s+'), '')
+              .replaceAll('assets/audio/', '')
+              .replaceAll('assets/', '')
+              .replaceAll('/', '');
           if (!prevSound.endsWith('.mp3')) prevSound = '$prevSound.mp3';
           playlist.add(AudioSource.uri(
             Uri.parse('asset:///assets/audio/$prevSound'),
             tag: MediaItem(
               id: _azkar[zekrIndex - 1].id.toString(),
-              title: _azkar[zekrIndex - 1].type.isNotEmpty ? _azkar[zekrIndex - 1].type : 'أذكار',
+              title: _azkar[zekrIndex - 1].type.isNotEmpty
+                  ? _azkar[zekrIndex - 1].type
+                  : 'أذكار',
               album: 'حصن المسلم',
             ),
           ));
@@ -777,13 +879,20 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
 
         // 3. Next/Dummy
         if (zekrIndex < _azkar.length - 1) {
-          String nextSound = _azkar[zekrIndex + 1].zekrSound.replaceAll(RegExp(r'\s+'), '').replaceAll('assets/audio/', '').replaceAll('assets/', '').replaceAll('/', '');
+          String nextSound = _azkar[zekrIndex + 1]
+              .zekrSound
+              .replaceAll(RegExp(r'\s+'), '')
+              .replaceAll('assets/audio/', '')
+              .replaceAll('assets/', '')
+              .replaceAll('/', '');
           if (!nextSound.endsWith('.mp3')) nextSound = '$nextSound.mp3';
           playlist.add(AudioSource.uri(
             Uri.parse('asset:///assets/audio/$nextSound'),
             tag: MediaItem(
               id: _azkar[zekrIndex + 1].id.toString(),
-              title: _azkar[zekrIndex + 1].type.isNotEmpty ? _azkar[zekrIndex + 1].type : 'أذكار',
+              title: _azkar[zekrIndex + 1].type.isNotEmpty
+                  ? _azkar[zekrIndex + 1].type
+                  : 'أذكار',
               album: 'حصن المسلم',
             ),
           ));
@@ -817,7 +926,7 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
   }
 
   void showSleepTimerDialog() {
-    final _customTimeCtrl = TextEditingController();
+    final customTimeCtrl = TextEditingController();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -827,6 +936,7 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
         final txtColor = AppTheme.getMainTextColor(themeVal);
         final bg = AppTheme.getCardBgColor(themeVal);
         final primary = AppTheme.getPrimaryColor(themeVal);
+        final l10n = AppLocalizations.of(context)!;
 
         void startTimer(int mins) {
           Navigator.pop(context);
@@ -837,7 +947,9 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
           });
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('سيتوقف الصوت بعد $mins دقيقة', style: const TextStyle(fontFamily: 'Amiri', fontSize: 16), textAlign: TextAlign.center),
+              content: Text('${l10n.stopAudioAfter} $mins ${l10n.minutesLabel}',
+                  style: const TextStyle(fontFamily: 'Amiri', fontSize: 16),
+                  textAlign: TextAlign.center),
               backgroundColor: primary,
               behavior: SnackBarBehavior.floating,
               duration: const Duration(seconds: 2),
@@ -846,7 +958,8 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
         }
 
         return Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: Container(
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(24),
@@ -854,49 +967,70 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
               color: bg,
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
-                BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 20, offset: const Offset(0, 10)),
+                BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10)),
               ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.nights_stay_rounded, size: 42, color: primary.withValues(alpha: 0.8)),
+                Icon(Icons.nights_stay_rounded,
+                    size: 42, color: primary.withValues(alpha: 0.8)),
                 const SizedBox(height: 12),
-                Text('مؤقت النوم', style: TextStyle(fontFamily: 'Amiri', fontSize: 24, fontWeight: FontWeight.bold, color: txtColor)),
+                Text(l10n.sleepTimer,
+                    style: TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: txtColor)),
                 const SizedBox(height: 4),
-                Text('إيقاف الصوت تلقائياً بعد:', style: TextStyle(fontFamily: 'Amiri', fontSize: 16, color: txtColor.withValues(alpha: 0.6))),
+                Text(l10n.stopAudioAfter,
+                    style: TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: 16,
+                        color: txtColor.withValues(alpha: 0.6))),
                 const SizedBox(height: 24),
-                
                 Wrap(
                   spacing: 12,
                   runSpacing: 12,
                   alignment: WrapAlignment.center,
-                  children: [15, 30, 45, 60].map((mins) => Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => startTimer(mins),
-                      borderRadius: BorderRadius.circular(16),
-                      child: Ink(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: primary.withValues(alpha: 0.1),
-                          border: Border.all(color: primary.withValues(alpha: 0.3), width: 1.5),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Text(
-                          '$mins\nدقيقة',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.bold, color: primary, height: 1.2),
-                        ),
-                      ),
-                    ),
-                  )).toList(),
+                  children: [15, 30, 45, 60]
+                      .map((mins) => Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () => startTimer(mins),
+                              borderRadius: BorderRadius.circular(16),
+                              child: Ink(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: primary.withValues(alpha: 0.1),
+                                  border: Border.all(
+                                      color: primary.withValues(alpha: 0.3),
+                                      width: 1.5),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Text(
+                                  '$mins\n${l10n.minutesLabel}',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: primary,
+                                      height: 1.2),
+                                ),
+                              ),
+                            ),
+                          ))
+                      .toList(),
                 ),
-                
                 const SizedBox(height: 24),
-                
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   decoration: BoxDecoration(
                     color: txtColor.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(16),
@@ -907,29 +1041,44 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
                     children: [
                       Expanded(
                         child: TextField(
-                          controller: _customTimeCtrl,
+                          controller: customTimeCtrl,
                           keyboardType: TextInputType.number,
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: txtColor, fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              color: txtColor,
+                              fontFamily: 'Inter',
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold),
                           decoration: InputDecoration(
-                            hintText: 'دقيقة مخصصة...',
-                            hintStyle: TextStyle(color: txtColor.withValues(alpha: 0.4), fontFamily: 'Amiri', fontSize: 16, fontWeight: FontWeight.normal),
+                            hintText: l10n.customMinHint,
+                            hintStyle: TextStyle(
+                                color: txtColor.withValues(alpha: 0.4),
+                                fontFamily: 'Amiri',
+                                fontSize: 16,
+                                fontWeight: FontWeight.normal),
                             border: InputBorder.none,
                           ),
                         ),
                       ),
-                      Container(width: 1, height: 24, color: txtColor.withValues(alpha: 0.2)),
+                      Container(
+                          width: 1,
+                          height: 24,
+                          color: txtColor.withValues(alpha: 0.2)),
                       TextButton(
                         onPressed: () {
-                          final mins = int.tryParse(_customTimeCtrl.text);
+                          final mins = int.tryParse(customTimeCtrl.text);
                           if (mins != null && mins > 0) startTimer(mins);
                         },
-                        child: Text('بدء', style: TextStyle(fontFamily: 'Amiri', fontSize: 18, fontWeight: FontWeight.bold, color: primary)),
+                        child: Text(l10n.start,
+                            style: TextStyle(
+                                fontFamily: 'Amiri',
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: primary)),
                       )
                     ],
                   ),
                 ),
-                
                 if (_sleepTimer != null && _sleepTimer!.isActive) ...[
                   const SizedBox(height: 24),
                   TextButton.icon(
@@ -938,18 +1087,28 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: const Text('تم إلغاء المؤقت', style: TextStyle(fontFamily: 'Amiri', fontSize: 16), textAlign: TextAlign.center),
+                          content: Text(l10n.timerCanceled,
+                              style: const TextStyle(
+                                  fontFamily: 'Amiri', fontSize: 16),
+                              textAlign: TextAlign.center),
                           backgroundColor: txtColor.withValues(alpha: 0.8),
                           behavior: SnackBarBehavior.floating,
                           duration: const Duration(seconds: 2),
                         ),
                       );
                     },
-                    icon: const Icon(Icons.timer_off_outlined, color: Colors.redAccent),
-                    label: const Text('إلغاء المؤقت الحالي', style: TextStyle(fontFamily: 'Amiri', fontSize: 16, color: Colors.redAccent)),
+                    icon: const Icon(Icons.timer_off_outlined,
+                        color: Colors.redAccent),
+                    label: Text(l10n.cancelCurrentTimer,
+                        style: const TextStyle(
+                            fontFamily: 'Amiri',
+                            fontSize: 16,
+                            color: Colors.redAccent)),
                     style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                       backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
                     ),
                   )
@@ -981,7 +1140,12 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
           child: Column(
             children: [
-              Text('فهرس الأذكار', style: TextStyle(fontFamily: 'Amiri', fontSize: 18, fontWeight: FontWeight.bold, color: txt)),
+              Text('فهرس الأذكار',
+                  style: TextStyle(
+                      fontFamily: 'Amiri',
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: txt)),
               const SizedBox(height: 16),
               Expanded(
                 child: GridView.builder(
@@ -1001,10 +1165,14 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: isCompleted ? AppColors.emeraldLight.withValues(alpha: 0.1) : border.withValues(alpha: 0.05),
+                          color: isCompleted
+                              ? AppColors.emeraldLight.withValues(alpha: 0.1)
+                              : border.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isCompleted ? AppColors.emeraldLight : border.withValues(alpha: 0.2),
+                            color: isCompleted
+                                ? AppColors.emeraldLight
+                                : border.withValues(alpha: 0.2),
                           ),
                         ),
                         child: Center(
@@ -1030,7 +1198,8 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
     );
   }
 
-  Widget _buildMiniPlayer(Color borderClr, Color cardBg, Color mainText, Color primaryClr, bool isDark) {
+  Widget _buildMiniPlayer(Color borderClr, Color cardBg, Color mainText,
+      Color primaryClr, bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ConstrainedBox(
@@ -1040,14 +1209,13 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
             child: Container(
-              padding: const EdgeInsets.only(left: 8, right: 8, bottom: 6, top: 12),
+              padding:
+                  const EdgeInsets.only(left: 8, right: 8, bottom: 6, top: 12),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: borderClr.withValues(alpha: 0.5), 
-                  width: 1.2
-                ),
+                    color: borderClr.withValues(alpha: 0.5), width: 1.2),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
@@ -1075,10 +1243,13 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
                         return SliderTheme(
                           data: SliderThemeData(
                             trackHeight: 3,
-                            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
-                            overlayShape: const RoundSliderOverlayShape(overlayRadius: 10),
+                            thumbShape: const RoundSliderThumbShape(
+                                enabledThumbRadius: 5),
+                            overlayShape: const RoundSliderOverlayShape(
+                                overlayRadius: 10),
                             activeTrackColor: primaryClr,
-                            inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
+                            inactiveTrackColor:
+                                Colors.white.withValues(alpha: 0.2),
                             thumbColor: primaryClr,
                           ),
                           child: SizedBox(
@@ -1088,7 +1259,8 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
                               min: 0,
                               max: max,
                               onChanged: (newVal) {
-                                _audioPlayer.seek(Duration(milliseconds: newVal.toInt()));
+                                _audioPlayer.seek(
+                                    Duration(milliseconds: newVal.toInt()));
                               },
                             ),
                           ),
@@ -1109,14 +1281,19 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
                           },
                         ),
                         _buildPlayerIconBtn(
-                          icon: Icons.skip_next_rounded, // Wait, next is skip_next in RTL
+                          icon: Icons
+                              .skip_next_rounded, // Wait, next is skip_next in RTL
                           color: Colors.white,
                           onTap: () {
                             if (_pageController.hasClients) {
-                              _pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-                              Future.delayed(const Duration(milliseconds: 300), () {
+                              _pageController.previousPage(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut);
+                              Future.delayed(const Duration(milliseconds: 300),
+                                  () {
                                 if (mounted) {
-                                  int index = _pageController.page?.round() ?? 0;
+                                  int index =
+                                      _pageController.page?.round() ?? 0;
                                   _toggleAudio(_azkar[index]);
                                 }
                               });
@@ -1150,7 +1327,9 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
                                   ],
                                 ),
                                 child: Icon(
-                                  playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                                  playing
+                                      ? Icons.pause_rounded
+                                      : Icons.play_arrow_rounded,
                                   color: Colors.white,
                                   size: 28,
                                 ),
@@ -1163,10 +1342,14 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
                           color: Colors.white,
                           onTap: () {
                             if (_pageController.hasClients) {
-                              _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-                              Future.delayed(const Duration(milliseconds: 300), () {
+                              _pageController.nextPage(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut);
+                              Future.delayed(const Duration(milliseconds: 300),
+                                  () {
                                 if (mounted) {
-                                  int index = _pageController.page?.round() ?? 0;
+                                  int index =
+                                      _pageController.page?.round() ?? 0;
                                   _toggleAudio(_azkar[index]);
                                 }
                               });
@@ -1190,7 +1373,10 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
     );
   }
 
-  Widget _buildPlayerIconBtn({required IconData icon, required Color color, required VoidCallback onTap}) {
+  Widget _buildPlayerIconBtn(
+      {required IconData icon,
+      required Color color,
+      required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -1207,14 +1393,14 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
     return ValueListenableBuilder<QuranTheme>(
       valueListenable: AppTheme.notifier,
       builder: (context, theme, _) {
-        final pageBg    = AppTheme.getPageBgColor(theme);
+        final pageBg = AppTheme.getPageBgColor(theme);
         final borderClr = AppTheme.getBorderColor(theme);
-        final goldText  = AppTheme.getGoldTextColor(theme);
-        final mainText  = AppTheme.getMainTextColor(theme);
-        final cardBg    = AppTheme.getCardBgColor(theme);
+        final goldText = AppTheme.getGoldTextColor(theme);
+        final mainText = AppTheme.getMainTextColor(theme);
+        final cardBg = AppTheme.getCardBgColor(theme);
         final primaryClr = AppTheme.getPrimaryColor(theme);
-        final isDark    = theme == QuranTheme.dark;
-        final lang      = AppLanguage.notifier.value.languageCode;
+        final isDark = theme == QuranTheme.dark;
+        final lang = AppLanguage.notifier.value.languageCode;
 
         return Stack(
           children: [
@@ -1279,7 +1465,9 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
                               itemCount: _azkar.length,
                               itemBuilder: (context, index) {
                                 final zekr = _azkar[index];
-                                final category = _categories.isNotEmpty ? _categories[_selectedCategoryIndex] : '';
+                                final category = _categories.isNotEmpty
+                                    ? _categories[_selectedCategoryIndex]
+                                    : '';
                                 return _ZekrCard(
                                   zekr: zekr,
                                   index: index,
@@ -1309,16 +1497,20 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
                 child: Container(
                   decoration: BoxDecoration(
                     color: cardBg,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(24)),
                     boxShadow: [
                       BoxShadow(
-                        color: isDark ? Colors.black.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.1),
+                        color: isDark
+                            ? Colors.black.withValues(alpha: 0.6)
+                            : Colors.black.withValues(alpha: 0.1),
                         blurRadius: 16,
                         offset: const Offset(0, -4),
                       )
                     ],
                   ),
-                  child: _buildMiniPlayer(borderClr, cardBg, mainText, primaryClr, isDark),
+                  child: _buildMiniPlayer(
+                      borderClr, cardBg, mainText, primaryClr, isDark),
                 ),
               ),
           ],
@@ -1397,9 +1589,8 @@ class _HisnAlMuslimTabState extends State<_HisnAlMuslimTab>
       setState(() => _filteredTitles = _allTitles);
     } else {
       setState(() {
-        _filteredTitles = _allTitles
-            .where((t) => (t['title'] ?? '').contains(q))
-            .toList();
+        _filteredTitles =
+            _allTitles.where((t) => (t['title'] ?? '').contains(q)).toList();
       });
     }
   }
@@ -1419,11 +1610,11 @@ class _HisnAlMuslimTabState extends State<_HisnAlMuslimTab>
       valueListenable: AppTheme.notifier,
       builder: (context, theme, _) {
         final borderClr = AppTheme.getBorderColor(theme);
-        final goldText  = AppTheme.getGoldTextColor(theme);
-        final mainText  = AppTheme.getMainTextColor(theme);
-        final cardBg    = AppTheme.getCardBgColor(theme);
-        final isDark    = theme == QuranTheme.dark;
-        final lang      = AppLanguage.notifier.value.languageCode;
+        final goldText = AppTheme.getGoldTextColor(theme);
+        final mainText = AppTheme.getMainTextColor(theme);
+        final cardBg = AppTheme.getCardBgColor(theme);
+        final isDark = theme == QuranTheme.dark;
+        final lang = AppLanguage.notifier.value.languageCode;
 
         return Column(
           children: [
@@ -1445,10 +1636,12 @@ class _HisnAlMuslimTabState extends State<_HisnAlMuslimTab>
                     fontSize: 14,
                     color: goldText.withValues(alpha: 0.5),
                   ),
-                  prefixIcon: Icon(Icons.search_rounded, color: borderClr, size: 22),
+                  prefixIcon:
+                      Icon(Icons.search_rounded, color: borderClr, size: 22),
                   suffixIcon: _searchCtrl.text.isNotEmpty
                       ? IconButton(
-                          icon: Icon(Icons.close_rounded, color: goldText, size: 18),
+                          icon: Icon(Icons.close_rounded,
+                              color: goldText, size: 18),
                           onPressed: () {
                             _searchCtrl.clear();
                           },
@@ -1499,8 +1692,7 @@ class _HisnAlMuslimTabState extends State<_HisnAlMuslimTab>
                           ),
                         )
                       : ListView.separated(
-                          padding:
-                              const EdgeInsets.fromLTRB(16, 8, 16, 80),
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
                           itemCount: _filteredTitles.length,
                           separatorBuilder: (_, __) =>
                               const SizedBox(height: 8),
@@ -1737,16 +1929,16 @@ class _HisnDetailScreenState extends State<_HisnDetailScreen> {
     return ValueListenableBuilder<QuranTheme>(
       valueListenable: AppTheme.notifier,
       builder: (context, theme, _) {
-        final screenBg  = AppTheme.getScreenBgColor(theme);
-        final pageBg    = AppTheme.getPageBgColor(theme);
-        final appBarBg  = AppTheme.getAppBarBgColor(theme);
+        final screenBg = AppTheme.getScreenBgColor(theme);
+        final pageBg = AppTheme.getPageBgColor(theme);
+        final appBarBg = AppTheme.getAppBarBgColor(theme);
         final appBarText = AppTheme.getAppBarTextColor(theme);
         final borderClr = AppTheme.getBorderColor(theme);
-        final goldText  = AppTheme.getGoldTextColor(theme);
-        final mainText  = AppTheme.getMainTextColor(theme);
-        final cardBg    = AppTheme.getCardBgColor(theme);
-        final isDark    = theme == QuranTheme.dark;
-        final lang      = AppLanguage.notifier.value.languageCode;
+        final goldText = AppTheme.getGoldTextColor(theme);
+        final mainText = AppTheme.getMainTextColor(theme);
+        final cardBg = AppTheme.getCardBgColor(theme);
+        final isDark = theme == QuranTheme.dark;
+        final lang = AppLanguage.notifier.value.languageCode;
 
         return Scaffold(
           backgroundColor: screenBg,
@@ -1857,8 +2049,7 @@ class _HisnEntryCard extends StatelessWidget {
           children: [
             // ── Header with entry number ────────────────────────────────
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
                 color: borderColor.withValues(alpha: 0.08),
                 borderRadius: const BorderRadius.only(
@@ -1870,8 +2061,8 @@ class _HisnEntryCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: borderColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
@@ -1894,25 +2085,23 @@ class _HisnEntryCard extends StatelessWidget {
 
             // ── Main Arabic Zkr text ────────────────────────────────────
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
               child: ValueListenableBuilder<double>(
-                valueListenable: _fontSizeNotifier,
-                builder: (context, fontSize, _) {
-                  return Text(
-                    entry.zkr,
-                    textAlign: TextAlign.center,
-                    textDirection: TextDirection.rtl,
-                    style: TextStyle(
-                      fontFamily: 'Amiri',
-                      fontSize: fontSize,
-                      fontWeight: FontWeight.w400,
-                      color: mainTextColor,
-                      height: 2.0,
-                    ),
-                  );
-                }
-              ),
+                  valueListenable: _fontSizeNotifier,
+                  builder: (context, fontSize, _) {
+                    return Text(
+                      entry.zkr,
+                      textAlign: TextAlign.center,
+                      textDirection: TextDirection.rtl,
+                      style: TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.w400,
+                        color: mainTextColor,
+                        height: 2.0,
+                      ),
+                    );
+                  }),
             ),
 
             // ── Hadith reference ────────────────────────────────────────
@@ -2197,8 +2386,7 @@ class _ProgressRow extends StatelessWidget {
                   fontFamily: 'Amiri',
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color:
-                      allDone ? AppColors.emeraldLight : goldTextColor,
+                  color: allDone ? AppColors.emeraldLight : goldTextColor,
                 ),
               ),
               // Masha'Allah badge or Reset button
@@ -2224,8 +2412,8 @@ class _ProgressRow extends StatelessWidget {
               GestureDetector(
                 onTap: onReset,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: borderColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
@@ -2254,9 +2442,9 @@ class _ProgressRow extends StatelessWidget {
               ),
             ],
           ),
-          
+
           // Play Full Azkar removed from here
-          
+
           const SizedBox(height: 6),
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
@@ -2320,8 +2508,7 @@ class _ZekrCard extends StatefulWidget {
   State<_ZekrCard> createState() => _ZekrCardState();
 }
 
-class _ZekrCardState extends State<_ZekrCard>
-    with TickerProviderStateMixin {
+class _ZekrCardState extends State<_ZekrCard> with TickerProviderStateMixin {
   late AnimationController _scaleCtrl;
   late AnimationController _pulseCtrl;
 
@@ -2367,7 +2554,8 @@ class _ZekrCardState extends State<_ZekrCard>
     final z = widget.zekr;
     final isCompleted = z.isCompleted;
     final lang = widget.lang;
-    final isMorningOrEvening = widget.category == 'أذكار الصباح' || widget.category == 'أذكار المساء';
+    final isMorningOrEvening =
+        widget.category == 'أذكار الصباح' || widget.category == 'أذكار المساء';
 
     return Column(
       children: [
@@ -2388,7 +2576,8 @@ class _ZekrCardState extends State<_ZekrCard>
               ),
               const SizedBox(width: 8),
               IconButton(
-                icon: Icon(Icons.grid_view_rounded, color: widget.goldTextColor, size: 22),
+                icon: Icon(Icons.grid_view_rounded,
+                    color: widget.goldTextColor, size: 22),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 onPressed: widget.onShowIndex,
@@ -2401,24 +2590,31 @@ class _ZekrCardState extends State<_ZekrCard>
           child: AnimatedBuilder(
             animation: _pulseCtrl,
             builder: (context, child) {
-              final pulseColor = AppColors.emeraldLight.withValues(alpha: _pulseCtrl.value * 0.15);
-              final pulseBorderColor = AppColors.emeraldLight.withValues(alpha: _pulseCtrl.value * 0.5 + 0.2);
+              final pulseColor = AppColors.emeraldLight
+                  .withValues(alpha: _pulseCtrl.value * 0.15);
+              final pulseBorderColor = AppColors.emeraldLight
+                  .withValues(alpha: _pulseCtrl.value * 0.5 + 0.2);
 
               return Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: widget.isPlaying ? Color.alphaBlend(pulseColor, widget.cardBgColor) : widget.cardBgColor,
+                  color: widget.isPlaying
+                      ? Color.alphaBlend(pulseColor, widget.cardBgColor)
+                      : widget.cardBgColor,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
                     color: isCompleted
                         ? AppColors.emeraldLight.withValues(alpha: 0.5)
-                        : widget.isPlaying ? pulseBorderColor : widget.borderColor.withValues(alpha: 0.4),
+                        : widget.isPlaying
+                            ? pulseBorderColor
+                            : widget.borderColor.withValues(alpha: 0.4),
                     width: 1.5,
                   ),
                   boxShadow: [
                     BoxShadow(
                       color: widget.isPlaying
-                          ? AppColors.emeraldLight.withValues(alpha: _pulseCtrl.value * 0.2)
+                          ? AppColors.emeraldLight
+                              .withValues(alpha: _pulseCtrl.value * 0.2)
                           : widget.isDark
                               ? Colors.black.withValues(alpha: 0.3)
                               : widget.borderColor.withValues(alpha: 0.1),
@@ -2438,168 +2634,183 @@ class _ZekrCardState extends State<_ZekrCard>
                     padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
                     physics: const BouncingScrollPhysics(),
                     child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ValueListenableBuilder<double>(
-                    valueListenable: _fontSizeNotifier,
-                    builder: (context, fontSize, _) {
-                      return Text(
-                        z.zekr,
-                        textAlign: TextAlign.center,
-                        textDirection: TextDirection.rtl,
-                        style: TextStyle(
-                          fontFamily: 'Amiri',
-                          fontSize: fontSize,
-                          fontWeight: FontWeight.w400,
-                          color: widget.mainTextColor,
-                          height: 1.8,
-                        ),
-                      );
-                    }
-                  ),
-                  const SizedBox(height: 24),
-                  if (z.zekrInfo.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: widget.borderColor.withValues(alpha: 0.06),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: widget.borderColor.withValues(alpha: 0.15),
-                        ),
-                      ),
-                      child: Text(
-                        getLocalizedZekrInfo(z.zekrInfo, lang),
-                        textAlign: TextAlign.center,
-                        textDirection: TextDirection.rtl,
-                        style: TextStyle(
-                          fontFamily: 'Amiri',
-                          fontSize: 15,
-                          color: widget.goldTextColor.withValues(alpha: 0.85),
-                          height: 1.6,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-
-          // ── Bottom Controls ─────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-            child: Row(
-              children: [
-                // Right side icons (Share, Copy)
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      _buildIconButton(
-                        icon: Icons.share_rounded,
-                        onTap: () {
-                          Share.share('${z.zekr}\n\n- تطبيق حصن المسلم');
-                        },
-                      ),
-                      const SizedBox(width: 12),
-                      _buildIconButton(
-                        icon: Icons.copy_rounded,
-                        onTap: () {
-                          Clipboard.setData(ClipboardData(text: z.zekr));
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'تم نسخ الذكر بنجاح',
-                                style: TextStyle(fontFamily: 'Amiri', fontSize: 16),
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ValueListenableBuilder<double>(
+                            valueListenable: _fontSizeNotifier,
+                            builder: (context, fontSize, _) {
+                              return Text(
+                                z.zekr,
                                 textAlign: TextAlign.center,
-                              ),
-                              backgroundColor: AppColors.emeraldLight,
-                              behavior: SnackBarBehavior.floating,
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Center Compact Counter
-                GestureDetector(
-                  onTapDown: (_) {
-                    if (!isCompleted) _scaleCtrl.reverse();
-                  },
-                  onTapUp: (_) {
-                    if (!isCompleted) {
-                      _scaleCtrl.forward();
-                      widget.onTap();
-                    }
-                  },
-                  onTapCancel: () {
-                    if (!isCompleted) _scaleCtrl.forward();
-                  },
-                  child: AnimatedBuilder(
-                    animation: _scaleCtrl,
-                    builder: (_, child) => Transform.scale(scale: isCompleted ? 1.0 : _scaleCtrl.value, child: child),
-                    child: Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isCompleted ? AppColors.emeraldLight : widget.cardBgColor,
-                        border: Border.all(
-                          color: isCompleted ? AppColors.emeraldLight : widget.borderColor,
-                          width: 2.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: (isCompleted ? AppColors.emeraldLight : widget.borderColor).withValues(alpha: 0.3),
-                            blurRadius: 12,
-                            spreadRadius: 1,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: isCompleted
-                            ? const Icon(Icons.check_rounded, color: Colors.white, size: 28)
-                            : Text(
-                                '${z.currentCount}',
+                                textDirection: TextDirection.rtl,
                                 style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Amiri',
+                                  fontSize: fontSize,
+                                  fontWeight: FontWeight.w400,
                                   color: widget.mainTextColor,
+                                  height: 1.8,
                                 ),
+                              );
+                            }),
+                        const SizedBox(height: 24),
+                        if (z.zekrInfo.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: widget.borderColor.withValues(alpha: 0.06),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color:
+                                    widget.borderColor.withValues(alpha: 0.15),
                               ),
-                      ),
+                            ),
+                            child: Text(
+                              getLocalizedZekrInfo(z.zekrInfo, lang),
+                              textAlign: TextAlign.center,
+                              textDirection: TextDirection.rtl,
+                              style: TextStyle(
+                                fontFamily: 'Amiri',
+                                fontSize: 15,
+                                color: widget.goldTextColor
+                                    .withValues(alpha: 0.85),
+                                height: 1.6,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
 
-                // Left side icon (Play Audio - only for Morning/Evening)
-                Expanded(
+                // ── Bottom Controls ─────────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      if (isMorningOrEvening)
-                        _buildIconButton(
-                          icon: widget.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                          isActive: widget.isPlaying,
-                          onTap: widget.onPlayPause,
+                      // Right side icons (Share, Copy)
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            _buildIconButton(
+                              icon: Icons.share_rounded,
+                              onTap: () {
+                                Share.share('${z.zekr}\n\n- تطبيق حصن المسلم');
+                              },
+                            ),
+                            const SizedBox(width: 12),
+                            _buildIconButton(
+                              icon: Icons.copy_rounded,
+                              onTap: () {
+                                Clipboard.setData(ClipboardData(text: z.zekr));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'تم نسخ الذكر بنجاح',
+                                      style: TextStyle(
+                                          fontFamily: 'Amiri', fontSize: 16),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    backgroundColor: AppColors.emeraldLight,
+                                    behavior: SnackBarBehavior.floating,
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
                         ),
+                      ),
+
+                      // Center Compact Counter
+                      GestureDetector(
+                        onTapDown: (_) {
+                          if (!isCompleted) _scaleCtrl.reverse();
+                        },
+                        onTapUp: (_) {
+                          if (!isCompleted) {
+                            _scaleCtrl.forward();
+                            widget.onTap();
+                          }
+                        },
+                        onTapCancel: () {
+                          if (!isCompleted) _scaleCtrl.forward();
+                        },
+                        child: AnimatedBuilder(
+                          animation: _scaleCtrl,
+                          builder: (_, child) => Transform.scale(
+                              scale: isCompleted ? 1.0 : _scaleCtrl.value,
+                              child: child),
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isCompleted
+                                  ? AppColors.emeraldLight
+                                  : widget.cardBgColor,
+                              border: Border.all(
+                                color: isCompleted
+                                    ? AppColors.emeraldLight
+                                    : widget.borderColor,
+                                width: 2.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: (isCompleted
+                                          ? AppColors.emeraldLight
+                                          : widget.borderColor)
+                                      .withValues(alpha: 0.3),
+                                  blurRadius: 12,
+                                  spreadRadius: 1,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: isCompleted
+                                  ? const Icon(Icons.check_rounded,
+                                      color: Colors.white, size: 28)
+                                  : Text(
+                                      '${z.currentCount}',
+                                      style: TextStyle(
+                                        fontFamily: 'Inter',
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold,
+                                        color: widget.mainTextColor,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Left side icon (Play Audio - only for Morning/Evening)
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            if (isMorningOrEvening)
+                              _buildIconButton(
+                                icon: widget.isPlaying
+                                    ? Icons.pause_rounded
+                                    : Icons.play_arrow_rounded,
+                                isActive: widget.isPlaying,
+                                onTap: widget.onPlayPause,
+                              ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
+                if (widget.isMiniPlayerVisible) const SizedBox(height: 80),
               ],
             ),
           ),
-          if (widget.isMiniPlayerVisible) const SizedBox(height: 80),
-        ],
-      ),
-    ),
-    ),
-    ],
+        ),
+      ],
     );
   }
 
@@ -2614,8 +2825,8 @@ class _ZekrCardState extends State<_ZekrCard>
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: isActive 
-              ? AppColors.emeraldLight.withValues(alpha: 0.15) 
+          color: isActive
+              ? AppColors.emeraldLight.withValues(alpha: 0.15)
               : widget.borderColor.withValues(alpha: 0.1),
           border: isActive
               ? Border.all(color: AppColors.emeraldLight, width: 1.5)

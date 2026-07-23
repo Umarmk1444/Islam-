@@ -923,6 +923,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mishary Alafasy'**
   String get muezzinAlafasy;
+
+  /// No description provided for @navLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Library'**
+  String get navLibrary;
+
+  /// No description provided for @libraryAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get libraryAll;
+
+  /// No description provided for @libraryFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get libraryFavorites;
+
+  /// No description provided for @noStoriesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No stories found.'**
+  String get noStoriesFound;
+
+  /// No description provided for @readingsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Readings: {count}'**
+  String readingsCount(int count);
+
+  /// No description provided for @playbackSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback Settings'**
+  String get playbackSettings;
+
+  /// No description provided for @intervalGap.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval'**
+  String get intervalGap;
+
+  /// No description provided for @playbackSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Speed'**
+  String get playbackSpeed;
+
+  /// No description provided for @noneOffLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get noneOffLabel;
+
+  /// No description provided for @secLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sec'**
+  String get secLabel;
+
+  /// No description provided for @ayahLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah'**
+  String get ayahLabel;
+
+  /// No description provided for @sleepTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep Timer'**
+  String get sleepTimer;
+
+  /// No description provided for @stopAudioAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop audio automatically after:'**
+  String get stopAudioAfter;
+
+  /// No description provided for @minutesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Min'**
+  String get minutesLabel;
+
+  /// No description provided for @customMinHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom minute...'**
+  String get customMinHint;
+
+  /// No description provided for @start.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get start;
+
+  /// No description provided for @timerCanceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Timer canceled'**
+  String get timerCanceled;
+
+  /// No description provided for @cancelCurrentTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel current timer'**
+  String get cancelCurrentTimer;
 }
 
 class _AppLocalizationsDelegate

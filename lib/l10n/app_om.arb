@@ -170,5 +170,30 @@
   "muezzinZahrani": "Mansuur Al Zahraanii",
   "muezzinDosari": "Yaasir Al Dosaarii",
   "muezzinAbdulbasit": "Abdulbaasit Abdulsamad",
-  "muezzinAlafasy": "Mishaarii Al Afaasii"
+  "muezzinAlafasy": "Mishaarii Al Afaasii",
+  "navLibrary": "Library",
+  "libraryAll": "All",
+  "libraryFavorites": "Favorites",
+  "noStoriesFound": "No stories found.",
+  "readingsCount": "Readings: {count}",
+  "@readingsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "playbackSettings": "Qindaa'ina Tapha",
+  "intervalGap": "Gidduu",
+  "playbackSpeed": "Saffisa",
+  "noneOffLabel": "Homaa",
+  "secLabel": "Sek",
+  "ayahLabel": "Aayata",
+  "sleepTimer": "Taimarii Hirribaa",
+  "stopAudioAfter": "Sagalee ofiin dhaabi erga:",
+  "minutesLabel": "Daq",
+  "customMinHint": "Daqiiqaa filatamaa...",
+  "start": "Jalqabi",
+  "timerCanceled": "Taimariin haqameera",
+  "cancelCurrentTimer": "Taimarii ammaa haqi"
 }

@@ -16,9 +16,11 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../theme_notifier.dart';
-import '../../data/models/prayer_config.dart';
 import '../../data/models/prayer_time_model.dart';
 import '../controllers/prayer_controller.dart';
+import 'prayer_settings_screen.dart';
+import '../../../../services/notification_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class PrayerTimesScreen extends StatefulWidget {
   const PrayerTimesScreen({super.key, required this.controller});
@@ -36,7 +38,75 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     // Re-resolve location and times when opening the screen to ensure accuracy.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.controller.syncLocation();
+      _checkAndRequestPermissions();
     });
+  }
+
+  Future<void> _checkAndRequestPermissions() async {
+    // 1. POST_NOTIFICATIONS
+    if (!await Permission.notification.isGranted) {
+      await Permission.notification.request();
+    }
+    // 2. SCHEDULE_EXACT_ALARM
+    if (!await Permission.scheduleExactAlarm.isGranted) {
+      await Permission.scheduleExactAlarm.request();
+    }
+    // 3. ignoreBatteryOptimizations
+    if (!await Permission.ignoreBatteryOptimizations.isGranted) {
+      if (mounted) {
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Background Protection'),
+            content: const Text(
+              'To ensure Adhan triggers exactly on time in the background, please disable battery optimization for this app on the next screen.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(ctx);
+                  await Permission.ignoreBatteryOptimizations.request();
+                },
+                child: const Text('Proceed'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+    // 4. SYSTEM_ALERT_WINDOW (Display over other apps)
+    if (!await Permission.systemAlertWindow.isGranted) {
+      if (mounted) {
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Display Over Other Apps'),
+            content: const Text(
+              'To show the Adhan full-screen UI when your phone is locked or while using other apps, please enable the "Display over other apps" permission.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(ctx);
+                  await Permission.systemAlertWindow.request();
+                },
+                child: const Text('Proceed'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -67,9 +137,22 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                 ),
                 actions: [
                   IconButton(
+                    icon: const Icon(Icons.bug_report_outlined),
+                    tooltip: 'Developer Tests',
+                    onPressed: () {
+                      _showDebugMenu(context, ctrl, theme);
+                    },
+                  ),
+                  IconButton(
                     icon: const Icon(Icons.settings_outlined),
                     tooltip: l10n.prayerSettingsTitle,
-                    onPressed: () => _showSettingsSheet(context, ctrl, theme),
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) =>
+                                  PrayerSettingsScreen(controller: ctrl)));
+                    },
                   ),
                 ],
               ),
@@ -79,7 +162,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                       ? Center(
                           child: Text(
                             ctrl.errorMessage ?? l10n.loading,
-                            style: AppTextStyles.bodyLarge.copyWith(color: textColor),
+                            style: AppTextStyles.bodyLarge
+                                .copyWith(color: textColor),
                           ),
                         )
                       : SafeArea(
@@ -87,25 +171,34 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               // ── 1. Top Hero Countdown Panel ────────────────
-                              _HeroCountdownPanel(
-                                model: model,
-                                countdown: ctrl.countdown,
-                                l10n: l10n,
+                              ValueListenableBuilder<String>(
+                                valueListenable: ctrl.countdownNotifier,
+                                builder: (context, countdownStr, _) {
+                                  return _HeroCountdownPanel(
+                                    model: model,
+                                    countdown: countdownStr,
+                                    l10n: l10n,
+                                  );
+                                },
                               ),
 
                               // ── 2. Current Location & Hijri Date Info ─────────
                               Padding(
-                                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                                padding:
+                                    const EdgeInsets.fromLTRB(20, 16, 20, 8),
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Row(
                                       children: [
-                                        Icon(Icons.location_on, size: 16, color: primaryColor),
+                                        Icon(Icons.location_on,
+                                            size: 16, color: primaryColor),
                                         const SizedBox(width: 4),
                                         Text(
                                           model.locationLabel,
-                                          style: AppTextStyles.bodyMedium.copyWith(
+                                          style:
+                                              AppTextStyles.bodyMedium.copyWith(
                                             color: textColor,
                                             fontWeight: FontWeight.w600,
                                           ),
@@ -113,7 +206,9 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                                       ],
                                     ),
                                     Text(
-                                      Localizations.localeOf(context).languageCode == 'ar'
+                                      Localizations.localeOf(context)
+                                                  .languageCode ==
+                                              'ar'
                                           ? model.hijriDate.formattedAr
                                           : model.hijriDate.formattedEn,
                                       style: AppTextStyles.bodyMedium.copyWith(
@@ -128,11 +223,13 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                               // ── 3. Vertical List of 6 Prayers ───────────────
                               Expanded(
                                 child: ListView.builder(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 8),
                                   itemCount: model.entries.length,
                                   itemBuilder: (context, index) {
                                     final entry = model.entries[index];
-                                    final isNext = entry.prayer == model.nextPrayer.prayer;
+                                    final isNext =
+                                        entry.prayer == model.nextPrayer.prayer;
                                     return _PrayerRowCard(
                                       entry: entry,
                                       isNext: isNext,
@@ -141,10 +238,19 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                                       primaryColor: primaryColor,
                                       theme: theme,
                                       l10n: l10n,
-                                      onToggleNotif: () => ctrl.toggleNotification(entry.prayer),
-                                      notifEnabled: ctrl.isNotifEnabled(entry.prayer),
-                                      is24HourFormat: ctrl.config.is24HourFormat,
-                                      onTap: () => _showPrayerOptionsSheet(context, entry, ctrl, theme),
+                                      onToggleNotif: () async {
+                                        final isEnabled = ctrl.isNotifEnabled(entry.prayer);
+                                        if (!isEnabled) {
+                                          await _checkAndRequestPermissions();
+                                        }
+                                        ctrl.toggleNotification(entry.prayer);
+                                      },
+                                      notifEnabled:
+                                          ctrl.isNotifEnabled(entry.prayer),
+                                      is24HourFormat:
+                                          ctrl.config.is24HourFormat,
+                                      onTap: () => _showPrayerOptionsSheet(
+                                          context, entry, ctrl, theme),
                                     );
                                   },
                                 ),
@@ -161,7 +267,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
 
   // ── Prayer Options Bottom Sheet ────────────────────────────────────────────
 
-  void _showPrayerOptionsSheet(BuildContext context, PrayerTimeEntry entry, PrayerController ctrl, QuranTheme theme) {
+  void _showPrayerOptionsSheet(BuildContext context, PrayerTimeEntry entry,
+      PrayerController ctrl, QuranTheme theme) {
     final l10n = AppLocalizations.of(context)!;
     final cardBg = AppTheme.getCardBgColor(theme);
     final textColor = AppTheme.getMainTextColor(theme);
@@ -177,8 +284,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
         return AnimatedBuilder(
           animation: ctrl,
           builder: (context, _) {
-            final currentOffset = ctrl.config.prayerOffsets[entry.prayer.name] ?? 0;
-            final currentMuezzinId = ctrl.config.prayerMuezzins[entry.prayer.name] ?? 'adhan_abdulbasit';
+            final currentOffset =
+                ctrl.config.prayerOffsets[entry.prayer.name] ?? 0;
+            final currentMuezzinId =
+                ctrl.config.prayerMuezzins[entry.prayer.name] ??
+                    'adhan_abdulbasit';
             final muezzinNames = {
               'adhan_abdulbasit': l10n.muezzinAbdulbasit,
               'adhan_mecca_ali_mulla': l10n.muezzinMecca,
@@ -195,7 +305,10 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                 color: cardBg,
                 borderRadius: BorderRadius.circular(28),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 20, offset: const Offset(0, 10)),
+                  BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10)),
                 ],
               ),
               child: Column(
@@ -218,12 +331,20 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                             children: [
                               Text(
                                 prayerNameStr,
-                                style: AppTextStyles.headlineMedium.copyWith(color: textColor, fontWeight: FontWeight.bold, fontSize: 20),
+                                style: AppTextStyles.headlineMedium.copyWith(
+                                    color: textColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 formattedTime,
-                                style: AppTextStyles.bodyLarge.copyWith(color: primary, fontWeight: FontWeight.bold, fontFeatures: const [FontFeature.tabularFigures()]),
+                                style: AppTextStyles.bodyLarge.copyWith(
+                                    color: primary,
+                                    fontWeight: FontWeight.bold,
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures()
+                                    ]),
                               ),
                             ],
                           ),
@@ -232,36 +353,49 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Athan Toggle
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.notifEnabled, style: AppTextStyles.bodyMedium.copyWith(color: textColor, fontWeight: FontWeight.bold)),
-                    subtitle: Text(l10n.athanNotifDesc, style: AppTextStyles.labelSmall.copyWith(color: textColor.withValues(alpha: 0.6))),
+                    title: Text(l10n.notifEnabled,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                            color: textColor, fontWeight: FontWeight.bold)),
+                    subtitle: Text(l10n.athanNotifDesc,
+                        style: AppTextStyles.labelSmall
+                            .copyWith(color: textColor.withValues(alpha: 0.6))),
                     value: ctrl.isNotifEnabled(entry.prayer),
-                    activeColor: primary,
-                    onChanged: (val) {
+                    activeThumbColor: primary,
+                    onChanged: (val) async {
+                      if (val) {
+                        await _checkAndRequestPermissions();
+                      }
                       ctrl.toggleNotification(entry.prayer);
                     },
                   ),
-                  
+
                   const Divider(height: 24),
 
                   // Pre-Athan Warning
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(l10n.preAthanWarning, style: AppTextStyles.bodyMedium.copyWith(color: textColor, fontWeight: FontWeight.bold)),
+                      Text(l10n.preAthanWarning,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                              color: textColor, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
                         alignment: WrapAlignment.center,
                         children: [
-                          _buildPreAthanChip(0, l10n.off, ctrl, entry.prayer.name, primary, textColor, cardBg),
-                          _buildPreAthanChip(5, '5 ${l10n.minLabel}', ctrl, entry.prayer.name, primary, textColor, cardBg),
-                          _buildPreAthanChip(10, '10 ${l10n.minLabel}', ctrl, entry.prayer.name, primary, textColor, cardBg),
-                          _buildCustomPreAthanChip(ctrl, entry.prayer.name, primary, textColor, cardBg, context, l10n),
+                          _buildPreAthanChip(0, l10n.off, ctrl,
+                              entry.prayer.name, primary, textColor, cardBg),
+                          _buildPreAthanChip(5, '5 ${l10n.minLabel}', ctrl,
+                              entry.prayer.name, primary, textColor, cardBg),
+                          _buildPreAthanChip(10, '10 ${l10n.minLabel}', ctrl,
+                              entry.prayer.name, primary, textColor, cardBg),
+                          _buildCustomPreAthanChip(ctrl, entry.prayer.name,
+                              primary, textColor, cardBg, context, l10n),
                         ],
                       ),
                     ],
@@ -277,20 +411,28 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(l10n.timeAdjustment, style: AppTextStyles.bodyMedium.copyWith(color: textColor, fontWeight: FontWeight.bold)),
+                            Text(l10n.timeAdjustment,
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                    color: textColor,
+                                    fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
-                            Text(l10n.adjustAthan, style: AppTextStyles.labelSmall.copyWith(color: textColor.withValues(alpha: 0.6))),
+                            Text(l10n.adjustAthan,
+                                style: AppTextStyles.labelSmall.copyWith(
+                                    color: textColor.withValues(alpha: 0.6))),
                           ],
                         ),
                       ),
                       Row(
                         children: [
                           IconButton(
-                            icon: Icon(Icons.remove_circle_outline, color: primary),
+                            icon: Icon(Icons.remove_circle_outline,
+                                color: primary),
                             onPressed: () {
-                              final newOffsets = Map<String, int>.from(ctrl.config.prayerOffsets);
+                              final newOffsets = Map<String, int>.from(
+                                  ctrl.config.prayerOffsets);
                               newOffsets[entry.prayer.name] = currentOffset - 1;
-                              ctrl.updateConfig(ctrl.config.copyWith(prayerOffsets: newOffsets));
+                              ctrl.updateConfig(ctrl.config
+                                  .copyWith(prayerOffsets: newOffsets));
                             },
                           ),
                           SizedBox(
@@ -298,15 +440,20 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                             child: Text(
                               '${currentOffset > 0 ? '+' : ''}$currentOffset',
                               textAlign: TextAlign.center,
-                              style: AppTextStyles.bodyLarge.copyWith(color: textColor, fontWeight: FontWeight.bold),
+                              style: AppTextStyles.bodyLarge.copyWith(
+                                  color: textColor,
+                                  fontWeight: FontWeight.bold),
                             ),
                           ),
                           IconButton(
-                            icon: Icon(Icons.add_circle_outline, color: primary),
+                            icon:
+                                Icon(Icons.add_circle_outline, color: primary),
                             onPressed: () {
-                              final newOffsets = Map<String, int>.from(ctrl.config.prayerOffsets);
+                              final newOffsets = Map<String, int>.from(
+                                  ctrl.config.prayerOffsets);
                               newOffsets[entry.prayer.name] = currentOffset + 1;
-                              ctrl.updateConfig(ctrl.config.copyWith(prayerOffsets: newOffsets));
+                              ctrl.updateConfig(ctrl.config
+                                  .copyWith(prayerOffsets: newOffsets));
                             },
                           ),
                         ],
@@ -319,11 +466,19 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   // Change Athan Sound
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.muezzinVoice, style: AppTextStyles.bodyMedium.copyWith(color: textColor, fontWeight: FontWeight.bold)),
-                    subtitle: Text(muezzinNames[currentMuezzinId] ?? l10n.muezzinAbdulbasit, style: AppTextStyles.labelSmall.copyWith(color: primary)),
-                    trailing: Icon(Icons.keyboard_arrow_down_rounded, color: primary),
+                    title: Text(l10n.muezzinVoice,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                            color: textColor, fontWeight: FontWeight.bold)),
+                    subtitle: Text(
+                        muezzinNames[currentMuezzinId] ??
+                            l10n.muezzinAbdulbasit,
+                        style:
+                            AppTextStyles.labelSmall.copyWith(color: primary)),
+                    trailing:
+                        Icon(Icons.keyboard_arrow_down_rounded, color: primary),
                     onTap: () {
-                      _showMuezzinSelector(context, entry, ctrl, theme, muezzinNames, currentMuezzinId, l10n);
+                      _showMuezzinSelector(context, entry, ctrl, theme,
+                          muezzinNames, currentMuezzinId, l10n);
                     },
                   ),
                 ],
@@ -335,7 +490,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     );
   }
 
-  Widget _buildPreAthanChip(int minutes, String label, PrayerController ctrl, String prayerName, Color primary, Color textColor, Color cardBg) {
+  Widget _buildPreAthanChip(int minutes, String label, PrayerController ctrl,
+      String prayerName, Color primary, Color textColor, Color cardBg) {
     final currentPreAthan = ctrl.config.preAthanMinutes[prayerName] ?? 0;
     final isSelected = currentPreAthan == minutes;
     return InkWell(
@@ -350,7 +506,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
         decoration: BoxDecoration(
           color: isSelected ? primary : cardBg,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? primary : primary.withValues(alpha: 0.3)),
+          border: Border.all(
+              color: isSelected ? primary : primary.withValues(alpha: 0.3)),
         ),
         child: Text(
           label,
@@ -363,14 +520,25 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     );
   }
 
-  Widget _buildCustomPreAthanChip(PrayerController ctrl, String prayerName, Color primary, Color textColor, Color cardBg, BuildContext context, AppLocalizations l10n) {
+  Widget _buildCustomPreAthanChip(
+      PrayerController ctrl,
+      String prayerName,
+      Color primary,
+      Color textColor,
+      Color cardBg,
+      BuildContext context,
+      AppLocalizations l10n) {
     final currentPreAthan = ctrl.config.preAthanMinutes[prayerName] ?? 0;
-    final isCustom = currentPreAthan != 0 && currentPreAthan != 5 && currentPreAthan != 10 && currentPreAthan != 15;
+    final isCustom = currentPreAthan != 0 &&
+        currentPreAthan != 5 &&
+        currentPreAthan != 10 &&
+        currentPreAthan != 15;
     final label = isCustom ? '$currentPreAthan ${l10n.minLabel}' : l10n.custom;
-    
+
     return InkWell(
       onTap: () {
-        _showCustomPreAthanDialog(context, ctrl, prayerName, currentPreAthan, primary, textColor, cardBg, l10n);
+        _showCustomPreAthanDialog(context, ctrl, prayerName, currentPreAthan,
+            primary, textColor, cardBg, l10n);
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(
@@ -378,7 +546,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
         decoration: BoxDecoration(
           color: isCustom ? primary : cardBg,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isCustom ? primary : primary.withValues(alpha: 0.3)),
+          border: Border.all(
+              color: isCustom ? primary : primary.withValues(alpha: 0.3)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -391,50 +560,78 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               ),
             ),
             const SizedBox(width: 4),
-            Icon(Icons.edit, size: 14, color: isCustom ? Colors.white : primary),
+            Icon(Icons.edit,
+                size: 14, color: isCustom ? Colors.white : primary),
           ],
         ),
       ),
     );
   }
 
-  void _showCustomPreAthanDialog(BuildContext context, PrayerController ctrl, String prayerName, int currentVal, Color primary, Color textColor, Color cardBg, AppLocalizations l10n) {
-    final textController = TextEditingController(text: currentVal > 0 ? currentVal.toString() : '');
+  void _showCustomPreAthanDialog(
+      BuildContext context,
+      PrayerController ctrl,
+      String prayerName,
+      int currentVal,
+      Color primary,
+      Color textColor,
+      Color cardBg,
+      AppLocalizations l10n) {
+    final textController = TextEditingController(
+        text: currentVal > 0 ? currentVal.toString() : '');
     showDialog(
       context: context,
       builder: (ctx) {
         return AlertDialog(
           backgroundColor: cardBg,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(l10n.customTimeMin, style: AppTextStyles.headlineMedium.copyWith(color: textColor, fontWeight: FontWeight.bold)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(l10n.customTimeMin,
+              style: AppTextStyles.headlineMedium
+                  .copyWith(color: textColor, fontWeight: FontWeight.bold)),
           content: TextField(
             controller: textController,
             keyboardType: TextInputType.number,
             style: AppTextStyles.bodyLarge.copyWith(color: textColor),
             decoration: InputDecoration(
               hintText: l10n.example30,
-              hintStyle: AppTextStyles.bodyMedium.copyWith(color: textColor.withValues(alpha: 0.5)),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: primary.withValues(alpha: 0.5))),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: primary)),
+              hintStyle: AppTextStyles.bodyMedium
+                  .copyWith(color: textColor.withValues(alpha: 0.5)),
+              enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide:
+                      BorderSide(color: primary.withValues(alpha: 0.5))),
+              focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: primary)),
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text(l10n.cancel, style: AppTextStyles.bodyMedium.copyWith(color: textColor.withValues(alpha: 0.6))),
+              child: Text(l10n.cancel,
+                  style: AppTextStyles.bodyMedium
+                      .copyWith(color: textColor.withValues(alpha: 0.6))),
             ),
             ElevatedButton(
               onPressed: () {
                 final val = int.tryParse(textController.text);
                 if (val != null && val >= 0) {
-                  final newPreAthan = Map<String, int>.from(ctrl.config.preAthanMinutes);
+                  final newPreAthan =
+                      Map<String, int>.from(ctrl.config.preAthanMinutes);
                   newPreAthan[prayerName] = val;
-                  ctrl.updateConfig(ctrl.config.copyWith(preAthanMinutes: newPreAthan));
+                  ctrl.updateConfig(
+                      ctrl.config.copyWith(preAthanMinutes: newPreAthan));
                 }
                 Navigator.pop(ctx);
               },
-              style: ElevatedButton.styleFrom(backgroundColor: primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-              child: Text(l10n.save, style: AppTextStyles.bodyMedium.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: primary,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12))),
+              child: Text(l10n.save,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                      color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           ],
         );
@@ -442,7 +639,14 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     );
   }
 
-  void _showMuezzinSelector(BuildContext context, PrayerTimeEntry entry, PrayerController ctrl, QuranTheme theme, Map<String, String> muezzinNames, String currentId, AppLocalizations l10n) {
+  void _showMuezzinSelector(
+      BuildContext context,
+      PrayerTimeEntry entry,
+      PrayerController ctrl,
+      QuranTheme theme,
+      Map<String, String> muezzinNames,
+      String currentId,
+      AppLocalizations l10n) {
     final cardBg = AppTheme.getCardBgColor(theme);
     final textColor = AppTheme.getMainTextColor(theme);
     final primary = AppTheme.getPrimaryColor(theme);
@@ -450,26 +654,43 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: cardBg,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (ctx) {
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 16),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+              Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                      color: Colors.grey.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2))),
               const SizedBox(height: 16),
-              Text(l10n.chooseMuezzin, style: AppTextStyles.headlineMedium.copyWith(color: textColor, fontWeight: FontWeight.bold)),
+              Text(l10n.chooseMuezzin,
+                  style: AppTextStyles.headlineMedium
+                      .copyWith(color: textColor, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               ...muezzinNames.entries.map((m) {
                 final isSelected = m.key == currentId;
                 return ListTile(
-                  title: Text(m.value, style: AppTextStyles.bodyMedium.copyWith(color: isSelected ? primary : textColor, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
-                  trailing: isSelected ? Icon(Icons.check_circle_rounded, color: primary) : null,
+                  title: Text(m.value,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                          color: isSelected ? primary : textColor,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal)),
+                  trailing: isSelected
+                      ? Icon(Icons.check_circle_rounded, color: primary)
+                      : null,
                   onTap: () {
-                    final newMuezzins = Map<String, String>.from(ctrl.config.prayerMuezzins);
+                    final newMuezzins =
+                        Map<String, String>.from(ctrl.config.prayerMuezzins);
                     newMuezzins[entry.prayer.name] = m.key;
-                    ctrl.updateConfig(ctrl.config.copyWith(prayerMuezzins: newMuezzins));
+                    ctrl.updateConfig(
+                        ctrl.config.copyWith(prayerMuezzins: newMuezzins));
                     Navigator.pop(ctx);
                   },
                 );
@@ -481,390 +702,58 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
       },
     );
   }
-
-  // ── Settings Bottom Sheet ──────────────────────────────────────────────────
-
-  void _showSettingsSheet(BuildContext context, PrayerController ctrl, QuranTheme theme) {
-    final l10n = AppLocalizations.of(context)!;
-    final isDark = theme == QuranTheme.dark;
+  void _showDebugMenu(
+      BuildContext context, PrayerController ctrl, QuranTheme theme) {
     final cardBg = AppTheme.getCardBgColor(theme);
     final textColor = AppTheme.getMainTextColor(theme);
     final primary = AppTheme.getPrimaryColor(theme);
 
-    // Prayer keys order
-    const prayerKeys = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
-    const prayerIcons = [
-      Icons.wb_twilight_rounded,
-      Icons.light_mode_rounded,
-      Icons.wb_sunny_rounded,
-      Icons.filter_drama_rounded,
-      Icons.nights_stay_rounded,
-      Icons.bedtime_rounded,
-    ];
-    final prayerColors = [
-      AppColors.prayerFajr,
-      AppColors.prayerSunrise,
-      AppColors.prayerDhuhr,
-      AppColors.prayerAsr,
-      AppColors.prayerMaghrib,
-      AppColors.prayerIsha,
-    ];
-
     showModalBottomSheet(
       context: context,
       backgroundColor: cardBg,
-      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            final cfg = ctrl.config;
-
-            // ── Section header helper ────────────────────────────────────
-            Widget sectionHeader(String label, IconData icon) => Padding(
-              padding: const EdgeInsets.only(top: 20, bottom: 10),
-              child: Row(
-                children: [
-                  Icon(icon, color: primary, size: 18),
-                  const SizedBox(width: 8),
-                  Text(
-                    label,
-                    style: AppTextStyles.labelLarge.copyWith(
-                      color: primary,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                ],
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 16),
+              Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                      color: Colors.grey.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2))),
+              const SizedBox(height: 16),
+              Text('Developer Test Tools',
+                  style: AppTextStyles.headlineMedium
+                      .copyWith(color: textColor, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: Icon(Icons.mosque_rounded, color: primary),
+                title: Text('Test Adhan (5s)',
+                    style: AppTextStyles.bodyMedium.copyWith(color: textColor)),
+                onTap: () {
+                  final currentMuezzinId =
+                      ctrl.config.prayerMuezzins[PrayerName.fajr.name] ??
+                          'adhan_abdulbasit';
+                  NotificationService().testAdhanNotification(currentMuezzinId);
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Adhan scheduled in 5 seconds')),
+                  );
+                },
               ),
-            );
 
-            // ── Settings row (label + widget) ──────────────────────────
-            Widget settingsRow(String label, Widget trailing) => Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    label,
-                    style: AppTextStyles.bodyMedium.copyWith(color: textColor),
-                  ),
-                ),
-                trailing,
-              ],
-            );
-
-            return DraggableScrollableSheet(
-              initialChildSize: 0.85,
-              maxChildSize: 0.95,
-              minChildSize: 0.5,
-              expand: false,
-              builder: (ctx, scrollCtrl) => SafeArea(
-                child: ListView(
-                  controller: scrollCtrl,
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                  children: [
-                    // Handle bar
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        margin: const EdgeInsets.only(bottom: 14),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? Colors.white24
-                              : Colors.black26,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-
-                    // Title
-                    Text(
-                      l10n.prayerSettingsTitle,
-                      style: AppTextStyles.headlineMedium.copyWith(
-                        color: textColor,
-                        fontWeight: FontWeight.w800,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-
-                    // ─────────────────────────────────────────
-                    // 1. Display
-                    // ─────────────────────────────────────────
-                    sectionHeader('Display', Icons.tune_rounded),
-
-                    settingsRow(
-                      '24-Hour Clock',
-                      Switch(
-                        value: cfg.is24HourFormat,
-                        activeThumbColor: primary,
-                        onChanged: (val) {
-                          ctrl.updateConfig(cfg.copyWith(is24HourFormat: val));
-                          setModalState(() {});
-                        },
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    // Hijri offset picker (−2 .. +2 days)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Hijri Date Offset',
-                          style: AppTextStyles.bodyMedium.copyWith(color: textColor),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Adjust to match your local moon sighting',
-                          style: AppTextStyles.labelSmall.copyWith(
-                            color: isDark ? Colors.white38 : Colors.black38,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(5, (i) {
-                            final val = i - 2; // -2 to +2
-                            final isSelected = cfg.hijriOffset == val;
-                            return GestureDetector(
-                              onTap: () {
-                                ctrl.updateConfig(cfg.copyWith(hijriOffset: val));
-                                setModalState(() {});
-                              },
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 180),
-                                margin: const EdgeInsets.symmetric(horizontal: 4),
-                                width: 44,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? primary
-                                      : (isDark
-                                          ? AppColors.surfaceElevated
-                                          : const Color(0xFFF0F4F2)),
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? primary
-                                        : (isDark
-                                            ? Colors.white12
-                                            : Colors.black12),
-                                  ),
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  val == 0 ? '0' : (val > 0 ? '+$val' : '$val'),
-                                  style: TextStyle(
-                                    color: isSelected
-                                        ? Colors.white
-                                        : textColor,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                      ],
-                    ),
-
-                    // ─────────────────────────────────────────
-                    // 2. Calculation
-                    // ─────────────────────────────────────────
-                    sectionHeader(l10n.calcMethod, Icons.calculate_rounded),
-
-                    DropdownButton<CalculationMethodEnum>(
-                      value: cfg.method,
-                      dropdownColor: cardBg,
-                      isExpanded: true,
-                      style: AppTextStyles.bodyLarge.copyWith(color: textColor),
-                      onChanged: (val) {
-                        if (val != null) {
-                          ctrl.changeMethod(val);
-                          setModalState(() {});
-                        }
-                      },
-                      items: CalculationMethodEnum.values.map((method) {
-                        final label =
-                            Localizations.localeOf(context).languageCode == 'ar'
-                                ? method.labelAr
-                                : method.labelEn;
-                        return DropdownMenuItem(
-                          value: method,
-                          child: Text(label),
-                        );
-                      }).toList(),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    Text(
-                      l10n.madhab,
-                      style: AppTextStyles.labelLarge.copyWith(color: textColor),
-                    ),
-                    DropdownButton<MadhabEnum>(
-                      value: cfg.madhab,
-                      dropdownColor: cardBg,
-                      isExpanded: true,
-                      style: AppTextStyles.bodyLarge.copyWith(color: textColor),
-                      onChanged: (val) {
-                        if (val != null) {
-                          ctrl.changeMadhab(val);
-                          setModalState(() {});
-                        }
-                      },
-                      items: MadhabEnum.values.map((m) {
-                        final label =
-                            Localizations.localeOf(context).languageCode == 'ar'
-                                ? m.labelAr
-                                : m.labelEn;
-                        return DropdownMenuItem(
-                          value: m,
-                          child: Text(label),
-                        );
-                      }).toList(),
-                    ),
-
-                    // ─────────────────────────────────────────
-                    // 3. Prayer Time Offsets
-                    // ─────────────────────────────────────────
-                    sectionHeader('Prayer Time Adjustments', Icons.schedule_rounded),
-
-                    Text(
-                      'Fine-tune each prayer time (minutes)',
-                      style: AppTextStyles.labelSmall.copyWith(
-                        color: isDark ? Colors.white38 : Colors.black38,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-
-                    ...List.generate(prayerKeys.length, (i) {
-                      final key = prayerKeys[i];
-                      final offsetVal = cfg.prayerOffsets[key] ?? 0;
-                      final prayerLabel = key[0].toUpperCase() + key.substring(1);
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 30,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                color: prayerColors[i].withValues(alpha: 0.15),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(prayerIcons[i],
-                                  color: prayerColors[i], size: 16),
-                            ),
-                            const SizedBox(width: 10),
-                            SizedBox(
-                              width: 72,
-                              child: Text(
-                                prayerLabel,
-                                style: AppTextStyles.bodyMedium
-                                    .copyWith(color: textColor),
-                              ),
-                            ),
-                            Expanded(
-                              child: Slider(
-                                value: offsetVal.toDouble(),
-                                min: -30,
-                                max: 30,
-                                divisions: 60,
-                                activeColor: prayerColors[i],
-                                inactiveColor:
-                                    prayerColors[i].withValues(alpha: 0.2),
-                                onChanged: (val) {
-                                  final newOffsets =
-                                      Map<String, int>.from(cfg.prayerOffsets)
-                                        ..[key] = val.round();
-                                  ctrl.updateConfig(
-                                      cfg.copyWith(prayerOffsets: newOffsets));
-                                  setModalState(() {});
-                                },
-                              ),
-                            ),
-                            SizedBox(
-                              width: 36,
-                              child: Text(
-                                offsetVal == 0
-                                    ? '0'
-                                    : (offsetVal > 0
-                                        ? '+$offsetVal'
-                                        : '$offsetVal'),
-                                style: TextStyle(
-                                  color: prayerColors[i],
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 12,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
-
-                    // ─────────────────────────────────────────
-                    // 4. Location
-                    // ─────────────────────────────────────────
-                    sectionHeader('Location', Icons.location_on_rounded),
-
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      icon: const Icon(Icons.gps_fixed),
-                      label: Text(l10n.locationSync),
-                      onPressed: () async {
-                        Navigator.pop(context);
-                        await ctrl.syncLocation();
-                      },
-                    ),
-
-                    // ─────────────────────────────────────────
-                    // 5. Permissions Status
-                    // ─────────────────────────────────────────
-                    sectionHeader('Permissions', Icons.security_rounded),
-
-                    _PermissionRow(
-                      label: 'Exact Alarms',
-                      subtitle: 'Required for precise adhan notifications',
-                      icon: Icons.alarm_rounded,
-                      iconColor: AppColors.prayerFajr,
-                      isDark: isDark,
-                      textColor: textColor,
-                    ),
-                    const SizedBox(height: 8),
-                    _PermissionRow(
-                      label: 'Battery Optimization',
-                      subtitle: 'Ignored — keeps adhan reliable in background',
-                      icon: Icons.battery_charging_full_rounded,
-                      iconColor: AppColors.emeraldLight,
-                      isDark: isDark,
-                      textColor: textColor,
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
+              const SizedBox(height: 16),
+            ],
+          ),
         );
       },
     );
   }
 }
-
 // ─────────────────────────────────────────────────────────────────────────────
 // _HeroCountdownPanel — Displays the next prayer name and countdown ticker
 // ─────────────────────────────────────────────────────────────────────────────
@@ -965,7 +854,7 @@ class _HeroCountdownPanel extends StatelessWidget {
         );
       },
       onEnd: () {
-        // We can't trivially loop TweenAnimationBuilder without state, 
+        // We can't trivially loop TweenAnimationBuilder without state,
         // but the layout itself is already heavily upgraded.
       },
     );
@@ -1017,18 +906,26 @@ class _PrayerRowCard extends StatelessWidget {
             : cardBg,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isNext
-              ? primaryColor.withValues(alpha: 0.5)
-              : Colors.transparent,
+          color:
+              isNext ? primaryColor.withValues(alpha: 0.5) : Colors.transparent,
           width: 1.5,
         ),
-        boxShadow: isNext ? [
-          BoxShadow(
-            color: primaryColor.withValues(alpha: 0.2),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          )
-        ] : [],
+        boxShadow: isNext
+            ? [
+                BoxShadow(
+                  color: primaryColor.withValues(alpha: 0.3),
+                  blurRadius: 16,
+                  spreadRadius: 2,
+                  offset: const Offset(0, 8),
+                )
+              ]
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                )
+              ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -1071,12 +968,15 @@ class _PrayerRowCard extends StatelessWidget {
                 // Notification Bell Toggle
                 IconButton(
                   icon: Icon(
-                    notifEnabled ? Icons.notifications_active_rounded : Icons.notifications_off_rounded,
+                    notifEnabled
+                        ? Icons.notifications_active_rounded
+                        : Icons.notifications_off_rounded,
                     color: notifEnabled
                         ? (isNext ? primaryColor : AppColors.goldMid)
                         : Colors.grey.shade400,
                   ),
-                  tooltip: notifEnabled ? l10n.notifEnabled : l10n.notifDisabled,
+                  tooltip:
+                      notifEnabled ? l10n.notifEnabled : l10n.notifDisabled,
                   onPressed: onToggleNotif,
                 ),
               ],
@@ -1086,7 +986,6 @@ class _PrayerRowCard extends StatelessWidget {
       ),
     );
   }
-
 }
 
 Widget _buildPrayerIcon(PrayerName prayer) {
@@ -1140,13 +1039,20 @@ String _formatTime(DateTime time, bool is24h) {
 // Helper to translate prayer names
 String _localizePrayerName(PrayerName prayer, AppLocalizations l10n) {
   switch (prayer) {
-    case PrayerName.fajr:    return l10n.prayerFajr;
-    case PrayerName.sunrise: return l10n.prayerSunrise;
-    case PrayerName.dhuhr:   return l10n.prayerDhuhr;
-    case PrayerName.asr:     return l10n.prayerAsr;
-    case PrayerName.maghrib: return l10n.prayerMaghrib;
-    case PrayerName.isha:    return l10n.prayerIsha;
-    default:                 return prayer.name;
+    case PrayerName.fajr:
+      return l10n.prayerFajr;
+    case PrayerName.sunrise:
+      return l10n.prayerSunrise;
+    case PrayerName.dhuhr:
+      return l10n.prayerDhuhr;
+    case PrayerName.asr:
+      return l10n.prayerAsr;
+    case PrayerName.maghrib:
+      return l10n.prayerMaghrib;
+    case PrayerName.isha:
+      return l10n.prayerIsha;
+    default:
+      return prayer.name;
   }
 }
 
@@ -1164,12 +1070,12 @@ class _PermissionRow extends StatefulWidget {
     required this.textColor,
   });
 
-  final String    label;
-  final String    subtitle;
-  final IconData  icon;
-  final Color     iconColor;
-  final bool      isDark;
-  final Color     textColor;
+  final String label;
+  final String subtitle;
+  final IconData icon;
+  final Color iconColor;
+  final bool isDark;
+  final Color textColor;
 
   @override
   State<_PermissionRow> createState() => _PermissionRowState();
@@ -1183,9 +1089,8 @@ class _PermissionRowState extends State<_PermissionRow> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: widget.isDark
-            ? AppColors.surfaceElevated
-            : const Color(0xFFF5F7F5),
+        color:
+            widget.isDark ? AppColors.surfaceElevated : const Color(0xFFF5F7F5),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: _granted
@@ -1213,16 +1118,16 @@ class _PermissionRowState extends State<_PermissionRow> {
                 Text(
                   widget.label,
                   style: TextStyle(
-                    color:      widget.textColor,
+                    color: widget.textColor,
                     fontWeight: FontWeight.w600,
-                    fontSize:   13,
+                    fontSize: 13,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   widget.subtitle,
                   style: TextStyle(
-                    color:    widget.isDark ? Colors.white38 : Colors.black38,
+                    color: widget.isDark ? Colors.white38 : Colors.black38,
                     fontSize: 11,
                   ),
                 ),

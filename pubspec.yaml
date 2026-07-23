@@ -7,6 +7,8 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
+  provider: ^6.1.2
+  flutter_svg: ^2.0.10
   flutter_skill: ^0.2.6
   flutter:
     sdk: flutter
@@ -21,6 +23,7 @@ dependencies:
   intl: ^0.20.2
   just_audio: ^0.9.0
   just_audio_background: ^0.0.1-beta.14
+  audio_session: ^0.1.19
   http: 1.6.0
   sqflite: ^2.4.1
   adhan: ^2.0.0+1
@@ -30,11 +33,21 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   hijri: ^3.0.1
+  android_alarm_manager_plus: ^4.0.4
+  workmanager: ^0.6.0
+  permission_handler: ^11.3.1
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  flutter_animate: ^4.5.0
+  cached_network_image: ^3.4.1
+  internet_connection_checker_plus: ^2.5.2
+  flutter_overlay_window: 0.5.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+  sqflite_common_ffi: ^2.3.3
 
 flutter:
   uses-material-design: true
@@ -43,9 +56,77 @@ flutter:
     - assets/muslim_house.db
     - assets/images/
     - assets/audio/
+    - assets/icons/light/
+    - assets/icons/dark/
   fonts:
     - family: Amiri
       fonts:
         - asset: assets/fonts/Amiri-Regular.ttf
         - asset: assets/fonts/Amiri-Bold.ttf
           weight: 700
+    - family: QCF_P052
+      fonts:
+        - asset: assets/fonts/QCF4052_X-Regular.woff
+    - family: QCF_P062
+      fonts:
+        - asset: assets/fonts/QCF4062_X-Regular.woff
+    - family: QCF_P113
+      fonts:
+        - asset: assets/fonts/QCF4113_X-Regular.woff
+    - family: QCF_P120
+      fonts:
+        - asset: assets/fonts/QCF4120_X-Regular.woff
+    - family: QCF_P217
+      fonts:
+        - asset: assets/fonts/QCF4217_X-Regular.woff
+    - family: QCF_P261
+      fonts:
+        - asset: assets/fonts/QCF4261_X-Regular.woff
+    - family: QCF_P263
+      fonts:
+        - asset: assets/fonts/QCF4263_X-Regular.woff
+    - family: QCF_P267
+      fonts:
+        - asset: assets/fonts/QCF4267_X-Regular.woff
+    - family: QCF_P277
+      fonts:
+        - asset: assets/fonts/QCF4277_X-Regular.woff
+    - family: QCF_P282
+      fonts:
+        - asset: assets/fonts/QCF4282_X-Regular.woff
+    - family: QCF_P296
+      fonts:
+        - asset: assets/fonts/QCF4296_X-Regular.woff
+    - family: QCF_P304
+      fonts:
+        - asset: assets/fonts/QCF4304_X-Regular.woff
+    - family: QCF_P307
+      fonts:
+        - asset: assets/fonts/QCF4307_X-Regular.woff
+    - family: QCF_P311
+      fonts:
+        - asset: assets/fonts/QCF4311_X-Regular.woff
+    - family: QCF_P321
+      fonts:
+        - asset: assets/fonts/QCF4321_X-Regular.woff
+    - family: QCF_P421
+      fonts:
+        - asset: assets/fonts/QCF4421_X-Regular.woff
+    - family: QCF_P473
+      fonts:
+        - asset: assets/fonts/QCF4473_X-Regular.woff
+    - family: QCF_P499
+      fonts:
+        - asset: assets/fonts/QCF4499_X-Regular.woff
+    - family: QCF_P543
+      fonts:
+        - asset: assets/fonts/QCF4543_X-Regular.woff
+    - family: QCF_P557
+      fonts:
+        - asset: assets/fonts/QCF4557_X-Regular.woff
+    - family: QCF_P563
+      fonts:
+        - asset: assets/fonts/QCF4563_X-Regular.woff
+    - family: QCF_P580
+      fonts:
+        - asset: assets/fonts/QCF4580_X-Regular.woff

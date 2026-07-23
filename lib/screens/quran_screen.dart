@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
@@ -67,8 +66,6 @@ class _QuranScreenState extends State<QuranScreen> {
   /// juzNumber → first page that contains this juz (built once at load)
   final Map<int, int> _juzFirstPage = {};
 
-
-
   /// Juz → list of Hizb entries for the hierarchical navigation index
   /// Each entry: { 'hizb': int, 'surahName': String, 'surahNum': int, 'ayahNum': int, 'page': int }
   Map<int, List<Map<String, dynamic>>> _juzHizbData = {};
@@ -110,13 +107,15 @@ class _QuranScreenState extends State<QuranScreen> {
     _reminderIndex = math.Random().nextInt(quranReminders.length);
     _reminderForceArabic = math.Random().nextInt(100) < 35;
     _loadQuranData();
-    QuranScreen.selectedVerseNotifier.addListener(_handleSelectedVerseNotifierChange);
+    QuranScreen.selectedVerseNotifier
+        .addListener(_handleSelectedVerseNotifierChange);
   }
 
   @override
   void dispose() {
     _sleepTimer?.cancel();
-    QuranScreen.selectedVerseNotifier.removeListener(_handleSelectedVerseNotifierChange);
+    QuranScreen.selectedVerseNotifier
+        .removeListener(_handleSelectedVerseNotifierChange);
     _pageController?.dispose();
     super.dispose();
   }
@@ -145,10 +144,11 @@ class _QuranScreenState extends State<QuranScreen> {
       final db = await DatabaseHelper.instance.database;
 
       // 1. Fetch Surah totals
-      final surahRows = await db.rawQuery('SELECT sura_num, COUNT(*) as totalVerses, MIN(page_aya) as minPage FROM quran GROUP BY sura_num');
+      final surahRows = await db.rawQuery(
+          'SELECT sura_num, COUNT(*) as totalVerses, MIN(page_aya) as minPage FROM quran GROUP BY sura_num');
       final Map<int, int> tmpSurahFirst = {};
       final List<Map<String, dynamic>> tmpSurahs = [];
-      
+
       for (final row in surahRows) {
         final int surahNum = (row['sura_num'] as num?)?.toInt() ?? 0;
         final int totalV = (row['totalVerses'] as num?)?.toInt() ?? 0;
@@ -158,14 +158,16 @@ class _QuranScreenState extends State<QuranScreen> {
           tmpSurahs.add({
             'number': surahNum,
             'name': DatabaseHelper.surahNamesArabicList[surahNum - 1],
-            'transliteration': DatabaseHelper.surahTransliterations[surahNum - 1],
+            'transliteration':
+                DatabaseHelper.surahTransliterations[surahNum - 1],
             'totalVerses': totalV,
           });
         }
       }
 
-      // 2. Fetch Juz 
-      final juzRows = await db.rawQuery('SELECT juz, MIN(page_aya) as minPage FROM quran GROUP BY juz');
+      // 2. Fetch Juz
+      final juzRows = await db.rawQuery(
+          'SELECT juz, MIN(page_aya) as minPage FROM quran GROUP BY juz');
       final Map<int, int> tmpJuzFirst = {};
       for (final row in juzRows) {
         final int juzNum = (row['juz'] as num?)?.toInt() ?? 1;
@@ -174,8 +176,9 @@ class _QuranScreenState extends State<QuranScreen> {
       }
 
       // 3. Fetch Hizb - OPTIMIZED (Very Fast!)
-      final hizbRows = await db.rawQuery('SELECT juz, hezb, MIN(sura_num) as sura_num, MIN(aya_num) as aya_num, MIN(page_aya) as page_aya FROM quran GROUP BY juz, hezb ORDER BY juz, hezb');
-      
+      final hizbRows = await db.rawQuery(
+          'SELECT juz, hezb, MIN(sura_num) as sura_num, MIN(aya_num) as aya_num, MIN(page_aya) as page_aya FROM quran GROUP BY juz, hezb ORDER BY juz, hezb');
+
       final Map<int, List<Map<String, dynamic>>> tmpJuzHizb = {};
       for (final row in hizbRows) {
         final int juzNum = (row['juz'] as num?)?.toInt() ?? 1;
@@ -183,7 +186,9 @@ class _QuranScreenState extends State<QuranScreen> {
         final int surahNum = (row['sura_num'] as num?)?.toInt() ?? 0;
         final int ayaNum = (row['aya_num'] as num?)?.toInt() ?? 1;
         final int pageNum = (row['page_aya'] as num?)?.toInt() ?? 1;
-        final surahName = surahNum > 0 ? DatabaseHelper.surahNamesArabicList[surahNum - 1] : '';
+        final surahName = surahNum > 0
+            ? DatabaseHelper.surahNamesArabicList[surahNum - 1]
+            : '';
 
         tmpJuzHizb.putIfAbsent(juzNum, () => []).add({
           'hizb': hizbNum,
@@ -195,13 +200,16 @@ class _QuranScreenState extends State<QuranScreen> {
       }
 
       // 4. Fetch Page Headers - OPTIMIZED (Very Fast!)
-      final headerRows = await db.rawQuery('SELECT page_aya, MIN(sura_num) as sura_num, MIN(juz) as juz FROM quran GROUP BY page_aya');
+      final headerRows = await db.rawQuery(
+          'SELECT page_aya, MIN(sura_num) as sura_num, MIN(juz) as juz FROM quran GROUP BY page_aya');
       final Map<int, Map<String, dynamic>> tmpPageHeaders = {};
       for (final row in headerRows) {
         final pageNum = (row['page_aya'] as num?)?.toInt() ?? 1;
         final surahNum = (row['sura_num'] as num?)?.toInt() ?? 1;
         final juzNum = (row['juz'] as num?)?.toInt() ?? 1;
-        final surahName = surahNum > 0 ? DatabaseHelper.surahNamesArabicList[surahNum - 1] : '';
+        final surahName = surahNum > 0
+            ? DatabaseHelper.surahNamesArabicList[surahNum - 1]
+            : '';
         tmpPageHeaders[pageNum] = {'surahName': surahName, 'juz': juzNum};
       }
 
@@ -324,7 +332,6 @@ class _QuranScreenState extends State<QuranScreen> {
     _pageController?.jumpToPage(pageNum - 1);
   }
 
-
   // ── Ayah Interactive Actions ──────────────────────────────────────────────
 
   void _onVerseSelected(int surahNumber, int ayahNumber, int pageNum) {
@@ -348,7 +355,7 @@ class _QuranScreenState extends State<QuranScreen> {
 
   void _startAudioForSelectedVerse() {
     if (_selectedVerseData == null) return;
-    
+
     final surahNumber = _selectedVerseData!['surahNumber'] as int;
     final ayahNumber = _selectedVerseData!['ayahNumber'] as int;
 
@@ -368,7 +375,7 @@ class _QuranScreenState extends State<QuranScreen> {
         if (_currentPageIndex + 1 != page) {
           _jumpToPage(page);
         }
-        
+
         final newVerseData = {
           'surahName': DatabaseHelper.surahNamesArabicList[s - 1],
           'text': '',
@@ -376,7 +383,7 @@ class _QuranScreenState extends State<QuranScreen> {
           'surahNumber': s,
           'ayahNumber': a,
         };
-        
+
         if (mounted) {
           setState(() {
             _selectedVerseData = newVerseData;
@@ -389,11 +396,12 @@ class _QuranScreenState extends State<QuranScreen> {
   Future<void> _downloadPageAudio(int pageNumber, QuranReciter reciter) async {
     // Reconstruct verses list for the page via SQLite dynamically for audio downloading
     final db = await DatabaseHelper.instance.database;
-    final rows = await db.rawQuery('SELECT sura_num, aya_num FROM quran WHERE page_aya = ? ORDER BY id_quran_ayat', [pageNumber]);
-    final versesOnPage = rows.map((r) => {
-      'surahNumber': r['sura_num'],
-      'ayahNumber': r['aya_num']
-    }).toList();
+    final rows = await db.rawQuery(
+        'SELECT sura_num, aya_num FROM quran WHERE page_aya = ? ORDER BY id_quran_ayat',
+        [pageNumber]);
+    final versesOnPage = rows
+        .map((r) => {'surahNumber': r['sura_num'], 'ayahNumber': r['aya_num']})
+        .toList();
 
     final ctrl = QuranAudioController.instance;
     ctrl.selectedReciter = reciter;
@@ -418,7 +426,8 @@ class _QuranScreenState extends State<QuranScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('لا توجد علامة محفوظة', style: TextStyle(fontFamily: 'Amiri')),
+          content: const Text('لا توجد علامة محفوظة',
+              style: TextStyle(fontFamily: 'Amiri')),
           backgroundColor: _borderColor,
         ),
       );
@@ -426,7 +435,7 @@ class _QuranScreenState extends State<QuranScreen> {
   }
 
   void _showSleepTimerDialog() {
-    final _customTimeCtrl = TextEditingController();
+    final customTimeCtrl = TextEditingController();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -436,6 +445,7 @@ class _QuranScreenState extends State<QuranScreen> {
         final txtColor = AppTheme.getMainTextColor(themeVal);
         final bg = AppTheme.getCardBgColor(themeVal);
         final primary = AppTheme.getPrimaryColor(themeVal);
+        final l10n = AppLocalizations.of(context)!;
 
         void startTimer(int mins) {
           Navigator.pop(context);
@@ -447,7 +457,9 @@ class _QuranScreenState extends State<QuranScreen> {
           });
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('سيتوقف الصوت بعد $mins دقيقة', style: const TextStyle(fontFamily: 'Amiri', fontSize: 16), textAlign: TextAlign.center),
+              content: Text('${l10n.stopAudioAfter} $mins ${l10n.minutesLabel}',
+                  style: const TextStyle(fontFamily: 'Amiri', fontSize: 16),
+                  textAlign: TextAlign.center),
               backgroundColor: primary,
               behavior: SnackBarBehavior.floating,
               duration: const Duration(seconds: 2),
@@ -456,7 +468,8 @@ class _QuranScreenState extends State<QuranScreen> {
         }
 
         return Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: Container(
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(24),
@@ -464,49 +477,70 @@ class _QuranScreenState extends State<QuranScreen> {
               color: bg,
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
-                BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 20, offset: const Offset(0, 10)),
+                BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10)),
               ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.nights_stay_rounded, size: 42, color: primary.withValues(alpha: 0.8)),
+                Icon(Icons.nights_stay_rounded,
+                    size: 42, color: primary.withValues(alpha: 0.8)),
                 const SizedBox(height: 12),
-                Text('مؤقت النوم', style: TextStyle(fontFamily: 'Amiri', fontSize: 24, fontWeight: FontWeight.bold, color: txtColor)),
+                Text(l10n.sleepTimer,
+                    style: TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: txtColor)),
                 const SizedBox(height: 4),
-                Text('إيقاف الصوت تلقائياً بعد:', style: TextStyle(fontFamily: 'Amiri', fontSize: 16, color: txtColor.withValues(alpha: 0.6))),
+                Text(l10n.stopAudioAfter,
+                    style: TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: 16,
+                        color: txtColor.withValues(alpha: 0.6))),
                 const SizedBox(height: 24),
-                
                 Wrap(
                   spacing: 12,
                   runSpacing: 12,
                   alignment: WrapAlignment.center,
-                  children: [15, 30, 45, 60].map((mins) => Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => startTimer(mins),
-                      borderRadius: BorderRadius.circular(16),
-                      child: Ink(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: primary.withValues(alpha: 0.1),
-                          border: Border.all(color: primary.withValues(alpha: 0.3), width: 1.5),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Text(
-                          '$mins\nدقيقة',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.bold, color: primary, height: 1.2),
-                        ),
-                      ),
-                    ),
-                  )).toList(),
+                  children: [15, 30, 45, 60]
+                      .map((mins) => Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () => startTimer(mins),
+                              borderRadius: BorderRadius.circular(16),
+                              child: Ink(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: primary.withValues(alpha: 0.1),
+                                  border: Border.all(
+                                      color: primary.withValues(alpha: 0.3),
+                                      width: 1.5),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Text(
+                                  '$mins\n${l10n.minutesLabel}',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: primary,
+                                      height: 1.2),
+                                ),
+                              ),
+                            ),
+                          ))
+                      .toList(),
                 ),
-                
                 const SizedBox(height: 24),
-                
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   decoration: BoxDecoration(
                     color: txtColor.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(16),
@@ -517,29 +551,44 @@ class _QuranScreenState extends State<QuranScreen> {
                     children: [
                       Expanded(
                         child: TextField(
-                          controller: _customTimeCtrl,
+                          controller: customTimeCtrl,
                           keyboardType: TextInputType.number,
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: txtColor, fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              color: txtColor,
+                              fontFamily: 'Inter',
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold),
                           decoration: InputDecoration(
-                            hintText: 'دقيقة مخصصة...',
-                            hintStyle: TextStyle(color: txtColor.withValues(alpha: 0.4), fontFamily: 'Amiri', fontSize: 16, fontWeight: FontWeight.normal),
+                            hintText: l10n.customMinHint,
+                            hintStyle: TextStyle(
+                                color: txtColor.withValues(alpha: 0.4),
+                                fontFamily: 'Amiri',
+                                fontSize: 16,
+                                fontWeight: FontWeight.normal),
                             border: InputBorder.none,
                           ),
                         ),
                       ),
-                      Container(width: 1, height: 24, color: txtColor.withValues(alpha: 0.2)),
+                      Container(
+                          width: 1,
+                          height: 24,
+                          color: txtColor.withValues(alpha: 0.2)),
                       TextButton(
                         onPressed: () {
-                          final mins = int.tryParse(_customTimeCtrl.text);
+                          final mins = int.tryParse(customTimeCtrl.text);
                           if (mins != null && mins > 0) startTimer(mins);
                         },
-                        child: Text('بدء', style: TextStyle(fontFamily: 'Amiri', fontSize: 18, fontWeight: FontWeight.bold, color: primary)),
+                        child: Text(l10n.start,
+                            style: TextStyle(
+                                fontFamily: 'Amiri',
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: primary)),
                       )
                     ],
                   ),
                 ),
-                
                 if (_sleepTimer != null && _sleepTimer!.isActive) ...[
                   const SizedBox(height: 24),
                   TextButton.icon(
@@ -548,18 +597,28 @@ class _QuranScreenState extends State<QuranScreen> {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: const Text('تم إلغاء المؤقت', style: TextStyle(fontFamily: 'Amiri', fontSize: 16), textAlign: TextAlign.center),
+                          content: Text(l10n.timerCanceled,
+                              style: const TextStyle(
+                                  fontFamily: 'Amiri', fontSize: 16),
+                              textAlign: TextAlign.center),
                           backgroundColor: txtColor.withValues(alpha: 0.8),
                           behavior: SnackBarBehavior.floating,
                           duration: const Duration(seconds: 2),
                         ),
                       );
                     },
-                    icon: const Icon(Icons.timer_off_outlined, color: Colors.redAccent),
-                    label: const Text('إلغاء المؤقت الحالي', style: TextStyle(fontFamily: 'Amiri', fontSize: 16, color: Colors.redAccent)),
+                    icon: const Icon(Icons.timer_off_outlined,
+                        color: Colors.redAccent),
+                    label: Text(l10n.cancelCurrentTimer,
+                        style: const TextStyle(
+                            fontFamily: 'Amiri',
+                            fontSize: 16,
+                            color: Colors.redAccent)),
                     style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                       backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
                     ),
                   )
@@ -585,8 +644,16 @@ class _QuranScreenState extends State<QuranScreen> {
 
   String _toArabicNumerals(int number) {
     const Map<String, String> digits = {
-      '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',
-      '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩',
+      '0': '٠',
+      '1': '١',
+      '2': '٢',
+      '3': '٣',
+      '4': '٤',
+      '5': '٥',
+      '6': '٦',
+      '7': '٧',
+      '8': '٨',
+      '9': '٩',
     };
     return number.toString().split('').map((c) => digits[c] ?? c).join('');
   }
@@ -613,7 +680,8 @@ class _QuranScreenState extends State<QuranScreen> {
         },
         onJumpToAyah: (surahNum, ayahNum) async {
           Navigator.pop(ctx);
-          final page = await DatabaseHelper.instance.getPageForAyah(surahNum, ayahNum);
+          final page =
+              await DatabaseHelper.instance.getPageForAyah(surahNum, ayahNum);
           _jumpToPage(page);
         },
       ),
@@ -683,7 +751,8 @@ class _QuranScreenState extends State<QuranScreen> {
               : ListenableBuilder(
                   listenable: QuranAudioController.instance,
                   builder: (context, _) {
-                    final hasOverlay = QuranAudioController.instance.isActive || _selectedVerseData != null;
+                    final hasOverlay = QuranAudioController.instance.isActive ||
+                        _selectedVerseData != null;
 
                     return Stack(
                       children: [
@@ -700,8 +769,10 @@ class _QuranScreenState extends State<QuranScreen> {
                               itemBuilder: (context, index) {
                                 final pageNum = index + 1;
                                 final header = _pageHeaders[pageNum] ?? {};
-                                final surahName = header['surahName'] as String? ?? "";
-                                final juzNumber = _toArabicNumerals(header['juz'] as int? ?? 1);
+                                final surahName =
+                                    header['surahName'] as String? ?? "";
+                                final juzNumber = _toArabicNumerals(
+                                    header['juz'] as int? ?? 1);
 
                                 return Center(
                                   child: AspectRatio(
@@ -717,59 +788,117 @@ class _QuranScreenState extends State<QuranScreen> {
                                             // 1. The Border that hugs everything
                                             Positioned.fill(
                                               child: Container(
-                                                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                                                margin:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 20,
+                                                        vertical: 20),
                                                 decoration: BoxDecoration(
                                                   color: _pageBgColor,
-                                                  border: Border.all(color: _borderColor, width: 2.0),
-                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: Border.all(
+                                                      color: _borderColor,
+                                                      width: 2.0),
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
                                                 ),
                                                 child: Column(
                                                   children: [
                                                     const SizedBox(height: 15),
                                                     // Surah and Juz Headers with container badges
                                                     Padding(
-                                                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          horizontal: 20),
                                                       child: Row(
-                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
                                                         children: [
                                                           GestureDetector(
-                                                            onTap: _openNavigationPanel,
-                                                            behavior: HitTestBehavior.opaque,
+                                                            onTap:
+                                                                _openNavigationPanel,
+                                                            behavior:
+                                                                HitTestBehavior
+                                                                    .opaque,
                                                             child: Container(
-                                                              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 2.0),
-                                                              decoration: BoxDecoration(
-                                                                color: _screenBgColor,
-                                                                borderRadius: BorderRadius.circular(6),
-                                                                border: Border.all(color: _goldTextColor.withValues(alpha: 0.5), width: 1.2),
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .symmetric(
+                                                                      horizontal:
+                                                                          10.0,
+                                                                      vertical:
+                                                                          2.0),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color:
+                                                                    _screenBgColor,
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            6),
+                                                                border: Border.all(
+                                                                    color: _goldTextColor
+                                                                        .withValues(
+                                                                            alpha:
+                                                                                0.5),
+                                                                    width: 1.2),
                                                               ),
                                                               child: Text(
                                                                 'سُورَةُ $surahName',
-                                                                style: TextStyle(
-                                                                  fontFamily: 'Amiri',
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontFamily:
+                                                                      'Amiri',
                                                                   fontSize: 13,
-                                                                  fontWeight: FontWeight.bold,
-                                                                  color: _mainTextColor,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color:
+                                                                      _mainTextColor,
                                                                 ),
                                                               ),
                                                             ),
                                                           ),
                                                           GestureDetector(
-                                                            onTap: _openNavigationPanel,
-                                                            behavior: HitTestBehavior.opaque,
+                                                            onTap:
+                                                                _openNavigationPanel,
+                                                            behavior:
+                                                                HitTestBehavior
+                                                                    .opaque,
                                                             child: Container(
-                                                              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 2.0),
-                                                              decoration: BoxDecoration(
-                                                                color: _screenBgColor,
-                                                                borderRadius: BorderRadius.circular(6),
-                                                                border: Border.all(color: _goldTextColor.withValues(alpha: 0.5), width: 1.2),
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .symmetric(
+                                                                      horizontal:
+                                                                          10.0,
+                                                                      vertical:
+                                                                          2.0),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color:
+                                                                    _screenBgColor,
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            6),
+                                                                border: Border.all(
+                                                                    color: _goldTextColor
+                                                                        .withValues(
+                                                                            alpha:
+                                                                                0.5),
+                                                                    width: 1.2),
                                                               ),
                                                               child: Text(
                                                                 'الجُزْءُ $juzNumber',
-                                                                style: TextStyle(
-                                                                  fontFamily: 'Amiri',
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontFamily:
+                                                                      'Amiri',
                                                                   fontSize: 13,
-                                                                  fontWeight: FontWeight.bold,
-                                                                  color: _mainTextColor,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color:
+                                                                      _mainTextColor,
                                                                 ),
                                                               ),
                                                             ),
@@ -778,65 +907,137 @@ class _QuranScreenState extends State<QuranScreen> {
                                                       ),
                                                     ),
                                                     const SizedBox(height: 10),
-                                                    
+
                                                     // Reminder ONLY on Pages 1 & 2 (Inside the border, above Surah Header graphic)
-                                                    if (pageNum == 1 || pageNum == 2)
+                                                    if (pageNum == 1 ||
+                                                        pageNum == 2)
                                                       Padding(
-                                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                                                        child: QuranReminderWidget(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                horizontal: 20,
+                                                                vertical: 5),
+                                                        child:
+                                                            QuranReminderWidget(
                                                           pageNum: pageNum,
-                                                          languageCode: Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar',
-                                                          textColor: _mainTextColor,
-                                                          reminderIndex: _reminderIndex,
-                                                          forceArabic: _reminderForceArabic,
+                                                          languageCode: Localizations
+                                                                      .maybeLocaleOf(
+                                                                          context)
+                                                                  ?.languageCode ??
+                                                              'ar',
+                                                          textColor:
+                                                              _mainTextColor,
+                                                          reminderIndex:
+                                                              _reminderIndex,
+                                                          forceArabic:
+                                                              _reminderForceArabic,
                                                         ),
                                                       ),
 
                                                     // The Quran Text (Expands to push page number to bottom)
                                                     Expanded(
                                                       child: Padding(
-                                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                horizontal: 10),
                                                         child: Directionality(
-                                                          textDirection: TextDirection.rtl,
-                                                          child: ListenableBuilder(
-                                                            listenable: QuranAudioController.instance,
-                                                            builder: (context, _) {
-                                                              final ctrl = QuranAudioController.instance;
+                                                          textDirection:
+                                                              TextDirection.rtl,
+                                                          child:
+                                                              ListenableBuilder(
+                                                            listenable:
+                                                                QuranAudioController
+                                                                    .instance,
+                                                            builder:
+                                                                (context, _) {
+                                                              final ctrl =
+                                                                  QuranAudioController
+                                                                      .instance;
                                                               return StrictQcfPage(
-                                                                pageNumber: pageNum,
-                                                                theme: _qcfTheme.copyWith(pageBackgroundColor: Colors.transparent),
-                                                                onTap: (s, a) => _onVerseSelected(s, a, pageNum),
-                                                                highlightedSurah: ctrl.isActive ? ctrl.currentSurah : null,
-                                                                highlightedAyah: ctrl.isActive ? ctrl.currentAyah : null,
-                                                                bookmarkedSurah: _bookmarkedSurah,
-                                                                bookmarkedAyah: _bookmarkedAyah,
+                                                                pageNumber:
+                                                                    pageNum,
+                                                                theme: _qcfTheme.copyWith(
+                                                                    pageBackgroundColor:
+                                                                        Colors
+                                                                            .transparent),
+                                                                onTap: (s, a) =>
+                                                                    _onVerseSelected(
+                                                                        s,
+                                                                        a,
+                                                                        pageNum),
+                                                                highlightedSurah:
+                                                                    ctrl.isActive
+                                                                        ? ctrl
+                                                                            .currentSurah
+                                                                        : null,
+                                                                highlightedAyah:
+                                                                    ctrl.isActive
+                                                                        ? ctrl
+                                                                            .currentAyah
+                                                                        : null,
+                                                                activeWordIndex:
+                                                                    ctrl.isActive
+                                                                        ? ctrl
+                                                                            .activeWordPosition
+                                                                        : null,
+                                                                bookmarkedSurah:
+                                                                    _bookmarkedSurah,
+                                                                bookmarkedAyah:
+                                                                    _bookmarkedAyah,
                                                               );
                                                             },
                                                           ),
                                                         ),
                                                       ),
                                                     ),
-                                                    
+
                                                     // Page Number with container badge
                                                     Padding(
-                                                      padding: const EdgeInsets.only(bottom: 10),
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              bottom: 10),
                                                       child: GestureDetector(
-                                                        onTap: _openNavigationPanel,
-                                                        behavior: HitTestBehavior.opaque,
+                                                        onTap:
+                                                            _openNavigationPanel,
+                                                        behavior:
+                                                            HitTestBehavior
+                                                                .opaque,
                                                         child: Container(
-                                                          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 2.0),
-                                                          decoration: BoxDecoration(
-                                                            color: _screenBgColor,
-                                                            borderRadius: BorderRadius.circular(6),
-                                                            border: Border.all(color: _goldTextColor.withValues(alpha: 0.5), width: 1.2),
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  horizontal:
+                                                                      10.0,
+                                                                  vertical:
+                                                                      2.0),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color:
+                                                                _screenBgColor,
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        6),
+                                                            border: Border.all(
+                                                                color: _goldTextColor
+                                                                    .withValues(
+                                                                        alpha:
+                                                                            0.5),
+                                                                width: 1.2),
                                                           ),
                                                           child: Text(
-                                                            _toArabicNumerals(pageNum),
+                                                            _toArabicNumerals(
+                                                                pageNum),
                                                             style: TextStyle(
-                                                              fontFamily: 'Amiri',
+                                                              fontFamily:
+                                                                  'Amiri',
                                                               fontSize: 20,
-                                                              fontWeight: FontWeight.bold,
-                                                              color: _mainTextColor,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              color:
+                                                                  _mainTextColor,
                                                             ),
                                                           ),
                                                         ),
@@ -857,7 +1058,7 @@ class _QuranScreenState extends State<QuranScreen> {
                           ),
                         ),
                         Positioned(
-                          bottom: 24.0,
+                          bottom: 14.0,
                           left: 0,
                           right: 0,
                           child: Center(
@@ -865,12 +1066,21 @@ class _QuranScreenState extends State<QuranScreen> {
                               listenable: QuranAudioController.instance,
                               builder: (context, _) {
                                 if (QuranAudioController.instance.isActive) {
-                                  return QuranMiniPlayerBar(onTimerTap: _showSleepTimerDialog);
+                                  return QuranMiniPlayerBar(
+                                      onTimerTap: _showSleepTimerDialog);
                                 }
                                 if (_selectedVerseData != null) {
-                                  final selSurah = _selectedVerseData!['surahNumber'] as int? ?? 1;
-                                  final selAyah = _selectedVerseData!['ayahNumber'] as int? ?? 1;
-                                  final isVerseBookmarked = _bookmarkedSurah == selSurah && _bookmarkedAyah == selAyah;
+                                  final selSurah =
+                                      _selectedVerseData!['surahNumber']
+                                              as int? ??
+                                          1;
+                                  final selAyah =
+                                      _selectedVerseData!['ayahNumber']
+                                              as int? ??
+                                          1;
+                                  final isVerseBookmarked =
+                                      _bookmarkedSurah == selSurah &&
+                                          _bookmarkedAyah == selAyah;
 
                                   return AyahActionBar(
                                     verseData: _selectedVerseData!,
@@ -879,7 +1089,8 @@ class _QuranScreenState extends State<QuranScreen> {
                                       setState(() {
                                         _selectedVerseData = null;
                                       });
-                                      QuranScreen.selectedVerseNotifier.value = null;
+                                      QuranScreen.selectedVerseNotifier.value =
+                                          null;
                                     },
                                     isBookmarked: isVerseBookmarked,
                                     onBookmarkChanged: _loadBookmark,
@@ -889,13 +1100,19 @@ class _QuranScreenState extends State<QuranScreen> {
                                     onOpenSearch: _openQuranWordSearch,
                                     onDownloadPage: _downloadPageAudio,
                                     onIsPageDownloaded: (pageNum) async {
-                                      final db = await DatabaseHelper.instance.database;
-                                      final rows = await db.rawQuery('SELECT sura_num, aya_num FROM quran WHERE page_aya = ?', [pageNum]);
+                                      final db = await DatabaseHelper
+                                          .instance.database;
+                                      final rows = await db.rawQuery(
+                                          'SELECT sura_num, aya_num FROM quran WHERE page_aya = ?',
+                                          [pageNum]);
                                       if (rows.isEmpty) return false;
                                       for (final v in rows) {
                                         final s = v['sura_num'] as int? ?? 1;
                                         final a = v['aya_num'] as int? ?? 1;
-                                        if (await QuranAudioController.instance.hasOfflineAudio(s, a)) return true;
+                                        if (await QuranAudioController.instance
+                                            .hasOfflineAudio(s, a)) {
+                                          return true;
+                                        }
                                       }
                                       return false;
                                     },
@@ -948,11 +1165,15 @@ class _ThemeOption extends StatelessWidget {
           color: bgColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? borderColor : Colors.grey.withValues(alpha: 0.3),
+            color:
+                isSelected ? borderColor : Colors.grey.withValues(alpha: 0.3),
             width: isSelected ? 2.5 : 1,
           ),
           boxShadow: isSelected
-              ? [BoxShadow(color: borderColor.withValues(alpha: 0.3), blurRadius: 6)]
+              ? [
+                  BoxShadow(
+                      color: borderColor.withValues(alpha: 0.3), blurRadius: 6)
+                ]
               : null,
         ),
         alignment: Alignment.center,
@@ -1190,7 +1411,10 @@ class _SurahAyahTabState extends State<_SurahAyahTab> {
                   const SizedBox(height: 16),
                   Text(
                     'اختر رقم الآية (أو اكتبه مباشرة)',
-                    style: TextStyle(fontFamily: 'Amiri', fontSize: 16, color: widget.mainTextColor),
+                    style: TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: 16,
+                        color: widget.mainTextColor),
                   ),
                   const SizedBox(height: 12),
                   Padding(
@@ -1200,7 +1424,10 @@ class _SurahAyahTabState extends State<_SurahAyahTab> {
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.center,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: widget.mainTextColor),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: widget.mainTextColor),
                       decoration: InputDecoration(
                         hintText: 'الآية...',
                         contentPadding: const EdgeInsets.symmetric(vertical: 8),
@@ -1210,7 +1437,8 @@ class _SurahAyahTabState extends State<_SurahAyahTab> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: widget.goldTextColor, width: 1.8),
+                          borderSide: BorderSide(
+                              color: widget.goldTextColor, width: 1.8),
                         ),
                       ),
                       onChanged: updateFromTextField,
@@ -1270,7 +1498,8 @@ class _SurahAyahTabState extends State<_SurahAyahTab> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('إلغاء', style: TextStyle(color: Colors.grey)),
+                child:
+                    const Text('إلغاء', style: TextStyle(color: Colors.grey)),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -1315,7 +1544,8 @@ class _SurahAyahTabState extends State<_SurahAyahTab> {
               prefixIcon: Icon(Icons.search, color: widget.borderColor),
               filled: true,
               fillColor: widget.borderColor.withValues(alpha: 0.07),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -1336,7 +1566,8 @@ class _SurahAyahTabState extends State<_SurahAyahTab> {
             itemBuilder: (context, i) {
               final surah = _filtered[i];
               return ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                 leading: Container(
                   width: 38,
                   height: 38,
@@ -1412,14 +1643,36 @@ class _JuzHizbTabState extends State<_JuzHizbTab> {
   late final Set<int> _expandedJuz;
 
   static const List<String> _juzNames = [
-    'الجزء الأول', 'الجزء الثاني', 'الجزء الثالث', 'الجزء الرابع', 'الجزء الخامس',
-    'الجزء السادس', 'الجزء السابع', 'الجزء الثامن', 'الجزء التاسع', 'الجزء العاشر',
-    'الجزء الحادي عشر', 'الجزء الثاني عشر', 'الجزء الثالث عشر', 'الجزء الرابع عشر',
-    'الجزء الخامس عشر', 'الجزء السادس عشر', 'الجزء السابع عشر', 'الجزء الثامن عشر',
-    'الجزء التاسع عشر', 'الجزء العشرون', 'الجزء الحادي والعشرون', 'الجزء الثاني والعشرون',
-    'الجزء الثالث والعشرون', 'الجزء الرابع والعشرون', 'الجزء الخامس والعشرون',
-    'الجزء السادس والعشرون', 'الجزء السابع والعشرون', 'الجزء الثامن والعشرون',
-    'الجزء التاسع والعشرون', 'الجزء الثلاثون',
+    'الجزء الأول',
+    'الجزء الثاني',
+    'الجزء الثالث',
+    'الجزء الرابع',
+    'الجزء الخامس',
+    'الجزء السادس',
+    'الجزء السابع',
+    'الجزء الثامن',
+    'الجزء التاسع',
+    'الجزء العاشر',
+    'الجزء الحادي عشر',
+    'الجزء الثاني عشر',
+    'الجزء الثالث عشر',
+    'الجزء الرابع عشر',
+    'الجزء الخامس عشر',
+    'الجزء السادس عشر',
+    'الجزء السابع عشر',
+    'الجزء الثامن عشر',
+    'الجزء التاسع عشر',
+    'الجزء العشرون',
+    'الجزء الحادي والعشرون',
+    'الجزء الثاني والعشرون',
+    'الجزء الثالث والعشرون',
+    'الجزء الرابع والعشرون',
+    'الجزء الخامس والعشرون',
+    'الجزء السادس والعشرون',
+    'الجزء السابع والعشرون',
+    'الجزء الثامن والعشرون',
+    'الجزء التاسع والعشرون',
+    'الجزء الثلاثون',
   ];
 
   @override
@@ -1430,8 +1683,16 @@ class _JuzHizbTabState extends State<_JuzHizbTab> {
 
   String _toArabicNumerals(int number) {
     const Map<String, String> digits = {
-      '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',
-      '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩',
+      '0': '٠',
+      '1': '١',
+      '2': '٢',
+      '3': '٣',
+      '4': '٤',
+      '5': '٥',
+      '6': '٦',
+      '7': '٧',
+      '8': '٨',
+      '9': '٩',
     };
     return number.toString().split('').map((c) => digits[c] ?? c).join('');
   }
@@ -1445,7 +1706,8 @@ class _JuzHizbTabState extends State<_JuzHizbTab> {
         final juzNum = index + 1;
         final hizbs = widget.juzHizbData[juzNum] ?? [];
         final isExpanded = _expandedJuz.contains(juzNum);
-        final firstPage = hizbs.isNotEmpty ? (hizbs.first['page'] as int? ?? 1) : 1;
+        final firstPage =
+            hizbs.isNotEmpty ? (hizbs.first['page'] as int? ?? 1) : 1;
 
         return Column(
           children: [
@@ -1461,7 +1723,8 @@ class _JuzHizbTabState extends State<_JuzHizbTab> {
                 });
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
                   color: widget.borderColor.withValues(alpha: 0.08),
                   border: Border(
@@ -1482,7 +1745,8 @@ class _JuzHizbTabState extends State<_JuzHizbTab> {
                       decoration: BoxDecoration(
                         color: widget.borderColor.withValues(alpha: 0.15),
                         shape: BoxShape.circle,
-                        border: Border.all(color: widget.borderColor, width: 1.2),
+                        border:
+                            Border.all(color: widget.borderColor, width: 1.2),
                       ),
                       child: Text(
                         _toArabicNumerals(juzNum),
@@ -1538,15 +1802,16 @@ class _JuzHizbTabState extends State<_JuzHizbTab> {
               firstChild: const SizedBox.shrink(),
               secondChild: Column(
                 children: hizbs.map((hizb) {
-                  final int hizbNum   = (hizb['hizb'] as int?) ?? 1;
-                  final String sName  = (hizb['surahName'] as String?) ?? '';
-                  final int ayahNum   = (hizb['ayahNum'] as int?) ?? 1;
-                  final int page      = (hizb['page'] as int?) ?? 1;
+                  final int hizbNum = (hizb['hizb'] as int?) ?? 1;
+                  final String sName = (hizb['surahName'] as String?) ?? '';
+                  final int ayahNum = (hizb['ayahNum'] as int?) ?? 1;
+                  final int page = (hizb['page'] as int?) ?? 1;
 
                   return InkWell(
                     onTap: () => widget.onJumpToPage(page),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
                       decoration: BoxDecoration(
                         color: widget.pageBgColor,
                         border: Border(
@@ -1591,7 +1856,8 @@ class _JuzHizbTabState extends State<_JuzHizbTab> {
                                   style: TextStyle(
                                     fontFamily: 'Amiri',
                                     fontSize: 13,
-                                    color: widget.mainTextColor.withValues(alpha: 0.7),
+                                    color: widget.mainTextColor
+                                        .withValues(alpha: 0.7),
                                   ),
                                 ),
                               ],
@@ -1599,7 +1865,8 @@ class _JuzHizbTabState extends State<_JuzHizbTab> {
                           ),
                           // Page number
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
                               color: widget.borderColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
@@ -1702,10 +1969,12 @@ class _PagesTabState extends State<_PagesTab> {
                   decoration: InputDecoration(
                     hintText: 'اكتب رقم الصفحة (1 - 604)...',
                     hintStyle: const TextStyle(color: Colors.grey),
-                    prefixIcon: Icon(Icons.find_in_page, color: widget.borderColor),
+                    prefixIcon:
+                        Icon(Icons.find_in_page, color: widget.borderColor),
                     filled: true,
                     fillColor: widget.borderColor.withValues(alpha: 0.07),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -1722,12 +1991,14 @@ class _PagesTabState extends State<_PagesTab> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
                 onPressed: _submitPage,
                 child: const Text(
                   'انتقل',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Amiri'),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, fontFamily: 'Amiri'),
                 ),
               ),
             ],
@@ -1752,10 +2023,14 @@ class _PagesTabState extends State<_PagesTab> {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
                   decoration: BoxDecoration(
-                    color: isCurrent ? widget.borderColor : widget.borderColor.withValues(alpha: 0.08),
+                    color: isCurrent
+                        ? widget.borderColor
+                        : widget.borderColor.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                      color: isCurrent ? widget.goldTextColor : widget.borderColor.withValues(alpha: 0.4),
+                      color: isCurrent
+                          ? widget.goldTextColor
+                          : widget.borderColor.withValues(alpha: 0.4),
                       width: isCurrent ? 2 : 1,
                     ),
                   ),
@@ -1814,310 +2089,503 @@ class _CircleButton extends StatelessWidget {
 final List<Map<String, String>> quranReminders = [
   // المجموعة 1: آيات وأحاديث ورفع القرآن
   {
-    'ar': '⚠️ {أَلَمْ يَأْنِ لِلَّذِينَ آمَنُوا أَن تَخْشَعَ قُلُوبُهُمْ لِذِكْرِ اللَّهِ وَمَا نَزَلَ مِنَ الْحَقِّ}.. اقرأ بقلبٍ حاضر.',
-    'en': '⚠️ {Has the time not come for those who have believed that their hearts should submit to the remembrance of Allah and what has come down of the truth...} Read with an attentive heart.',
-    'am': '⚠️ {ካመኑት ወገኖች ልቦቻቸው ለአላህ ውሳኔና ከእውነት ለወረደው (ለቁርኣን) ሊሰበሩና ሊያጎነብሱ ጊዜው አልደረሰምን?}.. በልብህ ተገኝተህ አንብብ።',
-    'om': '⚠️ {Yeroon warra amananiif qalbiiwwan isaanii zikrii Allaahifi dhugaa bu’eef akka laaftu hin geennee?...} Qalbii dammaqiinsaan dubbisi.',
+    'ar':
+        '⚠️ {أَلَمْ يَأْنِ لِلَّذِينَ آمَنُوا أَن تَخْشَعَ قُلُوبُهُمْ لِذِكْرِ اللَّهِ وَمَا نَزَلَ مِنَ الْحَقِّ}.. اقرأ بقلبٍ حاضر.',
+    'en':
+        '⚠️ {Has the time not come for those who have believed that their hearts should submit to the remembrance of Allah and what has come down of the truth...} Read with an attentive heart.',
+    'am':
+        '⚠️ {ካመኑት ወገኖች ልቦቻቸው ለአላህ ውሳኔና ከእውነት ለወረደው (ለቁርኣን) ሊሰበሩና ሊያጎነብሱ ጊዜው አልደረሰምን?}.. በልብህ ተገኝተህ አንብብ።',
+    'om':
+        '⚠️ {Yeroon warra amananiif qalbiiwwan isaanii zikrii Allaahifi dhugaa bu’eef akka laaftu hin geennee?...} Qalbii dammaqiinsaan dubbisi.',
   },
   {
-    'ar': '🚨 سيأتي زمانٌ يُسرى على كتاب الله في ليلة فلا يبقى في الأرض منه آية، وتُغلق التوبة.. ماذا أنت فاعلٌ بمصحفك اليوم؟',
-    'en': '🚨 A time will come when the Book of Allah will be taken away in a single night, leaving not a single verse on Earth, and repentance will be closed... What are you doing with your Mus-haf today?',
-    'am': '🚨 የአላህ መጽሐፍ (ቁርኣን) በአንድ ሌሊት የሚነጠቅበትና በምድር ላይ አንዲትም አንቀጽ የማይቀርበት، ተውበትም የሚዘጋበት ጊዜ ይመጣል። ዛሬ ከቁርኣንህ ጋር ምን እያደረግክ ነው?',
-    'om': "🚨 Yeroon Kitaabni Allaah halkan tokkotti ol fudhamuufi dachii irratti aayanni tokkollee hin hafne, tawbaanis cufamu ni dhufa... Har'a immoo ati qur'aana keetiin maal gochaa jirtaa?",
+    'ar':
+        '🚨 سيأتي زمانٌ يُسرى على كتاب الله في ليلة فلا يبقى في الأرض منه آية، وتُغلق التوبة.. ماذا أنت فاعلٌ بمصحفك اليوم؟',
+    'en':
+        '🚨 A time will come when the Book of Allah will be taken away in a single night, leaving not a single verse on Earth, and repentance will be closed... What are you doing with your Mus-haf today?',
+    'am':
+        '🚨 የአላህ መጽሐፍ (ቁርኣን) በአንድ ሌሊት የሚነጠቅበትና በምድር ላይ አንዲትም አንቀጽ የማይቀርበት، ተውበትም የሚዘጋበት ጊዜ ይመጣል። ዛሬ ከቁርኣንህ ጋር ምን እያደረግክ ነው?',
+    'om':
+        "🚨 Yeroon Kitaabni Allaah halkan tokkotti ol fudhamuufi dachii irratti aayanni tokkollee hin hafne, tawbaanis cufamu ni dhufa... Har'a immoo ati qur'aana keetiin maal gochaa jirtaa?",
   },
   {
-    'ar': '⏱️ فرصتك الآن بين يديك! اقرأ وتدبر بقلبك قبل أن يُرفع القرآن من الصدور والسطور.',
-    'en': '⏱️ Your opportunity is now in your hands! Read and contemplate with your heart before the Qur\'an is lifted from hearts and pages.',
+    'ar':
+        '⏱️ فرصتك الآن بين يديك! اقرأ وتدبر بقلبك قبل أن يُرفع القرآن من الصدور والسطور.',
+    'en':
+        '⏱️ Your opportunity is now in your hands! Read and contemplate with your heart before the Qur\'an is lifted from hearts and pages.',
     'am': '⏱️ ዕድሉ አሁን በእጅህ ነው! ቁርኣን ከልቦችና ከገጾች ከመነሳቱ በፊት በልብህ አንብብና አሰላስል።',
-    'om': "⏱️ Carraan kee amma harka kee jira! Qur'aanni onneefi barruu keessaa osoo hin fudaatamin dura qalbii keetiin dubbisi, xiinxali.",
+    'om':
+        "⏱️ Carraan kee amma harka kee jira! Qur'aanni onneefi barruu keessaa osoo hin fudaatamin dura qalbii keetiin dubbisi, xiinxali.",
   },
   {
-    'ar': '📖 قال النبي ﷺ: «اقرؤوا القرآن فإنه يأتي يوم القيامة شفيعاً لأصحابه».. فضمن شفاعته الآن.',
-    'en': '📖 The Prophet ﷺ said: "Read the Qur\'an, for it will come on the Day of Resurrection as an intercessor for its companions." Secure its intercession now.',
+    'ar':
+        '📖 قال النبي ﷺ: «اقرؤوا القرآن فإنه يأتي يوم القيامة شفيعاً لأصحابه».. فضمن شفاعته الآن.',
+    'en':
+        '📖 The Prophet ﷺ said: "Read the Qur\'an, for it will come on the Day of Resurrection as an intercessor for its companions." Secure its intercession now.',
     'am': '📖 ቁርኣንን አንብቡ፤ በትንሣኤ ቀን ለባልደረቦቹ አማላጅ ሆኖ ይመጣልና።',
-    'om': '📖 Nabiyyiin ﷺ jedhan: "Qur’aana dubbisaa, inni Guyyaa Qiyamaa saahiboota isaatiif shafaa’aa (mangaastuu) ta’ee ni dhufaa." Ammuma shafaa’ummaa isaa mirkaneeffadhu.',
+    'om':
+        '📖 Nabiyyiin ﷺ jedhan: "Qur’aana dubbisaa, inni Guyyaa Qiyamaa saahiboota isaatiif shafaa’aa (mangaastuu) ta’ee ni dhufaa." Ammuma shafaa’ummaa isaa mirkaneeffadhu.',
   },
   {
-    'ar': '💎 قال النبي ﷺ: «الماهر بالقرآن مع السفرة الكرام البررة».. جاهد لتكون معهم.',
-    'en': '💎 The Prophet ﷺ said: "The one who is proficient in the Qur\'an will be with the noble and obedient scribes (angels)." Strive to be with them.',
-    'am': '💎 ነቢዩ ﷺ እንዲህ ብለዋል፡- «በቁرኣን ጎበز የሆነው ከተከበሩትና ታዛዦች መላእክት ጋር ነው።» ከእነሱ ጋር ለመሆን ታገል።',
-    'om': '💎 Nabiyyiin ﷺ jedhan: "Inni qur’aana ogummaan dubbisu malaykoota kabajamoo fi qajeeloo waliin ta\'a." Isaaniin waliin ta\'uuf qabsaa\'i.',
+    'ar':
+        '💎 قال النبي ﷺ: «الماهر بالقرآن مع السفرة الكرام البررة».. جاهد لتكون معهم.',
+    'en':
+        '💎 The Prophet ﷺ said: "The one who is proficient in the Qur\'an will be with the noble and obedient scribes (angels)." Strive to be with them.',
+    'am':
+        '💎 ነቢዩ ﷺ እንዲህ ብለዋል፡- «በቁرኣን ጎበز የሆነው ከተከበሩትና ታዛዦች መላእክት ጋር ነው።» ከእነሱ ጋር ለመሆን ታገል።',
+    'om':
+        '💎 Nabiyyiin ﷺ jedhan: "Inni qur’aana ogummaan dubbisu malaykoota kabajamoo fi qajeeloo waliin ta\'a." Isaaniin waliin ta\'uuf qabsaa\'i.',
   },
   {
-    'ar': '🔥 قال النبي ﷺ: «يؤتى بالقرآن يوم القيامة تقدمه سورة البقرة وآل عمران تحاجان عن صاحبهما».. لا تترك صاحبيك اليوم.',
-    'en': '🔥 The Prophet ﷺ said: "The Qur\'an will be brought on the Day of Resurrection, preceded by Surah Al-Baqarah and Al-Imran, arguing on behalf of their companion." Do not abandon your two companions today.',
-    'am': '🔥 ነቢዩ ﷺ እንዲህ ብለዋል፡- «ቁርኣን በትንሳኤ ቀን ይመጣል؛ ሱረቱ አል-በቀራህና אሊ-ዒምራን እየመሩት ለባለቤታቸው ይሟገتاሉ።» ዛሬ ሁለቱን ጓደኞችህን አትተዋቸው።',
-    'om': '🔥 Nabiyyiin ﷺ jedhan: "Qur’aanni Guyyaa Qiyamaa ni fidama, Suuraa Al-Baqaraafi Al-Imraan dursanii dhufeen saahiba isaaniitiif falmu." Har\'a saahiboota kee lamaan kana hin dhiisin.',
+    'ar':
+        '🔥 قال النبي ﷺ: «يؤتى بالقرآن يوم القيامة تقدمه سورة البقرة وآل عمران تحاجان عن صاحبهما».. لا تترك صاحبيك اليوم.',
+    'en':
+        '🔥 The Prophet ﷺ said: "The Qur\'an will be brought on the Day of Resurrection, preceded by Surah Al-Baqarah and Al-Imran, arguing on behalf of their companion." Do not abandon your two companions today.',
+    'am':
+        '🔥 ነቢዩ ﷺ እንዲህ ብለዋል፡- «ቁርኣን በትንሳኤ ቀን ይመጣል؛ ሱረቱ አል-በቀራህና אሊ-ዒምራን እየመሩት ለባለቤታቸው ይሟገتاሉ።» ዛሬ ሁለቱን ጓደኞችህን አትተዋቸው።',
+    'om':
+        '🔥 Nabiyyiin ﷺ jedhan: "Qur’aanni Guyyaa Qiyamaa ni fidama, Suuraa Al-Baqaraafi Al-Imraan dursanii dhufeen saahiba isaaniitiif falmu." Har\'a saahiboota kee lamaan kana hin dhiisin.',
   },
   {
-    'ar': '⚖️ قال النبي ﷺ: «القرآن حجة لك أو عليك».. فتأمل في آياتك؛ هل تقودك إلى الجنة أم تشهد عليك؟',
-    'en': '⚖️ The Prophet ﷺ said: "The Qur\'an is a proof for you or against you." So reflect upon your verses; are they leading you to Paradise or testifying against you?',
-    'am': '⚖️ ነቢዩ ﷺ እንዲህ ብለዋል፡- «ቁርኣን ለአንተ ወይም በአንተ ላይ ምስክር ነው።» ስለዚህ አንቀጾችህን አሰላስል፤ ወደ ጀነት እየመሩህ ነው ወይስ በአንተ ላይ እየመሰከሩብህ؟',
-    'om': '⚖️ Nabiyyiin ﷺ jedhan: "Qur’aanni siif ragaa ykn sitti ragaa dha." Sila aayatoota kee xiinxali; gara Jannataa si geessaa jiran moo sitti ragaa bahaa jiru?',
+    'ar':
+        '⚖️ قال النبي ﷺ: «القرآن حجة لك أو عليك».. فتأمل في آياتك؛ هل تقودك إلى الجنة أم تشهد عليك؟',
+    'en':
+        '⚖️ The Prophet ﷺ said: "The Qur\'an is a proof for you or against you." So reflect upon your verses; are they leading you to Paradise or testifying against you?',
+    'am':
+        '⚖️ ነቢዩ ﷺ እንዲህ ብለዋል፡- «ቁርኣን ለአንተ ወይም በአንተ ላይ ምስክር ነው።» ስለዚህ አንቀጾችህን አሰላስል፤ ወደ ጀነት እየመሩህ ነው ወይስ በአንተ ላይ እየመሰከሩብህ؟',
+    'om':
+        '⚖️ Nabiyyiin ﷺ jedhan: "Qur’aanni siif ragaa ykn sitti ragaa dha." Sila aayatoota kee xiinxali; gara Jannataa si geessaa jiran moo sitti ragaa bahaa jiru?',
   },
   {
-    'ar': '⚡ قال عمر بن الخطاب: «إن الله يرفع بهذا الكتاب أقواماً ويضع به آخرين».. فكن ممن رفعه الله بالقرآن.',
-    'en': '⚡ Umar ibn al-Khattab said: "Indeed, Allah raises nations by this Book and degrades others by it." So be among those whom Allah raises with the Qur\'an.',
-    'am': '⚡ ዑመር ቢን አል-ኸጧብ እንዲህ ብለዋል፡- «አላህ በዚህ መጽሐፍ ህዝቦችን ከፍ ያደርጋል، ሌሎችንም ዝቅ ያደርጋል።» አላህ በቁርኣን ከፍ ካደረጋቸው መካከል ሁን።',
-    'om': '⚡ Umar bin Al-Khattaab jedhan: "Dhugumatti Allaah kitaaba kanaan uummata tokko ol kaasa, kaan immoo gadi qaba." Warra Allaah Qur\'aanaan ol kaase keessaa tokko ta\'i.',
+    'ar':
+        '⚡ قال عمر بن الخطاب: «إن الله يرفع بهذا الكتاب أقواماً ويضع به آخرين».. فكن ممن رفعه الله بالقرآن.',
+    'en':
+        '⚡ Umar ibn al-Khattab said: "Indeed, Allah raises nations by this Book and degrades others by it." So be among those whom Allah raises with the Qur\'an.',
+    'am':
+        '⚡ ዑመር ቢን አል-ኸጧብ እንዲህ ብለዋል፡- «አላህ በዚህ መጽሐፍ ህዝቦችን ከፍ ያደርጋል، ሌሎችንም ዝቅ ያደርጋል።» አላህ በቁርኣን ከፍ ካደረጋቸው መካከል ሁን።',
+    'om':
+        '⚡ Umar bin Al-Khattaab jedhan: "Dhugumatti Allaah kitaaba kanaan uummata tokko ol kaasa, kaan immoo gadi qaba." Warra Allaah Qur\'aanaan ol kaase keessaa tokko ta\'i.',
   },
 
   // المجموعة 2: أبيات شعرية (مستثناة من الترجمة الإنجليزية والأمهرية والأورومية)
   {
-    'ar': '«يا ليت شعري كيف حالي في غدٍ.. وبأيِّ وجهٍ ألتَقِي رَبِّي غَدَا\nأمَّا إلى جَنَّاتِ خُلْدٍ عَالِيَةْ.. أوْ هَاوِيَةْ تَصْلَى جَحِيمًا جَامِدَا!»\nاقرأ لِتَنْجُو.',
-    'en': '«يا ليت شعري كيف حالي في غدٍ.. وبأيِّ وجهٍ ألتَقِي رَبِّي غَدَا\nأمَّا إلى جَنَّاتِ خُلْدٍ عَالِيَةْ.. أوْ هَاوِيَةْ تَصْلَى جَحِيمًا جَامِدَا!»\nاقرأ لِتَنْجُو.',
-    'am': '«يا ليت شعري كيف حالي في غدٍ.. وبأيِّ وجهٍ ألتَقِي رَبِّي غَدَا\nأمَّا إلى جَنَّاتِ خُلْدٍ عَالِيَةْ.. أوْ هَاوِيَةْ تَصْلَى جَحِيمًا جَامِدَا!»\nاقرأ لِتَنْجُو.',
-    'om': '«يا ليت شعري كيف حالي في غدٍ.. وبأيِّ وجهٍ ألتَقِي رَبِّي غَدَا\nأمَّا إلى جَنَّاتِ خُلْدٍ عَالِيَةْ.. أوْ هَاوِيَةْ تَصْلَى جَحِيمًا جَامِدَا!»\nاقرأ لِتَنْجُو.',
+    'ar':
+        '«يا ليت شعري كيف حالي في غدٍ.. وبأيِّ وجهٍ ألتَقِي رَبِّي غَدَا\nأمَّا إلى جَنَّاتِ خُلْدٍ عَالِيَةْ.. أوْ هَاوِيَةْ تَصْلَى جَحِيمًا جَامِدَا!»\nاقرأ لِتَنْجُو.',
+    'en':
+        '«يا ليت شعري كيف حالي في غدٍ.. وبأيِّ وجهٍ ألتَقِي رَبِّي غَدَا\nأمَّا إلى جَنَّاتِ خُلْدٍ عَالِيَةْ.. أوْ هَاوِيَةْ تَصْلَى جَحِيمًا جَامِدَا!»\nاقرأ لِتَنْجُو.',
+    'am':
+        '«يا ليت شعري كيف حالي في غدٍ.. وبأيِّ وجهٍ ألتَقِي رَبِّي غَدَا\nأمَّا إلى جَنَّاتِ خُلْدٍ عَالِيَةْ.. أوْ هَاوِيَةْ تَصْلَى جَحِيمًا جَامِدَا!»\nاقرأ لِتَنْجُو.',
+    'om':
+        '«يا ليت شعري كيف حالي في غدٍ.. وبأيِّ وجهٍ ألتَقِي رَبِّي غَدَا\nأمَّا إلى جَنَّاتِ خُلْدٍ عَالِيَةْ.. أوْ هَاوِيَةْ تَصْلَى جَحِيمًا جَامِدَا!»\nاقرأ لِتَنْجُو.',
   },
   {
-    'ar': '«وإذا خلوت بريبة في ظلمة.. والنفس داعية إلى الطغيان\nفاستحي من نظر الإله وقل لها.. إن الذي خلق الظلام يراني»\nطهّر قلبك بالقرآن.',
-    'en': '«وإذا خلوت بريبة في ظلمة.. والنفس داعية إلى الطغيان\nفاستحي من نظر الإله وقل لها.. إن الذي خلق الظلام يراني»\nطهّر قلبك بالقرآن.',
-    'am': '«وإذا خلوت بريبة في ظلمة.. والنفس داعية إلى الطغيان\nفاستحي من نظر الإله وقل لها.. إن الذي خلق الظلام يراني»\nطهّر قلبك بالقرآن.',
-    'om': '«وإذا خلوت بريبة في ظلمة.. والنفس داعية إلى الطغيان\nفاستحي من نظر الإله وقل لها.. إن الذي خلق الظلام يراني»\nطهّر قلبك بالقرآن.',
+    'ar':
+        '«وإذا خلوت بريبة في ظلمة.. والنفس داعية إلى الطغيان\nفاستحي من نظر الإله وقل لها.. إن الذي خلق الظلام يراني»\nطهّر قلبك بالقرآن.',
+    'en':
+        '«وإذا خلوت بريبة في ظلمة.. والنفس داعية إلى الطغيان\nفاستحي من نظر الإله وقل لها.. إن الذي خلق الظلام يراني»\nطهّر قلبك بالقرآن.',
+    'am':
+        '«وإذا خلوت بريبة في ظلمة.. والنفس داعية إلى الطغيان\nفاستحي من نظر الإله وقل لها.. إن الذي خلق الظلام يراني»\nطهّر قلبك بالقرآن.',
+    'om':
+        '«وإذا خلوت بريبة في ظلمة.. والنفس داعية إلى الطغيان\nفاستحي من نظر الإله وقل لها.. إن الذي خلق الظلام يراني»\nطهّر قلبك بالقرآن.',
   },
   {
-    'ar': '«تنسى الموت وتلهو بالحياة.. وكأنك مخلدٌ فيها لا محالة\nوالقبر يناديك كل ليلة.. أنا بيت الغربة والظلمة والوحدة».. تدبر كلام ربك.',
-    'en': '«تنسى الموت وتلهو بالحياة.. وكأنك مخلدٌ فيها لا محالة\nوالقبر يناديك كل ليلة.. أنا بيت الغربة والظلمة والوحدة».. تدبر كلام ربك.',
-    'am': '«تنسى الموت وتلهو بالحياة.. وكأنك مخلدٌ فيها لا محالة\nوالقبر يناديك كل ليلة.. أنا بيت الغربة والظلمة والوحدة».. تدبر كلام ربك.',
-    'om': '«تنسى الموت وتلهو بالحياة.. وكأنك مخلدٌ فيها لا محالة\nوالقبر يناديك كل ليلة.. أنا بيت الغربة والظلمة والوحدة».. تدبر كلام ربك.',
+    'ar':
+        '«تنسى الموت وتلهو بالحياة.. وكأنك مخلدٌ فيها لا محالة\nوالقبر يناديك كل ليلة.. أنا بيت الغربة والظلمة والوحدة».. تدبر كلام ربك.',
+    'en':
+        '«تنسى الموت وتلهو بالحياة.. وكأنك مخلدٌ فيها لا محالة\nوالقبر يناديك كل ليلة.. أنا بيت الغربة والظلمة والوحدة».. تدبر كلام ربك.',
+    'am':
+        '«تنسى الموت وتلهو بالحياة.. وكأنك مخلدٌ فيها لا محالة\nوالقبر يناديك كل ليلة.. أنا بيت الغربة والظلمة والوحدة».. تدبر كلام ربك.',
+    'om':
+        '«تنسى الموت وتلهو بالحياة.. وكأنك مخلدٌ فيها لا محالة\nوالقبر يناديك كل ليلة.. أنا بيت الغربة والظلمة والوحدة».. تدبر كلام ربك.',
   },
   {
-    'ar': '«أتنبت بالذنوب وأنت فانٍ.. وتنسى موقف العرض العظيم؟\nوتعرض عن كتاب الله لاهٍ.. كأنك قد ضمنت لظى الجحيم!»\nاستفق واقرأ بوجل.',
-    'en': '«أتنبت بالذنوب وأنت فانٍ.. وتنسى موقف العرض العظيم؟\nوتعرض عن كتاب الله لاهٍ.. كأنك قد ضمنت لظى الجحيم!»\nاستفق واقرأ بوجل.',
-    'am': '«أتنبت بالذنوب وأنت فانٍ.. وتنسى موقف العرض العظيم؟\nوتعرض عن كتاب الله لاهٍ.. كأنك قد ضمنت لظى الجحيم!»\nاستفق واقرأ بوجل.',
-    'om': '«أتنبت بالذنوب وأنت فانٍ.. وتنسى موقف العرض العظيم؟\nوتعرض عن كتاب الله لاهٍ.. كأنك قد ضمنت لظى الجحيم!»\nاستفق واقرأ بوجل.',
+    'ar':
+        '«أتنبت بالذنوب وأنت فانٍ.. وتنسى موقف العرض العظيم؟\nوتعرض عن كتاب الله لاهٍ.. كأنك قد ضمنت لظى الجحيم!»\nاستفق واقرأ بوجل.',
+    'en':
+        '«أتنبت بالذنوب وأنت فانٍ.. وتنسى موقف العرض العظيم؟\nوتعرض عن كتاب الله لاهٍ.. كأنك قد ضمنت لظى الجحيم!»\nاستفق واقرأ بوجل.',
+    'am':
+        '«أتنبت بالذنوب وأنت فانٍ.. وتنسى موقف العرض العظيم؟\nوتعرض عن كتاب الله لاهٍ.. كأنك قد ضمنت لظى الجحيم!»\nاستفق واقرأ بوجل.',
+    'om':
+        '«أتنبت بالذنوب وأنت فانٍ.. وتنسى موقف العرض العظيم؟\nوتعرض عن كتاب الله لاهٍ.. كأنك قد ضمنت لظى الجحيم!»\nاستفق واقرأ بوجل.',
   },
   {
-    'ar': '«عمرك يمضي والأنفاس معدودة.. والمصحف يشكو الهجر في زاوية دارك\nفقم وتزود بآياتٍ تنير بها.. قبراً غداً ستحل فيه ضيفاً بجوارك».',
-    'en': '«عمرك يمضي والأنفاس معدودة.. والمصحف يشكو الهجر في زاوية دارك\nفقم وتزود بآياتٍ تنير بها.. قبراً غداً ستحل فيه ضيفاً بجوارك».',
-    'am': '«عمرك يمضي والأنفاس معدودة.. والمصحف يشكو الهجر في زاوية دارك\nفقم وتزود بآياتٍ تنير بها.. قبراً غداً ستحل فيه ضيفاً بجوارك».',
-    'om': '«عمرك يمضي والأنفاس معدودة.. والمصحف يشكو الهجر في زاوية دارك\nفقم وتزود بآياتٍ تنير بها.. قبراً غداً ستحل فيه ضيفاً بجوارك».',
+    'ar':
+        '«عمرك يمضي والأنفاس معدودة.. والمصحف يشكو الهجر في زاوية دارك\nفقم وتزود بآياتٍ تنير بها.. قبراً غداً ستحل فيه ضيفاً بجوارك».',
+    'en':
+        '«عمرك يمضي والأنفاس معدودة.. والمصحف يشكو الهجر في زاوية دارك\nفقم وتزود بآياتٍ تنير بها.. قبراً غداً ستحل فيه ضيفاً بجوارك».',
+    'am':
+        '«عمرك يمضي والأنفاس معدودة.. والمصحف يشكو الهجر في زاوية دارك\nفقم وتزود بآياتٍ تنير بها.. قبراً غداً ستحل فيه ضيفاً بجوارك».',
+    'om':
+        '«عمرك يمضي والأنفاس معدودة.. والمصحف يشكو الهجر في زاوية دارك\nفقم وتزود بآياتٍ تنير بها.. قبراً غداً ستحل فيه ضيفاً بجوارك».',
   },
 
   // المجموعة 3: أقوال الأئمة الأربعة وكبار السلف
   {
-    'ar': 'قال الإمام عثمان بن عفان رضي الله عنه: «لو طهرت قلوبكم ما شبعت من كلام ربكم.»',
-    'en': 'Imam Uthman ibn Affan (may Allah be pleased with him) said: "If your hearts were pure, they would never have enough of the speech of your Lord."',
-    'am': 'ኢማም ዑስማን ቢን ዓፋን (ረዲየላሁ ዐንሁ) እንዲህ ብለዋል፡- «ልቦቻችሁ ቢጠሩ ኖሮ ከጌታችሁ ንግግር ባልጠገቡ ነበር።»',
-    'om': 'Imaam Usmaan bin Affaan (R.A) jedhan: "Osoo onneen keessan qulqullooftee, jecha Rabbii keessanii hin quuftu turtte."',
+    'ar':
+        'قال الإمام عثمان بن عفان رضي الله عنه: «لو طهرت قلوبكم ما شبعت من كلام ربكم.»',
+    'en':
+        'Imam Uthman ibn Affan (may Allah be pleased with him) said: "If your hearts were pure, they would never have enough of the speech of your Lord."',
+    'am':
+        'ኢማም ዑስማን ቢን ዓፋን (ረዲየላሁ ዐንሁ) እንዲህ ብለዋል፡- «ልቦቻችሁ ቢጠሩ ኖሮ ከጌታችሁ ንግግር ባልጠገቡ ነበር።»',
+    'om':
+        'Imaam Usmaan bin Affaan (R.A) jedhan: "Osoo onneen keessan qulqullooftee, jecha Rabbii keessanii hin quuftu turtte."',
   },
   {
     'ar': 'قال الإمام الشافعي رحمه الله: «من قرأ القرآن عظُمت قيمته.»',
-    'en': 'Imam Al-Shafi\'i (may Allah have mercy on him) said: "Whoever reads the Qur\'an, their value becomes magnificent."',
+    'en':
+        'Imam Al-Shafi\'i (may Allah have mercy on him) said: "Whoever reads the Qur\'an, their value becomes magnificent."',
     'am': 'ኢማም አሽ-ሻፊዒይ (ረሂመሁላህ) እንዲህ ብለዋል፡- «ቁርኣንን ያነበበ ሰው እሴቱ ታላቅ ይሆናል።»',
-    'om': 'Imaam Al-Shaafi\'ii (R.H) jedhan: "Namni Qur’aana dubbise gatiin isaa guddata."',
+    'om':
+        'Imaam Al-Shaafi\'ii (R.H) jedhan: "Namni Qur’aana dubbise gatiin isaa guddata."',
   },
   {
-    'ar': 'قيل للإمام أحمد: بمَ يتقرب المتقربون إلى الله؟ قال: «بِكَلَامِهِ». قيل: بفهمٍ أو بغير فهم؟ قال: «بِفَهْمٍ وَبِغَيْرِ فَهْمٍ».',
-    'en': 'It was said to Imam Ahmad: "With what do those drawing close to Allah draw close?" He said: "With His Speech." It was asked: "With understanding or without understanding?" He said: "With understanding and without understanding."',
-    'am': 'ለኢማም አሕመድ ተባለ፡ «ወደ አلاህ ተቃራኒዎች በምን ይቃረባሉ?» እርሳቸውም «በቃሉ» አሉ። «በመረዳት ወይስ ያለመረዳት?» ተብለው ተጠየቁ። «በመረዳትም ያለመረዳትም» አሉ።',
-    'om': 'Imaam Ahmadaniin jedhame: "Warri gara Allaah dhiyaatan maaliin dhiyaatu?" Innis: "Jecha Isaatiin" jedhe. "Hubannoodhaan moo hubannoo malee?" jedhamee gaafatame. Innis: "Hubannoodhaanis hubannoo malees" jedhe.',
+    'ar':
+        'قيل للإمام أحمد: بمَ يتقرب المتقربون إلى الله؟ قال: «بِكَلَامِهِ». قيل: بفهمٍ أو بغير فهم؟ قال: «بِفَهْمٍ وَبِغَيْرِ فَهْمٍ».',
+    'en':
+        'It was said to Imam Ahmad: "With what do those drawing close to Allah draw close?" He said: "With His Speech." It was asked: "With understanding or without understanding?" He said: "With understanding and without understanding."',
+    'am':
+        'ለኢማም አሕመድ ተባለ፡ «ወደ አلاህ ተቃራኒዎች በምን ይቃረባሉ?» እርሳቸውም «በቃሉ» አሉ። «በመረዳት ወይስ ያለመረዳት?» ተብለው ተጠየቁ። «በመረዳትም ያለመረዳትም» አሉ።',
+    'om':
+        'Imaam Ahmadaniin jedhame: "Warri gara Allaah dhiyaatan maaliin dhiyaatu?" Innis: "Jecha Isaatiin" jedhe. "Hubannoodhaan moo hubannoo malee?" jedhamee gaafatame. Innis: "Hubannoodhaanis hubannoo malees" jedhe.',
   },
   {
-    'ar': 'قال الإمام مالك رحمه الله: «ما من شيء من أعمال البر إلا وله حدٌّ ينتهي إليه، إلا ذكر الله وتلاوة كتابه.»',
-    'en': 'Imam Malik (may Allah have mercy on him) said: "There is no righteous deed except that it has a limit where it ends, except the remembrance of Allah and the recitation of His Book."',
-    'am': 'ኢማም ማሊክ (ረሂመሁላህ) እንዲህ ብለዋል፡- «ከመልካም ስራዎች ሁሉ የሚቆምበት ወሰን የሌለው የለም، አላህን ማውሳትና መጽሐፉን ማንበብ ሲቀር።»',
-    'om': 'Imaam Maalik (R.H) jedhan: "Hojiiwwan gaarii keessaa waan daangaa qabu malee hin jiru, zikrii Allaah fi Kitaaba Isaa dubbisuu malee."',
+    'ar':
+        'قال الإمام مالك رحمه الله: «ما من شيء من أعمال البر إلا وله حدٌّ ينتهي إليه، إلا ذكر الله وتلاوة كتابه.»',
+    'en':
+        'Imam Malik (may Allah have mercy on him) said: "There is no righteous deed except that it has a limit where it ends, except the remembrance of Allah and the recitation of His Book."',
+    'am':
+        'ኢማም ማሊክ (ረሂመሁላህ) እንዲህ ብለዋል፡- «ከመልካም ስራዎች ሁሉ የሚቆምበት ወሰን የሌለው የለም، አላህን ማውሳትና መጽሐፉን ማንበብ ሲቀር።»',
+    'om':
+        'Imaam Maalik (R.H) jedhan: "Hojiiwwan gaarii keessaa waan daangaa qabu malee hin jiru, zikrii Allaah fi Kitaaba Isaa dubbisuu malee."',
   },
   {
-    'ar': 'قال الإمام عبد الله بن مسعود رضي الله عنه: «إن هذا القرآن مأدبة الله, فخذوا من مأدبته ما استطعتم.»',
-    'en': 'Imam Abdullah ibn Mas\'ud (may Allah be pleased with him) said: "Indeed, this Qur\'an is the banquet of Allah, so take from His banquet as much as you can."',
-    'am': 'ኢማም ዓብደላህ ቢን መስዑድ (ረዲየላሁ ዐንሁ) እንዲህ ብለዋል፡- «ይህ ቁርኣን የአላህ ግብዣ ነው፤ ስለዚህ ከግብዣው የቻላችሁትን ያህል ውሰዱ።»',
-    'om': 'Imaam Abdullaah bin Mas’uud (R.A) jedhan: "Dhugumatti Qur’aanni kun maaddii (afeerraa) Allaahati, kanaaf maaddii Isaa irraa waan dandeessan fudhadhaa."',
+    'ar':
+        'قال الإمام عبد الله بن مسعود رضي الله عنه: «إن هذا القرآن مأدبة الله, فخذوا من مأدبته ما استطعتم.»',
+    'en':
+        'Imam Abdullah ibn Mas\'ud (may Allah be pleased with him) said: "Indeed, this Qur\'an is the banquet of Allah, so take from His banquet as much as you can."',
+    'am':
+        'ኢማም ዓብደላህ ቢን መስዑድ (ረዲየላሁ ዐንሁ) እንዲህ ብለዋል፡- «ይህ ቁርኣን የአላህ ግብዣ ነው፤ ስለዚህ ከግብዣው የቻላችሁትን ያህል ውሰዱ።»',
+    'om':
+        'Imaam Abdullaah bin Mas’uud (R.A) jedhan: "Dhugumatti Qur’aanni kun maaddii (afeerraa) Allaahati, kanaaf maaddii Isaa irraa waan dandeessan fudhadhaa."',
   },
   {
-    'ar': 'قال الإمام سفيان الثوري: «إذا أراد العبد أن يزداد مقاطعة للدنيا وإقبالاً على الآخرة، فلينظر في المصحف.»',
-    'en': 'Imam Sufyan al-Thawri said: "If a servant wants to increase their detachment from this world and focus on the Hereafter, let them look into the Mus-haf."',
-    'am': 'ኢማም ሱፍያን አጥ-ሰውሪ እንዲህ ብለዋል፡- «አንድ ባሪያ ከዱንያ መራቅና ወደ አኺራ መቃረብን መጨመር ከፈለገ ቁርኣንን ይመልከት።»',
-    'om': 'Imaam Sufyaaan Al-Sawrii jedhan: "Yoo gabrichi addunyaa irraa fagaachuu fi gara aakhiraa deemuu dabaluu fedhe, Qur\'aana haa ilaalu."',
+    'ar':
+        'قال الإمام سفيان الثوري: «إذا أراد العبد أن يزداد مقاطعة للدنيا وإقبالاً على الآخرة، فلينظر في المصحف.»',
+    'en':
+        'Imam Sufyan al-Thawri said: "If a servant wants to increase their detachment from this world and focus on the Hereafter, let them look into the Mus-haf."',
+    'am':
+        'ኢማም ሱፍያን አጥ-ሰውሪ እንዲህ ብለዋል፡- «አንድ ባሪያ ከዱንያ መራቅና ወደ አኺራ መቃረብን መጨመር ከፈለገ ቁርኣንን ይመልከት።»',
+    'om':
+        'Imaam Sufyaaan Al-Sawrii jedhan: "Yoo gabrichi addunyaa irraa fagaachuu fi gara aakhiraa deemuu dabaluu fedhe, Qur\'aana haa ilaalu."',
   },
   {
-    'ar': 'قال الإمام الفضيل بن عياض: «حامل القرآن حامل راية الإسلام، لا ينبغي أن يلهو مع من يلهو.»',
-    'en': 'Imam Al-Fudayl ibn Iyad said: "The bearer of the Qur\'an is the bearer of the banner of Islam, it is not fitting for him to idle with those who idle."',
-    'am': 'ኢማም አል-ፉደይል ቢን ኢያድ እንዲህ ብለዋል፡- «የቁርኣን ተሸካሚ የእስልምናን ሰንደቅ አላማ ተሸካሚ ነው، ከሚጫወቱት ጋር ሊጫወት አይገባውም።»',
-    'om': 'Imaam Fudayl bin Iyaad jedhan: "Baataan Qur’aanaa alaabaa Islaamaa baataadha, nama taphatu waliin taphachuun isaaf hin malu."',
+    'ar':
+        'قال الإمام الفضيل بن عياض: «حامل القرآن حامل راية الإسلام، لا ينبغي أن يلهو مع من يلهو.»',
+    'en':
+        'Imam Al-Fudayl ibn Iyad said: "The bearer of the Qur\'an is the bearer of the banner of Islam, it is not fitting for him to idle with those who idle."',
+    'am':
+        'ኢማም አል-ፉደይል ቢን ኢያድ እንዲህ ብለዋል፡- «የቁርኣን ተሸካሚ የእስልምናን ሰንደቅ አላማ ተሸካሚ ነው، ከሚጫወቱት ጋር ሊጫወት አይገባውም።»',
+    'om':
+        'Imaam Fudayl bin Iyaad jedhan: "Baataan Qur’aanaa alaabaa Islaamaa baataadha, nama taphatu waliin taphachuun isaaf hin malu."',
   },
   {
-    'ar': 'قال الإمام الحسن البصري: «تفقَّدوا الحلاوة في ثلاثة أشياء: في الصلاة، وفي الذكر، وفي قراءة القرآن.»',
-    'en': 'Imam Al-Hasan al-Basri said: "Seek sweetness in three things: in prayer, in remembrance, and in the recitation of the Qur\'an."',
-    'am': 'ኢማም አል-ሀሰن አል-በስሪ እንዲህ ብለዋል፡- «ጣፋጭነትን በሶስት ነገሮች ውስጥ ፈልጉ፡ በሶላት، በዚክር እና ቁرኣን በማንበብ ውስጥ።»',
-    'om': 'Imaam Al-Hasan Al-Basrii jedhan: "Miyaawaa waan sadii keessatti barbaadaa: salaata keessatti, zikrii keessatti fi Qur’aana dubbisuu keessatti."',
+    'ar':
+        'قال الإمام الحسن البصري: «تفقَّدوا الحلاوة في ثلاثة أشياء: في الصلاة، وفي الذكر، وفي قراءة القرآن.»',
+    'en':
+        'Imam Al-Hasan al-Basri said: "Seek sweetness in three things: in prayer, in remembrance, and in the recitation of the Qur\'an."',
+    'am':
+        'ኢማም አል-ሀሰن አል-በስሪ እንዲህ ብለዋል፡- «ጣፋጭነትን በሶስት ነገሮች ውስጥ ፈልጉ፡ በሶላት، በዚክር እና ቁرኣን በማንበብ ውስጥ።»',
+    'om':
+        'Imaam Al-Hasan Al-Basrii jedhan: "Miyaawaa waan sadii keessatti barbaadaa: salaata keessatti, zikrii keessatti fi Qur’aana dubbisuu keessatti."',
   },
   {
-    'ar': 'قال ابن القيم رحمه الله: «قراءة آية بتفكر وتدبر خير من قراءة ختمة بغير تدبر وفهم.»',
-    'en': 'Ibn al-Qayyim (may Allah have mercy on him) said: "Reading a single verse with reflection and contemplation is better than completing the entire Qur\'an without contemplation and understanding."',
-    'am': 'ኢብኑል ቀይም (ረሂመሁላህ) እንዲህ ብለዋል፡- «አንዲትን አንቀጽ በትኩረትና በማስተንተን ማንበብ ቁርኣንን ሙሉ በሙሉ ያለ ማስተንተንና መረዳት ከማንበብ ይበልጣል።»',
-    'om': 'Ibn Al-Qayyim (R.H) jedhan: "Aayata tokko xiinxalaafi hubannoodhaan dubbisuun Qur’aana guutuu osoo hin xiinxalin dubbisuu irra caala."',
+    'ar':
+        'قال ابن القيم رحمه الله: «قراءة آية بتفكر وتدبر خير من قراءة ختمة بغير تدبر وفهم.»',
+    'en':
+        'Ibn al-Qayyim (may Allah have mercy on him) said: "Reading a single verse with reflection and contemplation is better than completing the entire Qur\'an without contemplation and understanding."',
+    'am':
+        'ኢብኑል ቀይም (ረሂመሁላህ) እንዲህ ብለዋል፡- «አንዲትን አንቀጽ በትኩረትና በማስተንተን ማንበብ ቁርኣንን ሙሉ በሙሉ ያለ ማስተንተንና መረዳት ከማንበብ ይበልጣል።»',
+    'om':
+        'Ibn Al-Qayyim (R.H) jedhan: "Aayata tokko xiinxalaafi hubannoodhaan dubbisuun Qur’aana guutuu osoo hin xiinxalin dubbisuu irra caala."',
   },
   {
-    'ar': 'قال الإمام ذو النون المصري: «القرآن دواء القلوب البالية، وصلاح الأنفس العاصية.»',
-    'en': 'Imam Dhu\'n-Nun al-Misri said: "The Qur\'an is the cure for worn-out hearts and the righteousness of disobedient souls."',
-    'am': 'ኢማም ዙን-ኑን አል-ሚስሪ እንዲህ ብለዋል፡- «ቁርኣን ለዛሉ ልቦች መድኃኒት، ለአመጸኞች ነፍሳትም ማስተካከያ ነው።»',
-    'om': 'Imaam Dhu Al-Nuun Al-Misrii jedhan: "Qur’aanni qoricha onnee dhumteeti, fi qajeelfama lubbuu finciltuuti."',
+    'ar':
+        'قال الإمام ذو النون المصري: «القرآن دواء القلوب البالية، وصلاح الأنفس العاصية.»',
+    'en':
+        'Imam Dhu\'n-Nun al-Misri said: "The Qur\'an is the cure for worn-out hearts and the righteousness of disobedient souls."',
+    'am':
+        'ኢማም ዙን-ኑን አል-ሚስሪ እንዲህ ብለዋል፡- «ቁርኣን ለዛሉ ልቦች መድኃኒት، ለአመጸኞች ነፍሳትም ማስተካከያ ነው።»',
+    'om':
+        'Imaam Dhu Al-Nuun Al-Misrii jedhan: "Qur’aanni qoricha onnee dhumteeti, fi qajeelfama lubbuu finciltuuti."',
   },
 
   // المجموعة 4: وعظ، مقارنة بالأموات، وشحن الهمة
   {
-    'ar': '⚰️ الأموات في قبورهم يتمنون سجدة أو آية، وأنت كتاب الله بين يديك كاملاً.. اغتنم حياتك قبل حسرتك!',
-    'en': '⚰️ The deceased in their graves wish for a single prostration or a single verse, while the Book of Allah is fully in your hands... Seize your life before your regret!',
-    'am': '⚰️ ሙታን በመቃብራቸው ውስጥ ሆነው አንዲት ሱጁድ ወይም አንቀጽ ይመኛሉ، አንተ ግን የአላህ መጽሐፍ ሙሉ በሙሉ በእጅህ ነው... ከቆጨህ በፊት ሕይወትህን ተጠቀምባት!',
-    'om': "⚰️ Warri du'an qabrii keessatti sujuuda tokko ykn aayata tokko hawwu, ati immoo Kitaabni Allaah guutuun harka kee jira... Osoo hin gaabin jireenya kee gorfadhu!",
+    'ar':
+        '⚰️ الأموات في قبورهم يتمنون سجدة أو آية، وأنت كتاب الله بين يديك كاملاً.. اغتنم حياتك قبل حسرتك!',
+    'en':
+        '⚰️ The deceased in their graves wish for a single prostration or a single verse, while the Book of Allah is fully in your hands... Seize your life before your regret!',
+    'am':
+        '⚰️ ሙታን በመቃብራቸው ውስጥ ሆነው አንዲት ሱጁድ ወይም አንቀጽ ይመኛሉ، አንተ ግን የአላህ መጽሐፍ ሙሉ በሙሉ በእጅህ ነው... ከቆጨህ በፊት ሕይወትህን ተጠቀምባት!',
+    'om':
+        "⚰️ Warri du'an qabrii keessatti sujuuda tokko ykn aayata tokko hawwu, ati immoo Kitaabni Allaah guutuun harka kee jira... Osoo hin gaabin jireenya kee gorfadhu!",
   },
   {
-    'ar': '🕯️ اقرأ بتمهل.. فرُبّ آيةٍ تتلوها وتتدبرها اليوم، تكون هي أنيسك والضياء الشافي لك في ظلمات قبرك.',
-    'en': '🕯️ Read slowly... For perhaps a verse you recite and ponder today will be your companion and healing light in the darkness of your grave.',
-    'am': '🕯️ ቀስ ብለህ አንብብ... ዛሬ የምታነባትና የምታስተነትናት አንቀጽ ነገ በመቃብርህ ጨለما ውስጥ አጋዥህና ፈዋሽ ብርሃንህ ትሆን ይሆናል።',
-    'om': "🕯️ Suuta jedhii dubbisi... Tarii aayanni ati har'a qaraatanii xiinxaltu, dukkana qabrii keetii keessatti hiriyaa keefi ibsaa si fayyisu ta'uu danda'a.",
+    'ar':
+        '🕯️ اقرأ بتمهل.. فرُبّ آيةٍ تتلوها وتتدبرها اليوم، تكون هي أنيسك والضياء الشافي لك في ظلمات قبرك.',
+    'en':
+        '🕯️ Read slowly... For perhaps a verse you recite and ponder today will be your companion and healing light in the darkness of your grave.',
+    'am':
+        '🕯️ ቀስ ብለህ አንብብ... ዛሬ የምታነባትና የምታስተነትናት አንቀጽ ነገ በመቃብርህ ጨለما ውስጥ አጋዥህና ፈዋሽ ብርሃንህ ትሆን ይሆናል።',
+    'om':
+        "🕯️ Suuta jedhii dubbisi... Tarii aayanni ati har'a qaraatanii xiinxaltu, dukkana qabrii keetii keessatti hiriyaa keefi ibsaa si fayyisu ta'uu danda'a.",
   },
   {
-    'ar': '🏰 كل آية تقرؤها وتعمل بها الآن هي لبنةٌ ودرجةٌ تبنيها في قصرك بالجنة.. اقرأ وارتقِ!',
-    'en': '🏰 Every verse you read and act upon now is a brick and a step you build in your palace in Paradise... Read and rise!',
-    'am': '🏰 አሁን የምታነባትና የምትሰራባት እያንዳንዱ አንቀጽ በጀነት ውስጥ ላለህ ቤተመንግስት የምትገነባው ጡብና ደረጃ ነው... አንብብና ከፍ በል!',
-    'om': '🏰 Aayanni ati amma dubbistee hojiirra oolchitu hundi riqaa fi sadarkaa ati gamooma jannata keessatti ijaarrattudha... Dubbisi ol ka\'i!',
+    'ar':
+        '🏰 كل آية تقرؤها وتعمل بها الآن هي لبنةٌ ودرجةٌ تبنيها في قصرك بالجنة.. اقرأ وارتقِ!',
+    'en':
+        '🏰 Every verse you read and act upon now is a brick and a step you build in your palace in Paradise... Read and rise!',
+    'am':
+        '🏰 አሁን የምታነባትና የምትሰራባት እያንዳንዱ አንቀጽ በጀነት ውስጥ ላለህ ቤተመንግስት የምትገነባው ጡብና ደረጃ ነው... አንብብና ከፍ በል!',
+    'om':
+        '🏰 Aayanni ati amma dubbistee hojiirra oolchitu hundi riqaa fi sadarkaa ati gamooma jannata keessatti ijaarrattudha... Dubbisi ol ka\'i!',
   },
   {
-    'ar': '🪙 الحرف بعشر حسنات، والحسنات جبالٌ تثقل الميزان يوم القيامة.. ابدأ تجارتك الرابحة الآن مع الله.',
-    'en': '🪙 A letter earns ten good deeds, and good deeds are mountains that weigh heavy on the Scale on the Day of Resurrection... Start your profitable trade with Allah now.',
-    'am': '🪙 እያንዳንዱ ፊደል በአስር መልካም ስራዎች ነው، መልካم ስራዎች ደግሞ በትንሳኤ ቀን ሚዛኑን የሚያከብዱ ተራሮች ናቸው... አሁኑኑ ከአлаህ ጋር አترافي ንግድህን ጀምር።',
-    'om': '🪙 Harfiin tokko tola kudhaniin, tolaa immoo gaarren Guyyaa Qiyamaa mizaana ulfeessanidha... Ammuma daldala kee kan bu\'aa qabu Allaah waliin jalقabi.',
+    'ar':
+        '🪙 الحرف بعشر حسنات، والحسنات جبالٌ تثقل الميزان يوم القيامة.. ابدأ تجارتك الرابحة الآن مع الله.',
+    'en':
+        '🪙 A letter earns ten good deeds, and good deeds are mountains that weigh heavy on the Scale on the Day of Resurrection... Start your profitable trade with Allah now.',
+    'am':
+        '🪙 እያንዳንዱ ፊደል በአስር መልካም ስራዎች ነው، መልካم ስራዎች ደግሞ በትንሳኤ ቀን ሚዛኑን የሚያከብዱ ተራሮች ናቸው... አሁኑኑ ከአлаህ ጋር አترافي ንግድህን ጀምር።',
+    'om':
+        '🪙 Harfiin tokko tola kudhaniin, tolaa immoo gaarren Guyyaa Qiyamaa mizaana ulfeessanidha... Ammuma daldala kee kan bu\'aa qabu Allaah waliin jalقabi.',
   },
   {
-    'ar': '❤️ القرآن لا يترك صاحبه أبداً؛ يرافقك في الدنيا، ويحميك في القبر، ويجادل عنك يوم القيامة حتى تدخل الجنة.',
-    'en': '❤️ The Qur\'an never leaves its companion; it accompanies you in this world, protects you in the grave, and advocates for you on the Day of Resurrection until you enter Paradise.',
-    'am': '❤️ ቁርኣን ባለቤቱን በፍጹም አይተውም፤ በዱንያ አብሮህ ይሆናል، በመቃብር ይጠብቅሃل، በትንሳኤ ቀንም ጀነት እስክትገባ ድረስ ይከراكرلሃል።',
-    'om': '❤️ Qur’aanni saahiba isaa hin dhiisu; addunyaa keessatti si waliin ta\'a, qabrii keessatti si eega, Guyyaa Qiyamaas hamma Jannata seentutti siif falma.',
+    'ar':
+        '❤️ القرآن لا يترك صاحبه أبداً؛ يرافقك في الدنيا، ويحميك في القبر، ويجادل عنك يوم القيامة حتى تدخل الجنة.',
+    'en':
+        '❤️ The Qur\'an never leaves its companion; it accompanies you in this world, protects you in the grave, and advocates for you on the Day of Resurrection until you enter Paradise.',
+    'am':
+        '❤️ ቁርኣን ባለቤቱን በፍጹም አይተውም፤ በዱንያ አብሮህ ይሆናል، በመቃብር ይጠብቅሃل، በትንሳኤ ቀንም ጀነት እስክትገባ ድረስ ይከراكرلሃል።',
+    'om':
+        '❤️ Qur’aanni saahiba isaa hin dhiisu; addunyaa keessatti si waliin ta\'a, qabrii keessatti si eega, Guyyaa Qiyamaas hamma Jannata seentutti siif falma.',
   },
   {
-    'ar': '🌟 لا تجعل مصحفك مهجوراً； فالقلب الذي لا يقرأ القرآن كالبيت الخرب الذي لا يسكنه أحد.',
-    'en': '🌟 Do not leave your Mus-haf abandoned; for the heart that does not read the Qur\'an is like a ruined house in which no one dwells.',
+    'ar':
+        '🌟 لا تجعل مصحفك مهجوراً； فالقلب الذي لا يقرأ القرآن كالبيت الخرب الذي لا يسكنه أحد.',
+    'en':
+        '🌟 Do not leave your Mus-haf abandoned; for the heart that does not read the Qur\'an is like a ruined house in which no one dwells.',
     'am': '🌟 ቁርኣንህን የተተወ አታድርገው፤ ቁርኣን የማይነበብበት ልብ ማንም እንደማይኖርበት የፈረሰ ቤት ነውና።',
-    'om': '🌟 Qur’aana kee gatamoo hin godhin; onneen Qur’aana hin dubbisne akka mana diigamee nama keessa hin jirreeti.',
+    'om':
+        '🌟 Qur’aana kee gatamoo hin godhin; onneen Qur’aana hin dubbisne akka mana diigamee nama keessa hin jirreeti.',
   },
   {
-    'ar': '🕊️ النجاة النجاة! غداً تُوضع الموازين وتنكشف الأستار، ولن ينفعك إلا ما قدمت من كتاب الله.',
-    'en': '🕊️ Salvation, salvation! Tomorrow the scales will be set and secrets revealed, and nothing will benefit you except what you offered from the Book of Allah.',
-    'am': '🕊️ መዳን، መዳን! ነገ ሚዛኖች ይቀመጣሉ، መጋረጃዎችም ይገለጣሉ، ከአላህ መጽሐፍ ካቀረብከው በስተቀር ምንም አይጠቅምህም።',
-    'om': '🕊️ Fayyinna, fayyinna! Bor mizaanni ni kaa\'ama, haguuggiinis ni saaqama, waan ati Kitaaba Allaah irraa dabarsite malee maaltu si fayyada.',
+    'ar':
+        '🕊️ النجاة النجاة! غداً تُوضع الموازين وتنكشف الأستار، ولن ينفعك إلا ما قدمت من كتاب الله.',
+    'en':
+        '🕊️ Salvation, salvation! Tomorrow the scales will be set and secrets revealed, and nothing will benefit you except what you offered from the Book of Allah.',
+    'am':
+        '🕊️ መዳን، መዳን! ነገ ሚዛኖች ይቀመጣሉ، መጋረጃዎችም ይገለጣሉ، ከአላህ መጽሐፍ ካቀረብከው በስተቀር ምንም አይጠቅምህም።',
+    'om':
+        '🕊️ Fayyinna, fayyinna! Bor mizaanni ni kaa\'ama, haguuggiinis ni saaqama, waan ati Kitaaba Allaah irraa dabarsite malee maaltu si fayyada.',
   },
   {
-    'ar': '💧 بكاء العين من خشية آية، يطفئ بحاراً من عذاب يوم القيامة.. تدبر حروفه.',
-    'en': '💧 The weeping of the eye out of fear from a verse extinguishes oceans of torment on the Day of Resurrection... Ponder its letters.',
-    'am': '💧 ከአንቀጽ ፍርሃት የተነሳ የአይን ማልቀስ የትንሳኤ ቀንን የስቃይ ባህሮች ያጠፋል... ፊደሎቹን አስተንትን።',
-    'om': '💧 Imimmaan ijaa sodaa aayata tokkoo irraa ka\'e, galaana adaba Guyyaa Qiyamaa balleessa... Harfii isaa xiinxali.',
+    'ar':
+        '💧 بكاء العين من خشية آية، يطفئ بحاراً من عذاب يوم القيامة.. تدبر حروفه.',
+    'en':
+        '💧 The weeping of the eye out of fear from a verse extinguishes oceans of torment on the Day of Resurrection... Ponder its letters.',
+    'am':
+        '💧 ከአንቀጽ ፍርሃት የተነሳ የአይን ማልቀስ የትንሳኤ ቀንን የስቃይ ባህሮች ያጠፋል... ፊደሎቹን አስተንትን።',
+    'om':
+        '💧 Imimmaan ijaa sodaa aayata tokkoo irraa ka\'e, galaana adaba Guyyaa Qiyamaa balleessa... Harfii isaa xiinxali.',
   },
   {
-    'ar': '👑 يُقال لقارئ القرآن يوم القيامة: اقرأ وارتق ورتل كما كنت ترتل في الدنيا، فإن منزلتك عند آخر آية تقرؤها.',
-    'en': '👑 It will be said to the companion of the Qur\'an on the Day of Resurrection: "Read and ascend, and recite smoothly as you used to recite in the world, for your status will be at the last verse you read."',
-    'am': '👑 በትንሳኤ ቀን ለቁርኣን አንባቢ እንዲህ ይባላል፡- «አንብብና ከፍ በል፤ በዱንያ ላይ እንደምታነበው አሳምረህ አንብብ፤ ደረጃህ የመጨረሻዋ የምታነባት አንቀጽ ጋ ነውና।»',
-    'om': '👑 Guyyaa Qiyamaa qaraataa Qur’aanaatiin ni jedhama: "Dubbisi ol ka\'i, akkuma addunyaa keessatti suuta dubbisaa turtetti suuta dubbisi, sadarkaan kee aayata dhumaa ati dubbistu biratti dha."',
+    'ar':
+        '👑 يُقال لقارئ القرآن يوم القيامة: اقرأ وارتق ورتل كما كنت ترتل في الدنيا، فإن منزلتك عند آخر آية تقرؤها.',
+    'en':
+        '👑 It will be said to the companion of the Qur\'an on the Day of Resurrection: "Read and ascend, and recite smoothly as you used to recite in the world, for your status will be at the last verse you read."',
+    'am':
+        '👑 በትንሳኤ ቀን ለቁርኣን አንባቢ እንዲህ ይባላል፡- «አንብብና ከፍ በል፤ በዱንያ ላይ እንደምታነበው አሳምረህ አንብብ፤ ደረጃህ የመጨረሻዋ የምታነባት አንቀጽ ጋ ነውና।»',
+    'om':
+        '👑 Guyyaa Qiyamaa qaraataa Qur’aanaatiin ni jedhama: "Dubbisi ol ka\'i, akkuma addunyaa keessatti suuta dubbisaa turtetti suuta dubbisi, sadarkaan kee aayata dhumaa ati dubbistu biratti dha."',
   },
   {
-    'ar': '🚨 لا تخرج من الدنيا صفر اليدين، والقرآن حجة لك أو عليك.. اجعله حجة لك.',
-    'en': '🚨 Do not leave this world empty-handed, while the Qur\'an is a proof for you or against you... Make it a proof for you.',
-    'am': '🚨 ከዱንያ ባዶ እጅህን አትውጣ، ቁርኣን ለአንተ ወይም በአንተ ላይ ምስክር ነው... ለአንተ ምስክር አድርገው።',
-    'om': '🚨 Harka duwwaa addunyaa irraa hin ba\'in, Qur’aanni siif ragaa ykn sitti ragaa dha... Ofiif ragaa godhadhu.',
+    'ar':
+        '🚨 لا تخرج من الدنيا صفر اليدين، والقرآن حجة لك أو عليك.. اجعله حجة لك.',
+    'en':
+        '🚨 Do not leave this world empty-handed, while the Qur\'an is a proof for you or against you... Make it a proof for you.',
+    'am':
+        '🚨 ከዱንያ ባዶ እጅህን አትውጣ، ቁርኣን ለአንተ ወይም በአንተ ላይ ምስክር ነው... ለአንተ ምስክር አድርገው።',
+    'om':
+        '🚨 Harka duwwaa addunyaa irraa hin ba\'in, Qur’aanni siif ragaa ykn sitti ragaa dha... Ofiif ragaa godhadhu.',
   },
   {
-    'ar': '🗺️ إذا تاهت بك السبل وضاق صدرك، فافتح مصحفك؛ ففيه نبأ من قبلكم، وخبر ما بعدكم، وحكم ما بينكم.',
-    'en': '🗺️ If the ways confuse you and your chest feels tight, open your Mus-haf; for in it is the news of those before you, information of what is after you, and judgment for what is between you.',
-    'am': '🗺️ መንገዶች ቢጠፉብህና ደረትህ ቢጠበብ ቁርኣንህን ክፈት؛ በእሱ ውስጥ የእናንተ በፊት የነበሩት ወሬ، ከእናንተ በኋላ የሚመጣው ዜና እና በመካከላችሁ ያለው ፍርድ አለና።',
-    'om': '🗺️ Yoo karaaleen sitti badanii garaan kee dhiphate, Qur\'aana kee bani; isa keessa oduu warra isiniin duraa, oduu warra isiniin boodaa fi murtii gidduu keessanii jirutu jira.',
+    'ar':
+        '🗺️ إذا تاهت بك السبل وضاق صدرك، فافتح مصحفك؛ ففيه نبأ من قبلكم، وخبر ما بعدكم، وحكم ما بينكم.',
+    'en':
+        '🗺️ If the ways confuse you and your chest feels tight, open your Mus-haf; for in it is the news of those before you, information of what is after you, and judgment for what is between you.',
+    'am':
+        '🗺️ መንገዶች ቢጠፉብህና ደረትህ ቢጠበብ ቁርኣንህን ክፈት؛ በእሱ ውስጥ የእናንተ በፊት የነበሩት ወሬ، ከእናንተ በኋላ የሚመጣው ዜና እና በመካከላችሁ ያለው ፍርድ አለና።',
+    'om':
+        '🗺️ Yoo karaaleen sitti badanii garaan kee dhiphate, Qur\'aana kee bani; isa keessa oduu warra isiniin duraa, oduu warra isiniin boodaa fi murtii gidduu keessanii jirutu jira.',
   },
   {
-    'ar': '⚡ شعلة الحماس لا تنطفئ في قلبٍ أدمن تلاوة كلام ربه.. ابدأ قراءتك بهمة عالية.',
-    'en': '⚡ The flame of enthusiasm does not die out in a heart addicted to reciting the speech of its Lord... Start your reading with high resolve.',
+    'ar':
+        '⚡ شعلة الحماس لا تنطفئ في قلبٍ أدمن تلاوة كلام ربه.. ابدأ قراءتك بهمة عالية.',
+    'en':
+        '⚡ The flame of enthusiasm does not die out in a heart addicted to reciting the speech of its Lord... Start your reading with high resolve.',
     'am': '⚡ የጌታውን ቃል ማንበብ በለመደ ልብ ውስጥ የنቃት እሳት አይጠፋም... ንባብህን በከፍተኛ ጉጉት ጀምር።',
-    'om': '⚡ Labbiin fedhii onnee keessa jiru kan daddabalatee jecha Rabbii isaa dubbisuun adiktee ta\'e hin dhabamu... Dubbisa kee hamilee olaanaan jalqabi.',
+    'om':
+        '⚡ Labbiin fedhii onnee keessa jiru kan daddabalatee jecha Rabbii isaa dubbisuun adiktee ta\'e hin dhabamu... Dubbisa kee hamilee olaanaan jalqabi.',
   },
   {
-    'ar': '🤝 ليكن القرآن صاحبك المفضل؛ فكل الأصحاب يفارقونك عند الموت، إلا القرآن يدخل معك قبرك.',
-    'en': '🤝 Let the Qur\'an be your favorite companion; for all companions part with you at death, except the Qur\'an, which enters your grave with you.',
-    'am': '🤝 ቁርኣن ተወዳጅ ጓደኛህ ይሁን፤ ጓደኞች ሁሉ ሲሞቱ ይለዩሃል، ቁርኣን ግን ካንተ ጋር ወደ መቃብርህ ይገባል።',
-    'om': '🤝 Qur’aanni saahiba kee filatamaa haa ta’u; saahiboonni hundi yeroo du\'aa si biraa deemu, Qur’aana malee kan qabrii kee si waliin seenu.',
+    'ar':
+        '🤝 ليكن القرآن صاحبك المفضل؛ فكل الأصحاب يفارقونك عند الموت، إلا القرآن يدخل معك قبرك.',
+    'en':
+        '🤝 Let the Qur\'an be your favorite companion; for all companions part with you at death, except the Qur\'an, which enters your grave with you.',
+    'am':
+        '🤝 ቁርኣن ተወዳጅ ጓደኛህ ይሁን፤ ጓደኞች ሁሉ ሲሞቱ ይለዩሃል، ቁርኣን ግን ካንተ ጋር ወደ መቃብርህ ይገባል።',
+    'om':
+        '🤝 Qur’aanni saahiba kee filatamaa haa ta’u; saahiboonni hundi yeroo du\'aa si biraa deemu, Qur’aana malee kan qabrii kee si waliin seenu.',
   },
   {
-    'ar': '✨ استشعر الآن وأنت تفتح المصحف أن ملك الملوك يكلمك أنت مباشرة.. فاستمع وأنصت.',
-    'en': '✨ Feel now as you open the Mus-haf that the King of kings is speaking to you directly... So listen and pay attention.',
-    'am': '✨ አሁን ቁርኣኑን ስትከፍት የነገስታት ንጉስ በቀጥታ እያናገረህ እንደሆነ ይሰማህ... ስለዚህ አድምጥ، ጸጥም በል።',
-    'om': '✨ Amma yeroo Qur\'aana bantu Mootiin moototaa kallattiin sitti dubbachaa akka jiru sitti haa dhaga\'amu... Kanaaf dhaggeeffadhu, cal\'isis.',
+    'ar':
+        '✨ استشعر الآن وأنت تفتح المصحف أن ملك الملوك يكلمك أنت مباشرة.. فاستمع وأنصت.',
+    'en':
+        '✨ Feel now as you open the Mus-haf that the King of kings is speaking to you directly... So listen and pay attention.',
+    'am':
+        '✨ አሁን ቁርኣኑን ስትከፍት የነገስታት ንጉስ በቀጥታ እያናገረህ እንደሆነ ይሰማህ... ስለዚህ አድምጥ، ጸጥም በል።',
+    'om':
+        '✨ Amma yeroo Qur\'aana bantu Mootiin moototaa kallattiin sitti dubbachaa akka jiru sitti haa dhaga\'amu... Kanaaf dhaggeeffadhu, cal\'isis.',
   },
   {
-    'ar': '🛑 احذر الحرمان! أن يمر عليك يومك المكتظ بالمشاغل دون أن تفتح لقلبك نافذة نور من كلام ربك.',
-    'en': '🛑 Beware of deprivation! That your day crowded with concerns passes by without opening a window of light for your heart from the speech of your Lord.',
+    'ar':
+        '🛑 احذر الحرمان! أن يمر عليك يومك المكتظ بالمشاغل دون أن تفتح لقلبك نافذة نور من كلام ربك.',
+    'en':
+        '🛑 Beware of deprivation! That your day crowded with concerns passes by without opening a window of light for your heart from the speech of your Lord.',
     'am': '🛑 ከመነፈግ ተጠንቀቅ! በስራ የተጠመደው ቀንህ ለልብህ ከጌታህ ቃል የብርሃن መስኮት ሳትከፍት ማለፉ።',
-    'om': '🛑 Akka hin dhabamne of eeggaddhu! Guyyaan kee kan hojiidhaan dhiphate osoo onnee keetiif foddaa ifaa jecha Rabbii keetii irraa hin banin akka hin dabarre.',
+    'om':
+        '🛑 Akka hin dhabamne of eeggaddhu! Guyyaan kee kan hojiidhaan dhiphate osoo onnee keetiif foddaa ifaa jecha Rabbii keetii irraa hin banin akka hin dabarre.',
   },
   {
-    'ar': '🥀 ما جفّت دماء القلوب ولا قست، إلا بعد أن هجرت تدبر المصحف الكريم.. رطّب قلبك بآياته.',
-    'en': '🥀 The blood of the hearts did not dry up nor harden, except after they abandoned contemplating the Noble Mus-haf... Moisten your heart with its verses.',
-    'am': '🥀 የልቦች ደም አልደረቀም ወይም አልጠነከረም، የተከበረውን ቁርኣን ማስተንተن ከተዉ በኋላ ቢሆን እንጂ... ልብህን በአንቀጾቹ አርጥብ።',
-    'om': '🥀 Dhiigni onnee hin gogne, hin jabaannes, osoo xiinxala Qur\'aana kabajamaa dhiisanii booda malee... Onnee kee aayatoota isaatiin jiisi.',
+    'ar':
+        '🥀 ما جفّت دماء القلوب ولا قست، إلا بعد أن هجرت تدبر المصحف الكريم.. رطّب قلبك بآياته.',
+    'en':
+        '🥀 The blood of the hearts did not dry up nor harden, except after they abandoned contemplating the Noble Mus-haf... Moisten your heart with its verses.',
+    'am':
+        '🥀 የልቦች ደም አልደረቀም ወይም አልጠነከረም، የተከበረውን ቁርኣን ማስተንተن ከተዉ በኋላ ቢሆን እንጂ... ልብህን በአንቀጾቹ አርጥብ።',
+    'om':
+        '🥀 Dhiigni onnee hin gogne, hin jabaannes, osoo xiinxala Qur\'aana kabajamaa dhiisanii booda malee... Onnee kee aayatoota isaatiin jiisi.',
   },
   {
-    'ar': '🔍 تفكّر في عاقبتك.. لو قُبضت روحك الليلة، أيسرّك أن يكون آخر عهدك بالدنيا آية قرأتها أم تفاهة تصفحتها؟',
-    'en': '🔍 Think about your end... If your soul were taken tonight, would it please you for your last moment in the world to be a verse you read, or triviality you scrolled through?',
-    'am': '🔍 ስለ መጨረሻህ አስብ... ዛሬ ማታ ነፍስህ ብትወሰድ، በዱንያ ላይ የመጨረሻ ጊዜህ ያነበብከው አንቀጽ መሆኑ ወይس የተመለከትከው ከንቱ ነገር መሆኑ ያስደስትሃል؟',
-    'om': '🔍 Gara dhuma keetii xiinxali... Yoo lubbuun kee halkan kana fudhatamte, addunyaa irratti yeroon kee dhumaa aayata ati dubbifte ta\'u moo waan faayidaa hin qabne kan ati laaltee dabarsitedha kan si gammachiisu?',
+    'ar':
+        '🔍 تفكّر في عاقبتك.. لو قُبضت روحك الليلة، أيسرّك أن يكون آخر عهدك بالدنيا آية قرأتها أم تفاهة تصفحتها؟',
+    'en':
+        '🔍 Think about your end... If your soul were taken tonight, would it please you for your last moment in the world to be a verse you read, or triviality you scrolled through?',
+    'am':
+        '🔍 ስለ መጨረሻህ አስብ... ዛሬ ማታ ነፍስህ ብትወሰድ، በዱንያ ላይ የመጨረሻ ጊዜህ ያነበብከው አንቀጽ መሆኑ ወይس የተመለከትከው ከንቱ ነገር መሆኑ ያስደስትሃል؟',
+    'om':
+        '🔍 Gara dhuma keetii xiinxali... Yoo lubbuun kee halkan kana fudhatamte, addunyaa irratti yeroon kee dhumaa aayata ati dubbifte ta\'u moo waan faayidaa hin qabne kan ati laaltee dabarsitedha kan si gammachiisu?',
   },
   {
-    'ar': '🏹 آيات الوعيد كالسِّهام، تفلق صخور القلوب القاسية.. فقف عند وعيد الله خاشعاً منيباً.',
-    'en': '🏹 The verses of warning are like arrows, splitting the rocks of hard hearts... So halt at the warning of Allah in humility and repentance.',
-    'am': '🏹 የማስጠንቀቂያ አንቀጾች እንደ ቀስት ናቸው، የጠነከሩ ልቦችን ዓለቶች ይሰነጥቃሉ... ስለዚህ በአላህ ማስጠንቀቂያ ላይ በትህتናና በመጸጸት ቁም።',
-    'om': '🏹 Aayatoonni akeekkachiisaa akka xiyyaati, dhagaa onnee gantuu dhoosu... Kanaaf sodaa fi tawbaadhaan akeekkachiisa Allaah biratti dhaabbadhu.',
+    'ar':
+        '🏹 آيات الوعيد كالسِّهام، تفلق صخور القلوب القاسية.. فقف عند وعيد الله خاشعاً منيباً.',
+    'en':
+        '🏹 The verses of warning are like arrows, splitting the rocks of hard hearts... So halt at the warning of Allah in humility and repentance.',
+    'am':
+        '🏹 የማስጠንቀቂያ አንቀጾች እንደ ቀስት ናቸው، የጠነከሩ ልቦችን ዓለቶች ይሰነጥቃሉ... ስለዚህ በአላህ ማስጠንቀቂያ ላይ በትህتናና በመጸጸት ቁም።',
+    'om':
+        '🏹 Aayatoonni akeekkachiisaa akka xiyyaati, dhagaa onnee gantuu dhoosu... Kanaaf sodaa fi tawbaadhaan akeekkachiisa Allaah biratti dhaabbadhu.',
   },
   {
-    'ar': '🌻 اقرأ بتلذذ، فهذه الدنيا ممر وساعات القراءة في المصحف هي روضة الجنة المعجّلة في الأرض.',
-    'en': '🌻 Read with pleasure, for this world is a transit, and the hours of reading the Mus-haf are the hastened garden of Paradise on Earth.',
-    'am': '🌻 በደስታ አንብብ، ይህች ዱንያ መሻገሪያ ነችና، በቁርኣን ውስጥ የምታነብባቸው ሰዓታት በምድር ላይ ያለችው የጀነት መናፈሻ ናቸው።',
-    'om': '🌻 Mi’aa dubbisi, addunyaan tun karaa darbiinsati, sa\'aatiin ati Qur’aana keessatti dabarsitus jannata daddafte kan dachii irratti argamte dha.',
+    'ar':
+        '🌻 اقرأ بتلذذ، فهذه الدنيا ممر وساعات القراءة في المصحف هي روضة الجنة المعجّلة في الأرض.',
+    'en':
+        '🌻 Read with pleasure, for this world is a transit, and the hours of reading the Mus-haf are the hastened garden of Paradise on Earth.',
+    'am':
+        '🌻 በደስታ አንብብ، ይህች ዱንያ መሻገሪያ ነችና، በቁርኣን ውስጥ የምታነብባቸው ሰዓታት በምድር ላይ ያለችው የጀነት መናፈሻ ናቸው።',
+    'om':
+        '🌻 Mi’aa dubbisi, addunyaan tun karaa darbiinsati, sa\'aatiin ati Qur’aana keessatti dabarsitus jannata daddafte kan dachii irratti argamte dha.',
   },
   {
-    'ar': '🌌 لو علم القارئ ما ينتظره من الإكرام عند منتهى سورة يرتلها، لسالت روحه شوقاً لتلاوة كتاب ربه.',
-    'en': '🌌 If the reader knew what honor awaits them at the end of a Surah they recite, their soul would have flowed with longing to recite the Book of their Lord.',
-    'am': '🌌 አንባቢው በሚያነበው ሱራ መጨረሻ ላይ ምን ዓይነት ክብር እንደሚጠብቀው ቢያውቅ ኖሮ، ነፍሱ የጌታውን መጽሐፍ ለማንبه በጉጉት ትፈስ ነበር።',
-    'om': '🌌 Osoo qaraataan kabaja dhuma suuraa inni qara\'u biratti isa eeggatu beekee, lubbuun isaa kitaaba Rabbii isaa qara\'uuf hawwiidhaan yaati turte.',
+    'ar':
+        '🌌 لو علم القارئ ما ينتظره من الإكرام عند منتهى سورة يرتلها، لسالت روحه شوقاً لتلاوة كتاب ربه.',
+    'en':
+        '🌌 If the reader knew what honor awaits them at the end of a Surah they recite, their soul would have flowed with longing to recite the Book of their Lord.',
+    'am':
+        '🌌 አንባቢው በሚያነበው ሱራ መጨረሻ ላይ ምን ዓይነት ክብር እንደሚጠብቀው ቢያውቅ ኖሮ، ነፍሱ የጌታውን መጽሐፍ ለማንبه በጉጉት ትፈስ ነበር።',
+    'om':
+        '🌌 Osoo qaraataan kabaja dhuma suuraa inni qara\'u biratti isa eeggatu beekee, lubbuun isaa kitaaba Rabbii isaa qara\'uuf hawwiidhaan yaati turte.',
   },
   {
-    'ar': '🚪 باب الإقبال على الله مفتوح الآن عبر هذه الشاشة.. ادخل بقلب منكسر خاشع عسى أن يُرحم.',
-    'en': '🚪 The door of turning to Allah is open now through this screen... Enter with a broken, humble heart, so you may be shown mercy.',
-    'am': '🚪 ወደ አላህ የመመለሻ በር አሁን በዚህ ስክሪን በኩል ክፍት ነው... ምሕረት ይደረግልህ ዘንድ በሰበረና በትሑት ልብ ግبا።',
-    'om': '🚪 Balbalonni gara Allaah deebi\'u amma iskiriinii kanaan banameera... Qalbii cabduu fi gadi jedheen seeni, tarii rahmanni siif godhama.',
+    'ar':
+        '🚪 باب الإقبال على الله مفتوح الآن عبر هذه الشاشة.. ادخل بقلب منكسر خاشع عسى أن يُرحم.',
+    'en':
+        '🚪 The door of turning to Allah is open now through this screen... Enter with a broken, humble heart, so you may be shown mercy.',
+    'am':
+        '🚪 ወደ አላህ የመመለሻ በር አሁን በዚህ ስክሪን በኩል ክፍት ነው... ምሕረት ይደረግልህ ዘንድ በሰበረና በትሑት ልብ ግبا።',
+    'om':
+        '🚪 Balbalonni gara Allaah deebi\'u amma iskiriinii kanaan banameera... Qalbii cabduu fi gadi jedheen seeni, tarii rahmanni siif godhama.',
   },
   {
-    'ar': '🍂 العمر ينقضي سريعاً والأيام تطوى.. ولا يبقى في صحيفتك غداً إلا ما وعاه قلبك من هذا التنزيل.',
-    'en': '🍂 Life passes quickly and days fold... and nothing remains in your record tomorrow except what your heart preserved of this Revelation.',
-    'am': '🍂 ዕድሜ በፍጥነት ያልፋል ቀናትም ይታጠፋሉ... ነገ በምዝግብ ማስታወሻህ ውስጥ ከዚህ መገለጥ ልብህ ከያዘው በስተቀር ምንም አይቀርም።',
-    'om': '🍂 Umriin dafee dhumata, guyyoonnis ni dacha\'u... Bor galmee kee keessatti waan onneen kee bu\'iinsa kana irraa qabatte malee homtuu hin hafu.',
+    'ar':
+        '🍂 العمر ينقضي سريعاً والأيام تطوى.. ولا يبقى في صحيفتك غداً إلا ما وعاه قلبك من هذا التنزيل.',
+    'en':
+        '🍂 Life passes quickly and days fold... and nothing remains in your record tomorrow except what your heart preserved of this Revelation.',
+    'am':
+        '🍂 ዕድሜ በፍጥነት ያልፋል ቀናትም ይታጠፋሉ... ነገ በምዝግብ ማስታወሻህ ውስጥ ከዚህ መገለጥ ልብህ ከያዘው በስተቀር ምንም አይቀርም።',
+    'om':
+        '🍂 Umriin dafee dhumata, guyyoonnis ni dacha\'u... Bor galmee kee keessatti waan onneen kee bu\'iinsa kana irraa qabatte malee homtuu hin hafu.',
   },
   {
-    'ar': '💡 القرآن نور البصيرة، من استضاء به هُدي إلى الصراط المستقيم ومن أعرض عنه عاش في ظلمة التيه.',
-    'en': '💡 The Qur\'an is the light of insight, whoever seeks light from it is guided to the Straight Path, and whoever turns away from it lives in the darkness of wandering.',
-    'am': '💡 ቁርኣን የእውቀት ብርሃን ነው، በእሱ የበራ ወደ ቀጥተኛው መንገድ ይመራል، ከእሱ የራቀ ግን በመጥፋት ጨለማ ውስጥ ይኖራል።',
-    'om': '💡 Qur’aanni ifa ija qalbii ti, namni ifa isaan ibsate gara karaa qajeelaa qajeelfama, namni isarraa garagale immoo dukkana badinsaa keessa jiraata.',
+    'ar':
+        '💡 القرآن نور البصيرة، من استضاء به هُدي إلى الصراط المستقيم ومن أعرض عنه عاش في ظلمة التيه.',
+    'en':
+        '💡 The Qur\'an is the light of insight, whoever seeks light from it is guided to the Straight Path, and whoever turns away from it lives in the darkness of wandering.',
+    'am':
+        '💡 ቁርኣን የእውቀት ብርሃን ነው، በእሱ የበራ ወደ ቀጥተኛው መንገድ ይመራል، ከእሱ የራቀ ግን በመጥፋት ጨለማ ውስጥ ይኖራል።',
+    'om':
+        '💡 Qur’aanni ifa ija qalbii ti, namni ifa isaan ibsate gara karaa qajeelaa qajeelfama, namni isarraa garagale immoo dukkana badinsaa keessa jiraata.',
   },
   {
-    'ar': '🔔 تذكرة للمغترّ بطول الأمل: الموت يأتي بغتة، والقبر صندوق العمل.. فاجعل صندوقك مليئاً بالقرآن.',
-    'en': '🔔 A reminder for the one deceived by long hopes: Death comes suddenly, and the grave is the chest of deeds... So make your chest full of the Qur\'an.',
-    'am': '🔔 ረጅም ተስፋ ላለው ሰው ማስታወሻ፡ ሞት በድንገት ይመጣል، መቃብርም የስራ ሳጥን ነው... ስለዚህ ሳጥንህን በቁርኣን የተሞላ አድርገው።',
-    'om': '🔔 Hawwii dheeraan kan gowwoomeef yaadachiisa: Duuti dingata dhufa, qabriin saanduqaa hojiiti... Kanaaf saanduqa kee Qur\'aanaan guuti.',
+    'ar':
+        '🔔 تذكرة للمغترّ بطول الأمل: الموت يأتي بغتة، والقبر صندوق العمل.. فاجعل صندوقك مليئاً بالقرآن.',
+    'en':
+        '🔔 A reminder for the one deceived by long hopes: Death comes suddenly, and the grave is the chest of deeds... So make your chest full of the Qur\'an.',
+    'am':
+        '🔔 ረጅም ተስፋ ላለው ሰው ማስታወሻ፡ ሞት በድንገት ይመጣል، መቃብርም የስራ ሳጥን ነው... ስለዚህ ሳጥንህን በቁርኣን የተሞላ አድርገው።',
+    'om':
+        '🔔 Hawwii dheeraan kan gowwoomeef yaadachiisa: Duuti dingata dhufa, qabriin saanduqaa hojiiti... Kanaaf saanduqa kee Qur\'aanaan guuti.',
   },
   {
-    'ar': '💎 القرآن لا يعطيك بعضه حتى تعطيه كلك.. فأعطِ مصحفك كليّة قلبك وانتباهك الآن.',
-    'en': '💎 The Qur\'an does not give you some of it until you give it all of you... So give your Mus-haf the whole of your heart and your attention now.',
-    'am': '💎 ቁርኣን ሙሉ ማንነትህን እስክትሰጠው ድረስ ከፊሉን አይሰጥህም... ስለዚህ አሁን ለቁርኣንህ ሙሉ ልብህንና ትኩረትህን ስጠው።',
-    'om': '💎 Qur’aanni hamma ati guutuu kee kennitutti gartokkee isaa siif hin kennu... Kanaaf guutuu onnee keetii fi xiyyeeffannaa kee amma Qur\'aanaaf kenni.',
+    'ar':
+        '💎 القرآن لا يعطيك بعضه حتى تعطيه كلك.. فأعطِ مصحفك كليّة قلبك وانتباهك الآن.',
+    'en':
+        '💎 The Qur\'an does not give you some of it until you give it all of you... So give your Mus-haf the whole of your heart and your attention now.',
+    'am':
+        '💎 ቁርኣን ሙሉ ማንነትህን እስክትሰጠው ድረስ ከፊሉን አይሰጥህም... ስለዚህ አሁን ለቁርኣንህ ሙሉ ልብህንና ትኩረትህን ስጠው።',
+    'om':
+        '💎 Qur’aanni hamma ati guutuu kee kennitutti gartokkee isaa siif hin kennu... Kanaaf guutuu onnee keetii fi xiyyeeffannaa kee amma Qur\'aanaaf kenni.',
   },
   {
-    'ar': '🌊 اغسل هموم صدرك الـمُتعبة بفيضان من آيات الطمأنينة.. أنصت لخطاب الله لك.',
-    'en': '🌊 Wash away the tired worries of your chest with a flood of verses of tranquility... Listen to Allah\'s discourse to you.',
-    'am': '🌊 የደረትህን የዛሉ ጭንቀቶች በእርጋታ አንቀጾች ጎርፍ እጠባቸው... አላህ ለአንተ የሚናገረውን ንግግር አድምጥ።',
-    'om': '🌊 Yaaddoo garba dhiphina garaa keetii dambalii aayatoota tasgabbii kanaan dhuqi... Dubbii Allaah kan sitti dubbatu dhaggeeffadhu.',
+    'ar':
+        '🌊 اغسل هموم صدرك الـمُتعبة بفيضان من آيات الطمأنينة.. أنصت لخطاب الله لك.',
+    'en':
+        '🌊 Wash away the tired worries of your chest with a flood of verses of tranquility... Listen to Allah\'s discourse to you.',
+    'am':
+        '🌊 የደረትህን የዛሉ ጭንቀቶች በእርጋታ አንቀጾች ጎርፍ እጠባቸው... አላህ ለአንተ የሚናገረውን ንግግር አድምጥ።',
+    'om':
+        '🌊 Yaaddoo garba dhiphina garaa keetii dambalii aayatoota tasgabbii kanaan dhuqi... Dubbii Allaah kan sitti dubbatu dhaggeeffadhu.',
   },
   {
-    'ar': '🤲 اللهم اجعلنا ممن يقرأ القرآن فيرقى، ولا تجعلنا ممن يقرأه فيشقى.. ابدأ قراءتك مستعيناً بالله.',
-    'en': '🤲 O Allah, make us of those who read the Qur\'an and ascend, and do not make us of those who read it and are miserable... Start your reading seeking help from Allah.',
-    'am': '🤲 አላህ ሆይ! ቁርኣን አንብበው ከፍ ከሚሉት አድርገን، አንብበው ከሚቸገሩት አታድርገን... አላህን በመታገዝ ንባብህን ጀምር።',
-    'om': 'Ya Allaah! warra Qur’aana qara’ee ol ka’u nu taasisi, warra qara’ee hoonga’u nu hin taasisin... Gargaarsa Allaah barbaacha dubbisa kee jalqabi.',
+    'ar':
+        '🤲 اللهم اجعلنا ممن يقرأ القرآن فيرقى، ولا تجعلنا ممن يقرأه فيشقى.. ابدأ قراءتك مستعيناً بالله.',
+    'en':
+        '🤲 O Allah, make us of those who read the Qur\'an and ascend, and do not make us of those who read it and are miserable... Start your reading seeking help from Allah.',
+    'am':
+        '🤲 አላህ ሆይ! ቁርኣን አንብበው ከፍ ከሚሉት አድርገን، አንብበው ከሚቸገሩት አታድርገን... አላህን በመታገዝ ንባብህን ጀምር።',
+    'om':
+        'Ya Allaah! warra Qur’aana qara’ee ol ka’u nu taasisi, warra qara’ee hoonga’u nu hin taasisin... Gargaarsa Allaah barbaacha dubbisa kee jalqabi.',
   },
 ];
 
@@ -2143,7 +2611,8 @@ class QuranReminderWidget extends StatelessWidget {
     if (pageNum != 1 && pageNum != 2) return const SizedBox.shrink();
     final selectedItem = quranReminders[reminderIndex];
     final String displayLang = forceArabic ? 'ar' : languageCode;
-    final String localizedText = selectedItem[displayLang] ?? selectedItem['ar'] ?? '';
+    final String localizedText =
+        selectedItem[displayLang] ?? selectedItem['ar'] ?? '';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
@@ -2230,18 +2699,20 @@ class _QuranWordSearchModalState extends State<_QuranWordSearchModal> {
     try {
       final db = await DatabaseHelper.instance.database;
       final rows = await db.rawQuery(
-        "SELECT sura_num, aya_num, page_aya, aya as text, sura as surahName "
-        "FROM quran WHERE search_aya LIKE ? LIMIT 100",
-        ['%$cleanQuery%']
-      );
+          "SELECT sura_num, aya_num, page_aya, aya as text, sura as surahName "
+          "FROM quran WHERE search_aya LIKE ? LIMIT 100",
+          ['%$cleanQuery%']);
 
-      final List<Map<String, dynamic>> matches = rows.map((r) => {
-        'surahNumber': r['sura_num'],
-        'ayahNumber': r['aya_num'],
-        'page': r['page_aya'],
-        'text': r['text'],
-        'surahName': DatabaseHelper.surahNamesArabicList[(r['sura_num'] as int) - 1],
-      }).toList();
+      final List<Map<String, dynamic>> matches = rows
+          .map((r) => {
+                'surahNumber': r['sura_num'],
+                'ayahNumber': r['aya_num'],
+                'page': r['page_aya'],
+                'text': r['text'],
+                'surahName': DatabaseHelper
+                    .surahNamesArabicList[(r['sura_num'] as int) - 1],
+              })
+          .toList();
 
       if (mounted) {
         setState(() {
@@ -2282,7 +2753,8 @@ class _QuranWordSearchModalState extends State<_QuranWordSearchModal> {
       decoration: BoxDecoration(
         color: widget.pageBgColor.withValues(alpha: 0.98),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border.all(color: widget.borderColor.withValues(alpha: 0.3), width: 1.5),
+        border: Border.all(
+            color: widget.borderColor.withValues(alpha: 0.3), width: 1.5),
       ),
       child: Column(
         children: [
@@ -2312,7 +2784,9 @@ class _QuranWordSearchModalState extends State<_QuranWordSearchModal> {
             style: TextStyle(color: widget.mainTextColor, fontFamily: 'Amiri'),
             decoration: InputDecoration(
               hintText: 'ابحث عن كلمة أو آية...',
-              hintStyle: TextStyle(color: widget.mainTextColor.withValues(alpha: 0.5), fontFamily: 'Amiri'),
+              hintStyle: TextStyle(
+                  color: widget.mainTextColor.withValues(alpha: 0.5),
+                  fontFamily: 'Amiri'),
               prefixIcon: Icon(Icons.search, color: widget.borderColor),
               suffixIcon: _controller.text.isNotEmpty
                   ? IconButton(
@@ -2325,19 +2799,22 @@ class _QuranWordSearchModalState extends State<_QuranWordSearchModal> {
                   : null,
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: widget.borderColor.withValues(alpha: 0.5)),
+                borderSide: BorderSide(
+                    color: widget.borderColor.withValues(alpha: 0.5)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(color: widget.borderColor),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
           ),
           const SizedBox(height: 16),
           Expanded(
             child: _isSearching
-                ? Center(child: CircularProgressIndicator(color: widget.borderColor))
+                ? Center(
+                    child: CircularProgressIndicator(color: widget.borderColor))
                 : _results.isEmpty
                     ? Center(
                         child: Text(
@@ -2364,7 +2841,8 @@ class _QuranWordSearchModalState extends State<_QuranWordSearchModal> {
                           final text = v['text'] ?? '';
 
                           return ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
                             title: Text(
                               text,
                               textAlign: TextAlign.right,
@@ -2379,7 +2857,8 @@ class _QuranWordSearchModalState extends State<_QuranWordSearchModal> {
                             subtitle: Padding(
                               padding: const EdgeInsets.only(top: 8.0),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'الصفحة: ${v['page']}',
@@ -2403,7 +2882,8 @@ class _QuranWordSearchModalState extends State<_QuranWordSearchModal> {
                             ),
                             onTap: () {
                               Navigator.pop(context);
-                              widget.onJumpToAyah(sNum, aNum, v['page'] as int? ?? 1);
+                              widget.onJumpToAyah(
+                                  sNum, aNum, v['page'] as int? ?? 1);
                             },
                           );
                         },

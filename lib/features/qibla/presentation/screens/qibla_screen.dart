@@ -71,7 +71,6 @@ class _QiblaScreenState extends State<QiblaScreen>
 
   double _qiblaBearing = 0;     // Bearing from user → Kaaba (true north)
   double _distanceKm = 0;
-  double _compassHeading = 0;
 
   StreamSubscription<CompassEvent>? _compassSub;
 
@@ -169,7 +168,6 @@ class _QiblaScreenState extends State<QiblaScreen>
       (event) {
         if (!mounted) return;
         final heading = event.heading ?? 0;
-        _compassHeading = heading;
 
         // The needle angle: how much to rotate the qibla indicator
         // relative to device orientation.

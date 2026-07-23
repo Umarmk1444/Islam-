@@ -430,4 +430,60 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get muezzinAlafasy => 'ሚሻሪ አል አፋሲ';
+
+  @override
+  String get navLibrary => 'Library';
+
+  @override
+  String get libraryAll => 'All';
+
+  @override
+  String get libraryFavorites => 'Favorites';
+
+  @override
+  String get noStoriesFound => 'No stories found.';
+
+  @override
+  String readingsCount(int count) {
+    return 'Readings: $count';
+  }
+
+  @override
+  String get playbackSettings => 'የማጫወቻ ቅንብሮች';
+
+  @override
+  String get intervalGap => 'ክፍተት';
+
+  @override
+  String get playbackSpeed => 'ፍጥነት';
+
+  @override
+  String get noneOffLabel => 'ምንም';
+
+  @override
+  String get secLabel => 'ሰከንድ';
+
+  @override
+  String get ayahLabel => 'አያህ';
+
+  @override
+  String get sleepTimer => 'የእንቅልፍ ጊዜ ቆጣሪ';
+
+  @override
+  String get stopAudioAfter => 'ከዚህ በኋላ ድምጽን አጥፋ:';
+
+  @override
+  String get minutesLabel => 'ደቂቃ';
+
+  @override
+  String get customMinHint => 'የራስዎ ደቂቃ...';
+
+  @override
+  String get start => 'ጀምር';
+
+  @override
+  String get timerCanceled => 'ሰዓት ቆጣሪው ተሰርዟል';
+
+  @override
+  String get cancelCurrentTimer => 'አሁን ያለውን ሰዓት ቆጣሪ ሰርዝ';
 }

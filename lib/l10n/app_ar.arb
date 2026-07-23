@@ -170,5 +170,30 @@
   "muezzinZahrani": "منصور الزهراني",
   "muezzinDosari": "ياسر الدوسري",
   "muezzinAbdulbasit": "عبدالباسط عبدالصمد",
-  "muezzinAlafasy": "مشاري العفاسي"
+  "muezzinAlafasy": "مشاري العفاسي",
+  "navLibrary": "المكتبة",
+  "libraryAll": "الكل",
+  "libraryFavorites": "المفضلة",
+  "noStoriesFound": "لا توجد قصص.",
+  "readingsCount": "القراءات: {count}",
+  "@readingsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "playbackSettings": "إعدادات التشغيل",
+  "intervalGap": "الفاصل",
+  "playbackSpeed": "السرعة",
+  "noneOffLabel": "لا",
+  "secLabel": "ث",
+  "ayahLabel": "آية",
+  "sleepTimer": "مؤقت النوم",
+  "stopAudioAfter": "إيقاف الصوت تلقائياً بعد:",
+  "minutesLabel": "دقيقة",
+  "customMinHint": "دقيقة مخصصة...",
+  "start": "بدء",
+  "timerCanceled": "تم إلغاء المؤقت",
+  "cancelCurrentTimer": "إلغاء المؤقت الحالي"
 }

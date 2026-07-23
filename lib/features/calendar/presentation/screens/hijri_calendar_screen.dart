@@ -15,6 +15,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../theme_notifier.dart';
 import '../controllers/calendar_controller.dart';
+import 'date_converter_screen.dart';
 
 class HijriCalendarScreen extends StatefulWidget {
   const HijriCalendarScreen({super.key});
@@ -168,6 +169,44 @@ class _HijriCalendarScreenState extends State<HijriCalendarScreen>
 
                 // ── Legend ───────────────────────────────────────────────────
                 _Legend(isDark: isDark, textSec: textSec),
+
+                // ── Date Converter Button ────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isDark ? AppColors.surfaceCard : Colors.white,
+                      foregroundColor: textPri,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(
+                          color: AppColors.emeraldLight.withValues(alpha: 0.35),
+                          width: 1.3,
+                        ),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      minimumSize: const Size.fromHeight(50),
+                    ),
+                    icon: const Icon(Icons.sync_alt, color: AppColors.emeraldLight),
+                    label: Text(
+                      locale == 'ar' ? 'محول التاريخ' : 
+                      locale == 'am' ? 'ቀን መለወጫ' : 
+                      locale == 'om' ? 'Jijjiirraa Guyyaa' : 
+                      'Date Converter',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const DateConverterScreen()),
+                      );
+                    },
+                  ),
+                ),
               ],
             );
           },

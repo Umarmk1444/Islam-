@@ -27,6 +27,7 @@ class QuranReciter {
   final int? sourceId;
   final String? apiEndpoint;
   final String? directAyahCdnTemplate;
+  final int? quranComId;
 
   const QuranReciter({
     required this.id,
@@ -40,6 +41,7 @@ class QuranReciter {
     this.sourceId,
     this.apiEndpoint,
     this.directAyahCdnTemplate,
+    this.quranComId,
   });
 
   bool get hasDirectTemplate => directAyahCdnTemplate != null;
@@ -61,6 +63,7 @@ const List<QuranReciter> kAllReciters = [
     englishName: 'Minshawy',
     aliases: ['Minshawi', 'Minshawy'],
     source: QuranAudioSource.alquranCloud,
+    quranComId: 9,
   ),
   QuranReciter(
     id: 2,
@@ -70,6 +73,7 @@ const List<QuranReciter> kAllReciters = [
     aliases: ['Minshawi', 'Minshawy', 'Mujawwad'],
     source: QuranAudioSource.alquranCloud,
     cloudBitrate: 64,
+    quranComId: 8,
   ),
   // Removed: ar.minshawi-2 (Alternate) — duplicate of same person
   QuranReciter(
@@ -80,6 +84,7 @@ const List<QuranReciter> kAllReciters = [
     aliases: ['Abdul Basit', 'Basit', 'Murattal'],
     source: QuranAudioSource.alquranCloud,
     cloudBitrate: 192,
+    quranComId: 2,
   ),
   // Removed: ar.abdulsamad — same person (عبد الباسط عبد الصمد) as above, different identifier
   QuranReciter(
@@ -99,6 +104,7 @@ const List<QuranReciter> kAllReciters = [
     aliases: ['Saood Shuraym', 'Shuraym', 'Shuraim'],
     source: QuranAudioSource.alquranCloud,
     cloudBitrate: 64,
+    quranComId: 10,
   ),
   QuranReciter(
     id: 6,
@@ -137,6 +143,7 @@ const List<QuranReciter> kAllReciters = [
     aliases: ['Shaatree', 'Shatri', 'Ash Shaatree'],
     source: QuranAudioSource.alquranCloud,
     cloudBitrate: 128,
+    quranComId: 4,
   ),
   QuranReciter(
     id: 10,
@@ -156,6 +163,7 @@ const List<QuranReciter> kAllReciters = [
     aliases: ['Hani', 'Rifai'],
     source: QuranAudioSource.alquranCloud,
     cloudBitrate: 192,
+    quranComId: 5,
   ),
   QuranReciter(
     id: 12,
@@ -174,6 +182,7 @@ const List<QuranReciter> kAllReciters = [
     aliases: ['Husary', 'Al Husary'],
     source: QuranAudioSource.alquranCloud,
     cloudBitrate: 128,
+    quranComId: 6,
   ),
   // Removed: ar.husary-2 (Alternate) — duplicate of same person
   QuranReciter(
@@ -229,7 +238,35 @@ const List<QuranReciter> kAllReciters = [
     directAyahCdnTemplate:
         'https://cdn.islamic.network/quran/audio/128/ar.alijaber/{global_ayah_id}.mp3',
   ),
+  QuranReciter(
+    id: 19,
+    name: 'مشاري راشد العفاسي',
+    identifier: 'ar.alafasy',
+    englishName: 'Mishary Rashid Alafasy',
+    aliases: ['Mishary', 'Alafasy', 'Afasy'],
+    source: QuranAudioSource.alquranCloud,
+    cloudBitrate: 128,
+    quranComId: 7,
+  ),
 ];
+
+List<QuranReciter> get sortedReciters {
+  final List<QuranReciter> supported = [];
+  final List<QuranReciter> fallback = [];
+
+  for (final r in kAllReciters) {
+    if (r.quranComId != null) {
+      supported.add(r);
+    } else {
+      fallback.add(r);
+    }
+  }
+
+  supported.sort((a, b) => a.name.compareTo(b.name));
+  fallback.sort((a, b) => a.name.compareTo(b.name));
+
+  return [...supported, ...fallback];
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Reciter Playback Routing Matrix
@@ -292,14 +329,11 @@ const Map<String, ReciterRouting> kReciterRouting = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Global Audio Controller — Dual-Player Ping-Pong for Gapless Playback
+// Global Audio Controller — Gapless Playback Engine
 // ─────────────────────────────────────────────────────────────────────────────
 //
 // Strategy:
-//   • _active  → currently playing verse N
-//   • _standby → pre-loading verse N+1 in background, already buffered
-//   When _active completes → swap pointers, start _standby instantly,
-//   then start loading verse N+2 into the now-free _active player.
+//   Use just_audio's ConcatenatingAudioSource to load the entire Surah.
 // ─────────────────────────────────────────────────────────────────────────────
 
 class QuranAudioController extends ChangeNotifier {
@@ -307,28 +341,13 @@ class QuranAudioController extends ChangeNotifier {
   QuranAudioController._internal();
   static final QuranAudioController instance = QuranAudioController._internal();
 
-  // ── Dual-player engine ─────────────────────────────────────────────────────
-  final AudioPlayer _playerA = AudioPlayer();
-  final AudioPlayer _playerB = AudioPlayer();
-  bool _usingA = true;
-
-  /// Increments every time the active player swaps.
-  /// UI widgets can key StreamBuilders on this to reconnect to the new stream.
+  // ── Audio engine ───────────────────────────────────────────────────────────
+  final AudioPlayer _active = AudioPlayer();
   int streamKey = 0;
 
-  AudioPlayer get _active => _usingA ? _playerA : _playerB;
-  AudioPlayer get _standby => _usingA ? _playerB : _playerA;
-
   StreamSubscription<PlayerState>? _activeSub;
-
-  // ── Standby state ──────────────────────────────────────────────────────────
-  // The absolute index that is currently being (or has been) pre-loaded
-  // into the standby player.
-  int? _standbyIdx;
-  bool _standbyReady = false; // true once setUrl() completes on standby
-
-  // ── Completion guard ───────────────────────────────────────────────────────
-  bool _isHandlingCompletion = false;
+  StreamSubscription<Duration>? _positionSub;
+  StreamSubscription<int?>? _indexSub;
 
   // ── URL cache (absoluteIdx → url) ──────────────────────────────────────────
   final Map<String, String> _urlCache = {};
@@ -355,6 +374,19 @@ class QuranAudioController extends ChangeNotifier {
   String currentSurahName = '';
   String currentVerseText = '';
 
+  // ── Word-by-word state ─────────────────────────────────────────────────────
+  int? activeWordPosition;
+  Map<String, dynamic>? _currentChapterSegments;
+  Map<String, Set<int>>? _currentChapterSymbols;
+
+  bool isWordSymbol(int surah, int verse, int wordIndex) {
+    if (_currentChapterSymbols == null) return false;
+    final key = '$surah:$verse';
+    final symbols = _currentChapterSymbols![key];
+    if (symbols == null) return false;
+    return symbols.contains(wordIndex);
+  }
+
   // ── Reciter ────────────────────────────────────────────────────────────────
   QuranReciter selectedReciter = kAllReciters.firstWhere(
     (r) => r.identifier == 'ar.minshawi',
@@ -365,20 +397,142 @@ class QuranAudioController extends ChangeNotifier {
   // ── Controls ───────────────────────────────────────────────────────────────
   final List<int> repetitionOptions = const [1, 2, 3, 5, -1];
   int repetitionIndex = 0;
-  int _remainingLoops = 1;
+  int _currentLoopCount = 0;
 
   final List<int> delayOptions = const [0, 2, 5, 10, -1];
   int delayIndex = 0;
+  bool _isDelaying = false;
+  bool _isHandlingCompletion = false;
 
   final List<double> speedOptions = const [0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
   int speedIndex = 1; // default 1.0x
   double currentSpeed = 1.0;
+
+  bool get _isGaplessMode =>
+      delayOptions[delayIndex] == 0 && repetitionOptions[repetitionIndex] == 1;
 
   // ── Data Callbacks ─────────────────────────────────────────────────────────
   List<Map<String, dynamic>> _surahList = [];
   int _totalVerses = 6236;
   Map<String, dynamic>? Function(int surah, int ayah)? _getVerseData;
   void Function(int surah, int ayah)? onAyahChanged;
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Word-by-word core
+  // ─────────────────────────────────────────────────────────────────────────
+
+  Future<void> _fetchSegmentsForChapter(int surah, int? quranComId) async {
+    _currentChapterSegments = null;
+    _currentChapterSymbols = null;
+    activeWordPosition = null;
+    notifyListeners();
+
+    if (quranComId == null) return;
+
+    try {
+      debugPrint('[QuranAudio] Fetching segments for surah=$surah audio=$quranComId page=1');
+      final response = await http.get(
+        Uri.parse('https://api.quran.com/api/v4/verses/by_chapter/$surah?words=true&audio=$quranComId&per_page=300'),
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        _currentChapterSegments = {};
+        _currentChapterSymbols = {};
+        
+        void parseVerses(List verses) {
+          if (_currentChapterSegments == null) return;
+          for (final verse in verses) {
+            final audio = verse['audio'];
+            if (audio != null && audio['segments'] != null) {
+              _currentChapterSegments![verse['verse_key']] = audio['segments'];
+            }
+            final words = verse['words'];
+            if (words != null && words is List) {
+              Set<int> symbols = {};
+              for (int i = 0; i < words.length; i++) {
+                final w = words[i];
+                final type = w['char_type_name'];
+                // Only 'word' is a standard Arabic word, everything else is a symbol (end, pause, sajdah, rub-el-hizb)
+                if (type != 'word') {
+                  symbols.add(i + 1); // 1-based index to match UI
+                }
+              }
+              _currentChapterSymbols![verse['verse_key']] = symbols;
+            }
+          }
+        }
+
+        parseVerses(data['verses'] as List);
+        
+        final pagination = data['pagination'];
+        final totalPages = pagination['total_pages'] as int? ?? 1;
+        
+        notifyListeners();
+        debugPrint('[QuranAudio] Fetched segments for ${_currentChapterSegments!.length} verses (Page 1/$totalPages)');
+        
+        // Fetch remaining pages asynchronously
+        for (int page = 2; page <= totalPages; page++) {
+          if (surah != currentSurah || quranComId != selectedReciter.quranComId) break;
+          try {
+            debugPrint('[QuranAudio] Fetching segments for surah=$surah audio=$quranComId page=$page');
+            final pageRes = await http.get(
+              Uri.parse('https://api.quran.com/api/v4/verses/by_chapter/$surah?words=true&audio=$quranComId&per_page=50&page=$page'),
+            );
+            
+            if (surah != currentSurah || quranComId != selectedReciter.quranComId) break;
+            
+            if (pageRes.statusCode == 200) {
+              final pageData = json.decode(pageRes.body);
+              parseVerses(pageData['verses'] as List);
+              notifyListeners();
+            }
+          } catch (e) {
+            debugPrint('[QuranAudio] Error fetching segments page $page: $e');
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('[QuranAudio] Error fetching segments: $e');
+    }
+  }
+
+  void _syncWordPosition(Duration position) {
+    if (_currentChapterSegments == null || _currentChapterSegments!.isEmpty) {
+      if (activeWordPosition != null) {
+        activeWordPosition = null;
+        notifyListeners();
+      }
+      return;
+    }
+
+    final verseKey = '$currentSurah:$currentAyah';
+    final segments = _currentChapterSegments![verseKey];
+    if (segments == null) {
+      if (activeWordPosition != null) {
+        activeWordPosition = null;
+        notifyListeners();
+      }
+      return;
+    }
+
+    int ms = position.inMilliseconds;
+    int? newPos;
+    for (final seg in segments) {
+      if (seg is List && seg.length >= 4) {
+        final startMs = seg[2] as int;
+        final endMs = seg[3] as int;
+        if (ms >= startMs && ms <= endMs) {
+          newPos = (seg[0] as int) + 1; // Map 0-based index to 1-based wordIndex
+          break;
+        }
+      }
+    }
+
+    if (newPos != activeWordPosition) {
+      activeWordPosition = newPos;
+      notifyListeners();
+    }
+  }
 
   // ─────────────────────────────────────────────────────────────────────────
   // Public API
@@ -397,81 +551,151 @@ class QuranAudioController extends ChangeNotifier {
     _getVerseData = getVerseData;
     this.onAyahChanged = onAyahChanged;
 
-    _isHandlingCompletion = false;
-    _standbyIdx = null;
-    _standbyReady = false;
+    // Fetch word timestamps asynchronously if available
+    _fetchSegmentsForChapter(surah, selectedReciter.quranComId);
 
     _setCurrentFromSurahAyah(surah, ayah);
     isActive = true;
 
-    // Set loop mode natively for infinite repeats
     if (repetitionOptions[repetitionIndex] == -1) {
-      _playerA.setLoopMode(LoopMode.one);
-      _playerB.setLoopMode(LoopMode.one);
+      _active.setLoopMode(LoopMode.all);
     } else {
-      _playerA.setLoopMode(LoopMode.off);
-      _playerB.setLoopMode(LoopMode.off);
+      _active.setLoopMode(LoopMode.off);
     }
 
-    await _loadActiveAndPlay();
+    await _loadSurahPlaylist(surah, ayah);
     notifyListeners();
   }
 
-  Future<void> play() async => _active.play();
+  Future<void> play() async {
+    if (!_isDelaying && !isPlaying) {
+      if (_active.processingState == ProcessingState.completed) {
+        _handleTrackCompletion();
+      } else {
+        _active.play();
+      }
+    }
+  }
 
-  Future<void> pause() async => _active.pause();
+  Future<void> pause() async {
+    _active.pause();
+    if (_isDelaying) {
+      _isDelaying = false;
+      isPlaying = false;
+      notifyListeners();
+    }
+  }
 
   Future<void> seek(Duration position) async => _active.seek(position);
 
   Future<void> nextAyah() async {
     if (currentAbsoluteIdx < _totalVerses) {
-      _isHandlingCompletion = false;
-      _updateFromAbsoluteIndex(currentAbsoluteIdx + 1);
-      onAyahChanged?.call(currentSurah, currentAyah);
-      notifyListeners();
-      await _loadActiveAndPlay();
+      if (_isGaplessMode) {
+        final nextSurahInfo = _surahList.firstWhere((s) => s['number'] == currentSurah);
+        if (currentAyah >= nextSurahInfo['totalVerses']) {
+          // Going to next surah
+          final nextS = currentSurah + 1;
+          if (nextS <= 114) {
+            _updateFromAbsoluteIndex(currentAbsoluteIdx + 1);
+            _fetchSegmentsForChapter(nextS, selectedReciter.quranComId);
+            onAyahChanged?.call(nextS, 1);
+            notifyListeners();
+            await _loadSurahPlaylist(nextS, 1);
+          }
+        } else {
+          await _active.seekToNext();
+        }
+      } else {
+        final nextSurahInfo = _surahList.firstWhere((s) => s['number'] == currentSurah);
+        if (currentAyah >= nextSurahInfo['totalVerses']) {
+          // Going to next surah
+          final nextS = currentSurah + 1;
+          if (nextS <= 114) {
+            _updateFromAbsoluteIndex(currentAbsoluteIdx + 1);
+            _fetchSegmentsForChapter(nextS, selectedReciter.quranComId);
+            onAyahChanged?.call(nextS, 1);
+            notifyListeners();
+            await _loadSurahPlaylist(nextS, 1);
+          }
+        } else {
+          _updateFromAbsoluteIndex(currentAbsoluteIdx + 1);
+          onAyahChanged?.call(currentSurah, currentAyah);
+          notifyListeners();
+          await _loadSurahPlaylist(currentSurah, currentAyah);
+        }
+      }
     }
   }
 
   Future<void> previousAyah() async {
     if (currentAbsoluteIdx > 1) {
-      _isHandlingCompletion = false;
-      _updateFromAbsoluteIndex(currentAbsoluteIdx - 1);
-      onAyahChanged?.call(currentSurah, currentAyah);
-      notifyListeners();
-      await _loadActiveAndPlay();
+      if (_isGaplessMode) {
+        if (currentAyah == 1) {
+          // Going to previous surah
+          final prevS = currentSurah - 1;
+          _updateFromAbsoluteIndex(currentAbsoluteIdx - 1);
+          _fetchSegmentsForChapter(prevS, selectedReciter.quranComId);
+          final prevSurahInfo = _surahList.firstWhere((s) => s['number'] == prevS);
+          final prevTotal = prevSurahInfo['totalVerses'] as int;
+          onAyahChanged?.call(prevS, prevTotal);
+          notifyListeners();
+          await _loadSurahPlaylist(prevS, prevTotal);
+        } else {
+          await _active.seekToPrevious();
+        }
+      } else {
+        if (currentAyah == 1) {
+          // Going to previous surah
+          final prevS = currentSurah - 1;
+          _updateFromAbsoluteIndex(currentAbsoluteIdx - 1);
+          _fetchSegmentsForChapter(prevS, selectedReciter.quranComId);
+          final prevSurahInfo = _surahList.firstWhere((s) => s['number'] == prevS);
+          final prevTotal = prevSurahInfo['totalVerses'] as int;
+          onAyahChanged?.call(prevS, prevTotal);
+          notifyListeners();
+          await _loadSurahPlaylist(prevS, prevTotal);
+        } else {
+          _updateFromAbsoluteIndex(currentAbsoluteIdx - 1);
+          onAyahChanged?.call(currentSurah, currentAyah);
+          notifyListeners();
+          await _loadSurahPlaylist(currentSurah, currentAyah);
+        }
+      }
     }
   }
 
   Future<void> changeReciter(QuranReciter reciter) async {
     selectedReciter = reciter;
     _urlCache.clear();
-    _standbyIdx = null;
-    _standbyReady = false;
+    
+    _fetchSegmentsForChapter(currentSurah, selectedReciter.quranComId);
+    
     notifyListeners();
-    await _loadActiveAndPlay();
+    await _loadSurahPlaylist(currentSurah, currentAyah);
   }
 
   void setRepetition(int value) {
     int idx = repetitionOptions.indexOf(value);
     if (idx != -1) {
       repetitionIndex = idx;
-      _remainingLoops = value;
-
       if (value == -1) {
-        _playerA.setLoopMode(LoopMode.one);
-        _playerB.setLoopMode(LoopMode.one);
+        _active.setLoopMode(LoopMode.all);
       } else {
-        _playerA.setLoopMode(LoopMode.off);
-        _playerB.setLoopMode(LoopMode.off);
+        _active.setLoopMode(LoopMode.off);
       }
       notifyListeners();
+      if (isActive) {
+        _loadSurahPlaylist(currentSurah, currentAyah);
+      }
     }
   }
 
   void setDelay(int optionValue) {
     delayIndex = delayOptions.indexOf(optionValue);
     notifyListeners();
+    if (isActive) {
+      _loadSurahPlaylist(currentSurah, currentAyah);
+    }
   }
 
   void setSpeed(double speed) {
@@ -479,8 +703,7 @@ class QuranAudioController extends ChangeNotifier {
     if (idx != -1) {
       speedIndex = idx;
       currentSpeed = speed;
-      _playerA.setSpeed(speed);
-      _playerB.setSpeed(speed);
+      _active.setSpeed(speed);
       notifyListeners();
     }
   }
@@ -488,233 +711,265 @@ class QuranAudioController extends ChangeNotifier {
   void stopAndDismiss() {
     _activeSub?.cancel();
     _activeSub = null;
-    _playerA.stop();
-    _playerB.stop();
-    _isHandlingCompletion = false;
-    _standbyIdx = null;
-    _standbyReady = false;
+    _positionSub?.cancel();
+    _positionSub = null;
+    _indexSub?.cancel();
+    _indexSub = null;
+    
+    _active.stop();
     isActive = false;
     isPlaying = false;
+    _isDelaying = false;
+    _currentLoopCount = 0;
     hasUserSelectedReciter = false;
+    activeWordPosition = null;
+    _currentChapterSegments = null;
     notifyListeners();
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Dual-player core
+  // Gapless Engine Core
   // ─────────────────────────────────────────────────────────────────────────
 
-  /// Load the current verse URL into the ACTIVE player and play it.
-  /// Then kick off loading of the NEXT verse into the standby player.
-  Future<void> _loadActiveAndPlay() async {
+  Future<void> _loadSurahPlaylist(int surah, int startAyah) async {
     isLoading = true;
     notifyListeners();
     lastPlaybackError = null;
 
     try {
-      // Tear down existing listener and stop both players cleanly.
       _activeSub?.cancel();
       _activeSub = null;
+      _indexSub?.cancel();
+      _indexSub = null;
       await _active.stop();
 
-      _isHandlingCompletion = false;
-      _standbyIdx = null;
-      _standbyReady = false;
-      await _standby.stop();
+      final routing = kReciterRouting[selectedReciter.identifier];
+      bool isFullSurah = routing != null && routing.type == ReciterPlaybackType.fullSurahOnly;
 
-      // Resolve URL for current verse.
-      final url = await _getAudioUrl(currentAbsoluteIdx);
-      _remainingLoops = repetitionOptions[repetitionIndex] == -1
-          ? -1
-          : repetitionOptions[repetitionIndex];
+      if (isFullSurah) {
+        final url = await _getAudioUrl(currentAbsoluteIdx, prefetchSurah: surah, prefetchAyah: 1);
+        if (url != null) {
+          final mediaItem = MediaItem(
+            id: currentAbsoluteIdx.toString(),
+            album: 'القرآن الكريم',
+            title: 'سورة $currentSurahName',
+            artist: selectedReciter.name,
+          );
+          final source = url.startsWith('http') 
+              ? AudioSource.uri(Uri.parse(url), tag: mediaItem)
+              : AudioSource.uri(Uri.file(url), tag: mediaItem);
+          await _active.setAudioSource(source);
+        }
+      } else if (_isGaplessMode) {
+        final surahInfo = _surahList.firstWhere((s) => s['number'] == surah);
+        final totalAyahs = surahInfo['totalVerses'] as int;
+        
+        int absStart = 1;
+        for (final s in _surahList) {
+          if (s['number'] == surah) break;
+          absStart += s['totalVerses'] as int;
+        }
 
-      // Re-attach listener then load & play.
-      _attachActiveListener();
-      if (url != null) {
-        try {
+        List<AudioSource> sources = [];
+        for (int a = 1; a <= totalAyahs; a++) {
+          final absIdx = absStart + a - 1;
+          final url = await _getAudioUrl(absIdx, prefetchSurah: surah, prefetchAyah: a);
+          if (url != null) {
+            final mediaItem = MediaItem(
+              id: absIdx.toString(),
+              album: 'القرآن الكريم',
+              title: 'الآية $absIdx',
+              artist: selectedReciter.name,
+            );
+            sources.add(url.startsWith('http') 
+              ? AudioSource.uri(Uri.parse(url), tag: mediaItem)
+              : AudioSource.uri(Uri.file(url), tag: mediaItem));
+          }
+        }
+        
+        if (sources.isNotEmpty) {
+          final playlist = ConcatenatingAudioSource(children: sources);
+          await _active.setAudioSource(playlist, initialIndex: startAyah - 1);
+        } else {
+           throw Exception("No audio sources found for this Surah.");
+        }
+      } else {
+        _currentLoopCount = 0; // reset loop when manually loaded
+        final url = await _getAudioUrl(currentAbsoluteIdx, prefetchSurah: surah, prefetchAyah: startAyah);
+        if (url != null) {
           final mediaItem = MediaItem(
             id: currentAbsoluteIdx.toString(),
             album: 'القرآن الكريم',
             title: 'الآية $currentAbsoluteIdx',
             artist: selectedReciter.name,
           );
-          if (url.startsWith('http')) {
-            await _active.setAudioSource(AudioSource.uri(Uri.parse(url), tag: mediaItem));
-          } else {
-            await _active.setAudioSource(AudioSource.uri(Uri.file(url), tag: mediaItem));
-          }
-          await _active.play();
-        } catch (e) {
-          debugPrint('[QuranAudio] Error setting url/playing: $e');
-          // Clear standby/preload queue and surface error to UI without crashing
-          _standbyIdx = null;
-          _standbyReady = false;
-          try {
-            await _standby.stop();
-          } catch (_) {}
-          isActive = false;
-          lastPlaybackError = e.toString();
-          notifyListeners();
-          return;
+          final source = url.startsWith('http') 
+              ? AudioSource.uri(Uri.parse(url), tag: mediaItem)
+              : AudioSource.uri(Uri.file(url), tag: mediaItem);
+          await _active.setAudioSource(source);
+        } else {
+           throw Exception("No audio sources found for this Ayah.");
         }
       }
-
-      // Begin pre-loading the NEXT verse into standby (fire-and-forget).
-      _preloadStandby(currentAbsoluteIdx + 1);
+      
+      _attachActiveListener();
+      await _active.play();
     } catch (e) {
-      debugPrint('[QuranAudio] Error loading active: $e');
+      debugPrint('[QuranAudio] Error in audio engine: $e');
+      isActive = false;
+      lastPlaybackError = e.toString();
+      notifyListeners();
     } finally {
       isLoading = false;
       notifyListeners();
     }
   }
 
-  /// Silently load the next verse URL into the standby player so it's
-  /// ready to play the instant the active player finishes.
-  /// Also batch-prefetch URLs for 2 verses ahead into the cache.
-  void _preloadStandby(int nextIdx) {
-    if (nextIdx > _totalVerses) return;
-    _standbyIdx = nextIdx;
-    _standbyReady = false;
-
-    // If the selected reciter only provides full-surah files, do not
-    // attempt verse-by-verse preloading.
-    final selectedRouting = kReciterRouting[selectedReciter.identifier];
-    if (selectedRouting != null &&
-        selectedRouting.type == ReciterPlaybackType.fullSurahOnly) {
-      debugPrint(
-          '[QuranAudio] Preload disabled for full-surah-only reciter=${selectedReciter.identifier}');
-      return;
-    }
-
-    for (int ahead = 1; ahead <= 2; ahead++) {
-      final futureIdx = nextIdx + ahead;
-      if (futureIdx <= _totalVerses && !_urlCache.containsKey(futureIdx)) {
-        int remaining = futureIdx;
-        int targetSurah = 1;
-        for (final s in _surahList) {
-          final total = s['totalVerses'] as int;
-          if (remaining <= total) {
-            targetSurah = s['number'] as int;
-            break;
-          }
-          remaining -= total;
-          targetSurah++;
-        }
-        _getAudioUrl(futureIdx,
-            prefetchSurah: targetSurah,
-            prefetchAyah: remaining); // fire-and-forget, populates _urlCache
-      }
-    }
-
-    _getAudioUrl(nextIdx).then((url) async {
-      // Abort if we've since moved on (user skipped or stopped).
-      if (_standbyIdx != nextIdx || !isActive) return;
-      if (url == null) return;
-
-      try {
-        final mediaItem = MediaItem(
-          id: nextIdx.toString(),
-          album: 'القرآن الكريم',
-          title: 'الآية $nextIdx',
-          artist: selectedReciter.name,
-        );
-        if (url.startsWith('http')) {
-          await _standby.setAudioSource(AudioSource.uri(Uri.parse(url), tag: mediaItem));
-        } else {
-          await _standby.setAudioSource(AudioSource.uri(Uri.file(url), tag: mediaItem));
-        }
-        // Only mark ready if still targeting the same index.
-        if (_standbyIdx == nextIdx && isActive) {
-          _standbyReady = true;
-          debugPrint(
-              '[QuranAudio] Standby ready for idx=$nextIdx (local: ${url.startsWith('/')})');
-        }
-      } catch (e) {
-        debugPrint('[QuranAudio] Failed to preload standby idx=$nextIdx: $e');
-      }
-    });
-  }
-
   void _attachActiveListener() {
     _activeSub?.cancel();
+    _positionSub?.cancel();
+    _indexSub?.cancel();
+    
+    _positionSub = _active.positionStream.listen(_syncWordPosition);
+
+    _indexSub = _active.currentIndexStream.listen((index) {
+      if (index == null) return;
+      final sequence = _active.sequenceState?.sequence;
+      if (sequence == null || index >= sequence.length) return;
+      
+      final mediaItem = sequence[index].tag as MediaItem;
+      final absoluteIdx = int.tryParse(mediaItem.id);
+      
+      if (absoluteIdx != null && absoluteIdx != currentAbsoluteIdx) {
+        final oldSurah = currentSurah;
+        _updateFromAbsoluteIndex(absoluteIdx);
+        
+        if (oldSurah != currentSurah) {
+          _fetchSegmentsForChapter(currentSurah, selectedReciter.quranComId);
+        }
+        
+        onAyahChanged?.call(currentSurah, currentAyah);
+        notifyListeners();
+      }
+    });
+
     _activeSub = _active.playerStateStream.listen((state) {
-      isPlaying =
-          state.playing && state.processingState != ProcessingState.completed;
+      isPlaying = (state.playing && state.processingState != ProcessingState.completed) || _isDelaying;
       notifyListeners();
 
       if (state.processingState == ProcessingState.completed) {
-        if (!_isHandlingCompletion) {
-          _isHandlingCompletion = true;
-          _handleCompletion();
-        }
+         _handleTrackCompletion();
       }
     });
   }
 
-  Future<void> _handleCompletion() async {
-    // ── Repetition ────────────────────────────────────────────────────────
-    if (_remainingLoops > 1) {
-      _remainingLoops--;
-      await _active.seek(Duration.zero);
-      await _active.play();
+  Future<void> _handleTrackCompletion() async {
+    if (_isHandlingCompletion) return;
+    _isHandlingCompletion = true;
+
+    try {
+      final routing = kReciterRouting[selectedReciter.identifier];
+      bool isFullSurah = routing != null && routing.type == ReciterPlaybackType.fullSurahOnly;
+      
+      if (isFullSurah) {
+        stopAndDismiss();
+        return;
+      }
+
+      if (_isGaplessMode) {
+        // In gapless mode, completion means the entire Surah playlist has finished.
+        if (currentAbsoluteIdx < _totalVerses) {
+          final nextSurah = currentSurah + 1;
+          if (nextSurah <= 114) {
+            _updateFromAbsoluteIndex(currentAbsoluteIdx + 1);
+            _fetchSegmentsForChapter(nextSurah, selectedReciter.quranComId);
+            onAyahChanged?.call(nextSurah, 1);
+            notifyListeners();
+            await _loadSurahPlaylist(nextSurah, 1);
+          } else {
+            stopAndDismiss();
+          }
+        } else {
+          stopAndDismiss();
+        }
+        return;
+      }
+
+      int targetRepeats = repetitionOptions[repetitionIndex];
+
+      _currentLoopCount++;
+
+      // STEP 1: APPLY THE GAP DELAY FIRST (Applies to both repeats and next Ayahs)
+      int delaySecs = delayOptions[delayIndex];
+
+      if (delaySecs == -1) {
+        isPlaying = false;
+        notifyListeners();
+        return;
+      }
+
+      if (delaySecs > 0) {
+        // Keep UI state as 'playing' so it doesn't look broken during the silence
+        _isDelaying = true;
+        isPlaying = true;
+        notifyListeners();
+        
+        await Future.delayed(Duration(seconds: delaySecs));
+        
+        _isDelaying = false;
+        notifyListeners();
+        
+        // Ensure we don't proceed if user intentionally stopped player during gap
+        if (!isActive || !isPlaying) return;
+      }
+
+      // STEP 2: Check if we need to repeat the current Ayah
+      if (targetRepeats == -1 || _currentLoopCount < targetRepeats) {
+        await _active.seek(Duration.zero);
+        await _active.play(); // Play the repeat
+        return; // EXIT FUNCTION HERE
+      }
+
+      // STEP 3: The current Ayah is fully finished. Reset counter.
+      _currentLoopCount = 0;
+
+      // STEP 4: Move to the next Ayah
+      if (currentAbsoluteIdx < _totalVerses) {
+        
+        int prevSurah = currentSurah;
+        _updateFromAbsoluteIndex(currentAbsoluteIdx + 1);
+        
+        if (currentSurah != prevSurah) {
+           _fetchSegmentsForChapter(currentSurah, selectedReciter.quranComId);
+        }
+        
+        onAyahChanged?.call(currentSurah, currentAyah);
+
+        // STEP 6: Load the new audio and FORCE PLAY
+        final url = await _getAudioUrl(currentAbsoluteIdx, prefetchSurah: currentSurah, prefetchAyah: currentAyah);
+        if (url != null) {
+          final mediaItem = MediaItem(
+            id: currentAbsoluteIdx.toString(),
+            album: 'القرآن الكريم',
+            title: 'الآية $currentAbsoluteIdx',
+            artist: selectedReciter.name,
+          );
+          final source = url.startsWith('http') 
+              ? AudioSource.uri(Uri.parse(url), tag: mediaItem)
+              : AudioSource.uri(Uri.file(url), tag: mediaItem);
+              
+          await _active.setAudioSource(source); // Adjust to setSource method
+          await _active.play(); // CRITICAL: Force it to play the new Ayah
+        } else {
+          stopAndDismiss();
+        }
+        
+      } else {
+        // STEP 7: Reached the end of the list/Surah
+        stopAndDismiss();
+      }
+    } finally {
       _isHandlingCompletion = false;
-      return;
-    } else if (repetitionOptions[repetitionIndex] == -1) {
-      // Infinite repeat is natively handled by LoopMode.one, so we should never hit this.
-      _isHandlingCompletion = false;
-      return;
-    }
-
-    // Reset loop counter for the next verse
-    _remainingLoops = repetitionOptions[repetitionIndex];
-
-    // ── Delay ─────────────────────────────────────────────────────────────
-    final delay = delayOptions[delayIndex];
-    if (delay > 0) {
-      await Future.delayed(Duration(seconds: delay));
-    } else if (delay == -1) {
-      final dur = _active.duration ?? const Duration(seconds: 3);
-      await Future.delayed(dur);
-    }
-
-    // ── Advance to next verse ─────────────────────────────────────────────
-    if (currentAbsoluteIdx >= _totalVerses) {
-      stopAndDismiss();
-      return;
-    }
-
-    final nextIdx = currentAbsoluteIdx + 1;
-    _updateFromAbsoluteIndex(nextIdx);
-    onAyahChanged?.call(currentSurah, currentAyah);
-    notifyListeners();
-
-    // ── Gapless swap ──────────────────────────────────────────────────────
-    if (_standbyReady && _standbyIdx == nextIdx) {
-      // Standby is already loaded → INSTANT swap, zero gap.
-      debugPrint('[QuranAudio] Gapless swap to idx=$nextIdx');
-
-      // Detach active listener before swap.
-      _activeSub?.cancel();
-      _activeSub = null;
-
-      // Swap the player roles.
-      _usingA = !_usingA;
-      streamKey++;
-      _isHandlingCompletion = false;
-      _standbyIdx = null;
-      _standbyReady = false;
-
-      // Attach listener to the new active (was standby).
-      _attachActiveListener();
-      await _active.play();
-
-      // Kick off preload for verse N+1.
-      _preloadStandby(currentAbsoluteIdx + 1);
-    } else {
-      // Standby wasn't ready in time — fall back to normal load.
-      debugPrint(
-          '[QuranAudio] Standby not ready, loading idx=$nextIdx normally');
-      await _loadActiveAndPlay();
     }
   }
 
@@ -1176,6 +1431,7 @@ class QuranAudioController extends ChangeNotifier {
   }
 
   static const String ayahSplit = 'ayahSplit';
+
   static const String fullSurahOnly = 'fullSurahOnly';
 
   String _surahNameFallback(int surah) {
@@ -1189,8 +1445,9 @@ class QuranAudioController extends ChangeNotifier {
   @override
   void dispose() {
     _activeSub?.cancel();
-    _playerA.dispose();
-    _playerB.dispose();
+    _positionSub?.cancel();
+    _indexSub?.cancel();
+    _active.dispose();
     super.dispose();
   }
 }
