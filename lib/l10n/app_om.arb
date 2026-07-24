@@ -195,5 +195,15 @@
   "customMinHint": "Daqiiqaa filatamaa...",
   "start": "Jalqabi",
   "timerCanceled": "Taimariin haqameera",
-  "cancelCurrentTimer": "Taimarii ammaa haqi"
+  "cancelCurrentTimer": "Taimarii ammaa haqi",
+  "minbarQuranTitle": "Qur'aana Kabajamaa",
+  "minbarDawahTitle": "Da'awaa fi Barnoota Afaan Arabiffaa",
+  "minbarAmharicLessons": "Da'awaa fi Barnoota Afaan Amaaraa",
+  "minbarOromoLessons": "Da'awaa fi Barnoota Afaan Oromoo",
+  "minbarDownloadsTitle": "Kuusaa Koo (Buufataman)",
+  "minbarQuranSubtitle": "Qara'iitii qara'iitoota beakamoodhaan",
+  "minbarDawahSubtitle": "Khutbaa, Du'aa'ii, Ruqiyaa fi Ibtehaalaat",
+  "minbarDownloadsSubtitle": "Faayiloota buufattan intarneetii malee dhaggeeffadhaa",
+  "minbarComingSoon": "Dhiyootti",
+  "minbarHeaderSubtitle": "Qara'iitii Qur'aanaa fi barnoota Islaamaa dhaggeeffadhaa"
 }

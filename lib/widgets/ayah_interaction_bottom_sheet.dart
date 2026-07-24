@@ -4,6 +4,7 @@ import 'package:share_plus/share_plus.dart';
 import '../l10n/app_localizations.dart';
 import '../theme_notifier.dart';
 import '../controllers/quran_audio_controller.dart';
+import '../core/database/database_helper.dart';
 import 'verse_content_sheet.dart';
 
 class AyahInteractionBottomSheet extends StatefulWidget {
@@ -71,6 +72,11 @@ class _AyahInteractionBottomSheetState
 
   void _showVerseContentSheet(bool isTafsir) {
     Navigator.pop(context); // Close grid bottom sheet
+    final surahName = widget.initialSurahName.isNotEmpty
+        ? widget.initialSurahName
+        : (widget.initialSurahNumber >= 1 && widget.initialSurahNumber <= DatabaseHelper.surahNamesArabicList.length
+            ? DatabaseHelper.surahNamesArabicList[widget.initialSurahNumber - 1]
+            : '');
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -80,7 +86,7 @@ class _AyahInteractionBottomSheetState
         surahNumber: widget.initialSurahNumber,
         ayahNumber: widget.initialAyahNumber,
         verseText: widget.initialVerseText,
-        surahName: widget.initialSurahName,
+        surahName: surahName,
       ),
     );
   }
@@ -160,11 +166,6 @@ class _AyahInteractionBottomSheetState
         onTap: () => _showVerseContentSheet(true),
       ),
       _ActionItem(
-        icon: Icons.translate,
-        label: l10n.actionTranslation,
-        onTap: () => _showVerseContentSheet(false),
-      ),
-      _ActionItem(
         icon: Icons.volume_up_rounded,
         label: l10n.actionListen,
         onTap: _startAudio,
@@ -188,17 +189,17 @@ class _AyahInteractionBottomSheetState
       _ActionItem(
         icon: Icons.image_rounded,
         label: l10n.actionShareImage,
-        onTap: () {/* TODO: share image */},
+        onTap: () {/* Implement: share image */},
       ),
       _ActionItem(
         icon: Icons.bookmark_add_rounded,
         label: l10n.actionSaveBookmark,
-        onTap: () {/* TODO: bookmark */},
+        onTap: () {/* Implement: bookmark */},
       ),
       _ActionItem(
         icon: Icons.bookmark_rounded,
         label: l10n.actionGoToBookmark,
-        onTap: () {/* TODO: go to bookmark */},
+        onTap: () {/* Implement: go to bookmark */},
       ),
       _ActionItem(
         icon: Icons.format_list_numbered_rounded,

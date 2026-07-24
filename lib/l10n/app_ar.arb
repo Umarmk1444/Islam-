@@ -195,5 +195,15 @@
   "customMinHint": "دقيقة مخصصة...",
   "start": "بدء",
   "timerCanceled": "تم إلغاء المؤقت",
-  "cancelCurrentTimer": "إلغاء المؤقت الحالي"
+  "cancelCurrentTimer": "إلغاء المؤقت الحالي",
+  "minbarQuranTitle": "القرآن الكريم",
+  "minbarDawahTitle": "الدعوة والدروس (بالعربية)",
+  "minbarAmharicLessons": "الدعوة والدروس (بالأمهرية)",
+  "minbarOromoLessons": "الدعوة والدروس (بالأورومية)",
+  "minbarDownloadsTitle": "مكتبتي (التنزيلات)",
+  "minbarQuranSubtitle": "تلاوات عذبة بأصوات كبار القراء",
+  "minbarDawahSubtitle": "خطب، أدعية، رقية شرعية، وابتهالات",
+  "minbarDownloadsSubtitle": "الاستماع للملفات الصوتية بدون إنترنت",
+  "minbarComingSoon": "قريباً",
+  "minbarHeaderSubtitle": "استمع إلى تلاوات القرآن الكريم والدروس الإسلامية"
 }

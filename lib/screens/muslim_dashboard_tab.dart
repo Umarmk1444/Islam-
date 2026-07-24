@@ -13,9 +13,10 @@ import '../features/calendar/presentation/screens/hijri_calendar_screen.dart';
 import '../features/qibla/presentation/screens/qibla_screen.dart';
 import 'azkar_screen.dart';
 import 'tasbih_screen.dart';
-import '../features/mosques/presentation/screens/nearest_mosques_screen.dart';
+import '../core/utils/map_launcher.dart';
 import 'quiz_intro_screen.dart';
 import '../widgets/liquid_pressable.dart';
+import '../widgets/custom_banner_ad.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MuslimDashboardTab — Tab 1
@@ -162,6 +163,7 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
           ),
         ),
       ),
+      bottomNavigationBar: const CustomBannerAd(),
     );
   }
 }
@@ -959,11 +961,7 @@ class _ToolGridCellState extends State<_ToolGridCell>
                     ));
                 break;
               case 'mosque':
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const NearestMosquesScreen(),
-                    ));
+                findNearestMosques();
                 break;
               case 'azkar':
                 Navigator.push(

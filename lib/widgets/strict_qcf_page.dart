@@ -336,7 +336,32 @@ class _StrictQcfPageState extends State<StrictQcfPage>
         !lines.last.isBasmala) {
       lines.removeLast();
     }
-    return lines;
+
+    // --- FIX FOR MISSING NEWLINES IN QCF DATASET ---
+    // Some pages have verses concatenated without \n between them,
+    // resulting in extremely long, squished lines.
+    final List<_Line> finalLines = [];
+    for (final line in lines) {
+      if (line.isHeader || line.isBasmala || line.words.length <= 18) {
+        finalLines.add(line);
+      } else {
+        _Line currentLine = _Line();
+        for (int i = 0; i < line.words.length; i++) {
+          final word = line.words[i];
+          currentLine.words.add(word);
+          
+          // Split at verse boundary if line is getting long enough
+          if (word.isVerseNumber && currentLine.words.length >= 9 && i != line.words.length - 1) {
+            finalLines.add(currentLine);
+            currentLine = _Line();
+          }
+        }
+        if (currentLine.words.isNotEmpty) {
+          finalLines.add(currentLine);
+        }
+      }
+    }
+    return finalLines;
   }
 
   /// Returns true if [token] is a standalone Quranic symbol (stop mark, pause

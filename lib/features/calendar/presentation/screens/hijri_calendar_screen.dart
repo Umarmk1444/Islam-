@@ -288,8 +288,8 @@ class _MonthBanner extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   hijriLabel,
-                  style: const TextStyle(
-                    color: AppColors.goldLight,
+                  style: TextStyle(
+                    color: isDark ? AppColors.goldLight : const Color(0xFF1565C0),
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -299,7 +299,7 @@ class _MonthBanner extends StatelessWidget {
                 Text(
                   ethLabel,
                   style: TextStyle(
-                    color: textSec,
+                    color: isDark ? textSec : const Color(0xFFDD2C00),
                     fontSize: 11.5,
                   ),
                   textAlign: TextAlign.center,
@@ -448,14 +448,17 @@ class _DayCell extends StatelessWidget {
                 ),
               ),
               // Hijri day (gold)
+              // Hijri day (gold/emerald)
               Text(
                 hijriDay,
                 style: TextStyle(
                   color: isToday
                       ? Colors.white70
-                      : AppColors.goldLight.withValues(alpha: isDark ? 0.9 : 0.8),
-                  fontSize: 9.5,
-                  fontWeight: FontWeight.w600,
+                      : (isDark 
+                          ? AppColors.goldLight.withValues(alpha: 0.9)
+                          : const Color(0xFF1565C0)),
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               // Ethiopian day (muted)
@@ -464,7 +467,9 @@ class _DayCell extends StatelessWidget {
                 style: TextStyle(
                   color: isToday
                       ? Colors.white54
-                      : textSec.withValues(alpha: 0.7),
+                      : (isDark
+                          ? textSec.withValues(alpha: 0.7)
+                          : const Color(0xFFDD2C00)),
                   fontSize: 8.5,
                 ),
               ),
@@ -495,13 +500,13 @@ class _Legend extends StatelessWidget {
           ),
           const SizedBox(width: 20),
           _LegendDot(
-            color: AppColors.goldLight,
+            color: isDark ? AppColors.goldLight : const Color(0xFF1565C0),
             label: 'Hijri',
             textSec: textSec,
           ),
           const SizedBox(width: 20),
           _LegendDot(
-            color: textSec,
+            color: isDark ? textSec : const Color(0xFFDD2C00),
             label: 'Ethiopian',
             textSec: textSec,
           ),

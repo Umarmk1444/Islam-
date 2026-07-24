@@ -486,4 +486,34 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get cancelCurrentTimer => 'አሁን ያለውን ሰዓት ቆጣሪ ሰርዝ';
+
+  @override
+  String get minbarQuranTitle => 'ቅዱስ ቁርኣን';
+
+  @override
+  String get minbarDawahTitle => 'የዓረብኛ ዳዕዋ እና ትምህርቶች';
+
+  @override
+  String get minbarAmharicLessons => 'የአማርኛ ዳዕዋ እና ትምህርቶች';
+
+  @override
+  String get minbarOromoLessons => 'የኦሮምኛ ዳዕዋ እና ትምህርቶች';
+
+  @override
+  String get minbarDownloadsTitle => 'የእኔ ቤተ-መጽሐፍት (የወረዱ)';
+
+  @override
+  String get minbarQuranSubtitle => 'በታዋቂ ቃሪዎች የተነበቡ ቁርኣኖች';
+
+  @override
+  String get minbarDawahSubtitle => 'ኹጥባ፣ ዱዓእ፣ ሩቅያህ እና ኢብቲሃላት';
+
+  @override
+  String get minbarDownloadsSubtitle => 'ያወረዷቸውን ድምጾች ያለ በይነመረብ ያዳምጡ';
+
+  @override
+  String get minbarComingSoon => 'በቅርቡ';
+
+  @override
+  String get minbarHeaderSubtitle => 'የቁርኣን ንባቦችን እና ኢስላማዊ ትምህርቶችን ያዳምጡ';
 }

@@ -23,8 +23,10 @@ void main() {
     }
   }
 
+  // ignore: avoid_print
   print('Page $pageNum has ${lines.length} lines');
   for (int i = 0; i < lines.length; i++) {
+    // ignore: avoid_print
     print('Line ${i + 1}: length ${lines[i].length} characters');
   }
 }

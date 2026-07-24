@@ -9,6 +9,7 @@ import 'library_content_list_screen.dart';
 import 'story_reading_screen.dart';
 import 'ruqyah_screen.dart';
 import '../widgets/liquid_pressable.dart';
+import '../widgets/custom_banner_ad.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Per-domain accent palette
@@ -165,6 +166,7 @@ class _LibraryScreenState extends State<LibraryScreen>
           ),
         ],
       ),
+      bottomNavigationBar: const CustomBannerAd(),
     );
   }
 

@@ -1,199 +1,686 @@
 {
-  "settings": "Settings",
-  "appLanguage": "App Language",
-  "selectLanguage": "Select Language",
-  "preferences": "Preferences",
-  "appTheme": "App Theme",
-  "themeCream": "Cream",
-  "themeDark": "Dark",
-  "themeWhite": "White",
-  "dailyNotifications": "Daily Notifications",
-  "dailyNotificationsDesc": "Receive daily verses & reminders",
-  "storageAndData": "Storage & Data",
-  "clearDownloadedAudio": "Clear Downloaded Audio",
-  "freeUpSpace": "Free up space on your device",
-  "audioCacheCleared": "Audio cache cleared.",
-  "noAudioFound": "No audio files found.",
-  "supportAndAbout": "Support & About",
-  "shareApp": "Share App",
-  "shareAppText": "Download the Quran & Dawah app to read the Quran and listen to Islamic scholars!",
-  "rateUs": "Rate Us",
-  "contactUs": "Contact Us",
-  "aboutApp": "About Quran & Dawah App",
-  "madeWithLove": "Made with ♥ for the Ummah",
-  "navQuran": "Quran",
-  "navDawah": "Dawah",
-  "navDashboard": "Dashboard",
-  "navMinbar": "Minbar",
-  "navSettings": "Settings",
-  "dawahScholars": "Dawah Scholars",
-  "availableItems": "{count} Available Items",
-  "@availableItems": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "downloadAll": "Download All",
-  "lectures": "Lectures",
-  "version": "Version",
-  "contactDeveloper": "Contact Developer",
-  "contactDeveloperDesc": "Direct link with developer @UMER_jr",
-  "contactDeveloperText": "For any issues, recommendations, or general inquiries, please feel free to contact me directly via Telegram.",
-  "chatOnTelegram": "Chat on Telegram",
-  "copyUsername": "Copy Username",
-  "copiedToClipboard": "Saved to clipboard: @UMER_jr",
-  "translation": "Translation",
-  "tafsir": "Tafsir",
-  "nextAyah": "Next Ayah",
-  "previousAyah": "Previous Ayah",
-  "repetition": "Repetition",
-  "delayInterval": "Delay Between Ayahs",
-  "reciterAlafasy": "Mishary Rashid Alafasy",
-  "infinite": "Infinite",
-  "none": "None",
-  "secondsShort": "{count}s",
-  "@secondsShort": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "verseDuration": "Verse Length",
-  "actionTafsir": "Tafsir",
-  "actionTranslation": "Translation",
-  "actionListen": "Listen / Audio",
-  "actionCopyAyah": "Copy Ayah Text",
-  "actionCopyPage": "Copy Page Text",
-  "actionShareText": "Share Text",
-  "actionShareImage": "Share Image",
-  "actionSaveBookmark": "Save Bookmark",
-  "actionGoToBookmark": "Go to Bookmark",
-  "actionIndex": "Index",
-  "actionClose": "Close",
-  "actionSearch": "Search",
-  "actionTheme": "Theme",
-  "audioReciter": "Reciter",
-  "loading": "Loading...",
-  "errorFetchingData": "Error fetching data",
-  "selectAction": "Select Action",
-  "selectLanguageTafsir": "Select Tafsir Language",
-  "selectLanguageTranslation": "Select Translation Language",
-  "selectTafsirBook": "Select Tafsir Book",
-  "languageArabic": "Arabic",
-  "languageEnglish": "English",
-  "languageAmharic": "Amharic",
-  "languageOromo": "Oromo",
-  "retry": "Retry",
-  "noTafsirAvailable": "No tafsir available for this language",
-  "noTranslationAvailable": "No translation available",
-  "prayerTimes": "Prayer Times",
-  "nextPrayer": "Next Prayer",
-  "countdown": "Countdown",
-  "prayerFajr": "Fajr",
-  "prayerSunrise": "Sunrise",
-  "prayerDhuhr": "Dhuhr",
-  "prayerAsr": "Asr",
-  "prayerMaghrib": "Maghrib",
-  "prayerIsha": "Isha",
-  "calcMethod": "Calculation Method",
-  "madhab": "Madhab (Asr)",
-  "locationSync": "Sync GPS Location",
-  "notifEnabled": "Notification On",
-  "notifDisabled": "Notification Off",
-  "methodUmmAlQura": "Umm al-Qura",
-  "methodEgyptian": "Egyptian",
-  "methodMWL": "Muslim World League",
-  "methodISNA": "ISNA",
-  "methodKarachi": "Karachi",
-  "madhabHanafi": "Hanafi",
-  "madhabShafi": "Shafi / Maliki / Hanbali",
-  "gpsPermissionDenied": "Location permission denied",
-  "usingFallbackLocation": "Using fallback: Makkah",
-  "prayerSettingsTitle": "Prayer Settings",
-  "qiblaTitle": "Qibla Direction",
-  "qiblaAlignPhone": "Align your phone flat for accuracy",
-  "qiblaDistance": "Distance to Kaaba",
-  "qiblaAngle": "Qibla Angle",
-  "qiblaKm": "KM",
-  "qiblaCompassError": "Error reading compass sensor: {error}",
-  "@qiblaCompassError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "qiblaNoCompass": "Compass hardware not detected.",
-  "qiblaStaticAngle": "Static Qibla Angle: {angle}°",
-  "@qiblaStaticAngle": {
-    "placeholders": {
-      "angle": {
-        "type": "String"
-      }
-    }
-  },
-  "qiblaLocationDisabled": "Location services are disabled.",
-  "qiblaPermissionDenied": "Location permissions are denied.",
-  "qiblaPermissionPermanentlyDenied": "Location permissions are permanently denied.",
-  "qiblaFailedInit": "Failed to initialize: {error}",
-  "@qiblaFailedInit": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "qiblaNorth": "North",
-  "qiblaEast": "East",
-  "qiblaSouth": "South",
-  "qiblaWest": "West",
-  "qiblaPermissionRequired": "Location Permission Required",
-  "qiblaEnableLocation": "Enable Location",
-  "athanNotifDesc": "Enable Athan sound alert",
-  "preAthanWarning": "Pre-Prayer Warning",
-  "off": "Off",
-  "minLabel": "m",
-  "custom": "Custom",
-  "timeAdjustment": "Time Adjustment (Manual)",
-  "adjustAthan": "Advance or delay Athan",
-  "muezzinVoice": "Muezzin Voice",
-  "customTimeMin": "Custom Time (Minutes)",
-  "example30": "Example: 30",
-  "cancel": "Cancel",
-  "save": "Save",
-  "chooseMuezzin": "Choose Muezzin",
-  "muezzinMecca": "Mecca - Ali Mulla",
-  "muezzinNasser": "Nasser Al Qatami",
-  "muezzinZahrani": "Mansour Al Zahrani",
-  "muezzinDosari": "Yasser Al Dosari",
-  "muezzinAbdulbasit": "Abdulbasit Abdulsamad",
-  "muezzinAlafasy": "Mishary Alafasy",
-  "navLibrary": "Library",
-  "libraryAll": "All",
-  "libraryFavorites": "Favorites",
-  "noStoriesFound": "No stories found.",
-  "readingsCount": "Readings: {count}",
-  "@readingsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "playbackSettings": "Playback Settings",
-  "intervalGap": "Interval",
-  "playbackSpeed": "Speed",
-  "noneOffLabel": "None",
-  "secLabel": "Sec",
-  "ayahLabel": "Ayah",
-  "sleepTimer": "Sleep Timer",
-  "stopAudioAfter": "Stop audio automatically after:",
-  "minutesLabel": "Min",
-  "customMinHint": "Custom minute...",
-  "start": "Start",
-  "timerCanceled": "Timer canceled",
-  "cancelCurrentTimer": "Cancel current timer"
+    "settings":  "Settings",
+    "@settings":  {
+
+                  },
+    "appLanguage":  "App Language",
+    "@appLanguage":  {
+
+                     },
+    "selectLanguage":  "Select Language",
+    "@selectLanguage":  {
+
+                        },
+    "preferences":  "Preferences",
+    "@preferences":  {
+
+                     },
+    "appTheme":  "App Theme",
+    "@appTheme":  {
+
+                  },
+    "themeCream":  "Cream",
+    "@themeCream":  {
+
+                    },
+    "themeDark":  "Dark",
+    "@themeDark":  {
+
+                   },
+    "themeWhite":  "White",
+    "@themeWhite":  {
+
+                    },
+    "dailyNotifications":  "Daily Notifications",
+    "@dailyNotifications":  {
+
+                            },
+    "dailyNotificationsDesc":  "Receive daily verses \u0026 reminders",
+    "@dailyNotificationsDesc":  {
+
+                                },
+    "storageAndData":  "Storage \u0026 Data",
+    "@storageAndData":  {
+
+                        },
+    "clearDownloadedAudio":  "Clear Downloaded Audio",
+    "@clearDownloadedAudio":  {
+
+                              },
+    "freeUpSpace":  "Free up space on your device",
+    "@freeUpSpace":  {
+
+                     },
+    "audioCacheCleared":  "Audio cache cleared.",
+    "@audioCacheCleared":  {
+
+                           },
+    "noAudioFound":  "No audio files found.",
+    "@noAudioFound":  {
+
+                      },
+    "supportAndAbout":  "Support \u0026 About",
+    "@supportAndAbout":  {
+
+                         },
+    "shareApp":  "Share App",
+    "@shareApp":  {
+
+                  },
+    "shareAppText":  "Download the Quran \u0026 Dawah app to read the Quran and listen to Islamic scholars!",
+    "@shareAppText":  {
+
+                      },
+    "rateUs":  "Rate Us",
+    "@rateUs":  {
+
+                },
+    "contactUs":  "Contact Us",
+    "@contactUs":  {
+
+                   },
+    "aboutApp":  "About Quran \u0026 Dawah App",
+    "@aboutApp":  {
+
+                  },
+    "madeWithLove":  "Made with ♥ for the Ummah",
+    "@madeWithLove":  {
+
+                      },
+    "navQuran":  "Quran",
+    "@navQuran":  {
+
+                  },
+    "navDawah":  "Dawah",
+    "@navDawah":  {
+
+                  },
+    "navDashboard":  "Dashboard",
+    "@navDashboard":  {
+
+                      },
+    "navMinbar":  "Minbar",
+    "@navMinbar":  {
+
+                   },
+    "navSettings":  "Settings",
+    "@navSettings":  {
+
+                     },
+    "dawahScholars":  "Dawah Scholars",
+    "@dawahScholars":  {
+
+                       },
+    "availableItems":  "{count} Available Items",
+    "@availableItems":  {
+                            "placeholders":  {
+                                                 "count":  {
+                                                               "type":  "int"
+                                                           }
+                                             }
+                        },
+    "downloadAll":  "Download All",
+    "@downloadAll":  {
+
+                     },
+    "lectures":  "Lectures",
+    "@lectures":  {
+
+                  },
+    "version":  "Version",
+    "@version":  {
+
+                 },
+    "contactDeveloper":  "Contact Developer",
+    "@contactDeveloper":  {
+
+                          },
+    "contactDeveloperDesc":  "Direct link with developer @UMER_jr",
+    "@contactDeveloperDesc":  {
+
+                              },
+    "contactDeveloperText":  "For any issues, recommendations, or general inquiries, please feel free to contact me directly via Telegram.",
+    "@contactDeveloperText":  {
+
+                              },
+    "chatOnTelegram":  "Chat on Telegram",
+    "@chatOnTelegram":  {
+
+                        },
+    "copyUsername":  "Copy Username",
+    "@copyUsername":  {
+
+                      },
+    "copiedToClipboard":  "Saved to clipboard: @UMER_jr",
+    "@copiedToClipboard":  {
+
+                           },
+    "translation":  "Translation",
+    "@translation":  {
+
+                     },
+    "tafsir":  "Tafsir",
+    "@tafsir":  {
+
+                },
+    "nextAyah":  "Next Ayah",
+    "@nextAyah":  {
+
+                  },
+    "previousAyah":  "Previous Ayah",
+    "@previousAyah":  {
+
+                      },
+    "repetition":  "Repetition",
+    "@repetition":  {
+
+                    },
+    "delayInterval":  "Delay Between Ayahs",
+    "@delayInterval":  {
+
+                       },
+    "reciterAlafasy":  "Mishary Rashid Alafasy",
+    "@reciterAlafasy":  {
+
+                        },
+    "infinite":  "Infinite",
+    "@infinite":  {
+
+                  },
+    "none":  "None",
+    "@none":  {
+
+              },
+    "secondsShort":  "{count}s",
+    "@secondsShort":  {
+                          "placeholders":  {
+                                               "count":  {
+                                                             "type":  "int"
+                                                         }
+                                           }
+                      },
+    "verseDuration":  "Verse Length",
+    "@verseDuration":  {
+
+                       },
+    "actionTafsir":  "Tafsir",
+    "@actionTafsir":  {
+
+                      },
+    "actionTranslation":  "Translation",
+    "@actionTranslation":  {
+
+                           },
+    "actionListen":  "Listen / Audio",
+    "@actionListen":  {
+
+                      },
+    "actionCopyAyah":  "Copy Ayah Text",
+    "@actionCopyAyah":  {
+
+                        },
+    "actionCopyPage":  "Copy Page Text",
+    "@actionCopyPage":  {
+
+                        },
+    "actionShareText":  "Share Text",
+    "@actionShareText":  {
+
+                         },
+    "actionShareImage":  "Share Image",
+    "@actionShareImage":  {
+
+                          },
+    "actionSaveBookmark":  "Save Bookmark",
+    "@actionSaveBookmark":  {
+
+                            },
+    "actionGoToBookmark":  "Go to Bookmark",
+    "@actionGoToBookmark":  {
+
+                            },
+    "actionIndex":  "Index",
+    "@actionIndex":  {
+
+                     },
+    "actionClose":  "Close",
+    "@actionClose":  {
+
+                     },
+    "actionSearch":  "Search",
+    "@actionSearch":  {
+
+                      },
+    "actionTheme":  "Theme",
+    "@actionTheme":  {
+
+                     },
+    "audioReciter":  "Reciter",
+    "@audioReciter":  {
+
+                      },
+    "loading":  "Loading...",
+    "@loading":  {
+
+                 },
+    "errorFetchingData":  "Error fetching data",
+    "@errorFetchingData":  {
+
+                           },
+    "selectAction":  "Select Action",
+    "@selectAction":  {
+
+                      },
+    "selectLanguageTafsir":  "Select Tafsir Language",
+    "@selectLanguageTafsir":  {
+
+                              },
+    "selectLanguageTranslation":  "Select Translation Language",
+    "@selectLanguageTranslation":  {
+
+                                   },
+    "selectTafsirBook":  "Select Tafsir Book",
+    "@selectTafsirBook":  {
+
+                          },
+    "languageArabic":  "Arabic",
+    "@languageArabic":  {
+
+                        },
+    "languageEnglish":  "English",
+    "@languageEnglish":  {
+
+                         },
+    "languageAmharic":  "Amharic",
+    "@languageAmharic":  {
+
+                         },
+    "languageOromo":  "Oromo",
+    "@languageOromo":  {
+
+                       },
+    "retry":  "Retry",
+    "@retry":  {
+
+               },
+    "noTafsirAvailable":  "No tafsir available for this language",
+    "@noTafsirAvailable":  {
+
+                           },
+    "noTranslationAvailable":  "No translation available",
+    "@noTranslationAvailable":  {
+
+                                },
+    "prayerTimes":  "Prayer Times",
+    "@prayerTimes":  {
+
+                     },
+    "nextPrayer":  "Next Prayer",
+    "@nextPrayer":  {
+
+                    },
+    "countdown":  "Countdown",
+    "@countdown":  {
+
+                   },
+    "prayerFajr":  "Fajr",
+    "@prayerFajr":  {
+
+                    },
+    "prayerSunrise":  "Sunrise",
+    "@prayerSunrise":  {
+
+                       },
+    "prayerDhuhr":  "Dhuhr",
+    "@prayerDhuhr":  {
+
+                     },
+    "prayerAsr":  "Asr",
+    "@prayerAsr":  {
+
+                   },
+    "prayerMaghrib":  "Maghrib",
+    "@prayerMaghrib":  {
+
+                       },
+    "prayerIsha":  "Isha",
+    "@prayerIsha":  {
+
+                    },
+    "calcMethod":  "Calculation Method",
+    "@calcMethod":  {
+
+                    },
+    "madhab":  "Madhab (Asr)",
+    "@madhab":  {
+
+                },
+    "locationSync":  "Sync GPS Location",
+    "@locationSync":  {
+
+                      },
+    "notifEnabled":  "Notification On",
+    "@notifEnabled":  {
+
+                      },
+    "notifDisabled":  "Notification Off",
+    "@notifDisabled":  {
+
+                       },
+    "methodUmmAlQura":  "Umm al-Qura",
+    "@methodUmmAlQura":  {
+
+                         },
+    "methodEgyptian":  "Egyptian",
+    "@methodEgyptian":  {
+
+                        },
+    "methodMWL":  "Muslim World League",
+    "@methodMWL":  {
+
+                   },
+    "methodISNA":  "ISNA",
+    "@methodISNA":  {
+
+                    },
+    "methodKarachi":  "Karachi",
+    "@methodKarachi":  {
+
+                       },
+    "madhabHanafi":  "Hanafi",
+    "@madhabHanafi":  {
+
+                      },
+    "madhabShafi":  "Shafi / Maliki / Hanbali",
+    "@madhabShafi":  {
+
+                     },
+    "gpsPermissionDenied":  "Location permission denied",
+    "@gpsPermissionDenied":  {
+
+                             },
+    "usingFallbackLocation":  "Using fallback: Makkah",
+    "@usingFallbackLocation":  {
+
+                               },
+    "prayerSettingsTitle":  "Prayer Settings",
+    "@prayerSettingsTitle":  {
+
+                             },
+    "qiblaTitle":  "Qibla Direction",
+    "@qiblaTitle":  {
+
+                    },
+    "qiblaAlignPhone":  "Align your phone flat for accuracy",
+    "@qiblaAlignPhone":  {
+
+                         },
+    "qiblaDistance":  "Distance to Kaaba",
+    "@qiblaDistance":  {
+
+                       },
+    "qiblaAngle":  "Qibla Angle",
+    "@qiblaAngle":  {
+
+                    },
+    "qiblaKm":  "KM",
+    "@qiblaKm":  {
+
+                 },
+    "qiblaCompassError":  "Error reading compass sensor: {error}",
+    "@qiblaCompassError":  {
+                               "placeholders":  {
+                                                    "error":  {
+                                                                  "type":  "String"
+                                                              }
+                                                }
+                           },
+    "qiblaNoCompass":  "Compass hardware not detected.",
+    "@qiblaNoCompass":  {
+
+                        },
+    "qiblaStaticAngle":  "Static Qibla Angle: {angle}°",
+    "@qiblaStaticAngle":  {
+                              "placeholders":  {
+                                                   "angle":  {
+                                                                 "type":  "String"
+                                                             }
+                                               }
+                          },
+    "qiblaLocationDisabled":  "Location services are disabled.",
+    "@qiblaLocationDisabled":  {
+
+                               },
+    "qiblaPermissionDenied":  "Location permissions are denied.",
+    "@qiblaPermissionDenied":  {
+
+                               },
+    "qiblaPermissionPermanentlyDenied":  "Location permissions are permanently denied.",
+    "@qiblaPermissionPermanentlyDenied":  {
+
+                                          },
+    "qiblaFailedInit":  "Failed to initialize: {error}",
+    "@qiblaFailedInit":  {
+                             "placeholders":  {
+                                                  "error":  {
+                                                                "type":  "String"
+                                                            }
+                                              }
+                         },
+    "qiblaNorth":  "North",
+    "@qiblaNorth":  {
+
+                    },
+    "qiblaEast":  "East",
+    "@qiblaEast":  {
+
+                   },
+    "qiblaSouth":  "South",
+    "@qiblaSouth":  {
+
+                    },
+    "qiblaWest":  "West",
+    "@qiblaWest":  {
+
+                   },
+    "qiblaPermissionRequired":  "Location Permission Required",
+    "@qiblaPermissionRequired":  {
+
+                                 },
+    "qiblaEnableLocation":  "Enable Location",
+    "@qiblaEnableLocation":  {
+
+                             },
+    "athanNotifDesc":  "Enable Athan sound alert",
+    "@athanNotifDesc":  {
+
+                        },
+    "preAthanWarning":  "Pre-Prayer Warning",
+    "@preAthanWarning":  {
+
+                         },
+    "off":  "Off",
+    "@off":  {
+
+             },
+    "minLabel":  "m",
+    "@minLabel":  {
+
+                  },
+    "custom":  "Custom",
+    "@custom":  {
+
+                },
+    "timeAdjustment":  "Time Adjustment (Manual)",
+    "@timeAdjustment":  {
+
+                        },
+    "adjustAthan":  "Advance or delay Athan",
+    "@adjustAthan":  {
+
+                     },
+    "muezzinVoice":  "Muezzin Voice",
+    "@muezzinVoice":  {
+
+                      },
+    "customTimeMin":  "Custom Time (Minutes)",
+    "@customTimeMin":  {
+
+                       },
+    "example30":  "Example: 30",
+    "@example30":  {
+
+                   },
+    "cancel":  "Cancel",
+    "@cancel":  {
+
+                },
+    "save":  "Save",
+    "@save":  {
+
+              },
+    "chooseMuezzin":  "Choose Muezzin",
+    "@chooseMuezzin":  {
+
+                       },
+    "muezzinMecca":  "Mecca - Ali Mulla",
+    "@muezzinMecca":  {
+
+                      },
+    "muezzinNasser":  "Nasser Al Qatami",
+    "@muezzinNasser":  {
+
+                       },
+    "muezzinZahrani":  "Mansour Al Zahrani",
+    "@muezzinZahrani":  {
+
+                        },
+    "muezzinDosari":  "Yasser Al Dosari",
+    "@muezzinDosari":  {
+
+                       },
+    "muezzinAbdulbasit":  "Abdulbasit Abdulsamad",
+    "@muezzinAbdulbasit":  {
+
+                           },
+    "muezzinAlafasy":  "Mishary Alafasy",
+    "@muezzinAlafasy":  {
+
+                        },
+    "navLibrary":  "Library",
+    "@navLibrary":  {
+
+                    },
+    "libraryAll":  "All",
+    "@libraryAll":  {
+
+                    },
+    "libraryFavorites":  "Favorites",
+    "@libraryFavorites":  {
+
+                          },
+    "noStoriesFound":  "No stories found.",
+    "@noStoriesFound":  {
+
+                        },
+    "readingsCount":  "Readings: {count}",
+    "@readingsCount":  {
+                           "placeholders":  {
+                                                "count":  {
+                                                              "type":  "int"
+                                                          }
+                                            }
+                       },
+    "playbackSettings":  "Playback Settings",
+    "@playbackSettings":  {
+
+                          },
+    "intervalGap":  "Interval",
+    "@intervalGap":  {
+
+                     },
+    "playbackSpeed":  "Speed",
+    "@playbackSpeed":  {
+
+                       },
+    "noneOffLabel":  "None",
+    "@noneOffLabel":  {
+
+                      },
+    "secLabel":  "Sec",
+    "@secLabel":  {
+
+                  },
+    "ayahLabel":  "Ayah",
+    "@ayahLabel":  {
+
+                   },
+    "sleepTimer":  "Sleep Timer",
+    "@sleepTimer":  {
+
+                    },
+    "stopAudioAfter":  "Stop audio automatically after:",
+    "@stopAudioAfter":  {
+
+                        },
+    "minutesLabel":  "Min",
+    "@minutesLabel":  {
+
+                      },
+    "customMinHint":  "Custom minute...",
+    "@customMinHint":  {
+
+                       },
+    "start":  "Start",
+    "@start":  {
+
+               },
+    "timerCanceled":  "Timer canceled",
+    "@timerCanceled":  {
+
+                       },
+    "cancelCurrentTimer":  "Cancel current timer",
+    "@cancelCurrentTimer":  {
+
+                            },
+    "minbarQuranTitle":  "القرآن الكريم",
+    "@minbarQuranTitle":  {
+
+                          },
+    "minbarDawahTitle":  "Arabic Dawah \u0026 Lectures",
+    "@minbarDawahTitle":  {
+
+                          },
+    "minbarAmharicLessons":  "Amharic Dawah \u0026 Lectures",
+    "@minbarAmharicLessons":  {
+
+                              },
+    "minbarOromoLessons":  "Oromo Dawah \u0026 Lectures",
+    "@minbarOromoLessons":  {
+
+                            },
+    "minbarDownloadsTitle":  "My Library (Downloads)",
+    "@minbarDownloadsTitle":  {
+
+                              },
+    "minbarQuranSubtitle":  "Recitations by world-renowned reciters",
+    "@minbarQuranSubtitle":  {
+
+                             },
+    "minbarDawahSubtitle":  "Khutbah, Dua, Ruqyah, \u0026 Ibtehalat",
+    "@minbarDawahSubtitle":  {
+
+                             },
+    "minbarDownloadsSubtitle":  "Listen to downloaded audio offline",
+    "@minbarDownloadsSubtitle":  {
+
+                                 },
+    "minbarComingSoon":  "Coming Soon",
+    "@minbarComingSoon":  {
+
+                          },
+    "minbarHeaderSubtitle":  "Listen to القرآن الكريم recitations and Islamic lessons",
+    "@minbarHeaderSubtitle":  {
+
+                              }
 }

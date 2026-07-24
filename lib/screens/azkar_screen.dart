@@ -113,13 +113,13 @@ String getLocalizedZekrInfo(String arabicInfo, String langCode) {
     case 'ar':
       return arabicInfo;
     case 'en':
-      // TODO: Replace with actual English translation lookup.
+      // Replace with actual English translation lookup.
       return arabicInfo; // Fallback to Arabic until translations are provided.
     case 'am':
-      // TODO: Replace with actual Amharic translation lookup.
+      // Replace with actual Amharic translation lookup.
       return arabicInfo;
     case 'om':
-      // TODO: Replace with actual Oromo translation lookup.
+      // Replace with actual Oromo translation lookup.
       return arabicInfo;
     default:
       return arabicInfo;

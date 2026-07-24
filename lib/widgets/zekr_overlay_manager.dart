@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../services/azkar_service.dart';
 import '../theme_notifier.dart';
-import '../core/constants/app_colors.dart';
 
 class ZekrOverlayManager {
   static final ZekrOverlayManager _instance = ZekrOverlayManager._internal();
@@ -50,24 +49,26 @@ class ZekrOverlayManager {
             onTap: _removeOverlay,
             behavior: HitTestBehavior.opaque,
             child: Container(
-              // Soft dimmed backdrop
-              color: Colors.black.withValues(alpha: 0.38),
-              alignment: Alignment.center,
+              color: Colors.transparent,
+              alignment: Alignment.topCenter,
               child: GestureDetector(
                 onTap: () {}, // consume taps on card
                 child: Padding(
                   padding: EdgeInsets.only(
-                    top: topPad + 20,
-                    bottom: 20,
-                    left: 20,
-                    right: 20,
+                    top: topPad + 12,
+                    left: 16,
+                    right: 16,
                   ),
-                  child: _InAppZekrCard(
-                    zekr: zekr,
-                    isDark: isDark,
-                    screenWidth: screenWidth,
-                    onDismiss: _removeOverlay,
-                  ).animate()
+                  child: MediaQuery(
+                    data: MediaQuery.of(ctx).copyWith(textScaler: TextScaler.noScaling),
+                    child: _InAppZekrCard(
+                      zekr: zekr,
+                      isDark: isDark,
+                      screenWidth: screenWidth,
+                      onDismiss: _removeOverlay,
+                    ),
+                  )
+                      .animate()
                       .fadeIn(duration: 450.ms, curve: Curves.easeOut)
                       .slideY(
                         begin: 0.08,
@@ -91,9 +92,9 @@ class ZekrOverlayManager {
 
     overlayState.insert(_overlayEntry!);
 
-    // Auto-dismiss after 10 seconds
+    // Auto-dismiss after 15 seconds
     _autoDismissTimer?.cancel();
-    _autoDismissTimer = Timer(const Duration(seconds: 10), _removeOverlay);
+    _autoDismissTimer = Timer(const Duration(seconds: 15), _removeOverlay);
   }
 
   void _removeOverlay() {
@@ -123,14 +124,15 @@ class _InAppZekrCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dismissible(
       key: UniqueKey(),
-      direction: DismissDirection.vertical,
+      direction: DismissDirection.horizontal,
       onDismissed: (_) => onDismiss(),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(30),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
-            width: screenWidth * 0.9,
+            width: double.infinity,
+            height: 190,
             decoration: BoxDecoration(
               gradient: isDark
                   ? const LinearGradient(
@@ -219,137 +221,135 @@ class _InAppZekrCard extends StatelessWidget {
 
                 // ── Content ─────────────────────────────────────────────────
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(28, 28, 28, 24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // ── Header row ─────────────────────────────────────────
-                      Row(
-                        children: [
-                          // Gold badge
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 7),
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  Color(0xFFB8860B),
-                                  Color(0xFFFFD966),
-                                  Color(0xFFD4A017),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(24),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFFD4A017)
-                                      .withValues(alpha: 0.45),
-                                  blurRadius: 12,
-                                  spreadRadius: 0,
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Force Header Row to LTR to keep Close Button on Upper Right
+                        Directionality(
+                          textDirection: TextDirection.ltr,
+                          child: Row(
+                            children: [
+                              // Gold badge
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Color(0xFFB8860B),
+                                      Color(0xFFFFD966),
+                                      Color(0xFFD4A017),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
-                              ],
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text('✨', style: TextStyle(fontSize: 13)),
-                                SizedBox(width: 6),
-                                Text(
-                                  'تذكير بذكر الله',
-                                  style: TextStyle(
-                                    color: Color(0xFF1A1200),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 0.4,
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text('✨', style: TextStyle(fontSize: 11)),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      'تذكير بذكر الله',
+                                      style: TextStyle(
+                                        color: Color(0xFF1A1200),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Spacer(),
+                              // Close button (enlarged and forced right)
+                              GestureDetector(
+                                onTap: onDismiss,
+                                child: Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.12),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white.withValues(alpha: 0.2),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.close_rounded,
+                                    size: 18,
+                                    color: Colors.white,
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                          const Spacer(),
-                          // Close button
-                          GestureDetector(
-                            onTap: onDismiss,
-                            child: Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.08),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.15),
-                                  width: 1,
-                                ),
                               ),
-                              child: const Icon(
-                                Icons.close_rounded,
-                                size: 18,
-                                color: Color(0xCCFFFFFF),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 26),
-
-                      // ── Arabic Zekr ─────────────────────────────────────────
-                      Text(
-                        zekr,
-                        style: const TextStyle(
-                          color: Color(0xFFF0F4F0),
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          height: 1.7,
-                          fontFamily: 'Amiri',
-                          letterSpacing: 0.4,
-                        ),
-                        textAlign: TextAlign.center,
-                        textDirection: TextDirection.rtl,
-                      ),
-
-                      const SizedBox(height: 28),
-
-                      // ── Gold shimmer divider ────────────────────────────────
-                      Container(
-                        height: 1,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.transparent,
-                              const Color(0xFFD4A017).withValues(alpha: 0.6),
-                              const Color(0xFFFFD966).withValues(alpha: 0.4),
-                              Colors.transparent,
                             ],
                           ),
                         ),
-                      ),
 
-                      const SizedBox(height: 16),
+                        const SizedBox(height: 12),
 
-                      // ── Swipe-to-dismiss hint ───────────────────────────────
-                      const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.swipe_up_alt_rounded,
-                            size: 14,
-                            color: Color(0x669BAAAA),
+                        // ── Arabic Zekr ─────────────────────────────────────────
+                        Text(
+                          zekr,
+                          style: const TextStyle(
+                            color: Color(0xFFF0F4F0),
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            height: 1.5,
+                            fontFamily: 'Amiri',
                           ),
-                          SizedBox(width: 6),
-                          Text(
-                            'اسحب للإغلاق',
-                            style: TextStyle(
-                              color: Color(0x779BAAAA),
-                              fontSize: 11,
-                              letterSpacing: 0.4,
+                          textAlign: TextAlign.center,
+                          textDirection: TextDirection.rtl,
+                          maxLines: 4,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        // ── Gold shimmer divider ────────────────────────────────
+                        Container(
+                          height: 1,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.transparent,
+                                const Color(0xFFD4A017).withValues(alpha: 0.6),
+                                const Color(0xFFFFD966).withValues(alpha: 0.4),
+                                Colors.transparent,
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // ── Swipe-to-dismiss hint (Horizontal) ───────────────────────────────
+                        const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.swipe_rounded,
+                              size: 14,
+                              color: Color(0x889BAAAA),
+                            ),
+                            SizedBox(width: 6),
+                            Text(
+                              'اسحب أفقياً للإغلاق',
+                              style: TextStyle(
+                                color: Color(0xAA9BAAAA),
+                                fontSize: 11,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],

@@ -291,73 +291,7 @@ class NotificationService {
     }
   }
 
-  // ── Testing Tools ─────────────────────────────────────────────────────────
 
-  Future<void> testAdhanNotification(String muezzinId) async {
-    final now = DateTime.now();
-    final tzTime = tz.TZDateTime.from(now.add(const Duration(seconds: 5)), tz.local);
-    final soundName = muezzinId;
-
-    final androidDetails = AndroidNotificationDetails(
-      'adhan_channel_test_$muezzinId',
-      'Test Adhan',
-      channelDescription: 'High-priority Athan alert test',
-      importance: Importance.max,
-      priority: Priority.high,
-      sound: RawResourceAndroidNotificationSound(soundName),
-      playSound: true,
-      ticker: 'Prayer time test',
-      styleInformation: const BigTextStyleInformation(''),
-      category: AndroidNotificationCategory.alarm,
-      audioAttributesUsage: AudioAttributesUsage.alarm,
-      visibility: NotificationVisibility.public,
-      fullScreenIntent: true,
-    );
-
-    // ignore: deprecated_member_use
-    await _plugin.zonedSchedule(
-      999, // Debug ID
-      '🕌 Test Adhan',
-      'This is a test adhan exactly 5s from tap.',
-      tzTime,
-      NotificationDetails(android: androidDetails),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      payload: 'test_adhan',
-    );
-  }
-
-  Future<void> testPreAdhanNotification() async {
-    final now = DateTime.now();
-    final preTzTime = tz.TZDateTime.from(now.add(const Duration(seconds: 5)), tz.local);
-
-    const preAndroidDetails = AndroidNotificationDetails(
-      'pre_adhan_channel_test',
-      'Test Pre-Adhan Warning',
-      channelDescription: 'Notification before Adhan time test',
-      importance: Importance.high,
-      priority: Priority.high,
-      sound: RawResourceAndroidNotificationSound('salah'),
-      playSound: true,
-      category: AndroidNotificationCategory.alarm,
-      audioAttributesUsage: AudioAttributesUsage.alarm,
-      visibility: NotificationVisibility.public,
-    );
-
-    // ignore: deprecated_member_use
-    await _plugin.zonedSchedule(
-      998, // Debug ID
-      '⏳ Test Pre-Adhan',
-      'This is a test pre-adhan warning 5s from tap.',
-      preTzTime,
-      const NotificationDetails(android: preAndroidDetails),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      payload: 'test_pre_adhan',
-    );
-  }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 

@@ -195,5 +195,15 @@
   "customMinHint": "የራስዎ ደቂቃ...",
   "start": "ጀምር",
   "timerCanceled": "ሰዓት ቆጣሪው ተሰርዟል",
-  "cancelCurrentTimer": "አሁን ያለውን ሰዓት ቆጣሪ ሰርዝ"
+  "cancelCurrentTimer": "አሁን ያለውን ሰዓት ቆጣሪ ሰርዝ",
+  "minbarQuranTitle": "ቅዱስ ቁርኣን",
+  "minbarDawahTitle": "የዓረብኛ ዳዕዋ እና ትምህርቶች",
+  "minbarAmharicLessons": "የአማርኛ ዳዕዋ እና ትምህርቶች",
+  "minbarOromoLessons": "የኦሮምኛ ዳዕዋ እና ትምህርቶች",
+  "minbarDownloadsTitle": "የእኔ ቤተ-መጽሐፍት (የወረዱ)",
+  "minbarQuranSubtitle": "በታዋቂ ቃሪዎች የተነበቡ ቁርኣኖች",
+  "minbarDawahSubtitle": "ኹጥባ፣ ዱዓእ፣ ሩቅያህ እና ኢብቲሃላት",
+  "minbarDownloadsSubtitle": "ያወረዷቸውን ድምጾች ያለ በይነመረብ ያዳምጡ",
+  "minbarComingSoon": "በቅርቡ",
+  "minbarHeaderSubtitle": "የቁርኣን ንባቦችን እና ኢስላማዊ ትምህርቶችን ያዳምጡ"
 }

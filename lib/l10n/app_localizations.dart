@@ -1031,6 +1031,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel current timer'**
   String get cancelCurrentTimer;
+
+  /// No description provided for @minbarQuranTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'القرآن الكريم'**
+  String get minbarQuranTitle;
+
+  /// No description provided for @minbarDawahTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Arabic Dawah & Lectures'**
+  String get minbarDawahTitle;
+
+  /// No description provided for @minbarAmharicLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'Amharic Dawah & Lectures'**
+  String get minbarAmharicLessons;
+
+  /// No description provided for @minbarOromoLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'Oromo Dawah & Lectures'**
+  String get minbarOromoLessons;
+
+  /// No description provided for @minbarDownloadsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Library (Downloads)'**
+  String get minbarDownloadsTitle;
+
+  /// No description provided for @minbarQuranSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recitations by world-renowned reciters'**
+  String get minbarQuranSubtitle;
+
+  /// No description provided for @minbarDawahSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Khutbah, Dua, Ruqyah, & Ibtehalat'**
+  String get minbarDawahSubtitle;
+
+  /// No description provided for @minbarDownloadsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen to downloaded audio offline'**
+  String get minbarDownloadsSubtitle;
+
+  /// No description provided for @minbarComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming Soon'**
+  String get minbarComingSoon;
+
+  /// No description provided for @minbarHeaderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen to القرآن الكريم recitations and Islamic lessons'**
+  String get minbarHeaderSubtitle;
 }
 
 class _AppLocalizationsDelegate

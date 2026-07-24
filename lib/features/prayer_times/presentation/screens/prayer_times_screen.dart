@@ -19,7 +19,6 @@ import '../../../../theme_notifier.dart';
 import '../../data/models/prayer_time_model.dart';
 import '../controllers/prayer_controller.dart';
 import 'prayer_settings_screen.dart';
-import '../../../../services/notification_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PrayerTimesScreen extends StatefulWidget {
@@ -137,13 +136,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                 ),
                 actions: [
                   IconButton(
-                    icon: const Icon(Icons.bug_report_outlined),
-                    tooltip: 'Developer Tests',
-                    onPressed: () {
-                      _showDebugMenu(context, ctrl, theme);
-                    },
-                  ),
-                  IconButton(
                     icon: const Icon(Icons.settings_outlined),
                     tooltip: l10n.prayerSettingsTitle,
                     onPressed: () {
@@ -239,7 +231,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                                       theme: theme,
                                       l10n: l10n,
                                       onToggleNotif: () async {
-                                        final isEnabled = ctrl.isNotifEnabled(entry.prayer);
+                                        final isEnabled =
+                                            ctrl.isNotifEnabled(entry.prayer);
                                         if (!isEnabled) {
                                           await _checkAndRequestPermissions();
                                         }
@@ -695,57 +688,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                   },
                 );
               }),
-              const SizedBox(height: 16),
-            ],
-          ),
-        );
-      },
-    );
-  }
-  void _showDebugMenu(
-      BuildContext context, PrayerController ctrl, QuranTheme theme) {
-    final cardBg = AppTheme.getCardBgColor(theme);
-    final textColor = AppTheme.getMainTextColor(theme);
-    final primary = AppTheme.getPrimaryColor(theme);
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: cardBg,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (ctx) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 16),
-              Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                      color: Colors.grey.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2))),
-              const SizedBox(height: 16),
-              Text('Developer Test Tools',
-                  style: AppTextStyles.headlineMedium
-                      .copyWith(color: textColor, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              ListTile(
-                leading: Icon(Icons.mosque_rounded, color: primary),
-                title: Text('Test Adhan (5s)',
-                    style: AppTextStyles.bodyMedium.copyWith(color: textColor)),
-                onTap: () {
-                  final currentMuezzinId =
-                      ctrl.config.prayerMuezzins[PrayerName.fajr.name] ??
-                          'adhan_abdulbasit';
-                  NotificationService().testAdhanNotification(currentMuezzinId);
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Adhan scheduled in 5 seconds')),
-                  );
-                },
-              ),
-
               const SizedBox(height: 16),
             ],
           ),

@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:workmanager/workmanager.dart';
@@ -99,11 +98,11 @@ void athanAlarmCallback(int id) async {
       if (isPreAdhan) {
         try {
           await androidImplementation
-              .deleteNotificationChannel('pre_adhan_channel_v2');
+              .deleteNotificationChannel('pre_adhan_channel_v3');
         } catch (_) {}
         await androidImplementation
             .createNotificationChannel(const AndroidNotificationChannel(
-          'pre_adhan_channel_v2',
+          'pre_adhan_channel_v3',
           'Pre-Adhan Warning',
           description: 'Notification before Adhan time',
           importance: Importance.high,
@@ -135,7 +134,7 @@ void athanAlarmCallback(int id) async {
 
     if (isPreAdhan) {
       androidDetails = const AndroidNotificationDetails(
-        'pre_adhan_channel_v2',
+        'pre_adhan_channel_v3',
         'Pre-Adhan Warning',
         channelDescription: 'Notification before Adhan time',
         importance: Importance.high,
@@ -145,6 +144,7 @@ void athanAlarmCallback(int id) async {
         category: AndroidNotificationCategory.alarm,
         audioAttributesUsage: AudioAttributesUsage.alarm,
         visibility: NotificationVisibility.public,
+        fullScreenIntent: true,
       );
     } else {
       final muezzinId =
@@ -259,7 +259,7 @@ void workmanagerDispatcher() {
             importance: Importance.max,
             priority: Priority.high,
             ticker: 'ticker',
-            styleInformation: const BigTextStyleInformation(''),
+            styleInformation: BigTextStyleInformation(''),
             category: AndroidNotificationCategory.reminder,
             visibility: NotificationVisibility.public,
           );
@@ -268,7 +268,7 @@ void workmanagerDispatcher() {
             888, // Unique ID for Zekr notification
             '✨ ذكر الله', // Title
             zekr, // Body
-            NotificationDetails(android: androidDetails),
+            const NotificationDetails(android: androidDetails),
           );
           debugPrint('Zekr notification shown successfully: $zekr');
         }
@@ -288,9 +288,11 @@ void workmanagerDispatcher() {
               alignment: overlay.OverlayAlignment.center,
               visibility: overlay.NotificationVisibility.visibilityPublic,
               positionGravity: overlay.PositionGravity.auto,
-              height: 480,
-              width: overlay.WindowSize.matchParent,
+              height: 320,
+              width: 380,
               flag: overlay.OverlayFlag.defaultFlag,
+              overlayTitle: 'Zekr Reminder',
+              overlayContent: 'Showing Zekr overlay on screen',
             );
           }
         }
@@ -300,6 +302,92 @@ void workmanagerDispatcher() {
     }
     return Future.value(true);
   });
+}
+
+// ── Zekr Alarm Callback ──────────────────────────────────────────────────────
+
+@pragma('vm:entry-point')
+void zekrAlarmCallback(int id) async {
+  WidgetsFlutterBinding.ensureInitialized();
+  DartPluginRegistrant.ensureInitialized();
+  try {
+    final zekrService = AzkarService();
+    final zekr = await zekrService.getRandomShortZekr();
+    if (zekr != null && zekr.isNotEmpty) {
+      final plugin = FlutterLocalNotificationsPlugin();
+      const androidSettings =
+          AndroidInitializationSettings('@mipmap/ic_launcher');
+      const initSettings = InitializationSettings(android: androidSettings);
+      await plugin.initialize(
+        initSettings,
+        onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
+      );
+
+      final androidImplementation =
+          plugin.resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
+
+      if (androidImplementation != null) {
+        await androidImplementation.createNotificationChannel(
+          const AndroidNotificationChannel(
+            'zekr_reminder_channel',
+            'Zekr Reminder',
+            description: 'Heads-up notifications for Zekr',
+            importance: Importance.max,
+            playSound: true,
+            enableVibration: true,
+          ),
+        );
+      }
+
+      const androidDetails = AndroidNotificationDetails(
+        'zekr_reminder_channel',
+        'Zekr Reminder',
+        channelDescription: 'Heads-up notifications for Zekr',
+        importance: Importance.max,
+        priority: Priority.high,
+        styleInformation: BigTextStyleInformation(''),
+        category: AndroidNotificationCategory.reminder,
+        visibility: NotificationVisibility.public,
+      );
+
+      await plugin.show(
+        888,
+        '✨ ذكر الله',
+        zekr,
+        const NotificationDetails(android: androidDetails),
+      );
+
+      final bool isGranted =
+          await overlay.FlutterOverlayWindow.isPermissionGranted();
+      if (isGranted) {
+        final bool isActive = await overlay.FlutterOverlayWindow.isActive();
+        if (!isActive) {
+          await overlay.FlutterOverlayWindow.showOverlay(
+            alignment: overlay.OverlayAlignment.topCenter,
+            visibility: overlay.NotificationVisibility.visibilityPublic,
+            positionGravity: overlay.PositionGravity.auto,
+            height: 320,
+            width: 380,
+            flag: overlay.OverlayFlag.defaultFlag,
+          );
+        }
+      }
+    }
+  } catch (e) {
+    debugPrint('Zekr alarm callback error: $e');
+  } finally {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final bool enabled = prefs.getBool('floating_reminder_enabled') ?? false;
+      final int interval = prefs.getInt('floating_reminder_interval') ?? 60;
+      if (enabled && interval > 0) {
+        await BackgroundEngine().scheduleZekrReminder(interval);
+      }
+    } catch (e) {
+      debugPrint('Zekr reschedule error: $e');
+    }
+  }
 }
 
 // ── Background Engine ────────────────────────────────────────────────────────
@@ -318,6 +406,26 @@ class BackgroundEngine {
     await Workmanager().initialize(workmanagerDispatcher, isInDebugMode: false);
 
     _initialized = true;
+  }
+
+  /// Schedules a Zekr alarm using exact Android AlarmManager oneShot
+  Future<void> scheduleZekrReminder(int minutes) async {
+    await AndroidAlarmManager.cancel(777);
+    if (minutes <= 0) return;
+    await AndroidAlarmManager.oneShot(
+      Duration(minutes: minutes),
+      777,
+      zekrAlarmCallback,
+      exact: true,
+      wakeup: true,
+      rescheduleOnReboot: true,
+      allowWhileIdle: true,
+    );
+  }
+
+  /// Cancels Zekr reminder alarm
+  Future<void> cancelZekrReminder() async {
+    await AndroidAlarmManager.cancel(777);
   }
 
   /// Cancels a specific alarm by ID

@@ -489,4 +489,37 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get cancelCurrentTimer => 'Taimarii ammaa haqi';
+
+  @override
+  String get minbarQuranTitle => 'Qur\'aana Kabajamaa';
+
+  @override
+  String get minbarDawahTitle => 'Da\'awaa fi Barnoota Afaan Arabiffaa';
+
+  @override
+  String get minbarAmharicLessons => 'Da\'awaa fi Barnoota Afaan Amaaraa';
+
+  @override
+  String get minbarOromoLessons => 'Da\'awaa fi Barnoota Afaan Oromoo';
+
+  @override
+  String get minbarDownloadsTitle => 'Kuusaa Koo (Buufataman)';
+
+  @override
+  String get minbarQuranSubtitle => 'Qara\'iitii qara\'iitoota beakamoodhaan';
+
+  @override
+  String get minbarDawahSubtitle =>
+      'Khutbaa, Du\'aa\'ii, Ruqiyaa fi Ibtehaalaat';
+
+  @override
+  String get minbarDownloadsSubtitle =>
+      'Faayiloota buufattan intarneetii malee dhaggeeffadhaa';
+
+  @override
+  String get minbarComingSoon => 'Dhiyootti';
+
+  @override
+  String get minbarHeaderSubtitle =>
+      'Qara\'iitii Qur\'aanaa fi barnoota Islaamaa dhaggeeffadhaa';
 }

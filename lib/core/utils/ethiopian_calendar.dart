@@ -99,10 +99,10 @@ class EthiopianCalendarHelper {
   ///
   /// The Ethiopic epoch (1 Meskerem 1 EC) in Julian Day Number is 1724221.
   static EthiopianDate _jdnToEthiopian(int jdn) {
-    const int jdnEpoch = 1724221; // JDN of 1 Meskerem 1 EC
+    const int jdnEpoch = 1723856; // JDN of 1 Meskerem 1 EC
     final r = jdn - jdnEpoch;
     final n = r % 1461; // days within a 4-year cycle
-    final year = 4 * (r ~/ 1461) + n ~/ 365;
+    final year = 4 * (r / 1461).floor() + n ~/ 365;
     final dayOfYear = n % 365;
     final month = dayOfYear ~/ 30 + 1;
     final day = dayOfYear % 30 + 1;
@@ -117,7 +117,7 @@ class EthiopianCalendarHelper {
 
   /// Converts an Ethiopian date back to a Julian Day Number.
   static int _ethiopianToJDN(int year, int month, int day) {
-    const int jdnEpoch = 1724221;
+    const int jdnEpoch = 1723856;
     return jdnEpoch +
         365 * year +
         year ~/ 4 +

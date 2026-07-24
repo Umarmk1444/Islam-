@@ -2,36 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import '../theme_notifier.dart';
-import '../services/quran_api_service.dart';
 import '../core/database/database_helper.dart';
 import '../screens/quran_screen.dart';
 
-class VerseContentSheet extends StatefulWidget {
+class VerseMeaningsAndIrabSheet extends StatefulWidget {
   final int surahNumber;
   final int ayahNumber;
   final String verseText;
   final String surahName;
-  final bool initialIsTafsir;
 
-  const VerseContentSheet({
+  const VerseMeaningsAndIrabSheet({
     Key? key,
     required this.surahNumber,
     required this.ayahNumber,
     required this.verseText,
     required this.surahName,
-    required this.initialIsTafsir,
   }) : super(key: key);
 
   @override
-  State<VerseContentSheet> createState() => _VerseContentSheetState();
+  State<VerseMeaningsAndIrabSheet> createState() => _VerseMeaningsAndIrabSheetState();
 }
 
-class _VerseContentSheetState extends State<VerseContentSheet> {
-  late bool _isTafsir;
-  late dynamic _selectedResourceId; // String for tafsir (column name), int for translation (API ID)
+class _VerseMeaningsAndIrabSheetState extends State<VerseMeaningsAndIrabSheet> {
   int? _currentAbsoluteIndex;
   PageController? _pageController;
-  bool _initialized = false;
+  int _selectedMode = 0; // 0: Meanings, 1: Irab
 
   late int _currentAyahNumber;
   late String _currentSurahName;
@@ -49,11 +44,9 @@ class _VerseContentSheetState extends State<VerseContentSheet> {
   @override
   void initState() {
     super.initState();
-    _isTafsir = widget.initialIsTafsir;
     _currentAyahNumber = widget.ayahNumber;
     _currentSurahName = _resolveSurahName(widget.surahNumber, widget.surahName);
     _initAbsoluteIndex(widget.surahNumber, widget.ayahNumber);
-
     QuranScreen.selectedVerseNotifier.addListener(_onGlobalVerseSelectionChanged);
   }
 
@@ -61,13 +54,13 @@ class _VerseContentSheetState extends State<VerseContentSheet> {
     final surahName = _resolveSurahName(surah, (surah == widget.surahNumber) ? widget.surahName : null);
     final db = await DatabaseHelper.instance.database;
     final res = await db.rawQuery(
-      'SELECT id_quran_ayat FROM quran WHERE sura_num = ? AND aya_num = ?',
-      [surah, ayah]
+        'SELECT id_quran_ayat FROM quran WHERE sura_num = ? AND aya_num = ?',
+        [surah, ayah]
     );
     if (res.isNotEmpty && mounted) {
       final id = res.first['id_quran_ayat'] as int;
       final newIndex = id - 1;
-      
+
       setState(() {
         _currentAyahNumber = ayah;
         _currentSurahName = surahName;
@@ -88,16 +81,6 @@ class _VerseContentSheetState extends State<VerseContentSheet> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_initialized) {
-      final locale = Localizations.localeOf(context).languageCode;
-      _selectedResourceId = _getDefaultResourceId(_isTafsir, locale);
-      _initialized = true;
-    }
-  }
-
-  @override
   void dispose() {
     QuranScreen.selectedVerseNotifier.removeListener(_onGlobalVerseSelectionChanged);
     _pageController?.dispose();
@@ -113,34 +96,6 @@ class _VerseContentSheetState extends State<VerseContentSheet> {
     }
   }
 
-  dynamic _getDefaultResourceId(bool isTafsir, String locale) {
-    if (isTafsir) {
-      return 'tafsir_moysar'; // الميسر (default Arabic tafsir)
-    } else {
-      if (locale == 'am') return 87; // Sadiq & Sani (AM)
-      if (locale == 'om') return 111; // Ghali Ababor (OM)
-      return 20; // Saheeh Int (default English)
-    }
-  }
-
-  List<Map<String, dynamic>> _getAvailableResources() {
-    if (_isTafsir) {
-      // Local DB column names as IDs
-      return const [
-        {'id': 'tafsir_moysar', 'name': 'الميسر'},
-        {'id': 'tafsir_saadi', 'name': 'السعدي'},
-        {'id': 'tafsir_baghawi', 'name': 'البغوي'},
-      ];
-    } else {
-      // API resource IDs for translations
-      return const [
-        {'id': 20, 'name': 'Saheeh Int'},
-        {'id': 87, 'name': 'Sadiq & Sani (AM)'},
-        {'id': 111, 'name': 'Ghali Ababor (OM)'},
-      ];
-    }
-  }
-
   void _onPageChanged(int index) async {
     if (index >= 6236) return;
     setState(() {
@@ -149,7 +104,10 @@ class _VerseContentSheetState extends State<VerseContentSheet> {
 
     final id = index + 1;
     final db = await DatabaseHelper.instance.database;
-    final res = await db.rawQuery('SELECT sura_num, aya_num, page_aya FROM quran WHERE id_quran_ayat = ?', [id]);
+    final res = await db.rawQuery(
+        'SELECT sura_num, aya_num, page_aya FROM quran WHERE id_quran_ayat = ?',
+        [id]
+    );
     if (res.isNotEmpty && mounted) {
       final row = res.first;
       final surahNum = (row['sura_num'] as num).toInt();
@@ -183,8 +141,6 @@ class _VerseContentSheetState extends State<VerseContentSheet> {
         final text = AppTheme.getMainTextColor(theme);
         final headerBg = isDark ? Colors.black.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.02);
 
-        final resources = _getAvailableResources();
-        
         final titleSurahName = _currentSurahName;
         final titleAyahNumber = _currentAyahNumber;
 
@@ -245,42 +201,12 @@ class _VerseContentSheetState extends State<VerseContentSheet> {
                   physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
-                    children: resources.map((res) {
-                      final isSelected = _selectedResourceId == res['id'];
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: ChoiceChip(
-                          label: Text(
-                            res['name'] as String,
-                            style: TextStyle(
-                              fontFamily: _isTafsir ? 'Amiri' : null,
-                              fontSize: _isTafsir ? 14 : 12,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                              color: isSelected ? bg : text,
-                            ),
-                          ),
-                          selected: isSelected,
-                          selectedColor: gold,
-                          backgroundColor: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.03),
-                          checkmarkColor: bg,
-                          showCheckmark: false,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            side: BorderSide(
-                              color: isSelected ? gold : border.withValues(alpha: 0.5),
-                              width: 1,
-                            ),
-                          ),
-                          onSelected: (selected) {
-                            if (selected) {
-                              setState(() {
-                                _selectedResourceId = res['id'];
-                              });
-                            }
-                          },
-                        ),
-                      );
-                    }).toList(),
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildChoiceChip('معاني الكلمات', 0, bg, text, gold, border, isDark),
+                      const SizedBox(width: 16),
+                      _buildChoiceChip('إعراب الآية', 1, bg, text, gold, border, isDark),
+                    ],
                   ),
                 ),
               ),
@@ -302,10 +228,9 @@ class _VerseContentSheetState extends State<VerseContentSheet> {
                             final idQuranAyat = index + 1;
                             return Directionality(
                               textDirection: globalDirectionality,
-                              child: VerseContentPage(
+                              child: MeaningsAndIrabPage(
                                 idQuranAyat: idQuranAyat,
-                                resourceId: _selectedResourceId,
-                                isTafsir: _isTafsir,
+                                selectedMode: _selectedMode,
                                 theme: theme,
                                 bg: bg,
                                 border: border,
@@ -323,27 +248,55 @@ class _VerseContentSheetState extends State<VerseContentSheet> {
       },
     );
   }
+
+  Widget _buildChoiceChip(String label, int modeIndex, Color bg, Color text, Color gold, Color border, bool isDark) {
+    final isSelected = _selectedMode == modeIndex;
+    return ChoiceChip(
+      label: Text(
+        label,
+        style: TextStyle(
+          fontFamily: 'Amiri',
+          fontSize: 14,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          color: isSelected ? bg : text,
+        ),
+      ),
+      selected: isSelected,
+      selectedColor: gold,
+      backgroundColor: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.03),
+      checkmarkColor: bg,
+      showCheckmark: false,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isSelected ? gold : border.withValues(alpha: 0.5),
+          width: 1,
+        ),
+      ),
+      onSelected: (selected) {
+        if (selected) {
+          setState(() {
+            _selectedMode = modeIndex;
+          });
+        }
+      },
+    );
+  }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Content view page loaded dynamically inside the PageView
-// ─────────────────────────────────────────────────────────────────────────────
-
-class VerseContentPage extends StatefulWidget {
+class MeaningsAndIrabPage extends StatefulWidget {
   final int idQuranAyat;
-  final dynamic resourceId; // String for tafsir, int for translation
-  final bool isTafsir;
+  final int selectedMode;
   final QuranTheme theme;
   final Color bg;
   final Color border;
   final Color gold;
   final Color text;
 
-  const VerseContentPage({
+  const MeaningsAndIrabPage({
     Key? key,
     required this.idQuranAyat,
-    required this.resourceId,
-    required this.isTafsir,
+    required this.selectedMode,
     required this.theme,
     required this.bg,
     required this.border,
@@ -352,15 +305,16 @@ class VerseContentPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<VerseContentPage> createState() => _VerseContentPageState();
+  State<MeaningsAndIrabPage> createState() => _MeaningsAndIrabPageState();
 }
 
-class _VerseContentPageState extends State<VerseContentPage> {
+class _MeaningsAndIrabPageState extends State<MeaningsAndIrabPage> {
   bool _isLoading = true;
-  String _content = '';
+  String _verseText = '';
+  String _meanings = '';
+  String _irab = '';
   String? _error;
 
-  String _verseText = '';
   @override
   void initState() {
     super.initState();
@@ -368,11 +322,9 @@ class _VerseContentPageState extends State<VerseContentPage> {
   }
 
   @override
-  void didUpdateWidget(covariant VerseContentPage oldWidget) {
+  void didUpdateWidget(covariant MeaningsAndIrabPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.resourceId != widget.resourceId ||
-        oldWidget.idQuranAyat != widget.idQuranAyat ||
-        oldWidget.isTafsir != widget.isTafsir) {
+    if (oldWidget.idQuranAyat != widget.idQuranAyat) {
       _fetchContent();
     }
   }
@@ -382,14 +334,18 @@ class _VerseContentPageState extends State<VerseContentPage> {
     setState(() {
       _isLoading = true;
       _error = null;
-      _content = '';
+      _meanings = '';
+      _irab = '';
     });
 
     try {
       final db = await DatabaseHelper.instance.database;
-      final rowRes = await db.rawQuery('SELECT sura_num, aya_num, aya FROM quran WHERE id_quran_ayat = ?', [widget.idQuranAyat]);
+      final rowRes = await db.rawQuery(
+          'SELECT sura_num, aya_num, aya FROM quran WHERE id_quran_ayat = ?',
+          [widget.idQuranAyat]
+      );
       if (rowRes.isEmpty) throw Exception('Verse not found in Database');
-      
+
       final row = rowRes.first;
       final surahNum = row['sura_num'] as int;
       final ayahNum = row['aya_num'] as int;
@@ -402,23 +358,15 @@ class _VerseContentPageState extends State<VerseContentPage> {
 
       _verseText = sanitizeQuranText(text);
 
-      String resText;
-      if (widget.isTafsir) {
-        final String column = widget.resourceId as String;
-        resText = await DatabaseHelper.instance.fetchTafsir(
-          surahNumber: surahNum,
-          ayahNumber: ayahNum,
-          tafsirColumn: column,
-        );
-      } else {
-        resText = await QuranApiService.fetchTranslationByResourceId(
-          surahNum, ayahNum, widget.resourceId as int,
-        );
-      }
-      
+      final data = await DatabaseHelper.instance.fetchMeaningsAndIrab(
+        surahNumber: surahNum,
+        ayahNumber: ayahNum,
+      );
+
       if (mounted) {
         setState(() {
-          _content = resText;
+          _meanings = data['meanings'] ?? '';
+          _irab = data['irab'] ?? '';
           _isLoading = false;
         });
       }
@@ -443,14 +391,154 @@ class _VerseContentPageState extends State<VerseContentPage> {
   }
 
   void _shareContent() {
+    final activeTabTitle = widget.selectedMode == 0 ? 'معاني الكلمات' : 'إعراب الآية';
+    final activeContent = widget.selectedMode == 0 ? _meanings : _irab;
     final text = 'الآية: $_verseText\n\n'
-        '$_content';
+        '$activeTabTitle:\n'
+        '$activeContent';
     Share.share(text);
+  }
+
+  Widget _buildMeaningsList() {
+    if (_meanings.trim().isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.info_outline, size: 48, color: widget.text.withValues(alpha: 0.3)),
+              const SizedBox(height: 12),
+              Text(
+                'الآية لا تحتوي على غريب كلمات بحاجة لبيان معانيها.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Amiri',
+                  fontSize: 16,
+                  color: widget.text.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final lines = _meanings.split('\n');
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: lines.length,
+      itemBuilder: (context, index) {
+        final line = lines[index].trim();
+        if (line.isEmpty) return const SizedBox.shrink();
+
+        // Split word and meaning if separated by ':'
+        final parts = line.split(':');
+        final word = parts[0].trim();
+        final meaning = parts.length > 1 ? parts.sublist(1).join(':').trim() : '';
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: widget.theme == QuranTheme.dark
+                ? Colors.white.withValues(alpha: 0.03)
+                : Colors.black.withValues(alpha: 0.02),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: widget.border.withValues(alpha: 0.2)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: RichText(
+                  textDirection: TextDirection.rtl,
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontFamily: 'Amiri',
+                      fontSize: 16,
+                      height: 1.6,
+                      color: widget.text,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: '$word: ',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: widget.gold,
+                        ),
+                      ),
+                      TextSpan(
+                        text: meaning,
+                        style: TextStyle(
+                          color: widget.text.withValues(alpha: 0.85),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildIrabText() {
+    if (_irab.trim().isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.info_outline, size: 48, color: widget.text.withValues(alpha: 0.3)),
+              const SizedBox(height: 12),
+              Text(
+                'لا يوجد إعراب متوفر لهذه الآية الكريمة.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Amiri',
+                  fontSize: 16,
+                  color: widget.text.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Format quote markers nicely: e.g. replacing « and » with color highlights
+    final paragraphs = _irab.split('\n\n');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: paragraphs.map((para) {
+        final content = para.trim();
+        if (content.isEmpty) return const SizedBox.shrink();
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Text(
+            content,
+            textDirection: TextDirection.rtl,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              fontFamily: 'Amiri',
+              fontSize: 17,
+              height: 1.8,
+              color: widget.text.withValues(alpha: 0.85),
+            ),
+          ),
+        );
+      }).toList(),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final isArabic = widget.isTafsir || widget.resourceId == 16 || widget.resourceId == 91 || widget.resourceId == 94 || widget.resourceId == 93;
     final isDark = widget.theme == QuranTheme.dark;
     final cardBg = isDark ? Colors.black.withValues(alpha: 0.28) : Colors.black.withValues(alpha: 0.03);
     final actionsBg = isDark ? Colors.black.withValues(alpha: 0.28) : Colors.black.withValues(alpha: 0.03);
@@ -458,99 +546,45 @@ class _VerseContentPageState extends State<VerseContentPage> {
     return Column(
       children: [
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Arabic Ayah text container at the top
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: cardBg,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: widget.border.withValues(alpha: 0.35)),
-                  ),
-                  child: Text(
-                    _verseText,
-                    textAlign: TextAlign.center,
-                    textDirection: TextDirection.rtl,
-                    style: TextStyle(
-                      fontFamily: 'Amiri',
-                      fontSize: 22,
-                      height: 1.8,
-                      color: widget.text,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Divider(color: widget.border.withValues(alpha: 0.25)),
-                const SizedBox(height: 12),
-
-                // Loaded Tafsir/Translation content underneath it
-                if (_isLoading)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 60),
-                    child: Center(child: CircularProgressIndicator(color: widget.gold)),
-                  )
-                else if (_error != null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Column(
-                      children: [
-                        const Text(
-                          'خطأ في جلب البيانات',
-                          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _error!,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 12, color: widget.text.withValues(alpha: 0.6)),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          onPressed: _fetchContent,
-                          icon: const Icon(Icons.refresh, size: 16),
-                          label: const Text('إعادة المحاولة'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: widget.gold,
-                            foregroundColor: widget.bg,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          child: _isLoading
+              ? Center(child: CircularProgressIndicator(color: widget.gold))
+              : _error != null
+                  ? _buildErrorWidget()
+                  : SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Verse text container
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: cardBg,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: widget.border.withValues(alpha: 0.35)),
+                            ),
+                            child: Text(
+                              _verseText,
+                              textAlign: TextAlign.center,
+                              textDirection: TextDirection.rtl,
+                              style: TextStyle(
+                                fontFamily: 'Amiri',
+                                fontSize: 22,
+                                height: 1.8,
+                                color: widget.text,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 16),
+                          widget.selectedMode == 0 ? _buildMeaningsList() : _buildIrabText(),
+                        ],
+                      ),
                     ),
-                  )
-                else if (_content.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 40),
-                    child: Text(
-                      'لا توجد بيانات متاحة لهذا المورد.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16, color: widget.text.withValues(alpha: 0.6)),
-                    ),
-                  )
-                else
-                  Text(
-                    _content.trim(),
-                    textAlign: isArabic ? TextAlign.right : TextAlign.justify,
-                    textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
-                    style: TextStyle(
-                      fontFamily: isArabic ? 'Amiri' : null,
-                      fontSize: isArabic ? 17 : 14,
-                      height: isArabic ? 1.8 : 1.6,
-                      color: widget.text.withValues(alpha: 0.85),
-                    ),
-                  ),
-              ],
-            ),
-          ),
         ),
 
         // Copy and Share Actions panel at the bottom
-        if (!_isLoading && _error == null && _content.isNotEmpty)
+        if (!_isLoading && _error == null)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
@@ -563,7 +597,10 @@ class _VerseContentPageState extends State<VerseContentPage> {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () => _copyToClipboard(_content),
+                      onPressed: () {
+                        final textToCopy = widget.selectedMode == 0 ? _meanings : _irab;
+                        _copyToClipboard(textToCopy);
+                      },
                       icon: Icon(Icons.copy, size: 16, color: widget.gold),
                       label: Text('نسخ النص', style: TextStyle(color: widget.text, fontSize: 13)),
                       style: OutlinedButton.styleFrom(
@@ -591,6 +628,40 @@ class _VerseContentPageState extends State<VerseContentPage> {
             ),
           ),
       ],
+    );
+  }
+
+  Widget _buildErrorWidget() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'خطأ في جلب البيانات',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _error ?? '',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 12, color: widget.text.withValues(alpha: 0.6)),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _fetchContent,
+              icon: const Icon(Icons.refresh, size: 16),
+              label: const Text('إعادة المحاولة'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: widget.gold,
+                foregroundColor: widget.bg,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

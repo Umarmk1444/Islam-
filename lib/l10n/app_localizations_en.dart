@@ -487,4 +487,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancelCurrentTimer => 'Cancel current timer';
+
+  @override
+  String get minbarQuranTitle => 'القرآن الكريم';
+
+  @override
+  String get minbarDawahTitle => 'Arabic Dawah & Lectures';
+
+  @override
+  String get minbarAmharicLessons => 'Amharic Dawah & Lectures';
+
+  @override
+  String get minbarOromoLessons => 'Oromo Dawah & Lectures';
+
+  @override
+  String get minbarDownloadsTitle => 'My Library (Downloads)';
+
+  @override
+  String get minbarQuranSubtitle => 'Recitations by world-renowned reciters';
+
+  @override
+  String get minbarDawahSubtitle => 'Khutbah, Dua, Ruqyah, & Ibtehalat';
+
+  @override
+  String get minbarDownloadsSubtitle => 'Listen to downloaded audio offline';
+
+  @override
+  String get minbarComingSoon => 'Coming Soon';
+
+  @override
+  String get minbarHeaderSubtitle =>
+      'Listen to القرآن الكريم recitations and Islamic lessons';
 }

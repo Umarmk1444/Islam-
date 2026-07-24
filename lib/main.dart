@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
@@ -10,8 +11,11 @@ import 'services/notification_service.dart';
 import 'fallback_localizations.dart';
 
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:workmanager/workmanager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/services/background_engine.dart';
 import 'widgets/system_zekr_overlay.dart';
+import 'services/minbar_player.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ENTRY POINT
@@ -24,6 +28,8 @@ import 'widgets/system_zekr_overlay.dart';
 //     SplashScreen — never blocking the UI thread here.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -35,6 +41,13 @@ void main() async {
     AppLanguage.init(),
     DashboardScale.init(),
   ]);
+
+  // Initialize AdMob Banner Ads
+  try {
+    MobileAds.instance.initialize();
+  } catch (e) {
+    debugPrint('AdMob initialization error: $e');
+  }
 
   runApp(const QuranDawahApp());
 }
@@ -58,6 +71,20 @@ Future<void> _initHeavyServices() async {
   try {
     await NotificationService().init();
   } catch (_) {}
+
+  // 4. Init MinbarPlayer listeners
+  MinbarPlayer.init();
+
+  // 5. Cancel old Workmanager overlay task and sync exact Zekr alarm
+  try {
+    await Workmanager().cancelByUniqueName("auto_zekr_overlay");
+    final prefs = await SharedPreferences.getInstance();
+    final bool enabled = prefs.getBool('floating_reminder_enabled') ?? false;
+    final int interval = prefs.getInt('floating_reminder_interval') ?? 30;
+    if (enabled) {
+      await BackgroundEngine().scheduleZekrReminder(interval);
+    }
+  } catch (_) {}
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -67,14 +94,22 @@ Future<void> _initHeavyServices() async {
 @pragma('vm:entry-point')
 void overlayMain() {
   WidgetsFlutterBinding.ensureInitialized();
+  DartPluginRegistrant.ensureInitialized();
   runApp(
-    const MaterialApp(
+    MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
+      builder: (context, child) {
+        final mediaQueryData = MediaQuery.of(context);
+        return MediaQuery(
+          data: mediaQueryData.copyWith(
+            textScaler: TextScaler.noScaling,
+          ),
+          child: child!,
+        );
+      },
+      home: const Scaffold(
         backgroundColor: Colors.transparent,
-        body: SafeArea(
-          child: SystemZekrOverlay(),
-        ),
+        body: SystemZekrOverlay(),
       ),
     ),
   );

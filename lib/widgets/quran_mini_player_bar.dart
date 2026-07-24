@@ -392,6 +392,10 @@ class _ReciterSelectionHeader extends StatelessWidget {
                                                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                                       color: isSelected ? gold : textColor)),
                                                 ),
+                                                if (r.quranComId != null) ...[
+                                                  const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
+                                                  const SizedBox(width: 6),
+                                                ],
                                                 Text(r.englishName,
                                                   style: TextStyle(fontFamily: 'Amiri', fontSize: 11,
                                                     color: textColor.withValues(alpha: 0.45))),

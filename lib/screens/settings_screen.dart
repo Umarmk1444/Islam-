@@ -1,8 +1,6 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import '../l10n/app_localizations.dart';
@@ -11,6 +9,8 @@ import '../language_notifier.dart';
 import '../services/notification_service.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:workmanager/workmanager.dart';
+import '../core/services/background_engine.dart';
+import '../widgets/zekr_overlay_manager.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SETTINGS SCREEN — Premium Liquid Redesign
@@ -95,15 +95,21 @@ class _SettingsScreenState extends State<SettingsScreen>
       }
       await prefs.setBool('floating_reminder_enabled', true);
       if (mounted) setState(() => _floatingReminderEnabled = true);
-      Workmanager().registerPeriodicTask(
-        "auto_zekr_overlay",
-        "show_zekr_overlay",
-        frequency: Duration(minutes: _floatingReminderInterval),
-      );
+
+      // Cancel WorkManager task completely to avoid its 15-minute restriction overriding exact timing
+      Workmanager().cancelByUniqueName("auto_zekr_overlay");
+
+      // Schedule exact Android AlarmManager + In-App overlay timer
+      await BackgroundEngine().scheduleZekrReminder(_floatingReminderInterval);
+      if (mounted) {
+        ZekrOverlayManager().startTimer(context, _floatingReminderInterval);
+      }
     } else {
       await prefs.setBool('floating_reminder_enabled', false);
       if (mounted) setState(() => _floatingReminderEnabled = false);
+      await BackgroundEngine().cancelZekrReminder();
       Workmanager().cancelByUniqueName("auto_zekr_overlay");
+      ZekrOverlayManager().stopTimer();
     }
   }
 
@@ -114,37 +120,9 @@ class _SettingsScreenState extends State<SettingsScreen>
     setState(() => _floatingReminderInterval = value);
     if (_floatingReminderEnabled) {
       Workmanager().cancelByUniqueName("auto_zekr_overlay");
-      Workmanager().registerPeriodicTask(
-        "auto_zekr_overlay",
-        "show_zekr_overlay",
-        frequency: Duration(minutes: value),
-      );
-    }
-  }
-
-  Future<void> _clearAudioCache(
-      Color primaryColor, AppLocalizations l10n) async {
-    if (kIsWeb) {
-      _showSnack(l10n.noAudioFound, primaryColor);
-      return;
-    }
-    try {
-      final directory = await getApplicationDocumentsDirectory();
-      bool deletedSomething = false;
-      final List<dynamic> files = directory.listSync(recursive: true);
-      for (final dynamic file in files) {
-        if (file.path != null && (file.path as String).endsWith('.mp3')) {
-          (file as dynamic).deleteSync();
-          deletedSomething = true;
-        }
-      }
+      await BackgroundEngine().scheduleZekrReminder(value);
       if (!mounted) return;
-      _showSnack(
-          deletedSomething ? l10n.audioCacheCleared : l10n.noAudioFound,
-          primaryColor);
-    } catch (e) {
-      if (!mounted) return;
-      _showSnack('Error: $e', Colors.red);
+      ZekrOverlayManager().startTimer(context, value);
     }
   }
 
@@ -172,9 +150,7 @@ class _SettingsScreenState extends State<SettingsScreen>
           title: Text(
             l10n.selectLanguage,
             style: TextStyle(
-                color: primaryColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 16),
+                color: primaryColor, fontWeight: FontWeight.bold, fontSize: 16),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -189,8 +165,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   margin: const EdgeInsets.symmetric(vertical: 4),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? primaryColor.withValues(alpha: 0.12)
@@ -254,9 +230,8 @@ class _SettingsScreenState extends State<SettingsScreen>
               SliverAppBar(
                 expandedHeight: 130,
                 pinned: true,
-                backgroundColor: isDark
-                    ? const Color(0xFF0D1F17)
-                    : const Color(0xFF1B5E20),
+                backgroundColor:
+                    isDark ? const Color(0xFF0D1F17) : const Color(0xFF1B5E20),
                 elevation: 0,
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.parallax,
@@ -406,8 +381,14 @@ class _SettingsScreenState extends State<SettingsScreen>
                       _SwitchTile(
                         icon: Icons.bubble_chart_rounded,
                         iconColor: const Color(0xFF7B1FA2),
-                        title: _getFloatingTitle(Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar'),
-                        subtitle: _getFloatingSubtitle(Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar'),
+                        title: _getFloatingTitle(
+                            Localizations.maybeLocaleOf(context)
+                                    ?.languageCode ??
+                                'ar'),
+                        subtitle: _getFloatingSubtitle(
+                            Localizations.maybeLocaleOf(context)
+                                    ?.languageCode ??
+                                'ar'),
                         value: _floatingReminderEnabled,
                         activeColor: primary,
                         onChanged: _toggleFloatingReminder,
@@ -425,19 +406,6 @@ class _SettingsScreenState extends State<SettingsScreen>
                                 onChanged: _setFloatingReminderInterval,
                               )
                             : const SizedBox.shrink(),
-                      ),
-                    ]),
-                    const SizedBox(height: 6),
-                    _label('STORAGE', primary),
-                    _PremiumCard(isDark: isDark, cardBg: cardBg, children: [
-                      _LiquidTile(
-                        icon: Icons.delete_sweep_rounded,
-                        iconColor: const Color(0xFFFF7043),
-                        title: l10n.clearDownloadedAudio,
-                        subtitle: l10n.freeUpSpace,
-                        onTap: () => _clearAudioCache(primary, l10n),
-                        isDark: isDark,
-                        textColor: textMain,
                       ),
                     ]),
                     const SizedBox(height: 6),
@@ -508,8 +476,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                         }
                       },
                       onCopy: () {
-                        Clipboard.setData(
-                                const ClipboardData(text: '@UMER_jr'))
+                        Clipboard.setData(const ClipboardData(text: '@UMER_jr'))
                             .then((_) {
                           if (!mounted) return;
                           _showSnack(l10n.copiedToClipboard, primary);
@@ -560,32 +527,42 @@ class _SettingsScreenState extends State<SettingsScreen>
 
 String _getFloatingTitle(String locale) {
   switch (locale) {
-    case 'en': return 'Floating Reminder';
-    case 'am': return 'ሰዓት ማስታወሻ';
-    case 'om': return 'Yaadachiisa Hawaasaa';
-    default:   return 'الذكر العائم';
+    case 'en':
+      return 'Floating Reminder';
+    case 'am':
+      return 'ሰዓት ማስታወሻ';
+    case 'om':
+      return 'Yaadachiisa Hawaasaa';
+    default:
+      return 'الذكر العائم';
   }
 }
 
 String _getFloatingSubtitle(String locale) {
   switch (locale) {
-    case 'en': return 'A small window reminds you to remember Allah';
-    case 'am': return 'ትንሽ መስኮት አላህን እንዲያስቡ ያስታውሰዎታል';
-    case 'om': return 'Mirkantessaa xiqqaa zaakira yaadachiisa';
-    default:   return 'نافذة صغيرة تذكرك بذكر الله';
+    case 'en':
+      return 'A small window reminds you to remember Allah';
+    case 'am':
+      return 'ትንሽ መስኮት አላህን እንዲያስቡ ያስታውሰዎታል';
+    case 'om':
+      return 'Mirkantessaa xiqqaa zaakira yaadachiisa';
+    default:
+      return 'نافذة صغيرة تذكرك بذكر الله';
   }
 }
 
 String _getIntervalTitle(String locale) {
   switch (locale) {
-    case 'en': return 'Reminder Frequency';
-    case 'am': return 'የማስታወሻ ድግግሞሽ';
-    case 'om': return 'Yeroo Yaadachiisaa';
-    default:   return 'تكرار التذكير';
+    case 'en':
+      return 'Reminder Frequency';
+    case 'am':
+      return 'የማስታወሻ ድግግሞሽ';
+    case 'om':
+      return 'Yeroo Yaadachiisaa';
+    default:
+      return 'تكرار التذكير';
   }
 }
-
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COMPONENTS
@@ -730,9 +707,8 @@ class _LiquidTileState extends State<_LiquidTile>
                     if (widget.subtitle != null)
                       Text(widget.subtitle!,
                           style: TextStyle(
-                            color: widget.isDark
-                                ? Colors.white38
-                                : Colors.black45,
+                            color:
+                                widget.isDark ? Colors.white38 : Colors.black45,
                             fontSize: 11,
                           )),
                   ],
@@ -742,8 +718,7 @@ class _LiquidTileState extends State<_LiquidTile>
                   Icon(
                     Icons.chevron_right_rounded,
                     size: 18,
-                    color:
-                        widget.isDark ? Colors.white24 : Colors.black26,
+                    color: widget.isDark ? Colors.white24 : Colors.black26,
                   ),
             ],
           ),
@@ -853,11 +828,11 @@ class _IntervalPicker extends StatelessWidget {
               thickness: 0.6,
               color: primary.withValues(alpha: 0.15)),
           const SizedBox(height: 10),
-          Text(_getIntervalTitle(Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar'),
+          Text(
+              _getIntervalTitle(
+                  Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar'),
               style: TextStyle(
-                  color: textColor,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600)),
+                  color: textColor, fontSize: 12, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -870,8 +845,7 @@ class _IntervalPicker extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color:
-                        selected ? primary : primary.withValues(alpha: 0.1),
+                    color: selected ? primary : primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -891,8 +865,6 @@ class _IntervalPicker extends StatelessWidget {
     );
   }
 }
-
-
 
 class _ThemePickerCard extends StatelessWidget {
   final QuranTheme currentTheme;
@@ -1019,8 +991,8 @@ class _ChipBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-            color: color, fontSize: 11, fontWeight: FontWeight.bold),
+        style:
+            TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -1117,8 +1089,7 @@ class _DeveloperCard extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
@@ -1169,7 +1140,8 @@ class _DeveloperCard extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.telegram, color: Colors.white, size: 16),
+                        const Icon(Icons.telegram,
+                            color: Colors.white, size: 16),
                         const SizedBox(width: 6),
                         Flexible(
                           child: FittedBox(

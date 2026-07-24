@@ -240,154 +240,165 @@ class _DateConverterScreenState extends State<DateConverterScreen>
             onPressed: () => Navigator.pop(context),
           ),
         ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // ── Result summary banner ─────────────────────────────────────
-              _ResultBanner(ctrl: _ctrl, isDark: isDark, locale: locale),
-
-              const SizedBox(height: 20),
-
-              // ── Gregorian picker ──────────────────────────────────────────
-              _CalendarCard(
-                label:     _gregLabel(locale),
-                icon:      Icons.calendar_today_rounded,
-                accentColor: const Color(0xFF1565C0),
-                isActive:  _active == _CalSource.gregorian,
-                isDark:    isDark,
-                onActivate: () => setState(() => _active = _CalSource.gregorian),
-                content: Column(
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(12),
+              physics: const BouncingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 24,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _DayMonthYearRow(
-                      dayCtrl:   _gregDay,
-                      monthCtrl: _gregMonth,
-                      yearCtrl:  _gregYear,
-                      isDark:    isDark,
-                      maxDay:    31,
-                      maxMonth:  12,
-                      onChanged: () {
-                        _active = _CalSource.gregorian;
-                        _convertFromGregorian();
-                      },
-                    ),
+                    // ── Result summary banner ─────────────────────────────────────
+                    _ResultBanner(ctrl: _ctrl, isDark: isDark, locale: locale),
+
                     const SizedBox(height: 8),
-                    TextButton.icon(
-                      onPressed: _pickGregorianDate,
-                      icon: const Icon(Icons.date_range_rounded,
-                          color: Color(0xFF1565C0), size: 18),
-                      label: Text(
-                        _pickLabel(locale),
-                        style: const TextStyle(color: Color(0xFF1565C0)),
+
+                    // ── Gregorian picker ──────────────────────────────────────────
+                    _CalendarCard(
+                      label:     _gregLabel(locale),
+                      icon:      Icons.calendar_today_rounded,
+                      accentColor: const Color(0xFF1565C0),
+                      isActive:  _active == _CalSource.gregorian,
+                      isDark:    isDark,
+                      onActivate: () => setState(() => _active = _CalSource.gregorian),
+                      content: Column(
+                        children: [
+                          _DayMonthYearRow(
+                            dayCtrl:   _gregDay,
+                            monthCtrl: _gregMonth,
+                            yearCtrl:  _gregYear,
+                            isDark:    isDark,
+                            maxDay:    31,
+                            maxMonth:  12,
+                            onChanged: () {
+                              _active = _CalSource.gregorian;
+                              _convertFromGregorian();
+                            },
+                          ),
+                          const SizedBox(height: 4),
+                          TextButton.icon(
+                            onPressed: _pickGregorianDate,
+                            icon: const Icon(Icons.date_range_rounded,
+                                color: Color(0xFF1565C0), size: 18),
+                            label: Text(
+                              _pickLabel(locale),
+                              style: const TextStyle(color: Color(0xFF1565C0)),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+
+                    const SizedBox(height: 6),
+
+                    // ── Arrows decoration ────────────────────────────────────────
+                    Center(
+                      child: AnimatedBuilder(
+                        animation: _pulseCtrl,
+                        builder: (_, __) => Opacity(
+                          opacity:
+                              (0.4 + 0.6 * (1 - _pulseCtrl.value)).clamp(0.4, 1.0),
+                          child: const Icon(
+                            Icons.swap_vert_circle_rounded,
+                            color: AppColors.emeraldLight,
+                            size: 30,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    // ── Hijri picker ──────────────────────────────────────────────
+                    _CalendarCard(
+                      label:     _hijriLabel(locale),
+                      icon:      Icons.brightness_3_rounded,
+                      accentColor: AppColors.goldMid,
+                      isActive:  _active == _CalSource.hijri,
+                      isDark:    isDark,
+                      onActivate: () => setState(() => _active = _CalSource.hijri),
+                      content: _DayMonthYearRow(
+                        dayCtrl:   _hijriDay,
+                        monthCtrl: _hijriMonth,
+                        yearCtrl:  _hijriYear,
+                        isDark:    isDark,
+                        maxDay:    30,
+                        maxMonth:  12,
+                        onChanged: () {
+                          _active = _CalSource.hijri;
+                          _convertFromHijri();
+                        },
+                      ),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    // ── Ethiopian picker ──────────────────────────────────────────
+                    _CalendarCard(
+                      label:     _ethLabel(locale),
+                      icon:      Icons.wb_sunny_rounded,
+                      accentColor: const Color(0xFFDD2C00),
+                      isActive:  _active == _CalSource.ethiopian,
+                      isDark:    isDark,
+                      onActivate: () => setState(() => _active = _CalSource.ethiopian),
+                      content: _DayMonthYearRow(
+                        dayCtrl:   _ethDay,
+                        monthCtrl: _ethMonth,
+                        yearCtrl:  _ethYear,
+                        isDark:    isDark,
+                        maxDay:    30,
+                        maxMonth:  13,
+                        onChanged: () {
+                          _active = _CalSource.ethiopian;
+                          _convertFromEthiopian();
+                        },
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // ── Convert button ────────────────────────────────────────────
+                    SizedBox(
+                      height: 48,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.emeraldMid,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14)),
+                        ),
+                        icon: const Icon(Icons.compare_arrows_rounded),
+                        label: Text(
+                          _convertLabel(locale),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 15),
+                        ),
+                        onPressed: () {
+                          switch (_active) {
+                            case _CalSource.gregorian:
+                              _convertFromGregorian();
+                              break;
+                            case _CalSource.hijri:
+                              _convertFromHijri();
+                              break;
+                            case _CalSource.ethiopian:
+                              _convertFromEthiopian();
+                              break;
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                   ],
                 ),
               ),
-
-              const SizedBox(height: 12),
-
-              // ── Arrows decoration ────────────────────────────────────────
-              Center(
-                child: AnimatedBuilder(
-                  animation: _pulseCtrl,
-                  builder: (_, __) => Opacity(
-                    opacity:
-                        (0.4 + 0.6 * (1 - _pulseCtrl.value)).clamp(0.4, 1.0),
-                    child: const Icon(
-                      Icons.swap_vert_circle_rounded,
-                      color: AppColors.emeraldLight,
-                      size: 32,
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              // ── Hijri picker ──────────────────────────────────────────────
-              _CalendarCard(
-                label:     _hijriLabel(locale),
-                icon:      Icons.brightness_3_rounded,
-                accentColor: AppColors.goldMid,
-                isActive:  _active == _CalSource.hijri,
-                isDark:    isDark,
-                onActivate: () => setState(() => _active = _CalSource.hijri),
-                content: _DayMonthYearRow(
-                  dayCtrl:   _hijriDay,
-                  monthCtrl: _hijriMonth,
-                  yearCtrl:  _hijriYear,
-                  isDark:    isDark,
-                  maxDay:    30,
-                  maxMonth:  12,
-                  onChanged: () {
-                    _active = _CalSource.hijri;
-                    _convertFromHijri();
-                  },
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              // ── Ethiopian picker ──────────────────────────────────────────
-              _CalendarCard(
-                label:     _ethLabel(locale),
-                icon:      Icons.wb_sunny_rounded,
-                accentColor: const Color(0xFFDD2C00),
-                isActive:  _active == _CalSource.ethiopian,
-                isDark:    isDark,
-                onActivate: () => setState(() => _active = _CalSource.ethiopian),
-                content: _DayMonthYearRow(
-                  dayCtrl:   _ethDay,
-                  monthCtrl: _ethMonth,
-                  yearCtrl:  _ethYear,
-                  isDark:    isDark,
-                  maxDay:    30,
-                  maxMonth:  13,
-                  onChanged: () {
-                    _active = _CalSource.ethiopian;
-                    _convertFromEthiopian();
-                  },
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // ── Convert button ────────────────────────────────────────────
-              SizedBox(
-                height: 52,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.emeraldMid,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                  ),
-                  icon: const Icon(Icons.compare_arrows_rounded),
-                  label: Text(
-                    _convertLabel(locale),
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 15),
-                  ),
-                  onPressed: () {
-                    switch (_active) {
-                      case _CalSource.gregorian:
-                        _convertFromGregorian();
-                        break;
-                      case _CalSource.hijri:
-                        _convertFromHijri();
-                        break;
-                      case _CalSource.ethiopian:
-                        _convertFromEthiopian();
-                        break;
-                    }
-                  },
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -584,7 +595,7 @@ class _CalendarCard extends StatelessWidget {
           onTap: onActivate,
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -630,7 +641,7 @@ class _CalendarCard extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 8),
                 content,
               ],
             ),

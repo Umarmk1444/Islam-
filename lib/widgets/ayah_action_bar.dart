@@ -9,6 +9,8 @@ import '../theme_notifier.dart';
 import '../controllers/quran_audio_controller.dart';
 import '../l10n/app_localizations.dart';
 import 'verse_content_sheet.dart';
+import 'verse_meanings_and_irab_sheet.dart';
+import '../core/database/database_helper.dart';
 
 /// Ultra-compact, icon-only floating action bar that appears when a user
 /// taps an Ayah. Contains only icons with tooltips — no text labels.
@@ -154,11 +156,40 @@ class _AyahActionBarState extends State<AyahActionBar>
     _showContentSheet(isTafsir: false);
   }
 
+  void _showMeaningsAndIrab() {
+    final surahNumber = widget.verseData['surahNumber'] as int? ?? 1;
+    final ayahNumber = widget.verseData['ayahNumber'] as int? ?? 1;
+    final verseText = widget.verseData['text'] as String? ?? '';
+    final rawSurahName = widget.verseData['surahName'] as String? ?? '';
+    final surahName = rawSurahName.isNotEmpty
+        ? rawSurahName
+        : (surahNumber >= 1 && surahNumber <= DatabaseHelper.surahNamesArabicList.length
+            ? DatabaseHelper.surahNamesArabicList[surahNumber - 1]
+            : '');
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => VerseMeaningsAndIrabSheet(
+        surahNumber: surahNumber,
+        ayahNumber: ayahNumber,
+        verseText: verseText,
+        surahName: surahName,
+      ),
+    );
+  }
+
   void _showContentSheet({required bool isTafsir}) {
     final surahNumber = widget.verseData['surahNumber'] as int? ?? 1;
     final ayahNumber = widget.verseData['ayahNumber'] as int? ?? 1;
     final verseText = widget.verseData['text'] as String? ?? '';
-    final surahName = widget.verseData['surahName'] as String? ?? '';
+    final rawSurahName = widget.verseData['surahName'] as String? ?? '';
+    final surahName = rawSurahName.isNotEmpty
+        ? rawSurahName
+        : (surahNumber >= 1 && surahNumber <= DatabaseHelper.surahNamesArabicList.length
+            ? DatabaseHelper.surahNamesArabicList[surahNumber - 1]
+            : '');
 
     showModalBottomSheet(
       context: context,
@@ -189,11 +220,10 @@ class _AyahActionBarState extends State<AyahActionBar>
   }
 
   void _showListenOptions(int surahNum, int ayahNum, int pageNum, {required bool hasOffline, required bool playAfterDownload}) {
-    final totalVerses = widget.verseData['totalVerses'] as int? ?? 286;
-    String selectedMode = 'online';
-    String selectedTarget = 'ayah';
     String searchQuery = '';
     QuranReciter selectedReciter = QuranAudioController.instance.selectedReciter;
+    
+
 
     showModalBottomSheet(
       context: context,
@@ -203,20 +233,11 @@ class _AyahActionBarState extends State<AyahActionBar>
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setModalState) {
-            final isDownloaded = hasOffline;
             final filteredReciters = [...kAllReciters]..sort((a, b) => a.englishName.toLowerCase().compareTo(b.englishName.toLowerCase()));
             final lowerQuery = searchQuery.trim().toLowerCase();
             final visibleReciters = lowerQuery.isEmpty
                 ? filteredReciters
                 : filteredReciters.where((reciter) => reciter.searchText.contains(lowerQuery)).toList();
-            final targetOptions = selectedMode == 'offline'
-                ? <Map<String, String>>[
-                    if (hasOffline) {'label': 'من التنزيل', 'value': 'offline'},
-                    {'label': 'آية', 'value': 'ayah'},
-                    {'label': 'صفحة', 'value': 'page'},
-                    {'label': 'سورة', 'value': 'surah'},
-                  ]
-                : <Map<String, String>>[];
 
             return Container(
               height: MediaQuery.of(context).size.height * 0.78,
@@ -229,109 +250,49 @@ class _AyahActionBarState extends State<AyahActionBar>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: _border.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  Text(
-                    'اختر كيف تريد الاستماع',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontFamily: 'Amiri', fontSize: 20, fontWeight: FontWeight.bold, color: _gold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    selectedMode == 'online'
-                        ? 'استمع مباشرة عبر الإنترنت بالمنشاوي افتراضياً أو اختر قارئاً آخر.'
-                        : isDownloaded
-                            ? 'تشغيل من دون اتصال إذا كان الصوت موجوداً محلياً، أو تنزيل الآية/الصفحة/السورة.'
-                            : 'الملف غير موجود محلياً. اختر قارئاً لتنزيل الصوت ثم استمع دون اتصال.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontFamily: 'Amiri', fontSize: 14, color: _text.withValues(alpha: 0.8)),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildModeChip('مباشر', 'online', selectedMode, setModalState),
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: _border.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(2),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _buildModeChip('بدون اتصال', 'offline', selectedMode, setModalState),
-                      ),
-                    ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  if (selectedMode == 'offline') ...[
-                    Text(
-                      'اختر نوع التنزيل ثم اختر القارئ. إذا كان الصوت متوفراً محلياً، يمكنك تشغيله مباشرةً بدون تنزيل إضافي.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontFamily: 'Amiri', fontSize: 13, color: _text.withValues(alpha: 0.7)),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: targetOptions
-                          .map((option) => Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                                  child: _buildTargetChip(option['label']!, option['value']!, selectedTarget, setModalState),
-                                ),
-                              ))
-                          .toList(),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                  if (widget.onIsPageDownloaded != null && selectedMode == 'offline')
-                    FutureBuilder<bool>(
-                      future: widget.onIsPageDownloaded!(pageNum),
-                      builder: (ctx, snapshot) {
-                        if (!snapshot.hasData) return const SizedBox.shrink();
-                        final pageDownloaded = snapshot.data == true;
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Text(
-                            pageDownloaded
-                                ? 'الصفحة متاحة بالفعل في وضع عدم الاتصال'
-                                : 'الصفحة غير متاحة محلياً بعد',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontFamily: 'Amiri', fontSize: 13, color: _text.withValues(alpha: 0.7)),
-                          ),
-                        );
-                      },
-                    ),
                   Text(
                     'اختر القارئ',
-                    style: TextStyle(fontFamily: 'Amiri', fontSize: 16, fontWeight: FontWeight.bold, color: _gold),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontFamily: 'Amiri', fontSize: 24, fontWeight: FontWeight.bold, color: _gold),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
                   TextField(
                     decoration: InputDecoration(
                       hintText: 'ابحث عن القارئ بالعربية أو الإنجليزية',
                       hintStyle: TextStyle(color: _text.withValues(alpha: 0.55), fontFamily: 'Amiri'),
                       filled: true,
                       fillColor: _bg.withValues(alpha: 0.08),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                      prefixIcon: Icon(Icons.search, color: _gold.withValues(alpha: 0.7)),
                     ),
-                    style: TextStyle(color: _text, fontFamily: 'Amiri'),
+                    style: TextStyle(color: _text, fontFamily: 'Amiri', fontSize: 16),
                     onChanged: (query) => setModalState(() => searchQuery = query),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Expanded(
                     child: visibleReciters.isEmpty
                         ? Center(
-                            child: Text('لا يوجد نتائج', style: TextStyle(fontFamily: 'Amiri', color: _text.withValues(alpha: 0.7))),
+                            child: Text('لا يوجد نتائج', style: TextStyle(fontFamily: 'Amiri', fontSize: 16, color: _text.withValues(alpha: 0.7))),
                           )
                         : ListView.builder(
                             itemCount: visibleReciters.length,
                             itemBuilder: (context, index) {
                               final reciter = visibleReciters[index];
                               final isSelected = selectedReciter.identifier == reciter.identifier;
+                              final supportsGapless = reciter.quranComId != null;
+                              
                               return ListTile(
                                 leading: Container(
                                   width: 36,
@@ -343,9 +304,24 @@ class _AyahActionBarState extends State<AyahActionBar>
                                   ),
                                   child: Icon(Icons.person, size: 18, color: isSelected ? _gold : _text.withValues(alpha: 0.6)),
                                 ),
-                                title: Text(reciter.name, style: TextStyle(fontFamily: 'Amiri', fontSize: 16, color: isSelected ? _gold : _text, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
-                                subtitle: Text(reciter.englishName, style: TextStyle(fontFamily: 'Amiri', fontSize: 12, color: _text.withValues(alpha: 0.65))),
-                                trailing: isSelected ? Icon(Icons.check_circle, color: _gold, size: 20) : null,
+                                title: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        reciter.name, 
+                                        style: TextStyle(fontFamily: 'Amiri', fontSize: 16, color: isSelected ? _gold : _text, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)
+                                      )
+                                    ),
+                                    if (supportsGapless)
+                                      const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
+                                  ],
+                                ),
+                                subtitle: Text(
+                                  reciter.englishName, 
+                                  style: TextStyle(fontFamily: 'Amiri', fontSize: 13, color: _text.withValues(alpha: 0.65))
+                                ),
+                                trailing: isSelected ? Icon(Icons.check_circle, color: _gold, size: 22) : null,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 onTap: () {
                                   setModalState(() {
                                     selectedReciter = reciter;
@@ -355,83 +331,26 @@ class _AyahActionBarState extends State<AyahActionBar>
                             },
                           ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: _gold, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14)),
-                    onPressed: () async {
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _gold, 
+                      foregroundColor: Colors.white, 
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 0,
+                    ),
+                    onPressed: () {
                       Navigator.pop(ctx);
                       QuranAudioController.instance.selectedReciter = selectedReciter;
                       QuranAudioController.instance.hasUserSelectedReciter = true;
-
-                      if (selectedMode == 'online') {
-                        widget.onListen();
-                        return;
-                      }
-
-                      if (selectedTarget == 'offline' && hasOffline) {
-                        widget.onListen();
-                        return;
-                      }
-
-                      if (selectedTarget == 'ayah') {
-                        await QuranAudioController.instance.downloadAyah(surahNum, ayahNum);
-                      } else if (selectedTarget == 'page') {
-                        if (widget.onDownloadPage != null) {
-                          await widget.onDownloadPage!(pageNum, selectedReciter);
-                        }
-                      } else if (selectedTarget == 'surah') {
-                        await QuranAudioController.instance.downloadSurah(surahNum, totalVerses);
-                      }
-
-                      if (playAfterDownload && selectedMode == 'offline') {
-                        final hasAudio = await QuranAudioController.instance.hasOfflineAudio(surahNum, ayahNum);
-                        if (hasAudio) {
-                          widget.onListen();
-                        } else if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Text('تعذر تشغيل الصوت بعد التنزيل. تأكد من اتصال الإنترنت وحاول مرة أخرى.', style: TextStyle(fontFamily: 'Amiri')),
-                              backgroundColor: _border,
-                            ),
-                          );
-                        }
-                      }
+                      widget.onListen();
                     },
-                    child: Text(
-                      selectedMode == 'online'
-                          ? 'تشغيل الآن'
-                          : (selectedTarget == 'offline' && hasOffline)
-                              ? 'تشغيل من دون اتصال'
-                              : 'تنزيل ${selectedTarget == 'page' ? 'الصفحة' : selectedTarget == 'surah' ? 'السورة' : 'الآية'}',
-                      style: const TextStyle(fontFamily: 'Amiri', fontSize: 16),
+                    child: const Text(
+                      'تشغيل الآن', 
+                      style: TextStyle(fontFamily: 'Amiri', fontSize: 18, fontWeight: FontWeight.bold)
                     ),
                   ),
-                  if (selectedMode == 'offline' && selectedTarget != 'offline') ...[
-                    const SizedBox(height: 8),
-                    OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: _gold,
-                        side: BorderSide(color: _gold),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      onPressed: () async {
-                        Navigator.pop(ctx);
-                        QuranAudioController.instance.selectedReciter = selectedReciter;
-                        QuranAudioController.instance.hasUserSelectedReciter = true;
-                        if (selectedTarget == 'ayah') {
-                          await QuranAudioController.instance.downloadAyah(surahNum, ayahNum);
-                        } else if (selectedTarget == 'page') {
-                          if (widget.onDownloadPage != null) {
-                            await widget.onDownloadPage!(pageNum, selectedReciter);
-                          }
-                        } else if (selectedTarget == 'surah') {
-                          await QuranAudioController.instance.downloadSurah(surahNum, totalVerses);
-                        }
-                      },
-                      child: const Text('تنزيل فقط', style: TextStyle(fontFamily: 'Amiri', fontSize: 16)),
-                    ),
-                  ],
-                  const SizedBox(height: 8),
                 ],
               ),
             );
@@ -440,66 +359,6 @@ class _AyahActionBarState extends State<AyahActionBar>
       },
     );
   }
-
-
-  Widget _buildTargetChip(String label, String value, String selectedTarget, void Function(void Function()) setModalState) {
-    final isSelected = selectedTarget == value;
-    return Expanded(
-      child: InkWell(
-        onTap: () => setModalState(() {
-          selectedTarget = value;
-        }),
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-          decoration: BoxDecoration(
-            color: isSelected ? _gold.withValues(alpha: 0.18) : _border.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: isSelected ? _gold : _border.withValues(alpha: 0.3), width: 1.2),
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Amiri',
-              fontSize: 14,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected ? _gold : _text,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildModeChip(String label, String value, String selectedMode, void Function(void Function()) setModalState) {
-    final isSelected = selectedMode == value;
-    return InkWell(
-      onTap: () => setModalState(() {
-        selectedMode = value;
-      }),
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        height: 48,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: isSelected ? _gold.withValues(alpha: 0.18) : _border.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isSelected ? _gold : _border.withValues(alpha: 0.3), width: 1.2),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontFamily: 'Amiri',
-            fontSize: 15,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            color: isSelected ? _gold : _text,
-          ),
-        ),
-      ),
-    );
-  }
-
 
 
   // ── Build ─────────────────────────────────────────────────────────────────
@@ -542,14 +401,6 @@ class _AyahActionBarState extends State<AyahActionBar>
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Index — most needed, top right
-                        _ActionIcon(
-                          icon: Icons.toc_rounded,
-                          label: l10n.actionIndex,
-                          color: _text,
-                          onTap: widget.onOpenIndex,
-                        ),
-                        _sep(),
                         // Listen — primary action
                         _ActionIcon(
                           icon: Icons.headphones_rounded,
@@ -590,6 +441,14 @@ class _AyahActionBarState extends State<AyahActionBar>
                           label: l10n.actionTranslation,
                           color: _text,
                           onTap: _showTranslation,
+                        ),
+                        _sep(),
+                        // Meanings & I'rab
+                        _ActionIcon(
+                          icon: Icons.menu_book_rounded,
+                          label: 'المعاني والإعراب',
+                          color: _text,
+                          onTap: _showMeaningsAndIrab,
                         ),
                       ],
                     ),

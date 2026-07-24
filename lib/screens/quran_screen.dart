@@ -2610,7 +2610,7 @@ class QuranReminderWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     if (pageNum != 1 && pageNum != 2) return const SizedBox.shrink();
     final selectedItem = quranReminders[reminderIndex];
-    final String displayLang = forceArabic ? 'ar' : languageCode;
+    const String displayLang = 'ar';
     final String localizedText =
         selectedItem[displayLang] ?? selectedItem['ar'] ?? '';
 

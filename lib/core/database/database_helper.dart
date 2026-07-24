@@ -358,6 +358,31 @@ class DatabaseHelper {
     }
   }
 
+  /// Fetches Word Meanings (ma3ny_aya) and I'rab (e3rab_quran) for a given verse.
+  Future<Map<String, String>> fetchMeaningsAndIrab({
+    required int surahNumber,
+    required int ayahNumber,
+  }) async {
+    try {
+      final rows = await rawQuery(
+        'SELECT ma3ny_aya, e3rab_quran FROM quran WHERE sura_num = ? AND aya_num = ? LIMIT 1',
+        [surahNumber, ayahNumber],
+      );
+      if (rows.isNotEmpty) {
+        final meanings = rows.first['ma3ny_aya'] as String? ?? '';
+        final irab = rows.first['e3rab_quran'] as String? ?? '';
+        return {
+          'meanings': meanings,
+          'irab': irab,
+        };
+      }
+      return {'meanings': '', 'irab': ''};
+    } catch (e, stackTrace) {
+      debugPrint('[DatabaseHelper] ERROR fetching meanings and irab for $surahNumber:$ayahNumber: $e\n$stackTrace');
+      return {'meanings': '', 'irab': ''};
+    }
+  }
+
   /// Fetches all verses for a specific Quran page from the local DB.
   /// Ordered by id_quran_ayat to ensure correct reading sequence.
   Future<List<Map<String, dynamic>>> getVersesByPage(int pageNumber) async {
