@@ -61,7 +61,7 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get shareAppText =>
-      'ቁርኣን ለማንበብ እና የእስልምና ሊቃውንትን ለማዳመጥ የቁርኣን እና ዳዕዋ መተግበሪያን ያውርዱ!';
+      'ቁርኣን ለማንበብ እና የእስልምና ሊቃውንትን ለማዳመጥ የQuran Zone መተግበሪያን ያውርዱ!';
 
   @override
   String get rateUs => 'ደረጃ ይስጡን';
@@ -70,7 +70,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get contactUs => 'ያግኙን';
 
   @override
-  String get aboutApp => 'ስለ ቁርኣን እና ዳዕዋ መተግበሪያ';
+  String get aboutApp => 'ስለ Quran Zone መተግበሪያ';
 
   @override
   String get madeWithLove => 'ለኡምማ በ ♥ ተሠርቷል';

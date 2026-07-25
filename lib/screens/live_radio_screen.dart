@@ -4,7 +4,6 @@ import '../core/constants/app_colors.dart';
 import '../core/constants/app_text_styles.dart';
 import '../theme_notifier.dart';
 import '../widgets/persistent_audio_bar.dart';
-import '../widgets/custom_banner_ad.dart';
 import '../services/minbar_player.dart';
 import '../models/minbar_models.dart';
 import '../services/quran_radio_service.dart';
@@ -278,7 +277,6 @@ class _LiveRadioScreenState extends State<LiveRadioScreen> {
 
               // ── Persistent Audio Bar ──
               const PersistentAudioBar(),
-              const CustomBannerAd(),
             ],
           ),
         );

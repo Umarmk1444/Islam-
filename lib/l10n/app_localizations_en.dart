@@ -61,7 +61,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shareAppText =>
-      'Download the Quran & Dawah app to read the Quran and listen to Islamic scholars!';
+      'Download the Quran Zone app to read the Quran and listen to Islamic scholars!';
 
   @override
   String get rateUs => 'Rate Us';
@@ -70,7 +70,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contactUs => 'Contact Us';
 
   @override
-  String get aboutApp => 'About Quran & Dawah App';
+  String get aboutApp => 'About Quran Zone App';
 
   @override
   String get madeWithLove => 'Made with ♥ for the Ummah';

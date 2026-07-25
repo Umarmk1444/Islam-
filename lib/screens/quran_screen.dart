@@ -11,6 +11,7 @@ import '../widgets/ayah_action_bar.dart';
 import '../controllers/quran_audio_controller.dart';
 import '../core/database/database_helper.dart';
 import '../l10n/app_localizations.dart';
+import '../widgets/custom_banner_ad.dart'; // kQuranScreenActive
 
 // Background processing removed in favor of True Lazy Loading directly from SQLite
 
@@ -104,6 +105,10 @@ class _QuranScreenState extends State<QuranScreen> {
   @override
   void initState() {
     super.initState();
+    // Signal to persistent banner: hide ads on the Holy Quran screen.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      kQuranScreenActive.value = true;
+    });
     _reminderIndex = math.Random().nextInt(quranReminders.length);
     _reminderForceArabic = math.Random().nextInt(100) < 35;
     _loadQuranData();
@@ -113,6 +118,10 @@ class _QuranScreenState extends State<QuranScreen> {
 
   @override
   void dispose() {
+    // Signal to persistent banner: show ads again.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      kQuranScreenActive.value = false;
+    });
     _sleepTimer?.cancel();
     QuranScreen.selectedVerseNotifier
         .removeListener(_handleSelectedVerseNotifierChange);

@@ -16,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/services/background_engine.dart';
 import 'widgets/system_zekr_overlay.dart';
 import 'services/minbar_player.dart';
+import 'widgets/custom_banner_ad.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ENTRY POINT
@@ -145,7 +146,7 @@ class _QuranDawahAppState extends State<QuranDawahApp> {
           valueListenable: AppLanguage.notifier,
           builder: (context, locale, _) {
             return MaterialApp(
-              title: 'Quran & Dawah',
+              title: 'Quran Zone',
               debugShowCheckedModeBanner: false,
               locale: locale,
               localizationsDelegates: const [
@@ -195,6 +196,39 @@ class _QuranDawahAppState extends State<QuranDawahApp> {
                   unselectedItemColor: Colors.grey,
                 ),
               ),
+              // ── Root-level builder: wraps ALL routes ──────────────
+              // The PersistentBannerAd lives here so it is visible on
+              // every single screen in the app (except the Holy Quran
+              // reading screen, which sets kQuranScreenActive = true).
+              builder: (context, child) {
+                return ValueListenableBuilder<bool>(
+                  valueListenable: kQuranScreenActive,
+                  builder: (context, isQuranActive, _) {
+                    return ColoredBox(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      child: Column(
+                        children: [
+                          if (!isQuranActive)
+                            const SafeArea(
+                              bottom: false,
+                              child: PersistentBannerAd(),
+                            ),
+                          Expanded(
+                            child: isQuranActive
+                                ? (child ?? const SizedBox.shrink())
+                                : MediaQuery(
+                                    data: MediaQuery.of(context).copyWith(
+                                      padding: MediaQuery.of(context).padding.copyWith(top: 0),
+                                    ),
+                                    child: child ?? const SizedBox.shrink(),
+                                  ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
               home: const SplashScreen(),
             );
           },

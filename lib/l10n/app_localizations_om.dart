@@ -62,7 +62,7 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get shareAppText =>
-      'Qur\'aana dubbisuu fi Ulamaa\'ii Islaamaa dhaggeeffachuuf appilikeeshinii Qur\'aanaa fi Da\'awaa buufadhaa!';
+      'Qur\'aana dubbisuu fi Ulamaa\'ii Islaamaa dhaggeeffachuuf appilikeeshinii Quran Zone buufadhaa!';
 
   @override
   String get rateUs => 'Nu Madaali';
@@ -71,7 +71,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get contactUs => 'Nu Quunnamaa';
 
   @override
-  String get aboutApp => 'Waa\'ee Appilikeeshinii Qur\'aanaa fi Da\'awaa';
+  String get aboutApp => 'Waa\'ee Appilikeeshinii Quran Zone';
 
   @override
   String get madeWithLove => 'Ummataaf ♥ tiin hojjetame';

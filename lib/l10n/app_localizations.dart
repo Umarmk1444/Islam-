@@ -207,7 +207,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareAppText.
   ///
   /// In en, this message translates to:
-  /// **'Download the Quran & Dawah app to read the Quran and listen to Islamic scholars!'**
+  /// **'Download the Quran Zone app to read the Quran and listen to Islamic scholars!'**
   String get shareAppText;
 
   /// No description provided for @rateUs.
@@ -225,7 +225,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutApp.
   ///
   /// In en, this message translates to:
-  /// **'About Quran & Dawah App'**
+  /// **'About Quran Zone App'**
   String get aboutApp;
 
   /// No description provided for @madeWithLove.

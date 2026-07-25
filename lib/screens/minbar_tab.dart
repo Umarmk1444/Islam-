@@ -4,7 +4,6 @@ import '../core/constants/app_colors.dart';
 import '../core/constants/app_text_styles.dart';
 import '../theme_notifier.dart';
 import '../widgets/persistent_audio_bar.dart';
-import '../widgets/custom_banner_ad.dart';
 import 'audio_categories_screen.dart';
 import 'minbar_downloads_screen.dart';
 import 'live_radio_screen.dart';
@@ -196,7 +195,6 @@ class MinbarTab extends StatelessWidget {
                 ),
               ),
               const PersistentAudioBar(),
-              const CustomBannerAd(),
             ],
           ),
         );

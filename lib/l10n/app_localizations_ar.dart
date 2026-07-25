@@ -61,7 +61,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get shareAppText =>
-      'قم بتنزيل تطبيق القرآن والدعوة لقراءة القرآن والاستماع إلى العلماء الإسلاميين!';
+      'قم بتنزيل تطبيق قرآن زون لقراءة القرآن والاستماع إلى العلماء الإسلاميين!';
 
   @override
   String get rateUs => 'قيمنا';
@@ -70,7 +70,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get contactUs => 'اتصل بنا';
 
   @override
-  String get aboutApp => 'حول تطبيق القرآن والدعوة';
+  String get aboutApp => 'حول تطبيق قرآن زون';
 
   @override
   String get madeWithLove => 'صُنع بـ ♥ للأمة';

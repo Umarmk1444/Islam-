@@ -125,58 +125,62 @@ class _LibraryScreenState extends State<LibraryScreen>
         ),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          // ── Search Bar ──────────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: TextField(
-              controller: _searchController,
-              onChanged: _onSearchChanged,
-              style: TextStyle(color: textColor),
-              decoration: InputDecoration(
-                hintText: 'Search library...',
-                hintStyle: TextStyle(
-                    color: isDark ? AppColors.textSecondary : AppColors.textMuted),
-                prefixIcon: Icon(Icons.search,
-                    color: isDark ? AppColors.textSecondary : AppColors.emeraldDeep),
-                filled: true,
-                fillColor: cardBg,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
-              ),
-            ),
-          ),
-
-          Expanded(
-            child: _searchController.text.isNotEmpty
-                ? _buildSearchResults(textColor, cardBg, isDark)
-                : CustomScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    slivers: [
-                      SliverToBoxAdapter(
-                        child: _buildFavoritesBanner(isDark, l10n),
-                      ),
-                      _buildDomainGrid(isDark),
-                    ],
+      body: ValueListenableBuilder<bool>(
+        valueListenable: kAdVisibleNotifier,
+        builder: (context, isAdVisible, _) {
+          return Column(
+            children: [
+              // ── Search Bar ─────────────────────────────────────────────────
+              Padding(
+                padding: EdgeInsets.fromLTRB(16, 0, 16, isAdVisible ? 12 * 0.93 : 12),
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: _onSearchChanged,
+                  style: TextStyle(color: textColor),
+                  decoration: InputDecoration(
+                    hintText: 'Search library...',
+                    hintStyle: TextStyle(
+                        color: isDark ? AppColors.textSecondary : AppColors.textMuted),
+                    prefixIcon: Icon(Icons.search,
+                        color: isDark ? AppColors.textSecondary : AppColors.emeraldDeep),
+                    filled: true,
+                    fillColor: cardBg,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
                   ),
-          ),
-        ],
+                ),
+              ),
+
+              Expanded(
+                child: _searchController.text.isNotEmpty
+                    ? _buildSearchResults(textColor, cardBg, isDark, isAdVisible)
+                    : CustomScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        slivers: [
+                          SliverToBoxAdapter(
+                            child: _buildFavoritesBanner(isDark, l10n, isAdVisible),
+                          ),
+                          _buildDomainGrid(isDark, isAdVisible),
+                        ],
+                      ),
+              ),
+            ],
+          );
+        },
       ),
-      bottomNavigationBar: const CustomBannerAd(),
     );
   }
 
   // ── Favourites banner ───────────────────────────────────────────────────────
-  Widget _buildFavoritesBanner(bool isDark, AppLocalizations? l10n) {
+  Widget _buildFavoritesBanner(bool isDark, AppLocalizations? l10n, bool isAdVisible) {
     return LiquidPressable(
       onTap: _navigateToFavorites,
       child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        margin: EdgeInsets.fromLTRB(16, 0, 16, isAdVisible ? 12 * 0.93 : 12),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: isAdVisible ? 18 * 0.93 : 18),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: isDark
@@ -197,31 +201,32 @@ class _LibraryScreenState extends State<LibraryScreen>
         child: Row(
           children: [
             Container(
-              width: 48, height: 48,
+              width: isAdVisible ? 48 * 0.93 : 48,
+              height: isAdVisible ? 48 * 0.93 : 48,
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.18),
                 shape: BoxShape.circle,
                 boxShadow: [BoxShadow(color: Colors.white.withValues(alpha: 0.25), blurRadius: 12, spreadRadius: 2)],
               ),
-              child: const Icon(Icons.favorite_rounded, color: Colors.white, size: 26),
+              child: Icon(Icons.favorite_rounded, color: Colors.white, size: isAdVisible ? 26 * 0.93 : 26),
             ),
-            const SizedBox(width: 14),
+            SizedBox(width: isAdVisible ? 14 * 0.93 : 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(l10n?.libraryFavorites ?? 'المفضلة',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: isAdVisible ? 18 * 0.93 : 18)),
                   const SizedBox(height: 3),
                   Text('Your saved books, hadiths, and fatwas',
-                      style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 12)),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: isAdVisible ? 12 * 0.93 : 12)),
                 ],
               ),
             ),
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), shape: BoxShape.circle),
-              child: const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 14),
+              child: Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: isAdVisible ? 14 * 0.93 : 14),
             ),
           ],
         ),
@@ -230,15 +235,15 @@ class _LibraryScreenState extends State<LibraryScreen>
   }
 
   // ── Domain grid ─────────────────────────────────────────────────────────────
-  Widget _buildDomainGrid(bool isDark) {
+  Widget _buildDomainGrid(bool isDark, bool isAdVisible) {
     return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: EdgeInsets.fromLTRB(16, 0, 16, isAdVisible ? 16 * 0.93 : 16),
       sliver: SliverGrid(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          mainAxisSpacing: 14,
-          crossAxisSpacing: 14,
-          childAspectRatio: 1.05,
+          mainAxisSpacing: isAdVisible ? 14 * 0.93 : 14,
+          crossAxisSpacing: isAdVisible ? 14 * 0.93 : 14,
+          childAspectRatio: isAdVisible ? 1.15 : 1.05, // slightly larger ratio = shorter card
         ),
         delegate: SliverChildBuilderDelegate(
           (context, index) {
@@ -253,6 +258,7 @@ class _LibraryScreenState extends State<LibraryScreen>
               phaseOffset: index * 0.15, // stagger the breathing phase for wave effect
               entranceDelay: Duration(milliseconds: index * 80),
               onTap: () => _navigateToDomain(domain),
+              isAdVisible: isAdVisible,
             );
           },
           childCount: _domains.length,
@@ -262,7 +268,7 @@ class _LibraryScreenState extends State<LibraryScreen>
   }
 
   // ── Search results ──────────────────────────────────────────────────────────
-  Widget _buildSearchResults(Color textColor, Color cardBg, bool isDark) {
+  Widget _buildSearchResults(Color textColor, Color cardBg, bool isDark, bool isAdVisible) {
     if (_isSearching && _searchResults.isEmpty) {
       return Center(
         child: Text('No results found.',
@@ -277,8 +283,8 @@ class _LibraryScreenState extends State<LibraryScreen>
         return LiquidPressable(
           onTap: () => _openStory(item),
           child: Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            margin: EdgeInsets.only(bottom: isAdVisible ? 10 * 0.93 : 10),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: isAdVisible ? 12 * 0.93 : 12),
             decoration: BoxDecoration(
               color: cardBg,
               borderRadius: BorderRadius.circular(16),
@@ -292,9 +298,10 @@ class _LibraryScreenState extends State<LibraryScreen>
             child: Row(
               children: [
                 Container(
-                  width: 40, height: 40,
+                  width: isAdVisible ? 40 * 0.93 : 40,
+                  height: isAdVisible ? 40 * 0.93 : 40,
                   decoration: BoxDecoration(color: AppColors.emeraldLight.withValues(alpha: 0.14), shape: BoxShape.circle),
-                  child: const Icon(Icons.book_rounded, color: AppColors.emeraldLight, size: 20),
+                  child: Icon(Icons.book_rounded, color: AppColors.emeraldLight, size: isAdVisible ? 20 * 0.93 : 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -302,16 +309,16 @@ class _LibraryScreenState extends State<LibraryScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(item.title,
-                          style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14),
+                          style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: isAdVisible ? 14 * 0.93 : 14),
                           maxLines: 1, overflow: TextOverflow.ellipsis),
                       const SizedBox(height: 3),
                       Text(item.type,
-                          style: TextStyle(color: isDark ? AppColors.textSecondary : AppColors.textMuted, fontSize: 12)),
+                          style: TextStyle(color: isDark ? AppColors.textSecondary : AppColors.textMuted, fontSize: isAdVisible ? 12 * 0.93 : 12)),
                     ],
                   ),
                 ),
                 Icon(Icons.arrow_forward_ios_rounded,
-                    color: isDark ? AppColors.textMuted : Colors.black26, size: 14),
+                    color: isDark ? AppColors.textMuted : Colors.black26, size: isAdVisible ? 14 * 0.93 : 14),
               ],
             ),
           ),
@@ -334,6 +341,7 @@ class _DomainCard extends StatefulWidget {
     required this.phaseOffset, // 0.0 – 1.0: each card starts at a different phase
     required this.entranceDelay,
     required this.onTap,
+    required this.isAdVisible,
   });
 
   final Map<String, dynamic> domain;
@@ -344,6 +352,7 @@ class _DomainCard extends StatefulWidget {
   final double phaseOffset;
   final Duration entranceDelay;
   final VoidCallback onTap;
+  final bool isAdVisible;
 
   @override
   State<_DomainCard> createState() => _DomainCardState();
@@ -391,6 +400,7 @@ class _DomainCardState extends State<_DomainCard>
     final accent = widget.accent;
     final deep   = widget.deep;
     final isDark = widget.isDark;
+    final isAdVisible = widget.isAdVisible;
 
     // A brighter "lit" version of the accent for color interpolation
     final bright = Color.lerp(accent, Colors.white, 0.30)!;
@@ -460,8 +470,8 @@ class _DomainCardState extends State<_DomainCard>
                           top: -30,
                           left: -30,
                           child: Container(
-                            width: 130,
-                            height: 130,
+                            width: isAdVisible ? 130 * 0.93 : 130,
+                            height: isAdVisible ? 130 * 0.93 : 130,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               gradient: RadialGradient(
@@ -478,8 +488,8 @@ class _DomainCardState extends State<_DomainCard>
                           bottom: -20,
                           right: -20,
                           child: Container(
-                            width: 110,
-                            height: 110,
+                            width: isAdVisible ? 110 * 0.93 : 110,
+                            height: isAdVisible ? 110 * 0.93 : 110,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               gradient: RadialGradient(
@@ -500,7 +510,7 @@ class _DomainCardState extends State<_DomainCard>
               );
             },
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(isAdVisible ? 16 * 0.93 : 16),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -512,7 +522,8 @@ class _DomainCardState extends State<_DomainCard>
                       final bright = Color.lerp(accent, Colors.white, 0.30)!;
                       final currentAccent = Color.lerp(accent, bright, t * 0.6)!;
                       return Container(
-                        width: 64, height: 64,
+                        width: isAdVisible ? 64 * 0.93 : 64,
+                        height: isAdVisible ? 64 * 0.93 : 64,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [currentAccent, deep],
@@ -528,18 +539,21 @@ class _DomainCardState extends State<_DomainCard>
                             ),
                           ],
                         ),
-                        child: Icon(widget.domain['icon'] as IconData,
-                            color: Colors.white, size: 30),
+                        child: Icon(
+                          widget.domain['icon'] as IconData,
+                          color: Colors.white,
+                          size: isAdVisible ? 30 * 0.93 : 30,
+                        ),
                       );
                     },
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: isAdVisible ? 12 * 0.93 : 12),
                   Text(
                     widget.domain['title'] as String,
                     style: TextStyle(
                       color: isDark ? Colors.white : const Color(0xFF1A1A2E),
                       fontWeight: FontWeight.bold,
-                      fontSize: 14.5,
+                      fontSize: isAdVisible ? 14.5 * 0.93 : 14.5,
                       height: 1.3,
                     ),
                     textAlign: TextAlign.center,

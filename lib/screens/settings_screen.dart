@@ -311,7 +311,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                                     ),
                                   ),
                                   Text(
-                                    'Quran & Dawah',
+                                    'Quran Zone',
                                     style: TextStyle(
                                       color:
                                           Colors.white.withValues(alpha: 0.6),
