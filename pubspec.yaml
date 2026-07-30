@@ -59,6 +59,7 @@ flutter:
     - assets/muslim_house.db
     - assets/images/
     - assets/audio/
+    - assets/muezzins.json
     - assets/icons/light/
     - assets/icons/dark/
   fonts:

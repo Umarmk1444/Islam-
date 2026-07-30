@@ -6,9 +6,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart' as overlay;
 
+import 'dart:isolate';
+import 'package:adhan/adhan.dart' as adhan;
+
 import '../../features/prayer_times/data/models/prayer_config.dart';
 import '../../features/prayer_times/data/models/prayer_time_model.dart';
+import '../../features/prayer_times/data/services/muezzin_manager.dart';
 import '../../services/azkar_service.dart';
+import 'athan_audio_service.dart';
 
 // ── Background Notification Tap Handler ──────────────────────────────────────
 
@@ -40,36 +45,114 @@ void athanAlarmCallback(int id) async {
         ? PrayerConfig.fromJsonString(rawConfig)
         : const PrayerConfig();
 
+    final bool isTestAdhan = id == 199;
     final bool isPreAdhan = id >= 200 && id <= 205;
     final int baseId = isPreAdhan ? id - 100 : id;
 
     String prayerNameStr;
-    switch (baseId) {
-      case 100:
-        prayerNameStr = 'fajr';
-        break;
-      case 101:
-        prayerNameStr = 'sunrise';
-        break;
-      case 102:
-        prayerNameStr = 'dhuhr';
-        break;
-      case 103:
-        prayerNameStr = 'asr';
-        break;
-      case 104:
-        prayerNameStr = 'maghrib';
-        break;
-      case 105:
-        prayerNameStr = 'isha';
-        break;
-      default:
-        prayerNameStr = 'unknown';
+    if (isTestAdhan) {
+      prayerNameStr = 'Test';
+    } else {
+      switch (baseId) {
+        case 100: prayerNameStr = 'fajr'; break;
+        case 101: prayerNameStr = 'sunrise'; break;
+        case 102: prayerNameStr = 'dhuhr'; break;
+        case 103: prayerNameStr = 'asr'; break;
+        case 104: prayerNameStr = 'maghrib'; break;
+        case 105: prayerNameStr = 'isha'; break;
+        default: prayerNameStr = 'unknown';
+      }
     }
 
     if (prayerNameStr == 'unknown') {
       debugPrint('Unknown prayer ID: $id');
       return;
+    }
+
+    // ── Reschedule Next Occurrence ───────────────────────────────────────────
+    if (!isTestAdhan) {
+      try {
+        final coordinates = adhan.Coordinates(config.latitude, config.longitude);
+        adhan.CalculationParameters params;
+        switch (config.method) {
+          case CalculationMethodEnum.ummAlQura:
+            params = adhan.CalculationMethod.umm_al_qura.getParameters(); break;
+          case CalculationMethodEnum.egyptian:
+            params = adhan.CalculationMethod.egyptian.getParameters(); break;
+          case CalculationMethodEnum.mwl:
+            params = adhan.CalculationMethod.muslim_world_league.getParameters(); break;
+          case CalculationMethodEnum.isna:
+            params = adhan.CalculationMethod.north_america.getParameters(); break;
+          case CalculationMethodEnum.karachi:
+            params = adhan.CalculationMethod.karachi.getParameters(); break;
+        }
+        params.madhab = config.madhab == MadhabEnum.hanafi
+            ? adhan.Madhab.hanafi
+            : adhan.Madhab.shafi;
+
+        final now = DateTime.now();
+        
+        // Calculate today's times to check for catch-up storms
+        final todayTimes = adhan.PrayerTimes(
+            coordinates, adhan.DateComponents.from(now), params);
+
+        DateTime? targetTime;
+        switch (prayerNameStr) {
+          case 'fajr': targetTime = todayTimes.fajr; break;
+          case 'sunrise': targetTime = todayTimes.sunrise; break;
+          case 'dhuhr': targetTime = todayTimes.dhuhr; break;
+          case 'asr': targetTime = todayTimes.asr; break;
+          case 'maghrib': targetTime = todayTimes.maghrib; break;
+          case 'isha': targetTime = todayTimes.isha; break;
+        }
+
+        if (targetTime != null) {
+          final diffInMinutes = now.difference(targetTime).inMinutes;
+          // If alarm triggered more than 15 minutes past the prayer time, skip stale notification
+          if (diffInMinutes > 15) {
+            debugPrint('Catch-up storm prevented! Alarm $id for $prayerNameStr is $diffInMinutes mins late.');
+            return;
+          }
+        }
+
+        // Calculate TOMORROW'S time and reschedule THIS specific alarm ID
+        final tomorrow = now.add(const Duration(days: 1));
+        final tomorrowTimes = adhan.PrayerTimes(
+            coordinates, adhan.DateComponents.from(tomorrow), params);
+        
+        DateTime? nextTargetTime;
+        switch (prayerNameStr) {
+          case 'fajr': nextTargetTime = tomorrowTimes.fajr; break;
+          case 'sunrise': nextTargetTime = tomorrowTimes.sunrise; break;
+          case 'dhuhr': nextTargetTime = tomorrowTimes.dhuhr; break;
+          case 'asr': nextTargetTime = tomorrowTimes.asr; break;
+          case 'maghrib': nextTargetTime = tomorrowTimes.maghrib; break;
+          case 'isha': nextTargetTime = tomorrowTimes.isha; break;
+        }
+
+        final preMins = config.preAthanMinutes[prayerNameStr] ?? 0;
+
+        if (nextTargetTime != null) {
+          if (isPreAdhan && preMins > 0) {
+            nextTargetTime = nextTargetTime.subtract(Duration(minutes: preMins));
+          }
+          
+          await AndroidAlarmManager.oneShotAt(
+            nextTargetTime.toLocal(),
+            id,
+            athanAlarmCallback,
+            exact: true,
+            wakeup: true,
+            rescheduleOnReboot: true,
+            alarmClock: true,
+            allowWhileIdle: true,
+          );
+          debugPrint('Successfully rescheduled $prayerNameStr (ID: $id) for ${nextTargetTime.toLocal()}');
+        }
+
+      } catch (e) {
+        debugPrint('Error validating/rescheduling prayer timestamp: $e');
+      }
     }
 
     final preMins = config.preAthanMinutes[prayerNameStr] ?? 0;
@@ -82,9 +165,7 @@ void athanAlarmCallback(int id) async {
 
     final plugin = FlutterLocalNotificationsPlugin();
 
-    // We must re-initialize flutter_local_notifications in this isolate
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: androidSettings);
     await plugin.initialize(
       initSettings,
@@ -94,12 +175,10 @@ void athanAlarmCallback(int id) async {
     final androidImplementation = plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
 
+    final muezzinId = config.prayerMuezzins[prayerNameStr] ?? 'adhan_abdulbasit';
+
     if (androidImplementation != null) {
       if (isPreAdhan) {
-        try {
-          await androidImplementation
-              .deleteNotificationChannel('pre_adhan_channel_v3');
-        } catch (_) {}
         await androidImplementation
             .createNotificationChannel(const AndroidNotificationChannel(
           'pre_adhan_channel_v3',
@@ -111,20 +190,15 @@ void athanAlarmCallback(int id) async {
           enableVibration: true,
         ));
       } else {
-        final muezzinId =
-            config.prayerMuezzins[prayerNameStr] ?? 'adhan_abdulbasit';
-        final channelId = 'athan_bg_channel_$muezzinId';
-        try {
-          await androidImplementation.deleteNotificationChannel(channelId);
-        } catch (_) {}
+        // Use v2 channel id to override any old configuration that had playSound: true
+        final channelId = 'athan_bg_channel_${muezzinId}_v2';
         await androidImplementation
             .createNotificationChannel(AndroidNotificationChannel(
           channelId,
           'Athan Background Alerts',
           description: 'Ongoing Athan playback',
           importance: Importance.max,
-          playSound: true,
-          sound: RawResourceAndroidNotificationSound(muezzinId),
+          playSound: false, // SILENT. We play audio natively.
           enableVibration: true,
         ));
       }
@@ -147,9 +221,7 @@ void athanAlarmCallback(int id) async {
         fullScreenIntent: true,
       );
     } else {
-      final muezzinId =
-          config.prayerMuezzins[prayerNameStr] ?? 'adhan_abdulbasit';
-      final channelId = 'athan_bg_channel_$muezzinId';
+      final channelId = 'athan_bg_channel_${muezzinId}_v2';
 
       androidDetails = AndroidNotificationDetails(
         channelId,
@@ -157,10 +229,9 @@ void athanAlarmCallback(int id) async {
         channelDescription: 'Ongoing Athan playback',
         importance: Importance.max,
         priority: Priority.high,
-        ongoing: true, // Cannot swipe away while playing
+        ongoing: true,
         autoCancel: false,
-        playSound: true,
-        sound: RawResourceAndroidNotificationSound(muezzinId),
+        playSound: false, // SILENT
         enableVibration: true,
         fullScreenIntent: true,
         category: AndroidNotificationCategory.alarm,
@@ -184,6 +255,48 @@ void athanAlarmCallback(int id) async {
       NotificationDetails(android: androidDetails),
     );
     debugPrint('Notification shown successfully for alarm: $id');
+
+    // ── Audio Playback for Full Adhan ────────────────────────────────────────
+    if (!isPreAdhan) {
+      final audioService = AthanAudioService();
+      final completer = Completer<void>();
+      
+      final stopPort = ReceivePort();
+      IsolateNameServer.removePortNameMapping('athan_stop_port');
+      IsolateNameServer.registerPortWithName(stopPort.sendPort, 'athan_stop_port');
+      
+      stopPort.listen((message) {
+        if (message == 'stop') {
+          audioService.stopAthan();
+          if (!completer.isCompleted) completer.complete();
+        }
+      });
+      
+      String audioPath = 'assets/audio/adhan_abdulbasit.mp3';
+      try {
+        final manager = MuezzinManager();
+        await manager.init();
+        final m = manager.muezzins.firstWhere(
+          (e) => e.id == muezzinId, 
+          orElse: () => manager.muezzins.first
+        );
+        audioPath = await manager.getAudioPath(m);
+      } catch (e) {
+        debugPrint('Muezzin resolution failed: $e');
+      }
+
+      // Wait for playAthan to naturally finish, keeping isolate alive!
+      audioService.playAthan(audioPath).then((_) {
+         if (!completer.isCompleted) completer.complete();
+      });
+      
+      await completer.future;
+      stopPort.close();
+      
+      // Cancel the ongoing notification once audio ends
+      await plugin.cancel(id);
+    }
+
   } catch (e, stack) {
     debugPrint('ERROR in athanAlarmCallback: $e');
     debugPrint(stack.toString());
@@ -192,20 +305,13 @@ void athanAlarmCallback(int id) async {
 
 String _prayerNameDisplayFromStr(String prayer) {
   switch (prayer) {
-    case 'fajr':
-      return 'Fajr';
-    case 'sunrise':
-      return 'Sunrise';
-    case 'dhuhr':
-      return 'Dhuhr';
-    case 'asr':
-      return 'Asr';
-    case 'maghrib':
-      return 'Maghrib';
-    case 'isha':
-      return 'Isha';
-    default:
-      return prayer;
+    case 'fajr': return 'Fajr';
+    case 'sunrise': return 'Sunrise';
+    case 'dhuhr': return 'Dhuhr';
+    case 'asr': return 'Asr';
+    case 'maghrib': return 'Maghrib';
+    case 'isha': return 'Isha';
+    default: return prayer;
   }
 }
 
@@ -216,6 +322,58 @@ void workmanagerDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     WidgetsFlutterBinding.ensureInitialized();
     DartPluginRegistrant.ensureInitialized();
+
+    if (task == 'sync_alarms') {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final rawConfig = prefs.getString(PrayerConfig.prefKey);
+        if (rawConfig != null) {
+          final config = PrayerConfig.fromJsonString(rawConfig);
+          
+          final coordinates = adhan.Coordinates(config.latitude, config.longitude);
+          adhan.CalculationParameters params;
+          switch (config.method) {
+            case CalculationMethodEnum.ummAlQura:
+              params = adhan.CalculationMethod.umm_al_qura.getParameters(); break;
+            case CalculationMethodEnum.egyptian:
+              params = adhan.CalculationMethod.egyptian.getParameters(); break;
+            case CalculationMethodEnum.mwl:
+              params = adhan.CalculationMethod.muslim_world_league.getParameters(); break;
+            case CalculationMethodEnum.isna:
+              params = adhan.CalculationMethod.north_america.getParameters(); break;
+            case CalculationMethodEnum.karachi:
+              params = adhan.CalculationMethod.karachi.getParameters(); break;
+          }
+          params.madhab = config.madhab == MadhabEnum.hanafi
+              ? adhan.Madhab.hanafi
+              : adhan.Madhab.shafi;
+
+          final now = DateTime.now();
+          final todayTimes = adhan.PrayerTimes(coordinates, adhan.DateComponents.from(now), params);
+          final tomorrowTimes = adhan.PrayerTimes(coordinates, adhan.DateComponents.from(now.add(const Duration(days: 1))), params);
+          
+          List<PrayerTimeEntry> toEntries(adhan.PrayerTimes t) {
+            final offsets = config.prayerOffsets;
+            DateTime adj(DateTime o, String k) => o.add(Duration(minutes: offsets[k] ?? 0));
+            return [
+              PrayerTimeEntry(prayer: PrayerName.fajr, time: adj(t.fajr, 'fajr'), alertMode: PrayerAlertMode.notification),
+              PrayerTimeEntry(prayer: PrayerName.sunrise, time: adj(t.sunrise, 'sunrise'), alertMode: PrayerAlertMode.notification),
+              PrayerTimeEntry(prayer: PrayerName.dhuhr, time: adj(t.dhuhr, 'dhuhr'), alertMode: PrayerAlertMode.notification),
+              PrayerTimeEntry(prayer: PrayerName.asr, time: adj(t.asr, 'asr'), alertMode: PrayerAlertMode.notification),
+              PrayerTimeEntry(prayer: PrayerName.maghrib, time: adj(t.maghrib, 'maghrib'), alertMode: PrayerAlertMode.notification),
+              PrayerTimeEntry(prayer: PrayerName.isha, time: adj(t.isha, 'isha'), alertMode: PrayerAlertMode.notification),
+            ];
+          }
+          
+          final upcomingEntries = [...toEntries(todayTimes), ...toEntries(tomorrowTimes)];
+          await BackgroundEngine().scheduleAllAlarms(upcomingEntries, config);
+          debugPrint('Successfully synced alarms via Workmanager');
+        }
+      } catch (e) {
+        debugPrint('Error syncing alarms: $e');
+      }
+      return Future.value(true);
+    }
 
     if (task == 'show_zekr_overlay') {
       // 1. Fetch Zekr and show Heads-up Notification
@@ -304,10 +462,10 @@ void workmanagerDispatcher() {
   });
 }
 
-// ── Zekr Alarm Callback ──────────────────────────────────────────────────────
+// ── Zekr Notification Callback ───────────────────────────────────────────────────
 
 @pragma('vm:entry-point')
-void zekrAlarmCallback(int id) async {
+void zekrNotificationCallback(int id) async {
   WidgetsFlutterBinding.ensureInitialized();
   DartPluginRegistrant.ensureInitialized();
   try {
@@ -357,38 +515,23 @@ void zekrAlarmCallback(int id) async {
         zekr,
         const NotificationDetails(android: androidDetails),
       );
-
-      final bool isGranted =
-          await overlay.FlutterOverlayWindow.isPermissionGranted();
-      if (isGranted) {
-        final bool isActive = await overlay.FlutterOverlayWindow.isActive();
-        if (!isActive) {
-          await overlay.FlutterOverlayWindow.showOverlay(
-            alignment: overlay.OverlayAlignment.topCenter,
-            visibility: overlay.NotificationVisibility.visibilityPublic,
-            positionGravity: overlay.PositionGravity.auto,
-            height: 320,
-            width: 380,
-            flag: overlay.OverlayFlag.defaultFlag,
-          );
-        }
-      }
     }
   } catch (e) {
-    debugPrint('Zekr alarm callback error: $e');
+    debugPrint('Zekr notification alarm callback error: $e');
   } finally {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final bool enabled = prefs.getBool('floating_reminder_enabled') ?? false;
-      final int interval = prefs.getInt('floating_reminder_interval') ?? 60;
+      final bool enabled = prefs.getBool('notifications_enabled') ?? true;
+      final int interval = prefs.getInt('notification_interval') ?? 60;
       if (enabled && interval > 0) {
-        await BackgroundEngine().scheduleZekrReminder(interval);
+        await BackgroundEngine().scheduleZekrNotification(interval);
       }
     } catch (e) {
-      debugPrint('Zekr reschedule error: $e');
+      debugPrint('Zekr notification reschedule error: $e');
     }
   }
 }
+
 
 // ── Background Engine ────────────────────────────────────────────────────────
 
@@ -405,17 +548,31 @@ class BackgroundEngine {
     await AndroidAlarmManager.initialize();
     await Workmanager().initialize(workmanagerDispatcher, isInDebugMode: false);
 
+    // Register stop port for background notification actions
+    try {
+      final stopPort = ReceivePort();
+      IsolateNameServer.removePortNameMapping('athan_stop_port');
+      IsolateNameServer.registerPortWithName(stopPort.sendPort, 'athan_stop_port');
+      stopPort.listen((message) {
+        if (message == 'stop') {
+          FlutterLocalNotificationsPlugin().cancelAll();
+        }
+      });
+    } catch (e) {
+      debugPrint('Error registering athan_stop_port: $e');
+    }
+
     _initialized = true;
   }
 
-  /// Schedules a Zekr alarm using exact Android AlarmManager oneShot
-  Future<void> scheduleZekrReminder(int minutes) async {
-    await AndroidAlarmManager.cancel(777);
+  /// Schedules a Zekr Notification alarm
+  Future<void> scheduleZekrNotification(int minutes) async {
+    await AndroidAlarmManager.cancel(888);
     if (minutes <= 0) return;
     await AndroidAlarmManager.oneShot(
       Duration(minutes: minutes),
-      777,
-      zekrAlarmCallback,
+      888,
+      zekrNotificationCallback,
       exact: true,
       wakeup: true,
       rescheduleOnReboot: true,
@@ -423,10 +580,11 @@ class BackgroundEngine {
     );
   }
 
-  /// Cancels Zekr reminder alarm
-  Future<void> cancelZekrReminder() async {
-    await AndroidAlarmManager.cancel(777);
+  /// Cancels Zekr Notification alarm
+  Future<void> cancelZekrNotification() async {
+    await AndroidAlarmManager.cancel(888);
   }
+
 
   /// Cancels a specific alarm by ID
   Future<void> cancelAlarm(int id) async {

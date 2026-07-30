@@ -170,117 +170,8 @@ class NotificationService {
     List<PrayerTimeEntry> entries,
     PrayerConfig config,
   ) async {
-    // Cancel existing Adhan alerts before rescheduling.
+    // Single source of truth: delegate to BackgroundEngine to avoid dual scheduling
     await cancelAdhanNotifications();
-
-    final notif = config.notifications;
-    final now = DateTime.now();
-
-    final Map<PrayerName, int> baseIds = {
-      PrayerName.fajr: 100,
-      PrayerName.sunrise: 101,
-      PrayerName.dhuhr: 102,
-      PrayerName.asr: 103,
-      PrayerName.maghrib: 104,
-      PrayerName.isha: 105,
-    };
-
-    for (final entry in entries) {
-      if (!baseIds.containsKey(entry.prayer)) continue;
-
-      final isEnabled = _isNotifEnabledForPrayer(entry.prayer, notif);
-      if (!isEnabled || entry.time.isBefore(now)) continue;
-
-      final slotId = baseIds[entry.prayer]!;
-      final tzTime = tz.TZDateTime.from(entry.time, tz.local);
-      final muezzinId =
-          config.prayerMuezzins[entry.prayer.name] ?? 'adhan_abdulbasit';
-      final soundName = muezzinId;
-
-      final androidDetails = AndroidNotificationDetails(
-        'adhan_channel_$muezzinId',
-        'Adhan - ${_prayerNameDisplay(entry.prayer)}',
-        channelDescription: 'High-priority Athan alert',
-        importance: Importance.max,
-        priority: Priority.high,
-        sound: RawResourceAndroidNotificationSound(soundName),
-        playSound: true,
-        ticker: 'Prayer time',
-        styleInformation: const BigTextStyleInformation(''),
-        category: AndroidNotificationCategory.alarm,
-        audioAttributesUsage: AudioAttributesUsage.alarm,
-        visibility: NotificationVisibility.public,
-        fullScreenIntent: true,
-      );
-
-      try {
-        // ignore: deprecated_member_use
-        await _plugin.zonedSchedule(
-          slotId,
-          '🕌 ${_prayerNameDisplay(entry.prayer)}',
-          'حان الآن موعد أذان ${_prayerNameDisplay(entry.prayer)}',
-          tzTime,
-          NotificationDetails(android: androidDetails),
-          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
-          payload: entry.prayer.name,
-        );
-
-        // Schedule Pre-Athan Alert if enabled for this specific prayer
-        final preAthanMinutes = config.preAthanMinutes[entry.prayer.name] ?? 0;
-        if (preAthanMinutes > 0) {
-          final preTzTime = tzTime.subtract(Duration(minutes: preAthanMinutes));
-          if (preTzTime.isAfter(now)) {
-            const preAndroidDetails = AndroidNotificationDetails(
-              'pre_adhan_channel_v2',
-              'Pre-Adhan Warning',
-              channelDescription: 'Notification before Adhan time',
-              importance: Importance.high,
-              priority: Priority.high,
-              sound: RawResourceAndroidNotificationSound('salah'),
-              playSound: true,
-              category: AndroidNotificationCategory.alarm,
-              audioAttributesUsage: AudioAttributesUsage.alarm,
-              visibility: NotificationVisibility.public,
-            );
-            // ignore: deprecated_member_use
-            await _plugin.zonedSchedule(
-              slotId + 100, // 200-205 for pre-athan
-              '⏳ اقتربت الصلاة',
-              'باقي $preAthanMinutes دقائق على أذان ${_prayerNameDisplay(entry.prayer)}',
-              preTzTime,
-              const NotificationDetails(android: preAndroidDetails),
-              androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-              uiLocalNotificationDateInterpretation:
-                  UILocalNotificationDateInterpretation.absoluteTime,
-              payload: 'pre_${entry.prayer.name}',
-            );
-          }
-        }
-      } catch (_) {
-        // Exact alarm permission may not be granted; skip silently.
-      }
-    }
-  }
-
-  bool _isNotifEnabledForPrayer(PrayerName prayer, PrayerNotifConfig notif) {
-    switch (prayer) {
-      case PrayerName.fajr:
-        return notif.fajrEnabled;
-      case PrayerName.sunrise:
-        return notif.sunriseEnabled;
-      case PrayerName.dhuhr:
-        return notif.dhuhrEnabled;
-      case PrayerName.asr:
-        return notif.asrEnabled;
-      case PrayerName.maghrib:
-        return notif.maghribEnabled;
-      case PrayerName.isha:
-        return notif.ishaEnabled;
-      default:
-        return false;
-    }
   }
 
   /// Cancels only the Adhan and Pre-Adhan notification IDs (100–105, 200-205)
@@ -288,29 +179,6 @@ class NotificationService {
     for (int id = 100; id <= 105; id++) {
       await _plugin.cancel(id);
       await _plugin.cancel(id + 100);
-    }
-  }
-
-
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
-
-  String _prayerNameDisplay(PrayerName prayer) {
-    switch (prayer) {
-      case PrayerName.fajr:
-        return 'Fajr';
-      case PrayerName.sunrise:
-        return 'Sunrise';
-      case PrayerName.dhuhr:
-        return 'Dhuhr';
-      case PrayerName.asr:
-        return 'Asr';
-      case PrayerName.maghrib:
-        return 'Maghrib';
-      case PrayerName.isha:
-        return 'Isha';
-      default:
-        return prayer.name;
     }
   }
 }

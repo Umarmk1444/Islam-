@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import '../services/azkar_service.dart';
@@ -29,9 +28,10 @@ class _SystemZekrOverlayState extends State<SystemZekrOverlay>
     );
     _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
     _slideAnim = Tween<Offset>(
-      begin: const Offset(0, 0.12),
+      begin: const Offset(0.2, 0), // Slide in from the right
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
+    ).animate(
+        CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
 
     _fetchZekr();
   }
@@ -46,26 +46,34 @@ class _SystemZekrOverlayState extends State<SystemZekrOverlay>
   Future<void> _fetchZekr() async {
     try {
       final service = AzkarService();
-      final zekr = await service.getRandomShortZekr();
+      // Added a 2 second timeout because database initialization in background isolates often hangs infinitely.
+      var zekr = await service
+          .getRandomShortZekr()
+          .timeout(const Duration(seconds: 2));
+
+      // Fallback if the database query returns empty
+      if (zekr == null || zekr.isEmpty) {
+        zekr = "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ";
+      }
+
       if (mounted) {
         setState(() {
           _zekr = zekr;
           _isLoading = false;
         });
-        if (zekr != null && zekr.isNotEmpty) {
-          _animController.forward();
-          _autoDismissTimer = Timer(const Duration(seconds: 15), _close);
-        } else {
-          FlutterOverlayWindow.closeOverlay();
-        }
+        _animController.forward();
+        _autoDismissTimer = Timer(const Duration(seconds: 15), _close);
       }
     } catch (e) {
       debugPrint('Error fetching Zekr for overlay: $e');
+      // If the database fails (common in background isolates), use a fallback Zekr
       if (mounted) {
         setState(() {
+          _zekr = "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ";
           _isLoading = false;
         });
-        FlutterOverlayWindow.closeOverlay();
+        _animController.forward();
+        _autoDismissTimer = Timer(const Duration(seconds: 15), _close);
       }
     }
   }
@@ -79,34 +87,42 @@ class _SystemZekrOverlayState extends State<SystemZekrOverlay>
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) return const SizedBox.shrink();
-    if (_zekr == null || _zekr!.isEmpty) {
-      FlutterOverlayWindow.closeOverlay();
-      return const SizedBox.shrink();
+    if (_isLoading) return const SizedBox(width: 420, height: 150);
+
+    double screenWidth = MediaQuery.of(context).size.width;
+    if (screenWidth <= 0) {
+      screenWidth =
+          390; // Default phone screen width to prevent negative bounds
     }
+
+    // Gap of 30px from upper, 16px from right edge
+    final double cardWidth = screenWidth < 432 ? screenWidth - 32 : 400;
 
     return Material(
       color: Colors.transparent,
-      child: Container(
-        width: double.infinity,
-        height: double.infinity,
-        color: Colors.transparent,
-        alignment: Alignment.center,
-        child: GestureDetector(
-          onTap: () {}, // Prevent tap-through on the card
-          child: FadeTransition(
-            opacity: _fadeAnim,
-            child: SlideTransition(
-              position: _slideAnim,
-              child: Dismissible(
-                key: const Key('system_overlay_zekr'),
-                direction: DismissDirection.horizontal,
-                onDismissed: (_) => FlutterOverlayWindow.closeOverlay(),
-                child: _OverlayCard(zekr: _zekr!, onClose: _close),
+      child: Stack(
+        children: [
+          Positioned(
+            top: 30, // 30px gap from upper edge
+            right: 16, // 16px gap from right edge
+            child: FadeTransition(
+              opacity: _fadeAnim,
+              child: SlideTransition(
+                position: _slideAnim,
+                child: Dismissible(
+                  key: const Key('system_overlay_zekr'),
+                  direction: DismissDirection.horizontal,
+                  onDismissed: (_) => FlutterOverlayWindow.closeOverlay(),
+                  child: _OverlayCard(
+                    zekr: _zekr!,
+                    cardWidth: cardWidth,
+                    onClose: _close,
+                  ),
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -114,160 +130,137 @@ class _SystemZekrOverlayState extends State<SystemZekrOverlay>
 
 class _OverlayCard extends StatelessWidget {
   final String zekr;
+  final double cardWidth;
   final VoidCallback onClose;
 
-  const _OverlayCard({required this.zekr, required this.onClose});
+  const _OverlayCard({
+    required this.zekr,
+    required this.cardWidth,
+    required this.onClose,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: 240,
-      margin: const EdgeInsets.fromLTRB(12, 35, 12, 12),
+    return SizedBox(
+      width: cardWidth,
+      height: 50,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-          child: Container(
-            decoration: BoxDecoration(
-              // Deep emerald glassmorphism gradient
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFA0D4F3C), // deep emerald
-                  Color(0xFA0A3A2C),
-                  Color(0xFA071E16),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: const Color(0x55D4A017), // gold tint border
-                width: 1.0,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.35),
-                  blurRadius: 20,
-                  offset: const Offset(0, 6),
-                ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color(0xFF042B2B).withValues(alpha: 0.95), // Deep emerald
+                const Color(0xFF021717)
+                    .withValues(alpha: 0.95), // Darker emerald
               ],
             ),
-            child: Stack(
-              children: [
-                // ── Main content ──
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Force Header Row to LTR to keep Close Button on Upper Right
-                        Directionality(
-                          textDirection: TextDirection.ltr,
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFFB8860B),
-                                      Color(0xFFFFD966),
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text('✨',
-                                        style: TextStyle(fontSize: 11)),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      'ذكر الله',
-                                      style: TextStyle(
-                                        color: Color(0xFF1A1200),
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const Spacer(),
-                              // Close button (enlarged and forced right)
-                              GestureDetector(
-                                onTap: onClose,
-                                child: Container(
-                                  width: 32,
-                                  height: 32,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.12),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white.withValues(alpha: 0.2),
-                                    ),
-                                  ),
-                                  child: const Icon(
-                                    Icons.close_rounded,
-                                    size: 18,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        // ── Arabic Zekr text ──
-                        Text(
-                          zekr,
-                          style: const TextStyle(
-                            color: Color(0xFFF0F4F0),
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            height: 1.4,
-                            fontFamily: 'Amiri',
-                          ),
-                          textAlign: TextAlign.center,
-                          textDirection: TextDirection.rtl,
-                          maxLines: 4,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        // ── Swipe hint (Horizontal) ──
-                        const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.swipe_rounded,
-                              size: 14,
-                              color: Color(0x889BAAAA),
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              'اسحب أفقياً للإغلاق',
-                              style: TextStyle(
-                                color: Color(0xAA9BAAAA),
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
-                        ),
+            border: Border.all(
+              color:
+                  const Color(0xFFD4AF37).withValues(alpha: 0.5), // Gold border
+              width: 1,
+            ),
+          ),
+          child: Stack(
+            children: [
+              // ── Decorative glowing orb – top right ──────────────────────
+              Positioned(
+                top: -25,
+                right: -25,
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        const Color(0xFFD4A017).withValues(alpha: 0.22),
+                        Colors.transparent,
                       ],
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+
+              // ── Decorative glowing orb – bottom left ────────────────────
+              Positioned(
+                bottom: -20,
+                left: -20,
+                child: Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        const Color(0xFF2ECC9A).withValues(alpha: 0.18),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // ── Main content ──
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // ✨ Icon
+                      const Text('✨', style: TextStyle(fontSize: 16)),
+                      const SizedBox(width: 8),
+
+                      // Arabic Zekr text (takes remaining space)
+                      Expanded(
+                        child: Text(
+                          zekr,
+                          style: const TextStyle(
+                            color: Color(0xFFF0F4F0),
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Amiri',
+                          ),
+                          textAlign: TextAlign.right,
+                          textDirection: TextDirection.rtl,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+
+                      const SizedBox(width: 12),
+
+                      // Close button
+                      GestureDetector(
+                        onTap: onClose,
+                        child: Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              width: 1,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.close_rounded,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

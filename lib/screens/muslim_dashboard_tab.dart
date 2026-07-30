@@ -80,13 +80,13 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
         child: ValueListenableBuilder<bool>(
           valueListenable: kAdVisibleNotifier,
           builder: (context, isAdVisible, _) {
-            // Dynamically calculate padding, spacer heights, grid ratios and cell sizes
-            final double space8 = isAdVisible ? 8 * 0.93 : 8;
-            final double space10 = isAdVisible ? 10 * 0.93 : 10;
-            final double space6 = isAdVisible ? 6 * 0.93 : 6;
-            final double space12 = isAdVisible ? 12 * 0.93 : 12;
-            final double gridRatio = isAdVisible ? 1.25 : 1.18; // slightly wider/shorter cells when ad is visible
-            final double paddingBottom = isAdVisible ? 12 * 0.93 : 12;
+            // Clean dynamic layout spacing
+            const double space8 = 8;
+            const double space10 = 10;
+            const double space6 = 6;
+            const double space12 = 12;
+            final double gridRatio = isAdVisible ? 1.25 : 1.18;
+            const double paddingBottom = 12;
 
             return SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
@@ -95,7 +95,7 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
                 children: [
                   // ── Header ─────────────────────────────────────────────────────────
                   Padding(
-                    padding: EdgeInsets.fromLTRB(16, isAdVisible ? 8 * 0.93 : 8, 8, isAdVisible ? 4 * 0.93 : 4),
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                     child: Row(
                       children: [
                         const Text('🕌', style: TextStyle(fontSize: 18)),
@@ -106,20 +106,8 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
                             color: isDark
                                 ? AppColors.textPrimary
                                 : AppColors.emeraldDeep,
-                            fontSize: isAdVisible ? 16 * 0.93 : 16,
+                            fontSize: 16,
                           ),
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          icon: Icon(
-                            Icons.notifications_outlined,
-                            color: isDark
-                                ? AppColors.textSecondary
-                                : AppColors.emeraldDeep,
-                            size: isAdVisible ? 20 * 0.93 : 20,
-                          ),
-                          onPressed: () {},
-                          tooltip: 'Notification Settings',
                         ),
                       ],
                     ),
@@ -130,14 +118,14 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: _MiqatCard(isAdVisible: isAdVisible),
                   ),
-                  SizedBox(height: space8),
+                  const SizedBox(height: space8),
 
                   // ── 2. Quran Gateway Card ───────────────────────────────────────────
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: _ResumeReadingCard(isAdVisible: isAdVisible),
                   ),
-                  SizedBox(height: space10),
+                  const SizedBox(height: space10),
 
                   // ── Section Title ───────────────────────────────────────────────────
                   Padding(
@@ -145,17 +133,17 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
                     child: Text(
                       secTitle,
                       style: AppTextStyles.headlineMedium.copyWith(
-                        fontSize: isAdVisible ? 13 * 0.93 : 13,
+                        fontSize: 13,
                       ),
                     ),
                   ),
-                  SizedBox(height: space6),
+                  const SizedBox(height: space6),
 
                   // ── 3. Tools Grid — Fills list scroll view ─────────────────────────
                   GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    padding: EdgeInsets.fromLTRB(12, 0, 12, paddingBottom),
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, paddingBottom),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       mainAxisSpacing: space12,
@@ -237,7 +225,7 @@ class _MiqatCard extends StatelessWidget {
         final model = ctrl.model;
         if (model == null || ctrl.isLoading) {
           return Container(
-            height: isAdVisible ? 140 * 0.93 : 140,
+            height: 140,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
@@ -296,7 +284,7 @@ class _MiqatCard extends StatelessWidget {
               children: [
                 // ── Date + Location ──────────────────────────────────────────
                 Padding(
-                  padding: EdgeInsets.fromLTRB(12, isAdVisible ? 8 * 0.93 : 8, 12, isAdVisible ? 4 * 0.93 : 4),
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerLeft,
@@ -304,23 +292,23 @@ class _MiqatCard extends StatelessWidget {
                       children: [
                         Text(hijriStr,
                             style: AppTextStyles.arabicSmall.copyWith(
-                                color: AppColors.goldLight, fontSize: isAdVisible ? 12 * 0.93 : 12)),
+                                color: AppColors.goldLight, fontSize: 12)),
                         const SizedBox(width: 8),
                         const Text('·',
                             style:
                                 TextStyle(color: Colors.white38, fontSize: 12)),
                         const SizedBox(width: 8),
                         Text(gregStr,
-                            style: TextStyle(
-                                color: Colors.white60, fontSize: isAdVisible ? 11 * 0.93 : 11)),
+                            style: const TextStyle(
+                                color: Colors.white60, fontSize: 11)),
                         const SizedBox(width: 16),
                         const Icon(Icons.location_on_outlined,
                             size: 12, color: Colors.white54),
                         const SizedBox(width: 4),
                         Text(
                           model.locationLabel,
-                          style: TextStyle(
-                              color: Colors.white54, fontSize: isAdVisible ? 10 * 0.93 : 10),
+                          style: const TextStyle(
+                              color: Colors.white54, fontSize: 10),
                         ),
                       ],
                     ),
@@ -330,7 +318,7 @@ class _MiqatCard extends StatelessWidget {
                 // ── Next Prayer & Countdown ──────────────────────────────────
                 Padding(
                   padding:
-                      EdgeInsets.symmetric(horizontal: 12, vertical: isAdVisible ? 4 * 0.93 : 4),
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -339,6 +327,7 @@ class _MiqatCard extends StatelessWidget {
                           fit: BoxFit.scaleDown,
                           alignment: AlignmentDirectional.centerStart,
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Column(
@@ -348,8 +337,8 @@ class _MiqatCard extends StatelessWidget {
                                     locale == 'ar'
                                         ? 'الصلاة القادمة'
                                         : 'Next Prayer',
-                                    style: TextStyle(
-                                        color: Colors.white60, fontSize: isAdVisible ? 12 * 0.93 : 12),
+                                    style: const TextStyle(
+                                        color: Colors.white60, fontSize: 12),
                                   ),
                                   const SizedBox(height: 2),
                                   Row(
@@ -359,34 +348,34 @@ class _MiqatCard extends StatelessWidget {
                                     children: [
                                       Text(
                                         nextPrayerName,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             color: Colors.white,
-                                            fontSize: isAdVisible ? 24 * 0.93 : 24,
+                                            fontSize: 24,
                                             fontWeight: FontWeight.bold),
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
                                         nextPrayerTime,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             color: AppColors.goldLight,
-                                            fontSize: isAdVisible ? 16 * 0.93 : 16,
+                                            fontSize: 16,
                                             fontWeight: FontWeight.bold),
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
-                              const SizedBox(width: 24),
+                              const SizedBox(width: 16),
                               ValueListenableBuilder<String>(
                                 valueListenable: ctrl.countdownNotifier,
                                 builder: (context, countdown, _) {
                                   return Text(
                                     '-$countdown',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Colors.white,
-                                      fontSize: isAdVisible ? 22 * 0.93 : 22,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.bold,
-                                      fontFeatures: const [
+                                      fontFeatures: [
                                         FontFeature.tabularFigures()
                                       ],
                                     ),
@@ -411,20 +400,20 @@ class _MiqatCard extends StatelessWidget {
                               ),
                             );
                           },
-                          child: Padding(
+                          child: const Padding(
                             padding: EdgeInsets.symmetric(
-                                horizontal: isAdVisible ? 12 * 0.93 : 12, vertical: isAdVisible ? 8 * 0.93 : 8),
+                                horizontal: 12, vertical: 8),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(Icons.explore_outlined,
-                                    color: AppColors.goldLight, size: isAdVisible ? 24 * 0.93 : 24),
-                                const SizedBox(height: 4),
+                                    color: AppColors.goldLight, size: 24),
+                                SizedBox(height: 4),
                                 Text(
-                                  locale == 'ar' ? 'القبلة' : 'Qibla',
+                                  'القبلة',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: isAdVisible ? 11 * 0.93 : 11,
+                                    fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -514,7 +503,9 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
           _ayahNameEn = foundEn;
         });
       }
-    } catch (_) {}
+    } catch (e, stack) {
+      debugPrint('Error loading last read position from DB: $e\n$stack');
+    }
   }
 
   void _navigateToQuran(BuildContext context) {
@@ -566,8 +557,6 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
       ayah = _ayahNameEn;
     }
 
-    final isAdVisible = widget.isAdVisible;
-
     return LiquidPressable(
       onTap: () => _navigateToQuran(context),
       scaleFactor: 0.96,
@@ -597,7 +586,7 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
           return Transform.scale(
             scale: scale,
             child: Container(
-              height: isAdVisible ? 84 * 0.93 : 84, // Dynamically adjust constraints
+              height: 84,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: isDark
@@ -626,8 +615,8 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                       top: -45,
                       right: -25,
                       child: Container(
-                        width: isAdVisible ? 150 * 0.93 : 150,
-                        height: isAdVisible ? 150 * 0.93 : 150,
+                        width: 150,
+                        height: 150,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: RadialGradient(
@@ -645,8 +634,8 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                       bottom: -35,
                       left: -35,
                       child: Container(
-                        width: isAdVisible ? 130 * 0.93 : 130,
-                        height: isAdVisible ? 130 * 0.93 : 130,
+                        width: 130,
+                        height: 130,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: RadialGradient(
@@ -661,11 +650,11 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                     ),
                     // Special golden glow orb right behind the book icon to make it emit light
                     Positioned(
-                      left: isAdVisible ? 12 * 0.93 : 12,
-                      top: isAdVisible ? 10 * 0.93 : 10,
+                      left: 12,
+                      top: 10,
                       child: Container(
-                        width: isAdVisible ? 52 * 0.93 : 52,
-                        height: isAdVisible ? 52 * 0.93 : 52,
+                        width: 52,
+                        height: 52,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: RadialGradient(
@@ -681,36 +670,36 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                     // Main Content centered perfectly using Positioned.fill
                     Positioned.fill(
                       child: Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: isAdVisible ? 14 * 0.93 : 14, vertical: isAdVisible ? 10 * 0.93 : 10),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 10),
                         child: Row(
                           children: [
                             // Golden medal style book container
                             Container(
-                              width: isAdVisible ? 48 * 0.93 : 48,
-                              height: isAdVisible ? 48 * 0.93 : 48,
+                              width: 48,
+                              height: 48,
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   colors: [goldColor, Color(0xFFF57F17)],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
-                                borderRadius: BorderRadius.circular(isAdVisible ? 14 * 0.93 : 14),
+                                borderRadius: BorderRadius.circular(14),
                                 boxShadow: [
                                   BoxShadow(
                                     color: goldColor.withValues(alpha: 0.4),
-                                    blurRadius: isAdVisible ? 8 * 0.93 : 8,
-                                    offset: Offset(0, isAdVisible ? 2 * 0.93 : 2),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
                                   ),
                                 ],
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.menu_book_rounded,
                                 color: Colors.white,
-                                size: isAdVisible ? 26 * 0.93 : 26,
+                                size: 26,
                               ),
                             ),
-                            SizedBox(width: isAdVisible ? 14 * 0.93 : 14),
+                            const SizedBox(width: 14),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -725,18 +714,18 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                                           title,
                                           style: TextStyle(
                                             color: textPrimary,
-                                            fontSize: isAdVisible ? 15 * 0.93 : 15,
+                                            fontSize: 15,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        SizedBox(width: isAdVisible ? 12 * 0.93 : 12),
+                                        const SizedBox(width: 12),
                                         Text(
                                           action,
                                           style: TextStyle(
                                             color: isDark
                                                 ? goldColor
                                                 : const Color(0xFFE65100),
-                                            fontSize: isAdVisible ? 11 * 0.93 : 11,
+                                            fontSize: 11,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
@@ -753,7 +742,7 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                                           : const Color(0xFFC8E6C9),
                                       valueColor: AlwaysStoppedAnimation<Color>(
                                           progressValColor),
-                                      minHeight: isAdVisible ? 5 * 0.93 : 5,
+                                      minHeight: 5,
                                     ),
                                   ),
                                   const SizedBox(height: 5),
@@ -768,16 +757,16 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                                             color: isDark
                                                 ? goldColor
                                                 : const Color(0xFF2E7D32),
-                                            fontSize: isAdVisible ? 11 * 0.93 : 11,
+                                            fontSize: 11,
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
-                                        SizedBox(width: isAdVisible ? 16 * 0.93 : 16),
+                                        const SizedBox(width: 16),
                                         Text(
                                           progress,
                                           style: TextStyle(
                                             color: textSecondary,
-                                            fontSize: isAdVisible ? 11 * 0.93 : 11,
+                                            fontSize: 11,
                                           ),
                                         ),
                                       ],
@@ -958,8 +947,6 @@ class _ToolGridCellState extends State<_ToolGridCell>
     final accent = widget.item.color;
     final bright = Color.lerp(accent, Colors.white, 0.30)!;
 
-    final isAdVisible = widget.isAdVisible;
-
     return FadeTransition(
       opacity: _fadeAnim,
       child: SlideTransition(
@@ -1070,8 +1057,8 @@ class _ToolGridCellState extends State<_ToolGridCell>
                           top: -25,
                           left: -25,
                           child: Container(
-                            width: isAdVisible ? 120 * 0.93 : 120,
-                            height: isAdVisible ? 120 * 0.93 : 120,
+                            width: 120,
+                            height: 120,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               gradient: RadialGradient(
@@ -1089,8 +1076,8 @@ class _ToolGridCellState extends State<_ToolGridCell>
                           bottom: -20,
                           right: -20,
                           child: Container(
-                            width: isAdVisible ? 100 * 0.93 : 100,
-                            height: isAdVisible ? 100 * 0.93 : 100,
+                            width: 100,
+                            height: 100,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               gradient: RadialGradient(
@@ -1112,9 +1099,9 @@ class _ToolGridCellState extends State<_ToolGridCell>
               );
             },
             child: Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: isAdVisible ? 10 * 0.93 : 10,
-                  vertical: isAdVisible ? 12 * 0.93 : 12),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 12),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -1128,8 +1115,8 @@ class _ToolGridCellState extends State<_ToolGridCell>
                       final deep =
                           Color.lerp(accent, const Color(0xFF0C0C14), 0.72)!;
                       return Container(
-                        width: isAdVisible ? 60 * 0.93 : 60,
-                        height: isAdVisible ? 60 * 0.93 : 60,
+                        width: 54,
+                        height: 54,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [currentAccent, deep],
@@ -1149,8 +1136,8 @@ class _ToolGridCellState extends State<_ToolGridCell>
                         child: Center(
                           child: SvgPicture.asset(
                             'assets/icons/${isDark ? 'dark' : 'light'}/${widget.item.svgIconName}.svg',
-                            width: isAdVisible ? 32 * 0.93 : 32,
-                            height: isAdVisible ? 32 * 0.93 : 32,
+                            width: 28,
+                            height: 28,
                             colorFilter: const ColorFilter.mode(
                                 Colors.white, BlendMode.srcIn),
                           ),
@@ -1158,14 +1145,14 @@ class _ToolGridCellState extends State<_ToolGridCell>
                       );
                     },
                   ),
-                  SizedBox(height: isAdVisible ? 10 * 0.93 : 10),
+                  const SizedBox(height: 8),
                   Text(
                     label,
                     style: TextStyle(
                       color: titleColor,
-                      fontSize: isAdVisible ? 14 * 0.93 : 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      height: 1.25,
+                      height: 1.2,
                     ),
                     textAlign: TextAlign.center,
                     maxLines: 2,

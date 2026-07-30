@@ -14,13 +14,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:adhan/adhan.dart' as adhan;
-import 'package:http/http.dart' as http;
 
 import '../../data/models/prayer_config.dart';
 import '../../data/models/prayer_time_model.dart';
@@ -139,15 +137,15 @@ class PrayerController extends ChangeNotifier {
           ),
         );
 
-        final geo = await _fetchGeoDetails(pos.latitude, pos.longitude);
+        final label = _coordsToLabel(pos.latitude, pos.longitude);
 
         config = config.copyWith(
           latitude:      pos.latitude,
           longitude:     pos.longitude,
-          locationLabel: geo.label,
+          locationLabel: label,
         );
 
-        _applySmartDefaults(pos.latitude, pos.longitude, geo.countryCode);
+        _applySmartDefaults(pos.latitude, pos.longitude, null);
         await _saveConfig();
       }).timeout(const Duration(seconds: 4), onTimeout: () {
         _applyFallbackMakkah();
@@ -386,40 +384,6 @@ class PrayerController extends ChangeNotifier {
     );
   }
 
-  Future<_GeoResult> _fetchGeoDetails(double lat, double lng) async {
-    try {
-      final url = Uri.parse('https://nominatim.openstreetmap.org/reverse?format=json&lat=$lat&lon=$lng&accept-language=en');
-      final response = await http.get(url, headers: {
-        'User-Agent': 'quran_dawah_app',
-      }).timeout(const Duration(seconds: 3));
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body) as Map<String, dynamic>;
-        final address = data['address'] as Map<String, dynamic>?;
-        String? countryCode;
-        String? label;
-
-        if (address != null) {
-          countryCode = address['country_code'] as String?;
-          final city = address['city'] ?? address['town'] ?? address['village'] ?? address['suburb'] ?? address['county'];
-          final country = address['country'];
-          if (city != null && country != null) {
-            label = '$city, $country';
-          } else if (city != null) {
-            label = city;
-          } else if (country != null) {
-            label = country;
-          }
-        }
-
-        label ??= data['display_name'] as String?;
-        if (label != null) {
-          return _GeoResult(label, countryCode);
-        }
-      }
-    } catch (_) {}
-    return _GeoResult(_coordsToLabel(lat, lng), null);
-  }
 
   // ── Live countdown timer ───────────────────────────────────────────────────
 
@@ -568,10 +532,4 @@ class PrayerController extends ChangeNotifier {
   }
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
 
-class _GeoResult {
-  final String label;
-  final String? countryCode;
-  const _GeoResult(this.label, this.countryCode);
-}

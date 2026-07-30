@@ -39,7 +39,7 @@ const List<_LiveChannel> _channels = [
     subtitleAr: 'بث مباشر على مدار الساعة',
     gradient: [Color(0xFF065F46), Color(0xFF059669)],
     icon: Icons.location_city_rounded,
-    videoId: 'YApPUEpGn-A',
+    videoId: 'rHWSRMcGGBQ',
   ),
 ];
 

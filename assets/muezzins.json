@@ -1,0 +1,56 @@
+[
+  {
+    "id": "adhan_mishary_alafasy",
+    "name": "Mishary Alafasy",
+    "country": "Kuwait",
+    "mosque": "Grand Mosque of Kuwait",
+    "duration": "3:15",
+    "type": "local",
+    "url": "assets/audio/adhan_mishary_alafasy.mp3"
+  },
+  {
+    "id": "adhan_abdulbasit",
+    "name": "Abdul Basit",
+    "country": "Egypt",
+    "mosque": "Imam Muhammad ibn Abd al-Wahhab",
+    "duration": "3:45",
+    "type": "local",
+    "url": "assets/audio/adhan_abdulbasit.mp3"
+  },
+  {
+    "id": "adhan_mecca_ali_mulla",
+    "name": "Ali Ahmed Mulla",
+    "country": "Saudi Arabia",
+    "mosque": "Masjid Al-Haram",
+    "duration": "3:30",
+    "type": "local",
+    "url": "assets/audio/adhan_mecca_ali_mulla.mp3"
+  },
+  {
+    "id": "adhan_yasser_al_dosari",
+    "name": "Yasser Al-Dosari",
+    "country": "Saudi Arabia",
+    "mosque": "Masjid Al-Haram",
+    "duration": "3:20",
+    "type": "local",
+    "url": "assets/audio/adhan_yasser_al_dosari.mp3"
+  },
+  {
+    "id": "adhan_nasser_al_qatami",
+    "name": "Nasser Al Qatami",
+    "country": "Saudi Arabia",
+    "mosque": "Princess Latifa Bint Sultan",
+    "duration": "3:10",
+    "type": "local",
+    "url": "assets/audio/adhan_nasser_al_qatami.mp3"
+  },
+  {
+    "id": "adhan_mansour_al_zahrani",
+    "name": "Mansour Al Zahrani",
+    "country": "Saudi Arabia",
+    "mosque": "Al Rajhi Mosque",
+    "duration": "3:05",
+    "type": "remote",
+    "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+  }
+]

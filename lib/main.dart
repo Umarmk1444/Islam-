@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
@@ -14,7 +13,7 @@ import 'package:just_audio_background/just_audio_background.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/services/background_engine.dart';
-import 'widgets/system_zekr_overlay.dart';
+
 import 'services/minbar_player.dart';
 import 'widgets/custom_banner_ad.dart';
 
@@ -76,44 +75,26 @@ Future<void> _initHeavyServices() async {
   // 4. Init MinbarPlayer listeners
   MinbarPlayer.init();
 
-  // 5. Cancel old Workmanager overlay task and sync exact Zekr alarm
+  // 5. Cancel old Workmanager overlay task and register new tasks
   try {
     await Workmanager().cancelByUniqueName("auto_zekr_overlay");
+    
+    // Register background sync task for alarms
+    await Workmanager().registerPeriodicTask(
+      "sync_alarms_task",
+      "sync_alarms",
+      frequency: const Duration(hours: 12),
+      existingWorkPolicy: ExistingWorkPolicy.keep,
+    );
+
     final prefs = await SharedPreferences.getInstance();
-    final bool enabled = prefs.getBool('floating_reminder_enabled') ?? false;
-    final int interval = prefs.getInt('floating_reminder_interval') ?? 30;
-    if (enabled) {
-      await BackgroundEngine().scheduleZekrReminder(interval);
+
+    final bool notifEnabled = prefs.getBool('notifications_enabled') ?? true;
+    final int notifInterval = prefs.getInt('notification_interval') ?? 60;
+    if (notifEnabled) {
+      await BackgroundEngine().scheduleZekrNotification(notifInterval);
     }
   } catch (_) {}
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Overlay entry-point (flutter_overlay_window)
-// ─────────────────────────────────────────────────────────────────────────────
-
-@pragma('vm:entry-point')
-void overlayMain() {
-  WidgetsFlutterBinding.ensureInitialized();
-  DartPluginRegistrant.ensureInitialized();
-  runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      builder: (context, child) {
-        final mediaQueryData = MediaQuery.of(context);
-        return MediaQuery(
-          data: mediaQueryData.copyWith(
-            textScaler: TextScaler.noScaling,
-          ),
-          child: child!,
-        );
-      },
-      home: const Scaffold(
-        backgroundColor: Colors.transparent,
-        body: SystemZekrOverlay(),
-      ),
-    ),
-  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -218,7 +199,9 @@ class _QuranDawahAppState extends State<QuranDawahApp> {
                                 ? (child ?? const SizedBox.shrink())
                                 : MediaQuery(
                                     data: MediaQuery.of(context).copyWith(
-                                      padding: MediaQuery.of(context).padding.copyWith(top: 0),
+                                      padding: MediaQuery.of(context)
+                                          .padding
+                                          .copyWith(top: 0),
                                     ),
                                     child: child ?? const SizedBox.shrink(),
                                   ),

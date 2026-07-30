@@ -7,10 +7,7 @@ import '../l10n/app_localizations.dart';
 import '../theme_notifier.dart';
 import '../language_notifier.dart';
 import '../services/notification_service.dart';
-import 'package:flutter_overlay_window/flutter_overlay_window.dart';
-import 'package:workmanager/workmanager.dart';
 import '../core/services/background_engine.dart';
-import '../widgets/zekr_overlay_manager.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SETTINGS SCREEN — Premium Liquid Redesign
@@ -27,8 +24,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     with TickerProviderStateMixin {
   String _selectedLanguage = 'English';
   bool _notificationsEnabled = true;
-  bool _floatingReminderEnabled = false;
-  int _floatingReminderInterval = 60;
+  int _notificationInterval = 60;
 
   late final AnimationController _headerCtrl;
   late final Animation<double> _headerFade;
@@ -57,10 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     setState(() {
       _selectedLanguage = prefs.getString('app_language') ?? 'English';
       _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
-      _floatingReminderEnabled =
-          prefs.getBool('floating_reminder_enabled') ?? false;
-      _floatingReminderInterval =
-          prefs.getInt('floating_reminder_interval') ?? 60;
+      _notificationInterval = prefs.getInt('notification_interval') ?? 60;
     });
   }
 
@@ -77,52 +70,20 @@ class _SettingsScreenState extends State<SettingsScreen>
     setState(() => _notificationsEnabled = value);
     if (value) {
       await NotificationService().scheduleIslamicReminders();
+      await BackgroundEngine().scheduleZekrNotification(_notificationInterval);
     } else {
       await NotificationService().cancelNotifications();
+      await BackgroundEngine().cancelZekrNotification();
     }
   }
 
-  Future<void> _toggleFloatingReminder(bool value) async {
+  Future<void> _setNotificationInterval(int value) async {
     final prefs = await SharedPreferences.getInstance();
-    if (value) {
-      final bool isGranted = await FlutterOverlayWindow.isPermissionGranted();
-      if (!isGranted) {
-        final bool? requested = await FlutterOverlayWindow.requestPermission();
-        if (requested != true) {
-          if (mounted) setState(() => _floatingReminderEnabled = false);
-          return;
-        }
-      }
-      await prefs.setBool('floating_reminder_enabled', true);
-      if (mounted) setState(() => _floatingReminderEnabled = true);
-
-      // Cancel WorkManager task completely to avoid its 15-minute restriction overriding exact timing
-      Workmanager().cancelByUniqueName("auto_zekr_overlay");
-
-      // Schedule exact Android AlarmManager + In-App overlay timer
-      await BackgroundEngine().scheduleZekrReminder(_floatingReminderInterval);
-      if (mounted) {
-        ZekrOverlayManager().startTimer(context, _floatingReminderInterval);
-      }
-    } else {
-      await prefs.setBool('floating_reminder_enabled', false);
-      if (mounted) setState(() => _floatingReminderEnabled = false);
-      await BackgroundEngine().cancelZekrReminder();
-      Workmanager().cancelByUniqueName("auto_zekr_overlay");
-      ZekrOverlayManager().stopTimer();
-    }
-  }
-
-  Future<void> _setFloatingReminderInterval(int value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('floating_reminder_interval', value);
+    await prefs.setInt('notification_interval', value);
     if (!mounted) return;
-    setState(() => _floatingReminderInterval = value);
-    if (_floatingReminderEnabled) {
-      Workmanager().cancelByUniqueName("auto_zekr_overlay");
-      await BackgroundEngine().scheduleZekrReminder(value);
-      if (!mounted) return;
-      ZekrOverlayManager().startTimer(context, value);
+    setState(() => _notificationInterval = value);
+    if (_notificationsEnabled) {
+      await BackgroundEngine().scheduleZekrNotification(value);
     }
   }
 
@@ -377,33 +338,15 @@ class _SettingsScreenState extends State<SettingsScreen>
                         isDark: isDark,
                         textColor: textMain,
                       ),
-                      _LiquidDivider(borderColor),
-                      _SwitchTile(
-                        icon: Icons.bubble_chart_rounded,
-                        iconColor: const Color(0xFF7B1FA2),
-                        title: _getFloatingTitle(
-                            Localizations.maybeLocaleOf(context)
-                                    ?.languageCode ??
-                                'ar'),
-                        subtitle: _getFloatingSubtitle(
-                            Localizations.maybeLocaleOf(context)
-                                    ?.languageCode ??
-                                'ar'),
-                        value: _floatingReminderEnabled,
-                        activeColor: primary,
-                        onChanged: _toggleFloatingReminder,
-                        isDark: isDark,
-                        textColor: textMain,
-                      ),
                       AnimatedSize(
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
-                        child: _floatingReminderEnabled
+                        child: _notificationsEnabled
                             ? _IntervalPicker(
-                                value: _floatingReminderInterval,
+                                value: _notificationInterval,
                                 primary: primary,
                                 textColor: textMain,
-                                onChanged: _setFloatingReminderInterval,
+                                onChanged: _setNotificationInterval,
                               )
                             : const SizedBox.shrink(),
                       ),
@@ -525,31 +468,6 @@ class _SettingsScreenState extends State<SettingsScreen>
 // LOCALIZATION HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
 
-String _getFloatingTitle(String locale) {
-  switch (locale) {
-    case 'en':
-      return 'Floating Reminder';
-    case 'am':
-      return 'ሰዓት ማስታወሻ';
-    case 'om':
-      return 'Yaadachiisa Hawaasaa';
-    default:
-      return 'الذكر العائم';
-  }
-}
-
-String _getFloatingSubtitle(String locale) {
-  switch (locale) {
-    case 'en':
-      return 'A small window reminds you to remember Allah';
-    case 'am':
-      return 'ትንሽ መስኮት አላህን እንዲያስቡ ያስታውሰዎታል';
-    case 'om':
-      return 'Mirkantessaa xiqqaa zaakira yaadachiisa';
-    default:
-      return 'نافذة صغيرة تذكرك بذكر الله';
-  }
-}
 
 String _getIntervalTitle(String locale) {
   switch (locale) {
