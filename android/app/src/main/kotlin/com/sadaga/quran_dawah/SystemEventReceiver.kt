@@ -7,7 +7,7 @@ import android.util.Log
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
-import dev.fluttercommunity.workmanager.WorkmanagerWorker
+import dev.fluttercommunity.workmanager.BackgroundWorker
 
 class SystemEventReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -26,7 +26,7 @@ class SystemEventReceiver : BroadcastReceiver() {
                     .putBoolean("be.tramckrijte.workmanager.IS_IN_DEBUG_MODE", false)
                     .build()
 
-                val request = OneTimeWorkRequest.Builder(WorkmanagerWorker::class.java)
+                val request = OneTimeWorkRequest.Builder(BackgroundWorker::class.java)
                     .setInputData(data)
                     .build()
 

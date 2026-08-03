@@ -17,8 +17,11 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter/material.dart';
 
+import '../main.dart';
 import '../features/prayer_times/data/models/prayer_config.dart';
 import '../features/prayer_times/data/models/prayer_time_model.dart';
+import '../features/prayer_times/presentation/screens/prayer_times_screen.dart';
+import '../features/prayer_times/presentation/controllers/prayer_controller.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -41,7 +44,13 @@ class NotificationService {
     await _plugin.initialize(
       initSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) async {
-        debugPrint('Notification clicked: ${response.payload}');
+        if (response.payload == 'prayer_times') {
+          rootNavigatorKey.currentState?.push(
+            MaterialPageRoute(
+              builder: (_) => PrayerTimesScreen(controller: PrayerController()),
+            ),
+          );
+        }
       },
     );
 

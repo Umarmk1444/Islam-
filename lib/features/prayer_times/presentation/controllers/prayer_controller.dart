@@ -14,9 +14,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:adhan/adhan.dart' as adhan;
 
@@ -72,7 +74,7 @@ class PrayerController extends ChangeNotifier {
     _loadConfig();
     await _resolveLocation();
     _compute();
-    _scheduleNotifications();
+    await _scheduleNotifications();
     _startCountdownTimer();
     isLoading = false;
     notifyListeners();
@@ -109,6 +111,7 @@ class PrayerController extends ChangeNotifier {
   // ── GPS / location resolution ──────────────────────────────────────────────
 
   /// Requests location permission and fetches a fresh GPS fix.
+  /// Automatically reverse-geocodes city and country name.
   /// If permission is denied or an error occurs, retains stored coordinates.
   Future<void> _resolveLocation() async {
     if (!config.useGps) return;
@@ -137,17 +140,40 @@ class PrayerController extends ChangeNotifier {
           ),
         );
 
-        final label = _coordsToLabel(pos.latitude, pos.longitude);
+        final label = await _fetchCityName(pos.latitude, pos.longitude);
+
+        String newLabel;
+        if (label != null && label.isNotEmpty) {
+          newLabel = label;
+        } else {
+          // If geocoding fails, check if the cached/existing label is already a valid city (i.e. does not contain coordinates degree character °)
+          final existingLabel = config.locationLabel;
+          if (existingLabel.isNotEmpty && !existingLabel.contains('°')) {
+            newLabel = existingLabel;
+          } else {
+            // Coordinates as a last resort
+            newLabel = _coordsToLabel(pos.latitude, pos.longitude);
+          }
+        }
 
         config = config.copyWith(
           latitude:      pos.latitude,
           longitude:     pos.longitude,
-          locationLabel: label,
+          locationLabel: newLabel,
         );
 
         _applySmartDefaults(pos.latitude, pos.longitude, null);
         await _saveConfig();
-      }).timeout(const Duration(seconds: 4), onTimeout: () {
+
+        // Immediately refresh prayer times and notify UI
+        _compute();
+        notifyListeners();
+
+        // Immediately reschedule alarms on background engine to apply updated coordinates/label
+        if (model != null) {
+          await BackgroundEngine().scheduleAllAlarms(model!.entries, config);
+        }
+      }).timeout(const Duration(seconds: 5), onTimeout: () {
         _applyFallbackMakkah();
       });
     } catch (_) {
@@ -155,15 +181,46 @@ class PrayerController extends ChangeNotifier {
     }
   }
 
-  void _applyFallbackMakkah() {
-    if (config.latitude == _makkahLat && config.longitude == _makkahLng) {
-      config = config.copyWith(
-        latitude:      _makkahLat,
-        longitude:     _makkahLng,
-        locationLabel: _makkahLabel,
-      );
-      _applySmartDefaults(_makkahLat, _makkahLng, 'SA');
+  Future<String?> _fetchCityName(double lat, double lng) async {
+    int retries = 3;
+    while (retries > 0) {
+      try {
+        final uri = Uri.parse(
+            'https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=$lat&longitude=$lng&localityLanguage=en');
+        final res = await http.get(uri).timeout(const Duration(seconds: 3));
+        if (res.statusCode == 200) {
+          final data = json.decode(res.body);
+          final city = data['city'] ?? data['locality'] ?? data['principalSubdivision'];
+          final country = data['countryName'];
+          if (city != null && city.toString().trim().isNotEmpty) {
+            final cStr = city.toString().trim();
+            return country != null && country.toString().trim().isNotEmpty
+                ? '$cStr, ${country.toString().trim()}'
+                : cStr;
+          }
+        }
+      } catch (e) {
+        debugPrint('[PrayerController] Geocoding attempt failed (${4 - retries}/3): $e');
+      }
+      retries--;
+      if (retries > 0) {
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
     }
+    return null;
+  }
+
+  void _applyFallbackMakkah() {
+    // Always fall back to Makkah when GPS is unavailable.
+    // Preserve any valid existing city label (one without raw degree coordinates).
+    final existing = config.locationLabel;
+    final keepLabel = existing.isNotEmpty && !existing.contains('°');
+    config = config.copyWith(
+      latitude:      _makkahLat,
+      longitude:     _makkahLng,
+      locationLabel: keepLabel ? existing : _makkahLabel,
+    );
+    _applySmartDefaults(_makkahLat, _makkahLng, 'SA');
   }
 
   /// Derives a short display label from decimal coordinates.
@@ -172,6 +229,7 @@ class PrayerController extends ChangeNotifier {
     final ew = lng >= 0 ? 'E' : 'W';
     return '${lat.abs().toStringAsFixed(2)}°$ns, ${lng.abs().toStringAsFixed(2)}°$ew';
   }
+
 
   // ── Prayer time computation ────────────────────────────────────────────────
 
@@ -420,7 +478,7 @@ class PrayerController extends ChangeNotifier {
     );
     await _saveConfig();
     _compute();
-    _scheduleNotifications();
+    await _scheduleNotifications();
     notifyListeners();
   }
 
@@ -432,7 +490,7 @@ class PrayerController extends ChangeNotifier {
     );
     await _saveConfig();
     _compute();
-    _scheduleNotifications();
+    await _scheduleNotifications();
     notifyListeners();
   }
 
@@ -465,7 +523,7 @@ class PrayerController extends ChangeNotifier {
     config = config.copyWith(notifications: updated);
     await _saveConfig();
     _compute();      // re-map alertMode flags onto entries
-    _scheduleNotifications();
+    await _scheduleNotifications();
     notifyListeners();
   }
 
@@ -475,7 +533,7 @@ class PrayerController extends ChangeNotifier {
     notifyListeners();
     await _resolveLocation();
     _compute();
-    _scheduleNotifications();
+    await _scheduleNotifications();
     isLoading = false;
     notifyListeners();
   }
@@ -487,7 +545,7 @@ class PrayerController extends ChangeNotifier {
     config = newConfig;
     await _saveConfig();
     _compute();
-    _scheduleNotifications();
+    await _scheduleNotifications();
     notifyListeners();
   }
 
@@ -507,7 +565,7 @@ class PrayerController extends ChangeNotifier {
 
   // ── Notification scheduling ────────────────────────────────────────────────
 
-  void _scheduleNotifications() {
+  Future<void> _scheduleNotifications() async {
     if (model == null) return;
     try {
       final now = DateTime.now();
@@ -524,10 +582,13 @@ class PrayerController extends ChangeNotifier {
 
       final upcomingEntries = [...todayEntries, ...tomorrowEntries];
 
-      NotificationService().cancelAdhanNotifications();
-      BackgroundEngine().scheduleAllAlarms(upcomingEntries, config);
-    } catch (_) {
-      // Silently ignore on platforms where notifications are unavailable.
+      // Cancel stale notifications first, then schedule new alarms.
+      await NotificationService().cancelAdhanNotifications();
+      await BackgroundEngine().scheduleAllAlarms(upcomingEntries, config);
+    } catch (e, stack) {
+      // Log scheduling failures — these are NOT always harmless (e.g. AlarmManager not initialized).
+      debugPrint('[PrayerController] _scheduleNotifications failed: $e');
+      debugPrint(stack.toString());
     }
   }
 }

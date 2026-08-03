@@ -1,3 +1,14 @@
+// lib/core/services/athan_audio_service.dart
+// ─────────────────────────────────────────────────────────────────────────────
+// AthanAudioService — foreground (in-app) Athan playback only.
+//
+// Background / killed-app Athan is now handled entirely by the native
+// AthanForegroundService (Kotlin), which uses MediaPlayer + WakeLock.
+//
+// This service is used when the user is actively in the app and wants to
+// preview an Athan or when the app is in the foreground when a prayer fires.
+// ─────────────────────────────────────────────────────────────────────────────
+
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
@@ -10,104 +21,123 @@ class AthanAudioService {
   final AudioPlayer _player = AudioPlayer();
   bool _isPlaying = false;
   Timer? _fadeTimer;
-
   StreamSubscription? _stateSubscription;
 
   AthanAudioService._internal() {
     _stateSubscription = _player.playerStateStream.listen((state) async {
       if (state.processingState == ProcessingState.completed) {
-        debugPrint('Athan audio playback completed natively.');
+        debugPrint('[AthanAudioService] Playback completed naturally.');
         _isPlaying = false;
         await _player.stop();
-        final session = await AudioSession.instance;
-        await session.setActive(false);
+        try {
+          final session = await AudioSession.instance;
+          await session.setActive(false);
+        } catch (_) {}
       }
     });
   }
 
   bool get isPlaying => _isPlaying;
 
-  Future<void> playAthan(String audioPath) async {
+  /// Plays the Athan audio in-app (foreground only).
+  ///
+  /// [audioPath] can be:
+  ///  - An asset path: "assets/audio/adhan_abdulbasit.mp3"
+  ///  - An absolute file path: "/data/user/0/.../adhan_mishary.mp3"
+  ///
+  /// [durationSeconds] optionally caps playback. 0 or null = play full file.
+  Future<void> playAthan(String audioPath, {int? durationSeconds}) async {
     if (_isPlaying) {
-      debugPrint('Athan is already playing. Rejecting overlapping playback request.');
+      debugPrint('[AthanAudioService] Already playing. Ignoring request.');
       return;
     }
 
     try {
       _isPlaying = true;
 
-      // Request and configure audio session to explicitly manage audio focus
+      // Configure audio session for alarm-priority playback
       final session = await AudioSession.instance;
       await session.configure(const AudioSessionConfiguration(
         avAudioSessionCategory: AVAudioSessionCategory.playback,
         avAudioSessionCategoryOptions: AVAudioSessionCategoryOptions.duckOthers,
         androidAudioAttributes: AndroidAudioAttributes(
-          contentType: AndroidAudioContentType.music,
+          contentType: AndroidAudioContentType.sonification,
           usage: AndroidAudioUsage.alarm,
         ),
         androidAudioFocusGainType: AndroidAudioFocusGainType.gain,
       ));
 
-      // Attempt to activate the session
       if (await session.setActive(true)) {
-        debugPrint('Audio focus gained successfully.');
+        debugPrint('[AthanAudioService] Audio focus gained.');
       }
 
       await _player.setVolume(1.0);
+
+      // Load audio source
+      bool loaded = false;
       try {
         if (audioPath.startsWith('assets/')) {
           await _player.setAsset(audioPath);
         } else {
           await _player.setFilePath(audioPath);
         }
-      } catch (assetError) {
-        debugPrint('Failed to load asset $audioPath: $assetError. Falling back to default Adhan.');
-        await _player.setAsset('assets/audio/adhan_abdulbasit.mp3');
+        loaded = true;
+      } catch (e) {
+        debugPrint('[AthanAudioService] Failed to load $audioPath: $e. Using default.');
+        try {
+          await _player.setAsset('assets/audio/adhan_abdulbasit.mp3');
+          loaded = true;
+        } catch (e2) {
+          debugPrint('[AthanAudioService] Default asset also failed: $e2');
+        }
       }
 
-      // We wait for the stream listener we set up in the constructor to handle completion.
-      // But since playAthan is awaited in the isolate to keep it alive, we should return a Future
-      // that completes when the playback is truly done. We can listen to the stream locally for this, 
-      // but only wait for completion or error, then cancel the local subscription.
+      if (!loaded) {
+        _isPlaying = false;
+        await session.setActive(false);
+        return;
+      }
 
+      // Completer that resolves when playback finishes
       final completer = Completer<void>();
       StreamSubscription? localSub;
-      
+
       localSub = _player.playerStateStream.listen((state) {
-        if (state.processingState == ProcessingState.completed || state.processingState == ProcessingState.idle) {
-           if (!completer.isCompleted) completer.complete();
+        if (state.processingState == ProcessingState.completed) {
+          if (!completer.isCompleted) completer.complete();
         }
       });
 
       _player.play().catchError((e) async {
-         debugPrint('Athan play error caught during playback: $e. Attempting fallback play.');
-         try {
-             await _player.setAsset('assets/audio/adhan_abdulbasit.mp3');
-             await _player.play();
-         } catch (fallbackErr) {
-             debugPrint('CRITICAL: Fallback playback also failed: $fallbackErr');
-             _isPlaying = false;
-             await session.setActive(false);
-             if (!completer.isCompleted) completer.complete();
-         }
+        debugPrint('[AthanAudioService] Play error: $e');
+        _isPlaying = false;
+        await session.setActive(false);
+        if (!completer.isCompleted) completer.complete();
       });
-      
+
+      // Optional duration cap
+      if (durationSeconds != null && durationSeconds > 0) {
+        final fadeOutAt = durationSeconds > 2 ? durationSeconds - 2 : durationSeconds;
+        Timer(Duration(seconds: fadeOutAt), () {
+          if (_isPlaying) fadeOutAndStop();
+        });
+      }
+
       await completer.future;
       await localSub.cancel();
+      _isPlaying = false;
 
     } catch (e) {
-      debugPrint('CRITICAL: Error playing Athan audio: $e');
-      // Final desperation fallback
+      debugPrint('[AthanAudioService] Critical error: $e');
+      _isPlaying = false;
       try {
-          await _player.setAsset('assets/audio/adhan_abdulbasit.mp3');
-          await _player.play();
-      } catch (_) {
-          _isPlaying = false;
-      }
+        final session = await AudioSession.instance;
+        await session.setActive(false);
+      } catch (_) {}
     }
   }
 
-  /// Stop the currently playing athan immediately.
+  /// Stop the Athan immediately.
   Future<void> stopAthan() async {
     _fadeTimer?.cancel();
     _isPlaying = false;
@@ -116,13 +146,12 @@ class AthanAudioService {
       final session = await AudioSession.instance;
       await session.setActive(false);
     } catch (e) {
-      debugPrint('Error stopping Athan: $e');
+      debugPrint('[AthanAudioService] Error stopping: $e');
     }
   }
 
-  /// Fade out the volume smoothly over the specified duration and then stop.
-  Future<void> fadeOutAndStop(
-      {Duration duration = const Duration(seconds: 3)}) async {
+  /// Smoothly fade out over [duration] then stop.
+  Future<void> fadeOutAndStop({Duration duration = const Duration(seconds: 2)}) async {
     if (!_isPlaying) return;
 
     const stepDuration = Duration(milliseconds: 100);
@@ -133,7 +162,6 @@ class AthanAudioService {
     }
 
     final volumeStep = _player.volume / steps;
-
     _fadeTimer?.cancel();
     _fadeTimer = Timer.periodic(stepDuration, (timer) async {
       final newVolume = _player.volume - volumeStep;
@@ -148,6 +176,7 @@ class AthanAudioService {
 
   void dispose() {
     _fadeTimer?.cancel();
+    _stateSubscription?.cancel();
     _player.dispose();
   }
 }

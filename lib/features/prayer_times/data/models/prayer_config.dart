@@ -158,6 +158,7 @@ class PrayerConfig {
       'maghrib': 'adhan_abdulbasit',
       'isha': 'adhan_abdulbasit',
     },
+    this.athanDurationSeconds = 0, // 0 = play full audio. Native foreground service handles timing.
   });
 
   /// Stored coordinates — updated whenever GPS succeeds.
@@ -200,6 +201,9 @@ class PrayerConfig {
   /// Selected Muezzin IDs for each of the 6 prayers
   final Map<String, String> prayerMuezzins;
 
+  /// Duration to play the Adhan in seconds. 0 = Full Adhan. Defaults to 30.
+  final int athanDurationSeconds;
+
   // ── SharedPreferences persistence ─────────────────────────────────────────
 
   static const String _prefKey = 'prayer_config_v1';
@@ -219,6 +223,7 @@ class PrayerConfig {
     'prayerOffsets':  prayerOffsets,
     'preAthanMinutes': preAthanMinutes,
     'prayerMuezzins': prayerMuezzins,
+    'athanDurationSeconds': athanDurationSeconds,
   });
 
   factory PrayerConfig.fromJsonString(String raw) {
@@ -296,7 +301,11 @@ class PrayerConfig {
       hijriOffset:    j['hijriOffset'] as int? ?? 0,
       prayerOffsets:  parsedOffsets,
       preAthanMinutes: parsedPreAthan,
+      // ── CRITICAL FIX: parsedMuezzins was parsed above but never passed here.
+      // Without this, the muezzin config was silently dropped on every app restart,
+      // causing background isolate to always use the default audio path.
       prayerMuezzins: parsedMuezzins,
+      athanDurationSeconds: j['athanDurationSeconds'] as int? ?? 7,
     );
   }
 
@@ -317,6 +326,7 @@ class PrayerConfig {
     Map<String, int>? prayerOffsets,
     Map<String, int>? preAthanMinutes,
     Map<String, String>? prayerMuezzins,
+    int? athanDurationSeconds,
   }) {
     return PrayerConfig(
       latitude:      latitude      ?? this.latitude,
@@ -333,6 +343,7 @@ class PrayerConfig {
       prayerOffsets:  prayerOffsets  ?? this.prayerOffsets,
       preAthanMinutes: preAthanMinutes ?? this.preAthanMinutes,
       prayerMuezzins: prayerMuezzins ?? this.prayerMuezzins,
+      athanDurationSeconds: athanDurationSeconds ?? this.athanDurationSeconds,
     );
   }
 }

@@ -18,7 +18,7 @@ class DiagnosticScreen extends StatefulWidget {
 
 class _DiagnosticScreenState extends State<DiagnosticScreen> {
   static const _channel = MethodChannel('com.sadaga.quran_dawah/device');
-  
+
   bool _isLoading = true;
   bool _exactAlarm = false;
   bool _ignoreBattery = false;
@@ -40,7 +40,8 @@ class _DiagnosticScreenState extends State<DiagnosticScreen> {
 
     try {
       if (Platform.isAndroid) {
-        final result = await _channel.invokeMapMethod<String, dynamic>('getDeviceInfo');
+        final result =
+            await _channel.invokeMapMethod<String, dynamic>('getDeviceInfo');
         if (result != null) {
           _manufacturer = result['manufacturer'] as String? ?? 'Unknown';
           _sdkInt = result['sdkInt'] as int? ?? 0;
@@ -71,7 +72,7 @@ class _DiagnosticScreenState extends State<DiagnosticScreen> {
     try {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/athan_diagnostics.txt');
-      
+
       final sb = StringBuffer();
       sb.writeln('=== QURAN DAWAH DIAGNOSTICS ===');
       sb.writeln('Timestamp: ${DateTime.now().toIso8601String()}');
@@ -83,10 +84,11 @@ class _DiagnosticScreenState extends State<DiagnosticScreen> {
       sb.writeln('Notifications Granted: $_notification');
       sb.writeln('\n=== SHARED PREFS ===');
       sb.writeln(_configDump);
-      
+
       await file.writeAsString(sb.toString());
-      
-      await Share.shareXFiles([XFile(file.path)], text: 'Quran Dawah Diagnostics');
+
+      await Share.shareXFiles([XFile(file.path)],
+          text: 'Quran Dawah Diagnostics');
     } catch (e) {
       debugPrint('Error exporting logs: $e');
     }
@@ -139,14 +141,16 @@ class _DiagnosticScreenState extends State<DiagnosticScreen> {
                         margin: const EdgeInsets.only(bottom: 24),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AppColors.coralRed.withValues(alpha: 0.1),
+                          color: Colors.redAccent.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.coralRed.withValues(alpha: 0.3)),
+                          border: Border.all(
+                              color: Colors.redAccent.withValues(alpha: 0.3)),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.warning_amber_rounded, color: AppColors.coralRed),
+                            const Icon(Icons.warning_amber_rounded,
+                                color: Colors.redAccent),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
@@ -154,12 +158,15 @@ class _DiagnosticScreenState extends State<DiagnosticScreen> {
                                 children: [
                                   Text(
                                     '${_manufacturer.toUpperCase()} Battery Restrictions',
-                                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.coralRed, fontWeight: FontWeight.bold),
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                        color: Colors.redAccent,
+                                        fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     'Your device aggressively kills background tasks. Please disable battery optimizations for this app to ensure the Adhan plays reliably.',
-                                    style: AppTextStyles.labelSmall.copyWith(color: textColor, height: 1.4),
+                                    style: AppTextStyles.labelSmall.copyWith(
+                                        color: textColor, height: 1.4),
                                   ),
                                 ],
                               ),
@@ -167,28 +174,33 @@ class _DiagnosticScreenState extends State<DiagnosticScreen> {
                           ],
                         ),
                       ),
-                    
                     _buildSectionTitle('Device Info', primary),
                     _buildCard(
                       cardBg,
                       Column(
                         children: [
-                          _buildInfoRow('OS', Platform.operatingSystem.toUpperCase(), textColor),
-                          _buildInfoRow('Manufacturer', _manufacturer, textColor),
+                          _buildInfoRow(
+                              'OS',
+                              Platform.operatingSystem.toUpperCase(),
+                              textColor),
+                          _buildInfoRow(
+                              'Manufacturer', _manufacturer, textColor),
                           _buildInfoRow('SDK Version', '$_sdkInt', textColor),
                         ],
                       ),
                     ),
                     const SizedBox(height: 24),
-
                     _buildSectionTitle('Permissions', primary),
                     _buildCard(
                       cardBg,
                       Column(
                         children: [
-                          _buildStatusRow('Exact Alarms (Android 12+)', _exactAlarm, textColor),
-                          _buildStatusRow('Battery Opt Ignored', _ignoreBattery, textColor),
-                          _buildStatusRow('Notifications', _notification, textColor),
+                          _buildStatusRow('Exact Alarms (Android 12+)',
+                              _exactAlarm, textColor),
+                          _buildStatusRow(
+                              'Battery Opt Ignored', _ignoreBattery, textColor),
+                          _buildStatusRow(
+                              'Notifications', _notification, textColor),
                         ],
                       ),
                     ),
@@ -200,7 +212,8 @@ class _DiagnosticScreenState extends State<DiagnosticScreen> {
                         'WorkManager Periodic Sync: Active\n'
                         'System Event Receiver: Active\n'
                         'AlarmManager Slots: Active',
-                        style: AppTextStyles.bodyMedium.copyWith(color: textColor, height: 1.5),
+                        style: AppTextStyles.bodyMedium
+                            .copyWith(color: textColor, height: 1.5),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -208,8 +221,11 @@ class _DiagnosticScreenState extends State<DiagnosticScreen> {
                     _buildCard(
                       cardBg,
                       SelectableText(
-                        _configDump.isEmpty ? 'No relevant config found.' : _configDump,
-                        style: AppTextStyles.bodySmall.copyWith(color: textColor.withValues(alpha: 0.8)),
+                        _configDump.isEmpty
+                            ? 'No relevant config found.'
+                            : _configDump,
+                        style: AppTextStyles.bodySmall
+                            .copyWith(color: textColor.withValues(alpha: 0.8)),
                       ),
                     ),
                   ],
@@ -250,8 +266,12 @@ class _DiagnosticScreenState extends State<DiagnosticScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: AppTextStyles.bodyMedium.copyWith(color: textColor.withValues(alpha: 0.6))),
-          Text(value, style: AppTextStyles.bodyMedium.copyWith(color: textColor, fontWeight: FontWeight.bold)),
+          Text(label,
+              style: AppTextStyles.bodyMedium
+                  .copyWith(color: textColor.withValues(alpha: 0.6))),
+          Text(value,
+              style: AppTextStyles.bodyMedium
+                  .copyWith(color: textColor, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -263,10 +283,11 @@ class _DiagnosticScreenState extends State<DiagnosticScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: AppTextStyles.bodyMedium.copyWith(color: textColor)),
+          Text(label,
+              style: AppTextStyles.bodyMedium.copyWith(color: textColor)),
           Icon(
             isOk ? Icons.check_circle_rounded : Icons.cancel_rounded,
-            color: isOk ? AppColors.emeraldLight : AppColors.coralRed,
+            color: isOk ? AppColors.emeraldLight : Colors.redAccent,
           ),
         ],
       ),

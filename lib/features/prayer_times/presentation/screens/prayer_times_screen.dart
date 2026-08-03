@@ -19,6 +19,7 @@ import '../../../../theme_notifier.dart';
 import '../../data/models/prayer_time_model.dart';
 import '../controllers/prayer_controller.dart';
 import 'prayer_settings_screen.dart';
+import 'muezzin_selection_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PrayerTimesScreen extends StatefulWidget {
@@ -286,7 +287,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               'adhan_abdulbasit': l10n.muezzinAbdulbasit,
               'adhan_mecca_ali_mulla': l10n.muezzinMecca,
               'adhan_mishary_alafasy': l10n.muezzinAlafasy,
-              'adhan_mansour_al_zahrani': l10n.muezzinZahrani,
               'adhan_nasser_al_qatami': l10n.muezzinNasser,
               'adhan_yasser_al_dosari': l10n.muezzinDosari,
             };
@@ -468,10 +468,18 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                         style:
                             AppTextStyles.labelSmall.copyWith(color: primary)),
                     trailing:
-                        Icon(Icons.keyboard_arrow_down_rounded, color: primary),
+                        const Icon(Icons.arrow_forward_ios_rounded, size: 16),
                     onTap: () {
-                      _showMuezzinSelector(context, entry, ctrl, theme,
-                          muezzinNames, currentMuezzinId, l10n);
+                      Navigator.pop(context); // Close bottom sheet
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => MuezzinSelectionScreen(
+                            controller: ctrl,
+                            prayerName: entry.prayer.name,
+                          ),
+                        ),
+                      );
                     },
                   ),
                 ],
@@ -631,70 +639,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
       },
     );
   }
-
-  void _showMuezzinSelector(
-      BuildContext context,
-      PrayerTimeEntry entry,
-      PrayerController ctrl,
-      QuranTheme theme,
-      Map<String, String> muezzinNames,
-      String currentId,
-      AppLocalizations l10n) {
-    final cardBg = AppTheme.getCardBgColor(theme);
-    final textColor = AppTheme.getMainTextColor(theme);
-    final primary = AppTheme.getPrimaryColor(theme);
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: cardBg,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (ctx) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 16),
-              Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                      color: Colors.grey.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2))),
-              const SizedBox(height: 16),
-              Text(l10n.chooseMuezzin,
-                  style: AppTextStyles.headlineMedium
-                      .copyWith(color: textColor, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              ...muezzinNames.entries.map((m) {
-                final isSelected = m.key == currentId;
-                return ListTile(
-                  title: Text(m.value,
-                      style: AppTextStyles.bodyMedium.copyWith(
-                          color: isSelected ? primary : textColor,
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.normal)),
-                  trailing: isSelected
-                      ? Icon(Icons.check_circle_rounded, color: primary)
-                      : null,
-                  onTap: () {
-                    final newMuezzins =
-                        Map<String, String>.from(ctrl.config.prayerMuezzins);
-                    newMuezzins[entry.prayer.name] = m.key;
-                    ctrl.updateConfig(
-                        ctrl.config.copyWith(prayerMuezzins: newMuezzins));
-                    Navigator.pop(ctx);
-                  },
-                );
-              }),
-              const SizedBox(height: 16),
-            ],
-          ),
-        );
-      },
-    );
-  }
 }
 // ─────────────────────────────────────────────────────────────────────────────
 // _HeroCountdownPanel — Displays the next prayer name and countdown ticker
@@ -724,8 +668,8 @@ class _HeroCountdownPanel extends StatelessWidget {
         return Transform.scale(
           scale: scale,
           child: Container(
-            margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            margin: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -735,10 +679,10 @@ class _HeroCountdownPanel extends StatelessWidget {
               borderRadius: BorderRadius.circular(32),
               boxShadow: [
                 BoxShadow(
-                  color: gradient.first.withValues(alpha: 0.5),
+                  color: gradient.first.withValues(alpha: 0.4),
                   blurRadius: 24,
-                  spreadRadius: 2,
-                  offset: const Offset(0, 12),
+                  spreadRadius: -2,
+                  offset: const Offset(0, 10),
                 ),
               ],
             ),
@@ -752,21 +696,21 @@ class _HeroCountdownPanel extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Text(
                   _localizePrayerName(nextPrayer.prayer, l10n),
                   style: AppTextStyles.displayMedium.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w900,
-                    fontSize: 32,
+                    fontSize: 28,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Text(
                   countdown,
                   style: AppTextStyles.prayerTimeLarge.copyWith(
                     color: AppColors.goldLight,
-                    fontSize: 48,
+                    fontSize: 40,
                     fontWeight: FontWeight.bold,
                     shadows: [
                       Shadow(
@@ -782,7 +726,7 @@ class _HeroCountdownPanel extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Text(
                   l10n.countdown,
                   style: AppTextStyles.labelSmall.copyWith(
@@ -841,7 +785,7 @@ class _PrayerRowCard extends StatelessWidget {
     final formattedTime = _formatTime(entry.time, is24HourFormat);
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 6),
+      margin: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
         color: isNext
             ? primaryColor.withValues(alpha: isDark ? 0.15 : 0.08)
@@ -849,23 +793,23 @@ class _PrayerRowCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color:
-              isNext ? primaryColor.withValues(alpha: 0.5) : Colors.transparent,
-          width: 1.5,
+              isNext ? primaryColor.withValues(alpha: 0.3) : Colors.transparent,
+          width: 0.5,
         ),
         boxShadow: isNext
             ? [
                 BoxShadow(
-                  color: primaryColor.withValues(alpha: 0.3),
-                  blurRadius: 16,
-                  spreadRadius: 2,
+                  color: primaryColor.withValues(alpha: 0.2),
+                  blurRadius: 24,
+                  spreadRadius: -2,
                   offset: const Offset(0, 8),
                 )
               ]
             : [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 )
               ],
       ),
@@ -874,10 +818,10 @@ class _PrayerRowCard extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(20),
-          highlightColor: primaryColor.withValues(alpha: 0.1),
-          splashColor: primaryColor.withValues(alpha: 0.15),
+          highlightColor: primaryColor.withValues(alpha: 0.05),
+          splashColor: primaryColor.withValues(alpha: 0.1),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
                 // Prayer Icon indicator

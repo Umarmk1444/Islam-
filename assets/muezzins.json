@@ -43,14 +43,5 @@
     "duration": "3:10",
     "type": "local",
     "url": "assets/audio/adhan_nasser_al_qatami.mp3"
-  },
-  {
-    "id": "adhan_mansour_al_zahrani",
-    "name": "Mansour Al Zahrani",
-    "country": "Saudi Arabia",
-    "mosque": "Al Rajhi Mosque",
-    "duration": "3:05",
-    "type": "remote",
-    "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
   }
 ]

@@ -16,6 +16,7 @@ import 'core/services/background_engine.dart';
 
 import 'services/minbar_player.dart';
 import 'widgets/custom_banner_ad.dart';
+import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ENTRY POINT
@@ -29,6 +30,8 @@ import 'widgets/custom_banner_ad.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,6 +61,7 @@ Future<void> _initHeavyServices() async {
   // 1. Workmanager + AndroidAlarmManager registration.
   await BackgroundEngine().init();
 
+
   // 2. Audio background service (required before any audio playback).
   //    The Quran screen is several taps away, so this has plenty of time.
   await JustAudioBackground.init(
@@ -78,7 +82,7 @@ Future<void> _initHeavyServices() async {
   // 5. Cancel old Workmanager overlay task and register new tasks
   try {
     await Workmanager().cancelByUniqueName("auto_zekr_overlay");
-    
+
     // Register background sync task for alarms
     await Workmanager().registerPeriodicTask(
       "sync_alarms_task",
@@ -94,7 +98,9 @@ Future<void> _initHeavyServices() async {
     if (notifEnabled) {
       await BackgroundEngine().scheduleZekrNotification(notifInterval);
     }
-  } catch (_) {}
+  } catch (e) {
+    debugPrint('[_initHeavyServices] Workmanager/Zekr registration failed: $e');
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -127,6 +133,7 @@ class _QuranDawahAppState extends State<QuranDawahApp> {
           valueListenable: AppLanguage.notifier,
           builder: (context, locale, _) {
             return MaterialApp(
+              navigatorKey: rootNavigatorKey,
               title: 'Quran Zone',
               debugShowCheckedModeBanner: false,
               locale: locale,
@@ -217,6 +224,81 @@ class _QuranDawahAppState extends State<QuranDawahApp> {
           },
         );
       },
+    );
+  }
+}
+
+// ── Overlay Window Entry Point ───────────────────────────────────────────────
+
+@pragma('vm:entry-point')
+void overlayMain() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: ZekrOverlayWidget(),
+  ));
+}
+
+class ZekrOverlayWidget extends StatelessWidget {
+  const ZekrOverlayWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0D4F3C),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black45,
+                blurRadius: 16,
+                offset: Offset(0, 8),
+              )
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    '✨ ذكر الله',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon:
+                        const Icon(Icons.close_rounded, color: Colors.white70),
+                    onPressed: () {
+                      FlutterOverlayWindow.closeOverlay();
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'سبحان الله وبحمده، سبحان الله العظيم',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  height: 1.4,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

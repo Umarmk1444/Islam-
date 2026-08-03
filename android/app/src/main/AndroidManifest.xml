@@ -12,9 +12,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
-    
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
     <application
         android:label="Quran Zone"
@@ -116,6 +116,21 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
+        <!-- NATIVE ATHAN ALARM — BroadcastReceiver triggered by AlarmManager -->
+        <receiver
+            android:name=".AthanAlarmReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.sadaga.quran_dawah.ACTION_PLAY_ATHAN" />
+            </intent-filter>
+        </receiver>
+
+        <!-- NATIVE ATHAN FOREGROUND SERVICE — keeps process alive + plays audio -->
+        <service
+            android:name=".AthanForegroundService"
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="false" />
     </application>
 
     <queries>
