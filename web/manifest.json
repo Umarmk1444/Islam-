@@ -1,6 +1,6 @@
 {
-    "name": "quran_dawah",
-    "short_name": "quran_dawah",
+    "name": "Quran Zone",
+    "short_name": "Quran Zone",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

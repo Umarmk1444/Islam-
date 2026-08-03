@@ -20,7 +20,7 @@ android {
         applicationId = "com.umer.quranzone"
 
         // Using explicit numbers to guarantee compatibility with SDK 35
-        minSdk = flutter.minSdkVersion
+        minSdk = 24
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"

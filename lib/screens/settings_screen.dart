@@ -176,6 +176,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       builder: (context, theme, _) {
         final Color primary = AppTheme.getPrimaryColor(theme);
         final Color textMain = AppTheme.getMainTextColor(theme);
+        final Color textSub = textMain.withValues(alpha: 0.7);
         final Color cardBg = AppTheme.getCardBgColor(theme);
         final Color borderColor = AppTheme.getBorderColor(theme);
         final bool isDark = theme == QuranTheme.dark;
@@ -382,7 +383,11 @@ class _SettingsScreenState extends State<SettingsScreen>
                         icon: Icons.ios_share_rounded,
                         iconColor: const Color(0xFF0288D1),
                         title: l10n.shareApp,
-                        onTap: () => Share.share(l10n.shareApp),
+                        onTap: () {
+                          Share.share(
+                            '${l10n.shareApp}\n\nDownload Quran Zone for a beautiful Quran experience: https://play.google.com/store/apps/details?id=com.umer.quranzone',
+                          );
+                        },
                         isDark: isDark,
                         textColor: textMain,
                       ),
@@ -410,8 +415,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                         onTap: () async {
                           final Uri emailUri = Uri(
                             scheme: 'mailto',
-                            path: 'support@example.com',
-                            query: 'subject=Quran App Feedback',
+                            path: 'umer.et.jm@gmail.com',
+                            query: 'subject=Quran Zone App Feedback',
                           );
                           if (!await launchUrl(emailUri)) {
                             debugPrint('Could not launch email');
@@ -426,7 +431,80 @@ class _SettingsScreenState extends State<SettingsScreen>
                         iconColor: Colors.grey,
                         title: l10n.aboutApp,
                         subtitle: 'Version 1.0.0',
-                        onTap: () {},
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              String getTranslatedAboutDescription(BuildContext ctx) {
+                                final locale = Localizations.localeOf(ctx).languageCode;
+                                switch (locale) {
+                                  case 'ar':
+                                    return 'تطبيق Quran Zone هو تطبيق إسلامي شامل يضم القرآن الكريم، مواقيت الصلاة الدقيقة مع تنبيهات الأذان في الخلفية، العثور على المساجد القريبة، اتجاه القبلة، والمزيد. صُنع بحب لمساعدة المسلمين على التواصل مع دينهم بسهولة.';
+                                  case 'am':
+                                    return 'ቁርኣን ዞን (Quran Zone) ቅዱስ ቁርኣንን፣ ትክክለኛ የሶላት ጊዜያትን ከ አዛን ማሳሰቢያዎች ጋር፣ በአቅራቢያ የሚገኙ መስጊዶችን መፈለጊያ፣ የቂብላ አቅጣጫ እና ሌሎችንም ያካተተ የተሟላ ኢስላማዊ መተግበሪያ ነው። ሙስሊሞች ከእምነታቸው ጋር በቀላሉ እንዲገናኙ ለመርዳት በፍቅር የተሰራ።';
+                                  case 'om':
+                                    return 'Quran Zone appilikeeshinii Islaamaa guutuu yoo ta\'u, Qur\'aana Qulqulluu, yeroo salaataa sirrii ta\'e akeekkachiisa Azaanii wajjin, masjiidota dhihoo jiran barbaaduu, kallattii Qiblaa fi kanneen biroo of keessatti qabata. Muslimoonni amantii isaanii wajjin haala salphaa ta\'een akka wal qunnaman gargaaruuf jaalalaan kan hojjetame.';
+                                  default:
+                                    return 'Quran Zone is a comprehensive Islamic app featuring the Holy Quran, accurate prayer times with Athan (Muezzin) background alerts, finding nearby mosques, Qibla direction, and much more. Built with love to help Muslims easily connect with their faith.';
+                                }
+                              }
+
+                              return AlertDialog(
+                              backgroundColor: cardBg,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              title: Row(
+                                children: [
+                                  Image.asset(
+                                    'assets/images/app_icon.png',
+                                    width: 40,
+                                    height: 40,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Quran Zone',
+                                    style: TextStyle(
+                                      color: textMain,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    getTranslatedAboutDescription(context),
+                                    style: TextStyle(
+                                      color: textSub,
+                                      height: 1.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Version 1.0.0',
+                                    style: TextStyle(
+                                      color: textMain,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: Text(
+                                    'Close',
+                                    style: TextStyle(color: primary),
+                                  ),
+                                ),
+                              ],
+                            );
+                            },
+                          );
+                        },
                         isDark: isDark,
                         textColor: textMain,
                       ),

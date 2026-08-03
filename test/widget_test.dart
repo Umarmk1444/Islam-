@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:quran_dawah/screens/quran_screen.dart';
+import 'package:quran_zone/screens/quran_screen.dart';
 
 void main() {
   testWidgets('adds bottom padding when an overlay bar is shown', (tester) async {
