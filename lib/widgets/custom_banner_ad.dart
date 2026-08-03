@@ -31,7 +31,7 @@ class _PersistentBannerAdState extends State<PersistentBannerAd> {
   bool _isAdLoaded = false;
 
   // Standard Test Ad Unit ID for Android Banners
-  static const String _adUnitId = 'ca-app-pub-3940256099942544/6300978111';
+  static const String _adUnitId = 'ca-app-pub-5557619519970400/5577116496';
 
   @override
   void initState() {
