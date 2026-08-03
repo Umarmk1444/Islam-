@@ -159,98 +159,59 @@ void athanAlarmCallback(int id) async {
       debugPrint('[athanAlarmCallback] Error rescheduling: $e');
     }
 
-    // ── Show Notification ────────────────────────────────────────────────────
-    // The native AthanForegroundService already shows its own notification.
-    // This backup notification only fires if the native alarm path failed
-    // (e.g. exact alarm permission revoked after scheduling).
+    // ── Pre-Adhan Notification Only ───────────────────────────────────────────
+    // Full Athan notifications are owned EXCLUSIVELY by AthanForegroundService
+    // (Kotlin). This Dart callback must NEVER show a full Athan notification or
+    // it creates the duplicate that confused the user.
+    // Pre-Adhan warnings (isPreAdhan == true) have no Kotlin counterpart, so
+    // they are still shown here.
+    if (!isPreAdhan) return;
+
     final preMins = config.preAthanMinutes[prayerNameStr] ?? 0;
-    final title = isPreAdhan
-        ? '⏳ ${_prayerNameDisplayFromStr(prayerNameStr)} Alert'
-        : '🕌 ${_prayerNameDisplayFromStr(prayerNameStr)}';
-    final body = isPreAdhan
-        ? 'باقي $preMins دقائق على أذان ${_prayerNameDisplayFromStr(prayerNameStr)}'
-        : 'حان الآن موعد أذان ${_prayerNameDisplayFromStr(prayerNameStr)}';
 
     final plugin = FlutterLocalNotificationsPlugin();
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: androidSettings);
     await plugin.initialize(initSettings);
 
     final androidImplementation = plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
 
-    final muezzinId =
-        config.prayerMuezzins[prayerNameStr] ?? 'adhan_abdulbasit';
-
     if (androidImplementation != null) {
-      if (isPreAdhan) {
-        await androidImplementation
-            .createNotificationChannel(const AndroidNotificationChannel(
-          'pre_adhan_channel_v3',
-          'Pre-Adhan Warning',
-          description: 'Notification before Adhan time',
-          importance: Importance.high,
-          playSound: true,
-          sound: RawResourceAndroidNotificationSound('salah'),
-          enableVibration: true,
-        ));
-      } else {
-        final channelId = 'athan_bg_channel_${muezzinId}_v2';
-        await androidImplementation
-            .createNotificationChannel(AndroidNotificationChannel(
-          channelId,
-          'Athan Background Alerts',
-          description: 'Ongoing Athan playback',
-          importance: Importance.max,
-          playSound: false,
-          enableVibration: true,
-        ));
-      }
-    }
-
-    AndroidNotificationDetails androidDetails;
-    if (isPreAdhan) {
-      androidDetails = const AndroidNotificationDetails(
+      await androidImplementation
+          .createNotificationChannel(const AndroidNotificationChannel(
         'pre_adhan_channel_v3',
         'Pre-Adhan Warning',
-        channelDescription: 'Notification before Adhan time',
+        description: 'Notification before Adhan time',
         importance: Importance.high,
-        priority: Priority.high,
-        sound: RawResourceAndroidNotificationSound('salah'),
         playSound: true,
-        category: AndroidNotificationCategory.alarm,
-        audioAttributesUsage: AudioAttributesUsage.alarm,
-        visibility: NotificationVisibility.public,
-        fullScreenIntent: true,
-      );
-    } else {
-      final channelId = 'athan_bg_channel_${muezzinId}_v2';
-      androidDetails = AndroidNotificationDetails(
-        channelId,
-        'Athan Background Alerts',
-        channelDescription: 'Ongoing Athan playback',
-        importance: Importance.max,
-        priority: Priority.high,
-        ongoing: true,
-        autoCancel: false,
-        playSound: false,
+        sound: RawResourceAndroidNotificationSound('salah'),
         enableVibration: true,
-        fullScreenIntent: true,
-        category: AndroidNotificationCategory.alarm,
-        audioAttributesUsage: AudioAttributesUsage.alarm,
-        visibility: NotificationVisibility.public,
-      );
+      ));
     }
+
+    const androidDetails = AndroidNotificationDetails(
+      'pre_adhan_channel_v3',
+      'Pre-Adhan Warning',
+      channelDescription: 'Notification before Adhan time',
+      importance: Importance.high,
+      priority: Priority.high,
+      sound: RawResourceAndroidNotificationSound('salah'),
+      playSound: true,
+      category: AndroidNotificationCategory.alarm,
+      audioAttributesUsage: AudioAttributesUsage.alarm,
+      visibility: NotificationVisibility.public,
+      fullScreenIntent: true,
+    );
 
     await plugin.show(
       id,
-      title,
-      body,
-      NotificationDetails(android: androidDetails),
+      '⏳ ${_prayerNameDisplayFromStr(prayerNameStr)} Alert',
+      'باقي $preMins دقائق على أذان ${_prayerNameDisplayFromStr(prayerNameStr)}',
+      const NotificationDetails(android: androidDetails),
       payload: 'prayer_times',
     );
-    debugPrint('[athanAlarmCallback] Backup notification shown for alarm: $id');
+    debugPrint('[athanAlarmCallback] Pre-Adhan notification shown for: $prayerNameStr');
   } catch (e, stack) {
     debugPrint('[athanAlarmCallback] ERROR: $e');
     debugPrint(stack.toString());
