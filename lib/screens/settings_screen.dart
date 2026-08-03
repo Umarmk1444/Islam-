@@ -189,109 +189,133 @@ class _SettingsScreenState extends State<SettingsScreen>
             slivers: [
               // ── Gradient SliverAppBar ──────────────────────────────────────
               SliverAppBar(
-                expandedHeight: 130,
+                expandedHeight: 140,
                 pinned: true,
+                automaticallyImplyLeading: false,
                 backgroundColor:
                     isDark ? const Color(0xFF0D1F17) : const Color(0xFF1B5E20),
                 elevation: 0,
-                flexibleSpace: FlexibleSpaceBar(
-                  collapseMode: CollapseMode.parallax,
-                  background: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: isDark
-                                ? [
-                                    const Color(0xFF0D2E1F),
-                                    const Color(0xFF0F1F17),
-                                  ]
-                                : [
-                                    const Color(0xFF1B6B38),
-                                    const Color(0xFF0D4F3C),
-                                  ],
+                flexibleSpace: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final top = constraints.biggest.height;
+                    final statusBarHeight = MediaQuery.of(context).padding.top;
+                    final collapsedThreshold =
+                        kToolbarHeight + statusBarHeight + 15;
+                    final isCollapsed = top <= collapsedThreshold;
+
+                    return FlexibleSpaceBar(
+                      collapseMode: CollapseMode.parallax,
+                      centerTitle: true,
+                      expandedTitleScale: 1.0,
+                      titlePadding: const EdgeInsets.only(bottom: 14),
+                      title: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 150),
+                        opacity: isCollapsed ? 1.0 : 0.0,
+                        child: Text(
+                          l10n.settings,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.3,
                           ),
                         ),
                       ),
-                      Positioned(
-                        right: -30,
-                        top: -30,
-                        child: Container(
-                          width: 140,
-                          height: 140,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.04),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        left: -20,
-                        bottom: -40,
-                        child: Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.03),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 16,
-                        left: 20,
-                        right: 20,
-                        child: FadeTransition(
-                          opacity: _headerFade,
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: const Icon(Icons.tune_rounded,
-                                    color: Colors.white, size: 22),
+                      background: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: isDark
+                                    ? [
+                                        const Color(0xFF0D2E1F),
+                                        const Color(0xFF0F1F17),
+                                      ]
+                                    : [
+                                        const Color(0xFF1B6B38),
+                                        const Color(0xFF0D4F3C),
+                                      ],
                               ),
-                              const SizedBox(width: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
+                            ),
+                          ),
+                          Positioned(
+                            right: -30,
+                            top: -30,
+                            child: Container(
+                              width: 140,
+                              height: 140,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withValues(alpha: 0.04),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            left: -20,
+                            bottom: -40,
+                            child: Container(
+                              width: 120,
+                              height: 120,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withValues(alpha: 0.03),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 16,
+                            left: 20,
+                            right: 20,
+                            child: FadeTransition(
+                              opacity: _headerFade,
+                              child: Row(
                                 children: [
-                                  Text(
-                                    l10n.settings,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 0.3,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Quran Zone',
-                                    style: TextStyle(
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
                                       color:
-                                          Colors.white.withValues(alpha: 0.6),
-                                      fontSize: 11,
+                                          Colors.white.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(14),
                                     ),
+                                    child: const Icon(Icons.tune_rounded,
+                                        color: Colors.white, size: 22),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        l10n.settings,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 0.3,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Quran Zone',
+                                        style: TextStyle(
+                                          color: Colors.white
+                                              .withValues(alpha: 0.6),
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                      color: Colors.white, size: 18),
-                  onPressed: () => Navigator.maybePop(context),
+                    );
+                  },
                 ),
               ),
 
@@ -369,7 +393,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                         title: l10n.rateUs,
                         onTap: () async {
                           final Uri url = Uri.parse(
-                              'https://play.google.com/store/apps/details?id=com.example.quran_dawah');
+                              'https://play.google.com/store/apps/details?id=com.umer.quranzone');
                           if (!await launchUrl(url,
                               mode: LaunchMode.externalApplication)) {
                             debugPrint('Could not launch');
@@ -429,7 +453,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                     const SizedBox(height: 16),
                     Center(
                       child: Text(
-                        l10n.madeWithLove,
+                        'Made with ❤️ for the Ummah',   // Hardcoded EN — never translated
                         style: TextStyle(
                           color: Colors.grey.withValues(alpha: 0.7),
                           fontSize: 12,
@@ -437,6 +461,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                         ),
                       ),
                     ),
+                    const SizedBox(height: 16),  // breathing room above bottom nav
                     const SizedBox(height: 28),
                   ]),
                 ),

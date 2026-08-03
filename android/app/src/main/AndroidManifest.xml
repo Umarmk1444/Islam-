@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.sadaga.quran_dawah">
+    package="com.umer.quranzone">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
@@ -122,7 +122,7 @@
             android:name=".AthanAlarmReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.sadaga.quran_dawah.ACTION_PLAY_ATHAN" />
+                <action android:name="com.umer.quranzone.ACTION_PLAY_ATHAN" />
             </intent-filter>
         </receiver>
 

@@ -1,4 +1,4 @@
-package com.sadaga.quran_dawah
+package com.umer.quranzone
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -32,7 +32,7 @@ class AthanForegroundService : Service() {
         const val DEFAULT_MAX_DURATION_SECONDS = 120 // 2-minute hard cap
 
         // Intent action for the Stop button and swipe-to-dismiss
-        const val ACTION_STOP_ATHAN = "com.sadaga.quran_dawah.ACTION_STOP_ATHAN"
+        const val ACTION_STOP_ATHAN = "com.umer.quranzone.ACTION_STOP_ATHAN"
     }
 
     private var mediaPlayer: MediaPlayer? = null

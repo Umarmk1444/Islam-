@@ -216,7 +216,7 @@ class _NearestMosquesScreenState extends State<NearestMosquesScreen> with Ticker
             children: [
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.sadaga.quran_dawah',
+                userAgentPackageName: 'com.umer.quranzone',
               ),
               MarkerLayer(
                 markers: _mosques.map((m) => Marker(

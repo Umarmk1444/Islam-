@@ -65,7 +65,7 @@ Future<void> _initHeavyServices() async {
   // 2. Audio background service (required before any audio playback).
   //    The Quran screen is several taps away, so this has plenty of time.
   await JustAudioBackground.init(
-    androidNotificationChannelId: 'com.sadaga.quran_dawah.channel.audio',
+    androidNotificationChannelId: 'com.umer.quranzone.channel.audio',
     androidNotificationChannelName: 'Audio Playback',
     androidNotificationOngoing: true,
   );

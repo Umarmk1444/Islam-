@@ -21,7 +21,7 @@ import '../../services/azkar_service.dart';
 // MethodChannel for native AlarmManager scheduling (main isolate only)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const _kAthanAlarmChannel = MethodChannel('com.sadaga.quran_dawah/athan_alarm');
+const _kAthanAlarmChannel = MethodChannel('com.umer.quranzone/athan_alarm');
 
 // ── Alarm Manager Callback (Runs in Background Isolate) ──────────────────────
 //

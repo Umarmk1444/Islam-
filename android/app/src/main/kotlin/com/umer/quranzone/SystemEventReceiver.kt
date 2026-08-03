@@ -1,4 +1,4 @@
-package com.sadaga.quran_dawah
+package com.umer.quranzone
 
 import android.content.BroadcastReceiver
 import android.content.Context

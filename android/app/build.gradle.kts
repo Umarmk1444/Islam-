@@ -6,7 +6,7 @@ plugins {
 
 android {
     // This namespace property links your app ID to your AndroidManifest.xml
-    namespace = "com.sadaga.quran_dawah"
+    namespace = "com.umer.quranzone"
     compileSdk = 36
     ndkVersion = "28.2.13676358"
 
@@ -17,7 +17,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.sadaga.quran_dawah"
+        applicationId = "com.umer.quranzone"
 
         // Using explicit numbers to guarantee compatibility with SDK 35
         minSdk = flutter.minSdkVersion

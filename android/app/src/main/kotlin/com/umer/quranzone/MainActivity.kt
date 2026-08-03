@@ -1,4 +1,4 @@
-package com.sadaga.quran_dawah
+package com.umer.quranzone
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -14,8 +14,8 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : AudioServiceActivity() {
 
-    private val DEVICE_CHANNEL = "com.sadaga.quran_dawah/device"
-    private val ATHAN_ALARM_CHANNEL = "com.sadaga.quran_dawah/athan_alarm"
+    private val DEVICE_CHANNEL = "com.umer.quranzone/device"
+    private val ATHAN_ALARM_CHANNEL = "com.umer.quranzone/athan_alarm"
 
     private var deviceChannel: MethodChannel? = null
     private var athanAlarmChannel: MethodChannel? = null

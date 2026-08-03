@@ -1,4 +1,4 @@
-package com.sadaga.quran_dawah
+package com.umer.quranzone
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -23,7 +23,7 @@ class AthanAlarmReceiver : BroadcastReceiver() {
 
     companion object {
         const val TAG = "AthanAlarmReceiver"
-        const val ACTION_PLAY_ATHAN = "com.sadaga.quran_dawah.ACTION_PLAY_ATHAN"
+        const val ACTION_PLAY_ATHAN = "com.umer.quranzone.ACTION_PLAY_ATHAN"
     }
 
     override fun onReceive(context: Context, intent: Intent) {

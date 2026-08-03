@@ -17,7 +17,7 @@ class DiagnosticScreen extends StatefulWidget {
 }
 
 class _DiagnosticScreenState extends State<DiagnosticScreen> {
-  static const _channel = MethodChannel('com.sadaga.quran_dawah/device');
+  static const _channel = MethodChannel('com.umer.quranzone/device');
 
   bool _isLoading = true;
   bool _exactAlarm = false;
