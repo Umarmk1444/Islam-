@@ -28,9 +28,9 @@ android {
     defaultConfig {
         applicationId = "com.umer.quranzone"
 
-        // Using explicit numbers to guarantee compatibility with SDK 35
+        // Using explicit numbers to guarantee compatibility with SDK 36
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
     }
