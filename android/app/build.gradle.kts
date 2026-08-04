@@ -25,6 +25,12 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
+    packaging {
+        jniLibs {
+            keepDebugSymbols.add("**/*.so")
+        }
+    }
+
     defaultConfig {
         applicationId = "com.umer.quranzone"
 
