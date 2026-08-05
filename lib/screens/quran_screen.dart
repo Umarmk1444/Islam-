@@ -1302,6 +1302,7 @@ class _NavigationPanelState extends State<_NavigationPanel>
                 ),
                 _JuzHizbTab(
                   juzHizbData: widget.juzHizbData,
+                  currentPage: widget.currentPage,
                   pageBgColor: widget.pageBgColor,
                   borderColor: widget.borderColor,
                   goldTextColor: widget.goldTextColor,
@@ -1629,6 +1630,7 @@ class _SurahAyahTabState extends State<_SurahAyahTab> {
 class _JuzHizbTab extends StatefulWidget {
   const _JuzHizbTab({
     required this.juzHizbData,
+    required this.currentPage,
     required this.pageBgColor,
     required this.borderColor,
     required this.goldTextColor,
@@ -1637,6 +1639,7 @@ class _JuzHizbTab extends StatefulWidget {
   });
 
   final Map<int, List<Map<String, dynamic>>> juzHizbData;
+  final int currentPage;
   final Color pageBgColor;
   final Color borderColor;
   final Color goldTextColor;
@@ -1648,8 +1651,22 @@ class _JuzHizbTab extends StatefulWidget {
 }
 
 class _JuzHizbTabState extends State<_JuzHizbTab> {
-  /// Tracks which Juz sections are expanded (first Juz expanded by default)
   late final Set<int> _expandedJuz;
+  late final List<GlobalKey> _juzKeys;
+  bool _scrolled = false;
+
+  int _getCurrentJuz() {
+    for (int j = 1; j <= 30; j++) {
+      final currentJuzPages = widget.juzHizbData[j];
+      final nextJuzPages = widget.juzHizbData[j + 1];
+      final firstPage = currentJuzPages?.isNotEmpty == true ? (currentJuzPages!.first['page'] as int? ?? 1) : 1;
+      final nextFirstPage = nextJuzPages?.isNotEmpty == true ? (nextJuzPages!.first['page'] as int? ?? 604) : 605;
+      if (widget.currentPage >= firstPage && widget.currentPage < nextFirstPage) {
+        return j;
+      }
+    }
+    return 30;
+  }
 
   static const List<String> _juzNames = [
     'الجزء الأول',
@@ -1687,7 +1704,26 @@ class _JuzHizbTabState extends State<_JuzHizbTab> {
   @override
   void initState() {
     super.initState();
-    _expandedJuz = {1}; // First juz expanded by default
+    _juzKeys = List.generate(30, (_) => GlobalKey());
+    _expandedJuz = {_getCurrentJuz()}; // Current juz expanded by default
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_scrolled) {
+      _scrolled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final currentJuz = _getCurrentJuz();
+        final keyContext = _juzKeys[currentJuz - 1].currentContext;
+        if (keyContext != null) {
+          Scrollable.ensureVisible(keyContext,
+              alignment: 0.1,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut);
+        }
+      });
+    }
   }
 
   String _toArabicNumerals(int number) {
@@ -1718,7 +1754,10 @@ class _JuzHizbTabState extends State<_JuzHizbTab> {
         final firstPage =
             hizbs.isNotEmpty ? (hizbs.first['page'] as int? ?? 1) : 1;
 
+        final isCurrentJuz = juzNum == _getCurrentJuz();
+
         return Column(
+          key: _juzKeys[index],
           children: [
             // ── Juz Header ──
             InkWell(
@@ -1735,7 +1774,9 @@ class _JuzHizbTabState extends State<_JuzHizbTab> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: widget.borderColor.withValues(alpha: 0.08),
+                  color: isCurrentJuz
+                      ? widget.borderColor.withValues(alpha: 0.25)
+                      : widget.borderColor.withValues(alpha: 0.08),
                   border: Border(
                     bottom: BorderSide(
                       color: widget.borderColor.withValues(alpha: 0.2),
@@ -1935,6 +1976,34 @@ class _PagesTab extends StatefulWidget {
 
 class _PagesTabState extends State<_PagesTab> {
   final TextEditingController _pageCtrl = TextEditingController();
+  late final ScrollController _scrollController;
+  bool _scrolled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_scrolled) {
+      _scrolled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          final screenW = MediaQuery.of(context).size.width;
+          final itemW = (screenW - 24 - (5 * 8)) / 6;
+          final rowH = itemW + 8;
+          final rowIndex = (widget.currentPage - 1) ~/ 6;
+          final offset = (rowIndex * rowH) - (rowH * 2);
+          if (offset > 0) {
+            _scrollController.jumpTo(offset);
+          }
+        }
+      });
+    }
+  }
 
   void _submitPage() {
     final val = int.tryParse(_pageCtrl.text);
@@ -1957,6 +2026,7 @@ class _PagesTabState extends State<_PagesTab> {
   @override
   void dispose() {
     _pageCtrl.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -2015,6 +2085,7 @@ class _PagesTabState extends State<_PagesTab> {
         ),
         Expanded(
           child: GridView.builder(
+            controller: _scrollController,
             padding: const EdgeInsets.all(12),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 6,

@@ -690,6 +690,7 @@ class _LiquidTileState extends State<_LiquidTile>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTapDown: (_) => _press.reverse(),
       onTapUp: (_) {
         _press.forward();
@@ -774,9 +775,12 @@ class _SwitchTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      child: Row(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => onChanged(!value),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        child: Row(
         children: [
           Container(
             width: 34,
@@ -817,7 +821,7 @@ class _SwitchTile extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 }
 
