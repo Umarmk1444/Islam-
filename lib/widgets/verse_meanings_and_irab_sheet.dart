@@ -351,12 +351,7 @@ class _MeaningsAndIrabPageState extends State<MeaningsAndIrabPage> {
       final ayahNum = row['aya_num'] as int;
       final text = row['aya'] as String;
 
-      String sanitizeQuranText(String t) {
-        String cleanedText = t.replaceAll(RegExp(r'([ۖۗۘۙۚۛۜ۞۩])\s+'), r'$1');
-        return cleanedText.trim();
-      }
-
-      _verseText = sanitizeQuranText(text);
+      _verseText = text.trim();
 
       final data = await DatabaseHelper.instance.fetchMeaningsAndIrab(
         surahNumber: surahNum,

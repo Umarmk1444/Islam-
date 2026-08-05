@@ -87,24 +87,42 @@ class _AyahActionBarState extends State<AyahActionBar>
 
   // ── Actions ───────────────────────────────────────────────────────────────
 
-  void _copyAyah() {
-    final text = widget.verseData['text'] ?? '';
-    Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('تم نسخ الآية',
-            style: TextStyle(fontFamily: 'Amiri')),
-        backgroundColor: _border,
-        duration: const Duration(seconds: 1),
-      ),
+  Future<void> _copyAyah() async {
+    final surahNum = widget.verseData['surahNumber'] as int? ?? 1;
+    final ayahNum = widget.verseData['ayahNumber'] as int? ?? 1;
+    final surahName = widget.verseData['surahName'] as String? ?? '';
+    final db = await DatabaseHelper.instance.database;
+    final res = await db.rawQuery(
+      'SELECT aya FROM quran WHERE sura_num = ? AND aya_num = ?',
+      [surahNum, ayahNum],
     );
+    final ayahText = res.isNotEmpty ? (res.first['aya'] as String? ?? '') : '';
+    final formatted = '$ayahText\n\n﴿ سورة $surahName - الآية $ayahNum ﴾';
+    await Clipboard.setData(ClipboardData(text: formatted));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('تم نسخ الآية',
+              style: TextStyle(fontFamily: 'Amiri')),
+          backgroundColor: _border,
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    }
   }
 
-  void _shareAyah() {
-    final surahName = widget.verseData['surahName'] ?? '';
-    final ayahNumber = widget.verseData['ayahNumber'] ?? 1;
-    final text = widget.verseData['text'] ?? '';
-    Share.share('﴿$text﴾ [$surahName: $ayahNumber]');
+  Future<void> _shareAyah() async {
+    final surahNum = widget.verseData['surahNumber'] as int? ?? 1;
+    final ayahNum = widget.verseData['ayahNumber'] as int? ?? 1;
+    final surahName = widget.verseData['surahName'] as String? ?? '';
+    final db = await DatabaseHelper.instance.database;
+    final res = await db.rawQuery(
+      'SELECT aya FROM quran WHERE sura_num = ? AND aya_num = ?',
+      [surahNum, ayahNum],
+    );
+    final ayahText = res.isNotEmpty ? (res.first['aya'] as String? ?? '') : '';
+    final formatted = '$ayahText\n\n﴿ سورة $surahName - الآية $ayahNum ﴾';
+    Share.share(formatted);
   }
 
   void _toggleBookmark() async {

@@ -18,23 +18,17 @@ class AyahInteractionBottomSheet extends StatefulWidget {
   /// Called by the grid's 'Listen' button — lets the screen pass a scroll callback
   final void Function(int surah, int ayah)? onAyahChanged;
 
-  AyahInteractionBottomSheet({
+  const AyahInteractionBottomSheet({
     Key? key,
     required this.initialSurahNumber,
     required this.initialAyahNumber,
     required this.initialSurahName,
-    required String initialVerseText,
+    required this.initialVerseText,
     required this.totalVersesInQuran,
     required this.surahList,
     required this.getVerseData,
     this.onAyahChanged,
-  }) : initialVerseText = _sanitizeQuranText(initialVerseText),
-       super(key: key);
-
-  static String _sanitizeQuranText(String text) {
-    String cleanedText = text.replaceAll(RegExp(r'([ۖۗۘۙۚۛۜ۞۩])\s+'), r'$1');
-    return cleanedText.trim();
-  }
+  }) : super(key: key);
 
   @override
   State<AyahInteractionBottomSheet> createState() =>

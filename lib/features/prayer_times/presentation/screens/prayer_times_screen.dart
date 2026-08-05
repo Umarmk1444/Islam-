@@ -79,35 +79,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
         );
       }
     }
-    // 4. SYSTEM_ALERT_WINDOW (Display over other apps)
-    if (!await Permission.systemAlertWindow.isGranted) {
-      if (mounted) {
-        await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Display Over Other Apps'),
-            content: const Text(
-              'To show the Adhan full-screen UI when your phone is locked or while using other apps, please enable the "Display over other apps" permission.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  Navigator.pop(ctx);
-                  await Permission.systemAlertWindow.request();
-                },
-                child: const Text('Proceed'),
-              ),
-            ],
-          ),
-        );
-      }
-    }
   }
+
 
   @override
   Widget build(BuildContext context) {

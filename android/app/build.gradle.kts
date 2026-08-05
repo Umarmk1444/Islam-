@@ -37,7 +37,7 @@ android {
         // Using explicit numbers to guarantee compatibility with SDK 36
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
+        versionCode = 2
         versionName = "1.0.0"
     }
 
