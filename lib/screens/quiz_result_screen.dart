@@ -121,7 +121,7 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
                     Container(
                       width: 60,
                       height: 2,
-                      color: isDark ? AppColors.divider : Colors.grey.shade300,
+                      color: isDark ? AppColors.divider : AppColors.textMuted.withValues(alpha: 0.2),
                       margin: const EdgeInsets.symmetric(vertical: 8),
                     ),
                     Text(
@@ -176,7 +176,7 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
                   color: cardBg,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                      color: isDark ? AppColors.divider : Colors.grey.shade300),
+                      color: isDark ? AppColors.divider : AppColors.textMuted.withValues(alpha: 0.2)),
                 ),
                 child: TextField(
                   controller: _nameController,

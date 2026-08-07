@@ -3,11 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../l10n/app_localizations.dart';
 import '../theme_notifier.dart';
 import '../language_notifier.dart';
 import '../services/notification_service.dart';
 import '../core/services/background_engine.dart';
+import '../core/constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SETTINGS SCREEN — Premium Liquid Redesign
@@ -25,6 +27,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   String _selectedLanguage = 'English';
   bool _notificationsEnabled = true;
   int _notificationInterval = 60;
+  String _appVersion = 'Loading...';
 
   late final AnimationController _headerCtrl;
   late final Animation<double> _headerFade;
@@ -54,6 +57,12 @@ class _SettingsScreenState extends State<SettingsScreen>
       _selectedLanguage = prefs.getString('app_language') ?? 'English';
       _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
       _notificationInterval = prefs.getInt('notification_interval') ?? 60;
+    });
+
+    final packageInfo = await PackageInfo.fromPlatform();
+    if (!mounted) return;
+    setState(() {
+      _appVersion = 'Version ${packageInfo.version} (Build ${packageInfo.buildNumber})';
     });
   }
 
@@ -145,7 +154,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                         isSelected
                             ? Icons.check_circle_rounded
                             : Icons.circle_outlined,
-                        color: isSelected ? primaryColor : Colors.grey,
+                        color: isSelected ? primaryColor : AppColors.textMuted,
                         size: 18,
                       ),
                       const SizedBox(width: 12),
@@ -428,9 +437,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                       _LiquidDivider(borderColor),
                       _LiquidTile(
                         icon: Icons.info_outline_rounded,
-                        iconColor: Colors.grey,
+                        iconColor: AppColors.textMuted,
                         title: l10n.aboutApp,
-                        subtitle: 'Version 1.0.0',
+                        subtitle: _appVersion,
                         onTap: () {
                           showDialog(
                             context: context,
@@ -484,7 +493,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
-                                    'Version 1.0.0',
+                                    _appVersion,
                                     style: TextStyle(
                                       color: textMain,
                                       fontWeight: FontWeight.w600,
@@ -533,7 +542,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                       child: Text(
                         'Made with ❤️ for the Ummah',   // Hardcoded EN — never translated
                         style: TextStyle(
-                          color: Colors.grey.withValues(alpha: 0.7),
+                          color: AppColors.textSecondary.withValues(alpha: 0.7),
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
@@ -852,7 +861,7 @@ class _IntervalPicker extends StatelessWidget {
               height: 1,
               thickness: 0.6,
               color: primary.withValues(alpha: 0.15)),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
               _getIntervalTitle(
                   Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar'),
@@ -1185,7 +1194,7 @@ class _DeveloperCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Expanded(
                 child: GestureDetector(
                   onTap: onCopy,
@@ -1201,7 +1210,7 @@ class _DeveloperCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.copy_rounded, color: primary, size: 15),
-                        const SizedBox(width: 5),
+                        const SizedBox(width: 8),
                         Flexible(
                           child: FittedBox(
                             fit: BoxFit.scaleDown,

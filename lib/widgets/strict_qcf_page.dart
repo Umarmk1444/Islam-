@@ -74,7 +74,7 @@ class _StrictQcfPageState extends State<StrictQcfPage>
     _breathController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1800),
-    )..repeat(reverse: true);
+    )..forward();
     _loadPageVerses();
   }
 

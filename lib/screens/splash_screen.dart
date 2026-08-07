@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'main_navigation_screen.dart';
+import 'dart:io' show Platform;
+import 'package:in_app_update/in_app_update.dart';
 import '../core/database/database_helper.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -18,6 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    _checkForUpdates(); // Check for updates in the background without blocking
     _runInitSequence();
   }
 
@@ -54,6 +57,24 @@ class _SplashScreenState extends State<SplashScreen> {
       await DatabaseHelper.instance.init();
     } catch (e) {
       debugPrint('[Splash] Database initialization failed: $e');
+    }
+  }
+
+  Future<void> _checkForUpdates() async {
+    try {
+      if (!Platform.isAndroid) return;
+      
+      final info = await InAppUpdate.checkForUpdate();
+      if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+        if (info.flexibleUpdateAllowed) {
+          // Triggers the download silently in the background
+          await InAppUpdate.startFlexibleUpdate();
+          // Prompts the user to install and restart once the download is finished
+          await InAppUpdate.completeFlexibleUpdate();
+        }
+      }
+    } catch (e) {
+      debugPrint('[Splash] In-App Update failed: $e');
     }
   }
 

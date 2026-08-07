@@ -56,7 +56,7 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
     _pulseCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2000),
-    )..repeat(reverse: true);
+    )..forward();
     _pulseAnim = CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut);
   }
 
@@ -98,8 +98,15 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                     child: Row(
                       children: [
-                        const Text('🕌', style: TextStyle(fontSize: 18)),
-                        const SizedBox(width: 6),
+                        ClipOval(
+                          child: Image.asset(
+                            'assets/images/app_icon.png',
+                            width: 26,
+                            height: 26,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
                         Text(
                           title,
                           style: AppTextStyles.headlineMedium.copyWith(
@@ -129,7 +136,7 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
 
                   // ── Section Title ───────────────────────────────────────────────────
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       secTitle,
                       style: AppTextStyles.headlineMedium.copyWith(
@@ -864,7 +871,7 @@ const _tools = <_ToolItem>[
     color: Color(0xFF00838F),
     labels: {
       'en': 'Nearest Mosques',
-      'ar': 'دليل المساجد',
+      'ar': 'المسجد الأقرب',
       'am': 'የቅርብ መስጊዶች',
       'om': 'Masjiida Dhihoo',
     },

@@ -109,7 +109,7 @@ class _YouTubePlayerScreenState extends State<YouTubePlayerScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _LiveDot(),
-                    SizedBox(width: 5),
+                    SizedBox(width: 8),
                     Text(
                       'LIVE',
                       style: TextStyle(
@@ -195,7 +195,7 @@ class _YouTubePlayerScreenState extends State<YouTubePlayerScreen> {
                           label: 'Requires an active internet connection',
                           textColor: textColor,
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
                         Divider(
                           color: isDark
                               ? Colors.white.withValues(alpha: 0.06)

@@ -528,7 +528,7 @@ class _ResultRow extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, color: color, size: 18),
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
         Expanded(
           child: Text(
             label,
@@ -610,7 +610,7 @@ class _CalendarCard extends StatelessWidget {
                       ),
                       child: Icon(icon, color: accentColor, size: 18),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
                     Text(
                       label,
                       style: TextStyle(

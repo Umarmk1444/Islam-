@@ -150,12 +150,33 @@ class _LibraryContentListScreenState extends State<LibraryContentListScreen> {
                         color: AppColors.emeraldLight))
                 : _items.isEmpty
                     ? Center(
-                        child: Text(
-                          'No items found.',
-                          style: TextStyle(
-                              color: isDark
-                                  ? AppColors.textSecondary
-                                  : AppColors.emeraldDeep),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.search_off_rounded,
+                                size: 64,
+                                color:
+                                    AppColors.textMuted.withValues(alpha: 0.5)),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No items found.',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: isDark
+                                    ? AppColors.textSecondary
+                                    : AppColors.emeraldDeep,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Try adjusting your search query.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: AppColors.textMuted,
+                              ),
+                            ),
+                          ],
                         ),
                       )
                     : ListView.builder(
@@ -194,7 +215,8 @@ class _LibraryContentListScreenState extends State<LibraryContentListScreen> {
                               border: Border.all(
                                 color: isDark
                                     ? AppColors.divider
-                                    : Colors.grey.shade200,
+                                    : AppColors.textMuted
+                                        .withValues(alpha: 0.2),
                                 width: 0.5,
                               ),
                             ),

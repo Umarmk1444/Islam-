@@ -261,7 +261,7 @@ class _CategoryAuthorsListState extends State<_CategoryAuthorsList> {
     final primaryColor = AppTheme.getPrimaryColor(widget.theme);
     final borderColor = widget.theme == QuranTheme.cream
         ? const Color(0xFFC9A84C).withValues(alpha: 0.3)
-        : (isDark ? AppColors.divider : Colors.grey.shade200);
+        : (isDark ? AppColors.divider : AppColors.textMuted.withValues(alpha: 0.2));
 
     return Column(
       children: [

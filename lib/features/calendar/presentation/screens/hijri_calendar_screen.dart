@@ -498,13 +498,13 @@ class _Legend extends StatelessWidget {
             label: 'Today',
             textSec: textSec,
           ),
-          const SizedBox(width: 20),
+          const SizedBox(width: 24),
           _LegendDot(
             color: isDark ? AppColors.goldLight : const Color(0xFF1565C0),
             label: 'Hijri',
             textSec: textSec,
           ),
-          const SizedBox(width: 20),
+          const SizedBox(width: 24),
           _LegendDot(
             color: isDark ? textSec : const Color(0xFFDD2C00),
             label: 'Ethiopian',

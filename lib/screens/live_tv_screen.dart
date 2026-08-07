@@ -94,7 +94,7 @@ class LiveTvScreen extends StatelessWidget {
                         color: textColor.withValues(alpha: 0.6),
                       ),
                     ).animate().fade(delay: 50.ms),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
                     Expanded(
                       child: ListView.separated(
                         physics: const BouncingScrollPhysics(),
@@ -111,7 +111,7 @@ class LiveTvScreen extends StatelessWidget {
                         },
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

@@ -205,7 +205,7 @@ class _AuthorAudioScreenState extends State<AuthorAudioScreen> {
         final primaryColor = AppTheme.getPrimaryColor(theme);
         final borderColor = theme == QuranTheme.cream
             ? const Color(0xFFC9A84C).withValues(alpha: 0.3)
-            : (isDark ? AppColors.divider : Colors.grey.shade200);
+            : (isDark ? AppColors.divider : AppColors.textMuted.withValues(alpha: 0.2));
 
         final titleAndIconColor =
             theme == QuranTheme.cream ? AppColors.emeraldDeep : textColor;

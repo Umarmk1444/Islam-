@@ -13,6 +13,14 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
+val flutterVersionCode = localProperties.getProperty("flutter.versionCode")?.toInt() ?: 1
+val flutterVersionName = localProperties.getProperty("flutter.versionName") ?: "1.0.0"
+
 android {
     // This namespace property links your app ID to your AndroidManifest.xml
     namespace = "com.umer.quranzone"
@@ -25,11 +33,7 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    packaging {
-        jniLibs {
-            keepDebugSymbols.add("**/*.so")
-        }
-    }
+
 
     defaultConfig {
         applicationId = "com.umer.quranzone"
@@ -37,8 +41,8 @@ android {
         // Using explicit numbers to guarantee compatibility with SDK 36
         minSdk = 24
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.0.0"
+        versionCode = flutterVersionCode
+        versionName = flutterVersionName
     }
 
     signingConfigs {

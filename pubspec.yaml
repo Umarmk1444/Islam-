@@ -1,7 +1,7 @@
 name: quran_zone
-description: An Islamic application (Quran & Dawah) in Amharic and Oromo languages.
+description: An Islamic application (Quran & Dawah) in Arabic, English, Amharic and Oromo languages.
 publish_to: 'none'
-version: 1.0.0+2
+version: 1.0.1+3
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -10,6 +10,8 @@ dependencies:
   provider: ^6.1.2
   flutter_svg: ^2.0.10
   flutter_skill: ^0.2.6
+  package_info_plus: ^8.0.0
+  in_app_update: ^4.2.2
   flutter:
     sdk: flutter
   scrollable_positioned_list: ^0.3.8

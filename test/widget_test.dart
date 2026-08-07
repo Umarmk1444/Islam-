@@ -4,7 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_zone/screens/quran_screen.dart';
 
 void main() {
-  testWidgets('adds bottom padding when an overlay bar is shown', (tester) async {
+  testWidgets('adds bottom padding when an overlay bar is shown',
+      (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -22,7 +23,8 @@ void main() {
     expect(edgeInsets.bottom, equals(120.0));
   });
 
-  testWidgets('does not add bottom padding when no overlay bar is shown', (tester) async {
+  testWidgets('does not add bottom padding when no overlay bar is shown',
+      (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(

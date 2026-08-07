@@ -219,7 +219,11 @@ class _QuranScreenState extends State<QuranScreen> {
         final surahName = surahNum > 0
             ? DatabaseHelper.surahNamesArabicList[surahNum - 1]
             : '';
-        tmpPageHeaders[pageNum] = {'surahName': surahName, 'juz': juzNum};
+        tmpPageHeaders[pageNum] = {
+          'surahName': surahName,
+          'juz': juzNum,
+          'sura_num': surahNum
+        };
       }
 
       final prefs = await SharedPreferences.getInstance();
@@ -669,7 +673,11 @@ class _QuranScreenState extends State<QuranScreen> {
 
   // ── Navigation panel ──────────────────────────────────────────────────────
 
-  void _openNavigationPanel() {
+  void _openNavigationPanel([int initialIndex = 0]) {
+    final pageNum = _currentPageIndex + 1;
+    final header = _pageHeaders[pageNum] ?? {};
+    final currentSurahNum = header['sura_num'] as int? ?? 1;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -678,7 +686,9 @@ class _QuranScreenState extends State<QuranScreen> {
         surahList: _surahList,
         juzFirstPage: _juzFirstPage,
         juzHizbData: _juzHizbData,
-        currentPage: _currentPageIndex + 1,
+        currentPage: pageNum,
+        currentSurahNum: currentSurahNum,
+        initialIndex: initialIndex,
         pageBgColor: _pageBgColor,
         borderColor: _borderColor,
         goldTextColor: _goldTextColor,
@@ -727,7 +737,7 @@ class _QuranScreenState extends State<QuranScreen> {
           backgroundColor: _screenBgColor,
           appBar: AppBar(
             title: GestureDetector(
-              onTap: _openNavigationPanel,
+              onTap: () => _openNavigationPanel(0),
               behavior: HitTestBehavior.opaque,
               child: Text(
                 _getCurrentSurahName(),
@@ -750,7 +760,7 @@ class _QuranScreenState extends State<QuranScreen> {
               ),
               IconButton(
                 icon: const Icon(Icons.format_list_bulleted),
-                onPressed: _openNavigationPanel,
+                onPressed: () => _openNavigationPanel(0),
                 tooltip: 'الفهرس',
               ),
             ],
@@ -799,8 +809,8 @@ class _QuranScreenState extends State<QuranScreen> {
                                               child: Container(
                                                 margin:
                                                     const EdgeInsets.symmetric(
-                                                        horizontal: 20,
-                                                        vertical: 20),
+                                                        horizontal: 24,
+                                                        vertical: 24),
                                                 decoration: BoxDecoration(
                                                   color: _pageBgColor,
                                                   border: Border.all(
@@ -811,103 +821,75 @@ class _QuranScreenState extends State<QuranScreen> {
                                                 ),
                                                 child: Column(
                                                   children: [
-                                                    const SizedBox(height: 15),
+                                                    const SizedBox(height: 16),
                                                     // Surah and Juz Headers with container badges
                                                     Padding(
                                                       padding: const EdgeInsets
                                                           .symmetric(
-                                                          horizontal: 20),
+                                                          horizontal: 16),
                                                       child: Row(
                                                         mainAxisAlignment:
                                                             MainAxisAlignment
                                                                 .spaceBetween,
                                                         children: [
                                                           GestureDetector(
-                                                            onTap:
-                                                                _openNavigationPanel,
+                                                            onTap: () =>
+                                                                _openNavigationPanel(
+                                                                    0),
                                                             behavior:
                                                                 HitTestBehavior
                                                                     .opaque,
                                                             child: Container(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .symmetric(
-                                                                      horizontal:
-                                                                          10.0,
-                                                                      vertical:
-                                                                          2.0),
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color:
-                                                                    _screenBgColor,
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            6),
-                                                                border: Border.all(
-                                                                    color: _goldTextColor
-                                                                        .withValues(
-                                                                            alpha:
-                                                                                0.5),
-                                                                    width: 1.2),
-                                                              ),
-                                                              child: Text(
-                                                                'سُورَةُ $surahName',
-                                                                style:
-                                                                    TextStyle(
-                                                                  fontFamily:
-                                                                      'Amiri',
-                                                                  fontSize: 13,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  color:
-                                                                      _mainTextColor,
+                                                              constraints: const BoxConstraints(minHeight: 48),
+                                                              alignment: Alignment.center,
+                                                              child: Container(
+                                                                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 2.0),
+                                                                decoration: BoxDecoration(
+                                                                  color: _screenBgColor,
+                                                                  borderRadius: BorderRadius.circular(6),
+                                                                  border: Border.all(
+                                                                      color: _goldTextColor.withValues(alpha: 0.5),
+                                                                      width: 1.2),
+                                                                ),
+                                                                child: Text(
+                                                                  'سُورَةُ $surahName',
+                                                                  style: TextStyle(
+                                                                    fontFamily: 'Amiri',
+                                                                    fontSize: 13,
+                                                                    fontWeight: FontWeight.bold,
+                                                                    color: _mainTextColor,
+                                                                  ),
                                                                 ),
                                                               ),
                                                             ),
                                                           ),
                                                           GestureDetector(
-                                                            onTap:
-                                                                _openNavigationPanel,
+                                                            onTap: () =>
+                                                                _openNavigationPanel(
+                                                                    1),
                                                             behavior:
                                                                 HitTestBehavior
                                                                     .opaque,
                                                             child: Container(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .symmetric(
-                                                                      horizontal:
-                                                                          10.0,
-                                                                      vertical:
-                                                                          2.0),
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color:
-                                                                    _screenBgColor,
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            6),
-                                                                border: Border.all(
-                                                                    color: _goldTextColor
-                                                                        .withValues(
-                                                                            alpha:
-                                                                                0.5),
-                                                                    width: 1.2),
-                                                              ),
-                                                              child: Text(
-                                                                'الجُزْءُ $juzNumber',
-                                                                style:
-                                                                    TextStyle(
-                                                                  fontFamily:
-                                                                      'Amiri',
-                                                                  fontSize: 13,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  color:
-                                                                      _mainTextColor,
+                                                              constraints: const BoxConstraints(minHeight: 48),
+                                                              alignment: Alignment.center,
+                                                              child: Container(
+                                                                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 2.0),
+                                                                decoration: BoxDecoration(
+                                                                  color: _screenBgColor,
+                                                                  borderRadius: BorderRadius.circular(6),
+                                                                  border: Border.all(
+                                                                      color: _goldTextColor.withValues(alpha: 0.5),
+                                                                      width: 1.2),
+                                                                ),
+                                                                child: Text(
+                                                                  'الجُزْءُ $juzNumber',
+                                                                  style: TextStyle(
+                                                                    fontFamily: 'Amiri',
+                                                                    fontSize: 13,
+                                                                    fontWeight: FontWeight.bold,
+                                                                    color: _mainTextColor,
+                                                                  ),
                                                                 ),
                                                               ),
                                                             ),
@@ -1007,49 +989,35 @@ class _QuranScreenState extends State<QuranScreen> {
                                                           const EdgeInsets.only(
                                                               bottom: 10),
                                                       child: GestureDetector(
-                                                        onTap:
-                                                            _openNavigationPanel,
+                                                        onTap: () =>
+                                                            _openNavigationPanel(
+                                                                2),
                                                         behavior:
                                                             HitTestBehavior
                                                                 .opaque,
-                                                        child: Container(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .symmetric(
-                                                                  horizontal:
-                                                                      10.0,
-                                                                  vertical:
-                                                                      2.0),
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color:
-                                                                _screenBgColor,
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        6),
-                                                            border: Border.all(
-                                                                color: _goldTextColor
-                                                                    .withValues(
-                                                                        alpha:
-                                                                            0.5),
-                                                                width: 1.2),
-                                                          ),
-                                                          child: Text(
-                                                            _toArabicNumerals(
-                                                                pageNum),
-                                                            style: TextStyle(
-                                                              fontFamily:
-                                                                  'Amiri',
-                                                              fontSize: 20,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color:
-                                                                  _mainTextColor,
+                                                          child: Container(
+                                                            constraints: const BoxConstraints(minHeight: 48),
+                                                            alignment: Alignment.center,
+                                                            child: Container(
+                                                              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 2.0),
+                                                              decoration: BoxDecoration(
+                                                                color: _screenBgColor,
+                                                                borderRadius: BorderRadius.circular(6),
+                                                                border: Border.all(
+                                                                    color: _goldTextColor.withValues(alpha: 0.5),
+                                                                    width: 1.2),
+                                                              ),
+                                                              child: Text(
+                                                                _toArabicNumerals(pageNum),
+                                                                style: TextStyle(
+                                                                  fontFamily: 'Amiri',
+                                                                  fontSize: 20,
+                                                                  fontWeight: FontWeight.bold,
+                                                                  color: _mainTextColor,
+                                                                ),
+                                                              ),
                                                             ),
                                                           ),
-                                                        ),
                                                       ),
                                                     ),
                                                   ],
@@ -1105,7 +1073,7 @@ class _QuranScreenState extends State<QuranScreen> {
                                     onBookmarkChanged: _loadBookmark,
                                     onGoToBookmark: _goToBookmark,
                                     onChangeTheme: _showThemeSelector,
-                                    onOpenIndex: _openNavigationPanel,
+                                    onOpenIndex: () => _openNavigationPanel(0),
                                     onOpenSearch: _openQuranWordSearch,
                                     onDownloadPage: _downloadPageAudio,
                                     onIsPageDownloaded: (pageNum) async {
@@ -1175,7 +1143,7 @@ class _ThemeOption extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color:
-                isSelected ? borderColor : Colors.grey.withValues(alpha: 0.3),
+                isSelected ? borderColor : textColor.withValues(alpha: 0.3),
             width: isSelected ? 2.5 : 1,
           ),
           boxShadow: isSelected
@@ -1209,6 +1177,8 @@ class _NavigationPanel extends StatefulWidget {
     required this.juzFirstPage,
     required this.juzHizbData,
     required this.currentPage,
+    required this.currentSurahNum,
+    required this.initialIndex,
     required this.pageBgColor,
     required this.borderColor,
     required this.goldTextColor,
@@ -1221,6 +1191,8 @@ class _NavigationPanel extends StatefulWidget {
   final Map<int, int> juzFirstPage;
   final Map<int, List<Map<String, dynamic>>> juzHizbData;
   final int currentPage;
+  final int currentSurahNum;
+  final int initialIndex;
   final Color pageBgColor;
   final Color borderColor;
   final Color goldTextColor;
@@ -1239,7 +1211,8 @@ class _NavigationPanelState extends State<_NavigationPanel>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(
+        length: 3, vsync: this, initialIndex: widget.initialIndex);
   }
 
   @override
@@ -1265,7 +1238,7 @@ class _NavigationPanelState extends State<_NavigationPanel>
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: widget.mainTextColor.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -1273,7 +1246,7 @@ class _NavigationPanelState extends State<_NavigationPanel>
           TabBar(
             controller: _tabController,
             labelColor: widget.goldTextColor,
-            unselectedLabelColor: Colors.grey,
+            unselectedLabelColor: widget.mainTextColor.withValues(alpha: 0.65),
             indicatorColor: widget.borderColor,
             indicatorWeight: 3,
             labelStyle: const TextStyle(
@@ -1294,6 +1267,7 @@ class _NavigationPanelState extends State<_NavigationPanel>
               children: [
                 _SurahAyahTab(
                   surahList: widget.surahList,
+                  currentSurahNum: widget.currentSurahNum,
                   pageBgColor: widget.pageBgColor,
                   borderColor: widget.borderColor,
                   goldTextColor: widget.goldTextColor,
@@ -1313,6 +1287,7 @@ class _NavigationPanelState extends State<_NavigationPanel>
                   currentPage: widget.currentPage,
                   borderColor: widget.borderColor,
                   goldTextColor: widget.goldTextColor,
+                  mainTextColor: widget.mainTextColor,
                   onJumpToPage: widget.onJumpToPage,
                 ),
               ],
@@ -1329,6 +1304,7 @@ class _NavigationPanelState extends State<_NavigationPanel>
 class _SurahAyahTab extends StatefulWidget {
   const _SurahAyahTab({
     required this.surahList,
+    required this.currentSurahNum,
     required this.pageBgColor,
     required this.borderColor,
     required this.goldTextColor,
@@ -1337,6 +1313,7 @@ class _SurahAyahTab extends StatefulWidget {
   });
 
   final List<Map<String, dynamic>> surahList;
+  final int currentSurahNum;
   final Color pageBgColor;
   final Color borderColor;
   final Color goldTextColor;
@@ -1350,17 +1327,37 @@ class _SurahAyahTab extends StatefulWidget {
 class _SurahAyahTabState extends State<_SurahAyahTab> {
   final TextEditingController _searchCtrl = TextEditingController();
   List<Map<String, dynamic>> _filtered = [];
+  late final ScrollController _scrollController;
+  bool _scrolled = false;
 
   @override
   void initState() {
     super.initState();
     _filtered = widget.surahList;
+    _scrollController = ScrollController();
     _searchCtrl.addListener(_onSearch);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_scrolled) {
+      _scrolled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients && widget.currentSurahNum > 0 && widget.currentSurahNum <= 114) {
+          final offset = (widget.currentSurahNum - 1) * 73.0; // Estimate ~73px per row
+          if (offset > 0) {
+            _scrollController.jumpTo(offset);
+          }
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
     _searchCtrl.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -1416,7 +1413,7 @@ class _SurahAyahTabState extends State<_SurahAyahTab> {
                 children: [
                   Text(
                     surah['transliteration'] ?? '',
-                    style: const TextStyle(color: Colors.grey, fontSize: 14),
+                    style: TextStyle(color: widget.mainTextColor.withValues(alpha: 0.65), fontSize: 14),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -1499,7 +1496,7 @@ class _SurahAyahTabState extends State<_SurahAyahTab> {
                   const SizedBox(height: 8),
                   Text(
                     'من $totalVerses آية',
-                    style: const TextStyle(color: Colors.grey, fontSize: 13),
+                    style: TextStyle(color: widget.mainTextColor.withValues(alpha: 0.65), fontSize: 13),
                   ),
                 ],
               ),
@@ -1509,7 +1506,7 @@ class _SurahAyahTabState extends State<_SurahAyahTab> {
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
                 child:
-                    const Text('إلغاء', style: TextStyle(color: Colors.grey)),
+                    Text('إلغاء', style: TextStyle(color: widget.mainTextColor.withValues(alpha: 0.65))),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -1550,7 +1547,7 @@ class _SurahAyahTabState extends State<_SurahAyahTab> {
             style: TextStyle(color: widget.mainTextColor),
             decoration: InputDecoration(
               hintText: 'ابحث عن سورة...',
-              hintStyle: const TextStyle(color: Colors.grey),
+              hintStyle: TextStyle(color: widget.mainTextColor.withValues(alpha: 0.65)),
               prefixIcon: Icon(Icons.search, color: widget.borderColor),
               filled: true,
               fillColor: widget.borderColor.withValues(alpha: 0.07),
@@ -1564,58 +1561,71 @@ class _SurahAyahTabState extends State<_SurahAyahTab> {
           ),
         ),
         Expanded(
-          child: ListView.separated(
+          child: ListView.builder(
+            controller: _scrollController,
             padding: const EdgeInsets.only(bottom: 16),
             itemCount: _filtered.length,
-            separatorBuilder: (_, __) => Divider(
-              height: 1,
-              indent: 16,
-              endIndent: 16,
-              color: widget.borderColor.withValues(alpha: 0.3),
-            ),
+            itemExtent: 76.0,
             itemBuilder: (context, i) {
               final surah = _filtered[i];
-              return ListTile(
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                leading: Container(
-                  width: 38,
-                  height: 38,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: widget.borderColor.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: widget.borderColor, width: 1),
-                  ),
-                  child: Text(
-                    '${surah['number']}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: widget.goldTextColor,
+              final surahNum = surah['number'] as int;
+              final isCurrent = surahNum == widget.currentSurahNum;
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    tileColor: isCurrent
+                        ? widget.borderColor.withValues(alpha: 0.15)
+                        : null,
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                    leading: Container(
+                      width: 38,
+                      height: 38,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: widget.borderColor.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: widget.borderColor, width: 1),
+                      ),
+                      child: Text(
+                        '${surah['number']}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: widget.goldTextColor,
+                        ),
+                      ),
                     ),
+                    title: Text(
+                      'سورة ${surah['name']}',
+                      textDirection: TextDirection.rtl,
+                      style: TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                        color: widget.mainTextColor,
+                      ),
+                    ),
+                    subtitle: Text(
+                      surah['transliteration'] ?? '',
+                      style: TextStyle(color: widget.mainTextColor.withValues(alpha: 0.65), fontSize: 13),
+                    ),
+                    trailing: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14,
+                      color: widget.borderColor,
+                    ),
+                    onTap: () => _showAyahPicker(surah),
                   ),
-                ),
-                title: Text(
-                  'سورة ${surah['name']}',
-                  textDirection: TextDirection.rtl,
-                  style: TextStyle(
-                    fontFamily: 'Amiri',
-                    fontSize: 19,
-                    fontWeight: FontWeight.bold,
-                    color: widget.mainTextColor,
+                  Divider(
+                    height: 1,
+                    indent: 16,
+                    endIndent: 16,
+                    color: widget.borderColor.withValues(alpha: 0.3),
                   ),
-                ),
-                subtitle: Text(
-                  surah['transliteration'] ?? '',
-                  style: const TextStyle(color: Colors.grey, fontSize: 13),
-                ),
-                trailing: Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 14,
-                  color: widget.borderColor,
-                ),
-                onTap: () => _showAyahPicker(surah),
+                ],
               );
             },
           ),
@@ -1652,16 +1662,21 @@ class _JuzHizbTab extends StatefulWidget {
 
 class _JuzHizbTabState extends State<_JuzHizbTab> {
   late final Set<int> _expandedJuz;
-  late final List<GlobalKey> _juzKeys;
+  late final ScrollController _scrollController;
   bool _scrolled = false;
 
   int _getCurrentJuz() {
     for (int j = 1; j <= 30; j++) {
       final currentJuzPages = widget.juzHizbData[j];
       final nextJuzPages = widget.juzHizbData[j + 1];
-      final firstPage = currentJuzPages?.isNotEmpty == true ? (currentJuzPages!.first['page'] as int? ?? 1) : 1;
-      final nextFirstPage = nextJuzPages?.isNotEmpty == true ? (nextJuzPages!.first['page'] as int? ?? 604) : 605;
-      if (widget.currentPage >= firstPage && widget.currentPage < nextFirstPage) {
+      final firstPage = currentJuzPages?.isNotEmpty == true
+          ? (currentJuzPages!.first['page'] as int? ?? 1)
+          : 1;
+      final nextFirstPage = nextJuzPages?.isNotEmpty == true
+          ? (nextJuzPages!.first['page'] as int? ?? 604)
+          : 605;
+      if (widget.currentPage >= firstPage &&
+          widget.currentPage < nextFirstPage) {
         return j;
       }
     }
@@ -1704,7 +1719,7 @@ class _JuzHizbTabState extends State<_JuzHizbTab> {
   @override
   void initState() {
     super.initState();
-    _juzKeys = List.generate(30, (_) => GlobalKey());
+    _scrollController = ScrollController();
     _expandedJuz = {_getCurrentJuz()}; // Current juz expanded by default
   }
 
@@ -1714,16 +1729,21 @@ class _JuzHizbTabState extends State<_JuzHizbTab> {
     if (!_scrolled) {
       _scrolled = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final currentJuz = _getCurrentJuz();
-        final keyContext = _juzKeys[currentJuz - 1].currentContext;
-        if (keyContext != null) {
-          Scrollable.ensureVisible(keyContext,
-              alignment: 0.1,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut);
+        if (_scrollController.hasClients) {
+          final currentJuz = _getCurrentJuz();
+          final offset = (currentJuz - 1) * 61.0; // Estimate ~61px per collapsed Juz header
+          if (offset > 0) {
+            _scrollController.jumpTo(offset);
+          }
         }
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   String _toArabicNumerals(int number) {
@@ -1745,6 +1765,7 @@ class _JuzHizbTabState extends State<_JuzHizbTab> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      controller: _scrollController,
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: 30,
       itemBuilder: (context, index) {
@@ -1757,7 +1778,6 @@ class _JuzHizbTabState extends State<_JuzHizbTab> {
         final isCurrentJuz = juzNum == _getCurrentJuz();
 
         return Column(
-          key: _juzKeys[index],
           children: [
             // ── Juz Header ──
             InkWell(
@@ -1962,12 +1982,14 @@ class _PagesTab extends StatefulWidget {
     required this.currentPage,
     required this.borderColor,
     required this.goldTextColor,
+    required this.mainTextColor,
     required this.onJumpToPage,
   }) : super(key: key);
 
   final int currentPage;
   final Color borderColor;
   final Color goldTextColor;
+  final Color mainTextColor;
   final void Function(int page) onJumpToPage;
 
   @override
@@ -2047,7 +2069,7 @@ class _PagesTabState extends State<_PagesTab> {
                   textDirection: TextDirection.rtl,
                   decoration: InputDecoration(
                     hintText: 'اكتب رقم الصفحة (1 - 604)...',
-                    hintStyle: const TextStyle(color: Colors.grey),
+                    hintStyle: TextStyle(color: widget.mainTextColor.withValues(alpha: 0.65)),
                     prefixIcon:
                         Icon(Icons.find_in_page, color: widget.borderColor),
                     filled: true,

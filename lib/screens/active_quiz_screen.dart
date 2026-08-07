@@ -176,7 +176,8 @@ class _ActiveQuizScreenState extends State<ActiveQuizScreen>
                 Navigator.pop(ctx);
                 _triggerGameOver();
               },
-              child: const Text('استسلم', style: TextStyle(color: Colors.grey)),
+              child: const Text('استسلم',
+                  style: TextStyle(color: AppColors.textMuted)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -340,10 +341,8 @@ class _ActiveQuizScreenState extends State<ActiveQuizScreen>
                       style: TextStyle(
                           color: textColor)); // If they somehow get more
                 } else {
-                  return Icon(Icons.favorite_border,
-                      color:
-                          isDark ? Colors.grey.shade700 : Colors.grey.shade400,
-                      size: 20);
+                  return const Icon(Icons.favorite_border,
+                      color: AppColors.textMuted, size: 20);
                 }
               }).take(3).toList(),
             ),
@@ -363,8 +362,7 @@ class _ActiveQuizScreenState extends State<ActiveQuizScreen>
                   borderRadius: BorderRadius.circular(8),
                   child: LinearProgressIndicator(
                     value: 1.0 - _timerController.value,
-                    backgroundColor:
-                        isDark ? Colors.grey.shade800 : Colors.grey.shade300,
+                    backgroundColor: AppColors.textMuted.withValues(alpha: 0.5),
                     color: _timerController.value > 0.7
                         ? Colors.redAccent
                         : AppColors.emeraldLight,
@@ -389,7 +387,9 @@ class _ActiveQuizScreenState extends State<ActiveQuizScreen>
                   ),
                 ],
                 border: Border.all(
-                  color: isDark ? AppColors.divider : Colors.grey.shade200,
+                  color: isDark
+                      ? AppColors.divider
+                      : AppColors.textMuted.withValues(alpha: 0.2),
                 ),
               ),
               child: Text(
@@ -415,8 +415,9 @@ class _ActiveQuizScreenState extends State<ActiveQuizScreen>
 
                   // Determine colors based on answered state
                   Color btnBgColor = cardBg;
-                  Color btnBorderColor =
-                      isDark ? AppColors.divider : Colors.grey.shade300;
+                  Color btnBorderColor = isDark
+                      ? AppColors.divider
+                      : AppColors.textMuted.withValues(alpha: 0.2);
                   Color btnTextColor = textColor;
 
                   if (_isAnswered) {

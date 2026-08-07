@@ -59,15 +59,11 @@ class ZekrOverlayManager {
                     left: 16,
                     right: 16,
                   ),
-                  child: MediaQuery(
-                    data: MediaQuery.of(ctx)
-                        .copyWith(textScaler: TextScaler.noScaling),
-                    child: _InAppZekrCard(
-                      zekr: zekr,
-                      isDark: isDark,
-                      screenWidth: screenWidth,
-                      onDismiss: _removeOverlay,
-                    ),
+                  child: _InAppZekrCard(
+                    zekr: zekr,
+                    isDark: isDark,
+                    screenWidth: screenWidth,
+                    onDismiss: _removeOverlay,
                   )
                       .animate()
                       .fadeIn(duration: 450.ms, curve: Curves.easeOut)

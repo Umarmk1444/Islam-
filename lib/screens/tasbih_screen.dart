@@ -395,7 +395,7 @@ class _TasbihScreenState extends State<TasbihScreen>
     return Column(
       children: [
         const Text('🕌', style: TextStyle(fontSize: 36)),
-        const SizedBox(height: 10),
+        const SizedBox(height: 16),
         Text(
           _t(context, 'title'),
           style: TextStyle(
@@ -804,7 +804,7 @@ class _TasbihScreenState extends State<TasbihScreen>
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
@@ -923,7 +923,7 @@ class _TasbihScreenState extends State<TasbihScreen>
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: customDhikrs.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
+            separatorBuilder: (_, __) => const SizedBox(height: 16),
             itemBuilder: (context, index) {
               final dhikr = customDhikrs[index];
               return Container(

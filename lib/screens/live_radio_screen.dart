@@ -96,7 +96,7 @@ class _LiveRadioScreenState extends State<LiveRadioScreen> {
             ? const Color(0xFFC9A84C).withValues(alpha: 0.3)
             : (isDark
                 ? Colors.white.withValues(alpha: 0.05)
-                : Colors.grey.withValues(alpha: 0.1));
+                : AppColors.textMuted.withValues(alpha: 0.1));
 
         final filteredStations = _getFilteredStations();
 

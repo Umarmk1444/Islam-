@@ -60,7 +60,7 @@ class _LibraryScreenState extends State<LibraryScreen>
     _pulseCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2000),
-    )..repeat(reverse: true); // auto-reverses → perfect sine-like loop
+    )..forward(); // Trigger entrance pulse once instead of infinite loop
     _pulseAnim = CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut);
   }
 
