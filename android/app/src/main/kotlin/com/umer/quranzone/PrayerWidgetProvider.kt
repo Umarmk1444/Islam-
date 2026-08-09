@@ -71,18 +71,18 @@ class PrayerWidgetProvider : HomeWidgetProvider() {
                 )
                 setOnClickPendingIntent(R.id.widget_root, pendingIntent)
 
-                // Intent for Qibla Button
-                val qiblaIntent = Intent(context, MainActivity::class.java).apply {
+                // Intent for Quran Button
+                val quranIntent = Intent(context, MainActivity::class.java).apply {
                     action = "es.antonborri.home_widget.action.LAUNCH"
-                    data = Uri.parse("app://qibla_action")
+                    data = Uri.parse("app://quran_action")
                 }
-                val qiblaPendingIntent = PendingIntent.getActivity(
+                val quranPendingIntent = PendingIntent.getActivity(
                     context,
                     1,
-                    qiblaIntent,
+                    quranIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
-                setOnClickPendingIntent(R.id.btn_qibla, qiblaPendingIntent)
+                setOnClickPendingIntent(R.id.btn_quran, quranPendingIntent)
             }
 
             appWidgetManager.updateAppWidget(appWidgetId, views)

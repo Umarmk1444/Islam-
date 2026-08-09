@@ -10,11 +10,24 @@ import 'live_radio_screen.dart';
 import 'live_tv_screen.dart';
 import '../l10n/app_localizations.dart';
 
+bool _globalHasAnimatedMinbar = false;
+
+Widget _wrapAnim(Widget child, bool animate, int delayMs, {bool slideY = false}) {
+  if (!animate) return child;
+  if (slideY) return child.animate().fade(delay: delayMs.ms).slideY(begin: 0.2);
+  return child.animate().fade(delay: delayMs.ms).slideX(begin: 0.1);
+}
+
 class MinbarTab extends StatelessWidget {
   const MinbarTab({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final bool animate = !_globalHasAnimatedMinbar;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _globalHasAnimatedMinbar = true;
+    });
+
     return ValueListenableBuilder<QuranTheme>(
       valueListenable: AppTheme.notifier,
       builder: (context, theme, _) {
@@ -50,128 +63,141 @@ class MinbarTab extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        l10n.minbarHeaderSubtitle,
-                        style: AppTextStyles.audioSubtitle.copyWith(
-                          fontSize: 16,
-                          color: textColor.withValues(alpha: 0.7),
+                      _wrapAnim(
+                        Text(
+                          l10n.minbarHeaderSubtitle,
+                          style: AppTextStyles.audioSubtitle.copyWith(
+                            fontSize: 16,
+                            color: textColor.withValues(alpha: 0.7),
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
-                      ).animate().fade().slideY(begin: 0.2),
+                        animate, 0, slideY: true,
+                      ),
 
                       const SizedBox(height: 8),
 
-                      // 1. QURAN ONLY (Translated per language)
-                      _buildUniformCard(
-                        context: context,
-                        theme: theme,
-                        title: l10n.minbarQuranTitle,
-                        subtitle: l10n.minbarQuranSubtitle,
-                        icon: Icons.menu_book_rounded,
-                        primaryGradient: [
-                          AppColors.emeraldDeep,
-                          AppColors.emeraldMid
-                        ],
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const AudioCategoriesScreen(onlyQuran: true),
-                            ),
-                          );
-                        },
-                      ).animate().fade(delay: 100.ms).slideX(begin: 0.1),
+                      _wrapAnim(
+                        _buildUniformCard(
+                          context: context,
+                          theme: theme,
+                          title: l10n.minbarQuranTitle,
+                          subtitle: l10n.minbarQuranSubtitle,
+                          icon: Icons.menu_book_rounded,
+                          primaryGradient: [
+                            AppColors.emeraldDeep,
+                            AppColors.emeraldMid
+                          ],
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const AudioCategoriesScreen(onlyQuran: true),
+                              ),
+                            );
+                          },
+                        ),
+                        animate, 100,
+                      ),
 
                       const SizedBox(height: 6),
 
-                      // 2. ARABIC DAWAH & LECTURES
-                      _buildUniformCard(
-                        context: context,
-                        theme: theme,
-                        title: l10n.minbarDawahTitle,
-                        subtitle: l10n.minbarDawahSubtitle,
-                        icon: Icons.record_voice_over_rounded,
-                        primaryGradient: [
-                          isDark
-                              ? Colors.indigo.shade400
-                              : Colors.indigo.shade300,
-                          isDark
-                              ? Colors.indigo.shade600
-                              : Colors.indigo.shade500,
-                        ],
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const AudioCategoriesScreen(
-                                  excludeQuran: true),
-                            ),
-                          );
-                        },
-                      ).animate().fade(delay: 200.ms).slideX(begin: 0.1),
+                      _wrapAnim(
+                        _buildUniformCard(
+                          context: context,
+                          theme: theme,
+                          title: l10n.minbarDawahTitle,
+                          subtitle: l10n.minbarDawahSubtitle,
+                          icon: Icons.record_voice_over_rounded,
+                          primaryGradient: [
+                            isDark
+                                ? Colors.indigo.shade400
+                                : Colors.indigo.shade300,
+                            isDark
+                                ? Colors.indigo.shade600
+                                : Colors.indigo.shade500,
+                          ],
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const AudioCategoriesScreen(
+                                    excludeQuran: true),
+                              ),
+                            );
+                          },
+                        ),
+                        animate, 200,
+                      ),
 
                       const SizedBox(height: 6),
 
-                      // 3. AMHARIC DAWAH & LECTURES
-                      _buildUniformCard(
-                        context: context,
-                        theme: theme,
-                        title: l10n.minbarAmharicLessons,
-                        subtitle: l10n.minbarComingSoon,
-                        icon: Icons.language_rounded,
-                        isPlaceholder: true,
-                        primaryGradient: [
-                          isDark ? Colors.teal.shade400 : Colors.teal.shade300,
-                          isDark ? Colors.teal.shade600 : Colors.teal.shade500,
-                        ],
-                        onTap: () {},
-                      ).animate().fade(delay: 300.ms).slideX(begin: 0.1),
+                      _wrapAnim(
+                        _buildUniformCard(
+                          context: context,
+                          theme: theme,
+                          title: l10n.minbarAmharicLessons,
+                          subtitle: l10n.minbarComingSoon,
+                          icon: Icons.language_rounded,
+                          isPlaceholder: true,
+                          primaryGradient: [
+                            isDark ? Colors.teal.shade400 : Colors.teal.shade300,
+                            isDark ? Colors.teal.shade600 : Colors.teal.shade500,
+                          ],
+                          onTap: () {},
+                        ),
+                        animate, 300,
+                      ),
 
                       const SizedBox(height: 6),
 
-                      // 4. OROMO DAWAH & LECTURES
-                      _buildUniformCard(
-                        context: context,
-                        theme: theme,
-                        title: l10n.minbarOromoLessons,
-                        subtitle: l10n.minbarComingSoon,
-                        icon: Icons.language_rounded,
-                        isPlaceholder: true,
-                        primaryGradient: [
-                          isDark ? Colors.cyan.shade400 : Colors.cyan.shade300,
-                          isDark ? Colors.cyan.shade600 : Colors.cyan.shade500,
-                        ],
-                        onTap: () {},
-                      ).animate().fade(delay: 400.ms).slideX(begin: 0.1),
+                      _wrapAnim(
+                        _buildUniformCard(
+                          context: context,
+                          theme: theme,
+                          title: l10n.minbarOromoLessons,
+                          subtitle: l10n.minbarComingSoon,
+                          icon: Icons.language_rounded,
+                          isPlaceholder: true,
+                          primaryGradient: [
+                            isDark ? Colors.cyan.shade400 : Colors.cyan.shade300,
+                            isDark ? Colors.cyan.shade600 : Colors.cyan.shade500,
+                          ],
+                          onTap: () {},
+                        ),
+                        animate, 400,
+                      ),
 
                       const SizedBox(height: 6),
 
-                      // 5. DOWNLOADS (Translated per language)
-                      _buildUniformCard(
-                        context: context,
-                        theme: theme,
-                        title: l10n.minbarDownloadsTitle,
-                        subtitle: l10n.minbarDownloadsSubtitle,
-                        icon: Icons.download_done_rounded,
-                        primaryGradient: [
-                          isDark
-                              ? Colors.blueGrey.shade800
-                              : Colors.blueGrey.shade600,
-                          isDark
-                              ? Colors.blueGrey.shade700
-                              : Colors.blueGrey.shade400,
-                        ],
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const MinbarDownloadsScreen(),
-                            ),
-                          );
-                        },
-                      ).animate().fade(delay: 500.ms).slideX(begin: 0.1),
+                      _wrapAnim(
+                        _buildUniformCard(
+                          context: context,
+                          theme: theme,
+                          title: l10n.minbarDownloadsTitle,
+                          subtitle: l10n.minbarDownloadsSubtitle,
+                          icon: Icons.download_done_rounded,
+                          primaryGradient: [
+                            isDark
+                                ? Colors.blueGrey.shade800
+                                : Colors.blueGrey.shade600,
+                            isDark
+                                ? Colors.blueGrey.shade700
+                                : Colors.blueGrey.shade400,
+                          ],
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const MinbarDownloadsScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                        animate, 500,
+                      ),
 
                       const SizedBox(height: 12),
 

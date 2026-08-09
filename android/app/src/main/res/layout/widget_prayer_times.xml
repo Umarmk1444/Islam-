@@ -61,10 +61,10 @@
             </LinearLayout>
         </LinearLayout>
         
-        <!-- Right Side: Qibla Square Button -->
-        <LinearLayout android:id="@+id/btn_qibla" android:layout_width="52dp" android:layout_height="52dp" android:background="@drawable/widget_btn_qibla_bg" android:orientation="vertical" android:gravity="center" android:padding="6dp">
-            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/ic_qibla" android:contentDescription="Qibla" android:layout_marginBottom="4dp" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="القبلة" android:textColor="#FFFFFF" android:textSize="10sp" android:textStyle="normal" />
+        <!-- Right Side: Quran Square Button -->
+        <LinearLayout android:id="@+id/btn_quran" android:layout_width="52dp" android:layout_height="52dp" android:background="@drawable/widget_btn_qibla_bg" android:orientation="vertical" android:gravity="center" android:padding="6dp">
+            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/ic_quran_book" android:contentDescription="Quran" android:layout_marginBottom="4dp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="القرآن" android:textColor="#FFFFFF" android:textSize="10sp" android:textStyle="normal" />
         </LinearLayout>
         
     </LinearLayout>

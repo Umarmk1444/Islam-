@@ -74,22 +74,11 @@ class PrayerController extends ChangeNotifier {
     _prefs = await SharedPreferences.getInstance();
     _loadConfig();
 
-    bool isFirstTime = (config.latitude == 0.0 && config.longitude == 0.0 && !config.isManualLocation);
-
-    // 1. Boot Logic: Rely 100% on cached storage. DO NOT FETCH GPS unless first time.
+    // 1. Boot Logic: Rely 100% on cached storage. DO NOT FETCH GPS unless explicitly requested by user.
     if (config.latitude != 0.0 && config.longitude != 0.0) {
       isLocationMissing = false;
     } else {
       isLocationMissing = true;
-    }
-
-    if (isFirstTime) {
-      // 2. First-Time Auto Fetch
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Future.delayed(const Duration(milliseconds: 300), () {
-          _resolveLocation();
-        });
-      });
     }
 
     // Always finalize boot state, even if resolveLocation aborted/denied

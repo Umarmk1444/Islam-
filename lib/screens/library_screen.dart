@@ -33,6 +33,8 @@ class LibraryScreen extends StatefulWidget {
   State<LibraryScreen> createState() => _LibraryScreenState();
 }
 
+bool _globalHasAnimatedLibrary = false;
+
 class _LibraryScreenState extends State<LibraryScreen>
     with SingleTickerProviderStateMixin {
   final LibraryService _libraryService = LibraryService();
@@ -60,8 +62,17 @@ class _LibraryScreenState extends State<LibraryScreen>
     _pulseCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2000),
-    )..forward(); // Trigger entrance pulse once instead of infinite loop
+    );
     _pulseAnim = CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut);
+
+    if (!_globalHasAnimatedLibrary) {
+      _pulseCtrl.forward();
+      Future.delayed(const Duration(milliseconds: 2000), () {
+        _globalHasAnimatedLibrary = true;
+      });
+    } else {
+      _pulseCtrl.value = 1.0;
+    }
   }
 
   @override
@@ -375,9 +386,13 @@ class _DomainCardState extends State<_DomainCard>
     _slideAnim = Tween<Offset>(begin: const Offset(0, 0.22), end: Offset.zero)
         .animate(CurvedAnimation(parent: _entranceCtrl, curve: Curves.easeOutCubic));
 
-    Future.delayed(widget.entranceDelay, () {
-      if (mounted) _entranceCtrl.forward();
-    });
+    if (!_globalHasAnimatedLibrary) {
+      Future.delayed(widget.entranceDelay, () {
+        if (mounted) _entranceCtrl.forward();
+      });
+    } else {
+      _entranceCtrl.value = 1.0;
+    }
   }
 
   @override

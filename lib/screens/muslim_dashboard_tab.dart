@@ -31,6 +31,8 @@ class MuslimDashboardTab extends StatefulWidget {
   State<MuslimDashboardTab> createState() => _MuslimDashboardTabState();
 }
 
+bool _globalHasAnimatedDashboard = false;
+
 class _MuslimDashboardTabState extends State<MuslimDashboardTab>
     with SingleTickerProviderStateMixin {
   static const _localizedTitle = {
@@ -56,8 +58,17 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
     _pulseCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2000),
-    )..forward();
+    );
     _pulseAnim = CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut);
+
+    if (!_globalHasAnimatedDashboard) {
+      _pulseCtrl.forward();
+      Future.delayed(const Duration(milliseconds: 2000), () {
+        _globalHasAnimatedDashboard = true;
+      });
+    } else {
+      _pulseCtrl.value = 1.0;
+    }
   }
 
   @override
@@ -85,8 +96,8 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
             const double space10 = 10;
             const double space6 = 6;
             const double space12 = 12;
-            final double gridRatio = isAdVisible ? 1.25 : 1.18;
-            const double paddingBottom = 12;
+            final double gridRatio = isAdVisible ? 1.34 : 1.27; // Increased ratio to shrink height
+            const double paddingBottom = 40; // Extra padding at the bottom to leave room for ad pushed content
 
             return SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
@@ -141,6 +152,7 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
                       secTitle,
                       style: AppTextStyles.headlineMedium.copyWith(
                         fontSize: 13,
+                        color: isDark ? Colors.white : const Color(0xFF032616),
                       ),
                     ),
                   ),
@@ -230,9 +242,71 @@ class _MiqatCard extends StatelessWidget {
       animation: ctrl,
       builder: (context, _) {
         final model = ctrl.model;
+        if (ctrl.isLocationMissing && !ctrl.isLoading) {
+          return LiquidPressable(
+            onTap: () => ctrl.syncLocation(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF0D4F3C), Color(0xFF1A7A5E)],
+                ),
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF0D4F3C).withValues(alpha: 0.45),
+                    blurRadius: 14,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.location_on_rounded, color: Colors.white, size: 28),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          locale == 'ar' ? 'مواقيت الصلاة' : 'Prayer Times',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          locale == 'ar'
+                              ? 'اضغط هنا لتحديد موقعك وعرض أوقات الصلاة'
+                              : 'Tap here to enable location & see prayer times',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
         if (model == null || ctrl.isLoading) {
           return Container(
-            height: 140,
+            padding: const EdgeInsets.symmetric(vertical: 40),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
@@ -530,16 +604,16 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
     final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
     final pctStr = (_progressPct * 100).toStringAsFixed(0);
 
-    // Royal emerald and gold color scheme
-    const Color emeraldDark = Color(0xFF063A20);
-    const Color emeraldDeep = Color(0xFF032212);
-    const Color emeraldLight = Color(0xFF0F6636);
-    const Color goldColor = Color(0xFFFFD54F);
-
-    final Color textPrimary = isDark ? Colors.white : const Color(0xFF0D3B23);
-    final Color textSecondary =
-        isDark ? Colors.white70 : const Color(0xFF1E5235);
-    final Color progressValColor = isDark ? goldColor : const Color(0xFF2E7D32);
+    // Premium Color Palette
+    const Color goldColor = Color(0xFFFFD700);
+    const Color goldDark = Color(0xFFD4AF37);
+    const Color midnightBlue = Color(0xFF071120);
+    const Color deepEmerald = Color(0xFF032616);
+    
+    // Cream Mood Palette
+    const Color creamLight = Color(0xFFFFFDF7);
+    const Color creamDark = Color(0xFFF3EAC6);
+    const Color darkGold = Color(0xFFB8860B);
 
     final String title, action, progress, ayah;
     if (locale == 'ar') {
@@ -571,213 +645,260 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
         animation: _pulseAnim,
         builder: (context, child) {
           final t = _pulseAnim.value;
-          final scale = 1.0 + 0.025 * t;
-
-          final Color currentBorder = Color.lerp(
-            isDark ? emeraldLight : const Color(0xFF81C784),
-            goldColor.withValues(alpha: 0.95),
-            t * 0.55,
-          )!;
-          final double borderWidth = 1.4 + 1.0 * t;
-
-          final glowColor = Color.lerp(
-            isDark ? emeraldLight : const Color(0xFF81C784),
-            goldColor,
-            0.65,
-          )!;
-          final double shadowAlpha =
-              isDark ? (0.20 + 0.35 * t) : (0.10 + 0.20 * t);
-          final double blurRadius = 10.0 + 20.0 * t;
-          final double spreadRadius = 0.8 + 3.0 * t;
+          final scale = 1.0 + 0.015 * t;
+          final double shadowSpread = 1.0 + 2.0 * t;
+          final double glowOpacity = isDark ? (0.15 + 0.15 * t) : (0.05 + 0.10 * t);
 
           return Transform.scale(
             scale: scale,
             child: Container(
-              height: 84,
+              height: 95, // Increased height for elegance
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: isDark
-                      ? [emeraldDark, emeraldDeep]
-                      : [const Color(0xFFE8F5E9), const Color(0xFFC8E6C9)],
+                  colors: isDark 
+                      ? [midnightBlue, deepEmerald]
+                      : [creamLight, creamDark],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: currentBorder, width: borderWidth),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: isDark 
+                      ? goldDark.withValues(alpha: 0.3 + (0.2 * t))
+                      : darkGold.withValues(alpha: 0.2 + (0.15 * t)),
+                  width: 1.2,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: glowColor.withValues(alpha: shadowAlpha),
-                    blurRadius: blurRadius,
-                    spreadRadius: spreadRadius,
-                    offset: const Offset(0, 4),
+                    color: isDark ? Colors.black.withValues(alpha: 0.4) : Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                  BoxShadow(
+                    color: (isDark ? goldDark : darkGold).withValues(alpha: glowOpacity),
+                    blurRadius: 20,
+                    spreadRadius: shadowSpread,
                   ),
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(22),
                 child: Stack(
                   children: [
-                    // Gold radial glow orb (upper right) - intensified
+                    // --- Subtle Islamic Geometric Background Pattern Overlay ---
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: _IslamicPatternPainter(
+                          color: isDark ? goldColor.withValues(alpha: 0.06) : darkGold.withValues(alpha: 0.05),
+                        ),
+                      ),
+                    ),
+                    // --- Golden Orbs for Sacred Lighting Effect ---
                     Positioned(
-                      top: -45,
-                      right: -25,
+                      top: -30,
+                      right: locale == 'ar' ? null : -20,
+                      left: locale == 'ar' ? -20 : null,
                       child: Container(
-                        width: 150,
-                        height: 150,
+                        width: 120,
+                        height: 120,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: RadialGradient(
                             colors: [
-                              goldColor.withValues(
-                                  alpha: isDark ? 0.32 * t : 0.22 * t),
-                              goldColor.withValues(alpha: 0.0),
+                              (isDark ? goldColor : Colors.white).withValues(alpha: 0.2 + (0.1 * t)),
+                              Colors.transparent,
                             ],
                           ),
                         ),
                       ),
                     ),
-                    // Emerald radial glow orb (lower left) - intensified
                     Positioned(
-                      bottom: -35,
-                      left: -35,
+                      bottom: -40,
+                      left: locale == 'ar' ? null : -20,
+                      right: locale == 'ar' ? -20 : null,
                       child: Container(
-                        width: 130,
-                        height: 130,
+                        width: 100,
+                        height: 100,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: RadialGradient(
                             colors: [
-                              emeraldLight.withValues(
-                                  alpha: isDark ? 0.38 * t : 0.26 * t),
-                              emeraldLight.withValues(alpha: 0.0),
+                              (isDark ? const Color(0xFF00FF88) : darkGold).withValues(alpha: 0.1),
+                              Colors.transparent,
                             ],
                           ),
                         ),
                       ),
                     ),
-                    // Special golden glow orb right behind the book icon to make it emit light
-                    Positioned(
-                      left: 12,
-                      top: 10,
-                      child: Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [
-                              goldColor.withValues(
-                                  alpha: isDark ? 0.70 * t : 0.50 * t),
-                              goldColor.withValues(alpha: 0.0),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Main Content centered perfectly using Positioned.fill
+                    // --- Main Content ---
                     Positioned.fill(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 10),
+                            horizontal: 16, vertical: 12),
                         child: Row(
                           children: [
-                            // Golden medal style book container
-                            Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [goldColor, Color(0xFFF57F17)],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(14),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: goldColor.withValues(alpha: 0.4),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
+                            // Majestic Layered Iconography
+                            SizedBox(
+                              width: 54,
+                              height: 54,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  // Outer pulse
+                                  Container(
+                                    width: 54,
+                                    height: 54,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: (isDark ? goldColor : darkGold).withValues(alpha: 0.3 * t),
+                                        width: 1,
+                                      ),
+                                    ),
+                                  ),
+                                  // Inner premium container
+                                  Container(
+                                    width: 44,
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(
+                                        colors: isDark 
+                                            ? [goldDark.withValues(alpha: 0.2), goldColor.withValues(alpha: 0.05)]
+                                            : [Colors.white, creamLight],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      border: Border.all(
+                                        color: (isDark ? goldColor : darkGold).withValues(alpha: 0.5),
+                                        width: 1.5,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: (isDark ? goldColor : darkGold).withValues(alpha: 0.2),
+                                          blurRadius: 8,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Icon(
+                                      Icons.auto_stories_rounded,
+                                      color: isDark ? goldColor.withValues(alpha: 0.9) : darkGold,
+                                      size: 24,
+                                    ),
                                   ),
                                 ],
                               ),
-                              child: const Icon(
-                                Icons.menu_book_rounded,
-                                color: Colors.white,
-                                size: 26,
-                              ),
                             ),
-                            const SizedBox(width: 14),
+                            const SizedBox(width: 16),
+                            // Text & Progress Content
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    alignment: Alignment.centerLeft,
-                                    child: Row(
-                                      children: [
-                                        Text(
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                                    textBaseline: TextBaseline.alphabetic,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
                                           title,
                                           style: TextStyle(
-                                            color: textPrimary,
-                                            fontSize: 15,
+                                            color: isDark ? Colors.white : deepEmerald,
+                                            fontSize: 16,
                                             fontWeight: FontWeight.bold,
+                                            letterSpacing: 0.5,
+                                            shadows: isDark ? const [
+                                              Shadow(
+                                                color: Colors.black54,
+                                                blurRadius: 4,
+                                                offset: Offset(0, 1),
+                                              ),
+                                            ] : null,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        action,
+                                        style: TextStyle(
+                                          color: isDark ? goldColor : darkGold,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: 0.3,
+                                          shadows: isDark ? [
+                                            Shadow(
+                                              color: goldColor.withValues(alpha: 0.4),
+                                              blurRadius: 4,
+                                            ),
+                                          ] : null,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  // Luxurious Progress Bar
+                                  Stack(
+                                    alignment: locale == 'ar'
+                                        ? Alignment.centerRight
+                                        : Alignment.centerLeft,
+                                    children: [
+                                      Container(
+                                        height: 2,
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(
+                                          color: isDark ? Colors.white.withValues(alpha: 0.15) : deepEmerald.withValues(alpha: 0.1),
+                                          borderRadius: BorderRadius.circular(2),
+                                        ),
+                                      ),
+                                      FractionallySizedBox(
+                                        widthFactor: _progressPct.clamp(0.0, 1.0),
+                                        child: Container(
+                                          height: 2,
+                                          decoration: BoxDecoration(
+                                            color: isDark ? goldColor : darkGold,
+                                            borderRadius: BorderRadius.circular(2),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: isDark ? goldColor : darkGold.withValues(alpha: 0.5),
+                                                blurRadius: 4,
+                                                spreadRadius: 1,
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                        const SizedBox(width: 12),
-                                        Text(
-                                          action,
-                                          style: TextStyle(
-                                            color: isDark
-                                                ? goldColor
-                                                : const Color(0xFFE65100),
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 5),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(4),
-                                    child: LinearProgressIndicator(
-                                      value: _progressPct,
-                                      backgroundColor: isDark
-                                          ? Colors.white12
-                                          : const Color(0xFFC8E6C9),
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                          progressValColor),
-                                      minHeight: 5,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    alignment: Alignment.centerLeft,
-                                    child: Row(
-                                      children: [
-                                        Text(
+                                  const SizedBox(height: 8),
+                                  // Ayah and Progress Info
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
                                           ayah,
                                           style: TextStyle(
-                                            color: isDark
-                                                ? goldColor
-                                                : const Color(0xFF2E7D32),
+                                            color: isDark ? goldColor.withValues(alpha: 0.85) : deepEmerald.withValues(alpha: 0.9),
                                             fontSize: 11,
                                             fontWeight: FontWeight.w600,
                                           ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        const SizedBox(width: 16),
-                                        Text(
-                                          progress,
-                                          style: TextStyle(
-                                            color: textSecondary,
-                                            fontSize: 11,
-                                          ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        progress,
+                                        style: TextStyle(
+                                          color: isDark ? Colors.white.withValues(alpha: 0.7) : deepEmerald.withValues(alpha: 0.7),
+                                          fontSize: 11,
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -794,6 +915,38 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
         },
       ),
     );
+  }
+}
+
+class _IslamicPatternPainter extends CustomPainter {
+  final Color color;
+
+  _IslamicPatternPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+
+    const double step = 40.0;
+    for (double x = -step; x < size.width + step; x += step) {
+      for (double y = -step; y < size.height + step; y += step) {
+        canvas.save();
+        canvas.translate(x, y);
+        canvas.rotate(0.785398); // 45 degrees
+        canvas.drawRect(Rect.fromCenter(center: Offset.zero, width: 22, height: 22), paint);
+        canvas.rotate(-0.785398);
+        canvas.drawRect(Rect.fromCenter(center: Offset.zero, width: 22, height: 22), paint);
+        canvas.restore();
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _IslamicPatternPainter oldDelegate) {
+    return oldDelegate.color != color;
   }
 }
 
@@ -927,9 +1080,13 @@ class _ToolGridCellState extends State<_ToolGridCell>
         .animate(
             CurvedAnimation(parent: _entranceCtrl, curve: Curves.easeOutCubic));
 
-    Future.delayed(widget.entranceDelay, () {
-      if (mounted) _entranceCtrl.forward();
-    });
+    if (!_globalHasAnimatedDashboard) {
+      Future.delayed(widget.entranceDelay, () {
+        if (mounted) _entranceCtrl.forward();
+      });
+    } else {
+      _entranceCtrl.value = 1.0;
+    }
   }
 
   @override
@@ -1006,7 +1163,7 @@ class _ToolGridCellState extends State<_ToolGridCell>
           child: AnimatedBuilder(
             animation: widget.pulseAnim,
             builder: (_, child) {
-              final t = _phased(widget.pulseAnim.value);
+              final t = _globalHasAnimatedDashboard ? 0.0 : _phased(widget.pulseAnim.value);
 
               // Scale: 1.00 -> 1.03
               final scale = 1.0 + 0.03 * t;
