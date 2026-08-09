@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/widget_bg_afternoon"
+    android:orientation="vertical"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="14dp"
+    android:paddingVertical="10dp">
+
+    <!-- Top row: Dates and Location -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+        <TextView android:id="@+id/tv_hijri_date" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFD54F" android:textSize="9sp" android:textStyle="normal" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="  •  " android:textColor="#B3FFFFFF" android:textSize="9sp" />
+        <TextView android:id="@+id/tv_gregorian_date" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#B3FFFFFF" android:textSize="9sp" />
+        
+        <FrameLayout android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
+        
+        <!-- Location Pin + Text -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📍 " android:textColor="#B3FFFFFF" android:textSize="8sp" />
+        <TextView android:id="@+id/tv_location" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#B3FFFFFF" android:textSize="9sp" android:maxLines="1" android:ellipsize="end" />
+    </LinearLayout>
+
+    <FrameLayout android:layout_width="match_parent" android:layout_height="10dp" />
+
+    <!-- Bottom Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="bottom">
+        
+        <!-- Left Side: Texts -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginEnd="8dp">
+            
+            <TextView android:id="@+id/tv_next_prayer_label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Next Prayer" android:textColor="#B3FFFFFF" android:textSize="11sp" android:layout_marginBottom="2dp" />
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="true"
+                android:gravity="bottom">
+                
+                <TextView android:id="@+id/tv_prayer_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="26sp" android:textStyle="bold" />
+                <TextView android:id="@+id/tv_prayer_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFD54F" android:textSize="15sp" android:textStyle="bold" android:layout_marginStart="6dp" />
+                
+                <FrameLayout android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
+                
+                <Chronometer android:id="@+id/chronometer_countdown" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="20sp" android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+        
+        <!-- Right Side: Qibla Square Button -->
+        <LinearLayout android:id="@+id/btn_qibla" android:layout_width="52dp" android:layout_height="52dp" android:background="@drawable/widget_btn_qibla_bg" android:orientation="vertical" android:gravity="center" android:padding="6dp">
+            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/ic_qibla" android:contentDescription="Qibla" android:layout_marginBottom="4dp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="القبلة" android:textColor="#FFFFFF" android:textSize="10sp" android:textStyle="normal" />
+        </LinearLayout>
+        
+    </LinearLayout>
+</LinearLayout>

@@ -132,6 +132,7 @@ class PrayerConfig {
     this.useGps             = true,
     this.hasManualMethodOverride = false,
     this.hasManualMadhabOverride = false,
+    this.isManualLocation   = false,
     this.is24HourFormat     = false,
     this.hijriOffset        = 0,
     this.prayerOffsets      = const {
@@ -186,6 +187,9 @@ class PrayerConfig {
   /// Whether the user manually configured the Madhab.
   final bool hasManualMadhabOverride;
 
+  /// Whether the location was set manually by the user (bypassing GPS).
+  final bool isManualLocation;
+
   /// Whether the UI displays 24-hour formats (e.g. 16:30) or 12-hour (e.g. 04:30 PM).
   final bool is24HourFormat;
 
@@ -218,6 +222,7 @@ class PrayerConfig {
     'useGps':        useGps,
     'hasManualMethodOverride': hasManualMethodOverride,
     'hasManualMadhabOverride': hasManualMadhabOverride,
+    'isManualLocation':      isManualLocation,
     'is24HourFormat': is24HourFormat,
     'hijriOffset':    hijriOffset,
     'prayerOffsets':  prayerOffsets,
@@ -297,6 +302,7 @@ class PrayerConfig {
       useGps: j['useGps'] as bool? ?? true,
       hasManualMethodOverride: j['hasManualMethodOverride'] as bool? ?? false,
       hasManualMadhabOverride: j['hasManualMadhabOverride'] as bool? ?? false,
+      isManualLocation: j['isManualLocation'] as bool? ?? false,
       is24HourFormat: j['is24HourFormat'] as bool? ?? false,
       hijriOffset:    j['hijriOffset'] as int? ?? 0,
       prayerOffsets:  parsedOffsets,
@@ -321,6 +327,7 @@ class PrayerConfig {
     bool? useGps,
     bool? hasManualMethodOverride,
     bool? hasManualMadhabOverride,
+    bool? isManualLocation,
     bool? is24HourFormat,
     int? hijriOffset,
     Map<String, int>? prayerOffsets,
@@ -338,6 +345,7 @@ class PrayerConfig {
       useGps:        useGps        ?? this.useGps,
       hasManualMethodOverride: hasManualMethodOverride ?? this.hasManualMethodOverride,
       hasManualMadhabOverride: hasManualMadhabOverride ?? this.hasManualMadhabOverride,
+      isManualLocation: isManualLocation ?? this.isManualLocation,
       is24HourFormat: is24HourFormat ?? this.is24HourFormat,
       hijriOffset:    hijriOffset    ?? this.hijriOffset,
       prayerOffsets:  prayerOffsets  ?? this.prayerOffsets,

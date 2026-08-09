@@ -9,7 +9,7 @@ class AppLocalizationsAm extends AppLocalizations {
   AppLocalizationsAm([String locale = 'am']) : super(locale);
 
   @override
-  String get settings => 'ቅንብሮች';
+  String get settings => 'ሴቲንግ';
 
   @override
   String get appLanguage => 'የመተግበሪያ ቋንቋ';
@@ -88,7 +88,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get navMinbar => 'ሚንበር';
 
   @override
-  String get navSettings => 'ቅንብሮች';
+  String get navSettings => 'ሴቲንግ';
 
   @override
   String get dawahScholars => 'የዳዕዋ ሊቃውንት';
@@ -432,7 +432,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get muezzinAlafasy => 'ሚሻሪ አል አፋሲ';
 
   @override
-  String get navLibrary => 'Library';
+  String get navLibrary => 'መጽሐፍቶች';
 
   @override
   String get libraryAll => 'All';
@@ -516,4 +516,110 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get minbarHeaderSubtitle => 'የቁርኣን ንባቦችን እና ኢስላማዊ ትምህርቶችን ያዳምጡ';
+
+  @override
+  String get forceSyncTimeAndLocation => 'ሰዓት እና ቦታን በግድ አመሳስል';
+
+  @override
+  String get tapToSetLocation => 'ቦታ ለማስተካከል ይጫኑ';
+
+  @override
+  String get notificationAlarmRequired => 'አዛን በትክክለኛው ሰዓት እንዲሰማ ያስፈልጋል';
+
+  @override
+  String get backgroundExecution => 'ከጀርባ መስራት';
+
+  @override
+  String get setupGuide => 'የፈቃዶች ማዋቀር መመሪያ';
+
+  @override
+  String get selectLocation => 'ቦታ ይምረጡ';
+
+  @override
+  String get country => 'ሀገር';
+
+  @override
+  String get cityRegion => 'ከተማ / ክልል';
+
+  @override
+  String get search => 'ፈልግ...';
+
+  @override
+  String get saveLocation => 'ቦታ አስቀምጥ';
+
+  @override
+  String get fajr => 'ፈጅር';
+
+  @override
+  String get sunrise => 'ሹሩቅ';
+
+  @override
+  String get dhuhr => 'ዙህር';
+
+  @override
+  String get asr => 'ዐስር';
+
+  @override
+  String get maghrib => 'መግሪብ';
+
+  @override
+  String get isha => 'ዒሻእ';
+
+  @override
+  String get autoDetectLocation => 'በራስ-ሰር ቦታን ያግኙ (ጂፒኤስ)';
+
+  @override
+  String get calculationMethod => 'የስሌት ዘዴ';
+
+  @override
+  String get generalSettings => 'አጠቃላይ';
+
+  @override
+  String get twentyFourHourClock => 'የ24-ሰዓት አቆጣጠር';
+
+  @override
+  String get hijriDateOffset => 'የሂጅሪያ ቀን ማስተካከያ';
+
+  @override
+  String get hijriOffsetDescription => 'ከአካባቢዎ የጨረቃ እይታ ጋር ለማስማማት ያስተካክሉ';
+
+  @override
+  String get advancedSettings => 'የላቀ';
+
+  @override
+  String get ensureAthanPlaysInBackground => 'አዛን ከጀርባ መስራቱን ያረጋግጡ';
+
+  @override
+  String get recalculatePrayerTimes => 'ሁሉንም የሶላት ጊዜዎች አሁን እንደገና አስላ';
+
+  @override
+  String get syncingLocation => 'ቦታን በማመሳሰል ላይ...';
+
+  @override
+  String get neverMissPrayer => 'አንድም ሶላት አያምልጥዎ';
+
+  @override
+  String get setupGuideDescription =>
+      'አዛን ከጀርባ በትክክለኛው ሰዓት እንዲሰራ፣ እባክዎ የሚከተሉትን ፈቃዶች ያብሩ።';
+
+  @override
+  String get notificationsTitle => 'ማሳወቂያዎች';
+
+  @override
+  String get notificationsSubtitle => 'የአዛን ማሳወቂያዎችን ለማሳየት ያስፈልጋል';
+
+  @override
+  String get exactAlarmsTitle => 'ትክክለኛ ማንቂያዎች';
+
+  @override
+  String get batteryOptimizationSubtitle => 'ባትሪ ለመቆጠብ ስልኩ አዛንን እንዳይዘጋው ይከላከላል';
+
+  @override
+  String get done => 'ተጠናቋል';
+
+  @override
+  String get completeSetupAbove => 'ከላይ ያለውን ማዋቀር ያጠናቅቁ';
+
+  @override
+  String get allow => 'ፍቀድ';
 }

@@ -47,6 +47,7 @@ dependencies:
   dio: ^5.4.0
   youtube_player_flutter: ^10.0.1
   google_mobile_ads: ^5.1.0
+  home_widget: ^0.9.3
 
 dev_dependencies:
   flutter_test:
@@ -62,6 +63,7 @@ flutter:
     - assets/images/
     - assets/audio/
     - assets/muezzins.json
+    - assets/cities.json.gz
     - assets/icons/light/
     - assets/icons/dark/
   fonts:

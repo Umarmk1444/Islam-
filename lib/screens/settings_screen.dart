@@ -23,7 +23,9 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
   String _selectedLanguage = 'English';
   bool _notificationsEnabled = true;
   int _notificationInterval = 60;
@@ -178,6 +180,7 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final l10n = AppLocalizations.of(context)!;
 
     return ValueListenableBuilder<QuranTheme>(
@@ -197,135 +200,25 @@ class _SettingsScreenState extends State<SettingsScreen>
           body: CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
-              // ── Gradient SliverAppBar ──────────────────────────────────────
+              // ── Compact Elegant AppBar ─────────────────────────────────────
               SliverAppBar(
-                expandedHeight: 140,
                 pinned: true,
                 automaticallyImplyLeading: false,
                 backgroundColor:
                     isDark ? const Color(0xFF0D1F17) : const Color(0xFF1B5E20),
                 elevation: 0,
-                flexibleSpace: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final top = constraints.biggest.height;
-                    final statusBarHeight = MediaQuery.of(context).padding.top;
-                    final collapsedThreshold =
-                        kToolbarHeight + statusBarHeight + 15;
-                    final isCollapsed = top <= collapsedThreshold;
-
-                    return FlexibleSpaceBar(
-                      collapseMode: CollapseMode.parallax,
-                      centerTitle: true,
-                      expandedTitleScale: 1.0,
-                      titlePadding: const EdgeInsets.only(bottom: 14),
-                      title: AnimatedOpacity(
-                        duration: const Duration(milliseconds: 150),
-                        opacity: isCollapsed ? 1.0 : 0.0,
-                        child: Text(
-                          l10n.settings,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                      ),
-                      background: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: isDark
-                                    ? [
-                                        const Color(0xFF0D2E1F),
-                                        const Color(0xFF0F1F17),
-                                      ]
-                                    : [
-                                        const Color(0xFF1B6B38),
-                                        const Color(0xFF0D4F3C),
-                                      ],
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            right: -30,
-                            top: -30,
-                            child: Container(
-                              width: 140,
-                              height: 140,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withValues(alpha: 0.04),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            left: -20,
-                            bottom: -40,
-                            child: Container(
-                              width: 120,
-                              height: 120,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withValues(alpha: 0.03),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 16,
-                            left: 20,
-                            right: 20,
-                            child: FadeTransition(
-                              opacity: _headerFade,
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color:
-                                          Colors.white.withValues(alpha: 0.15),
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                    child: const Icon(Icons.tune_rounded,
-                                        color: Colors.white, size: 22),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        l10n.settings,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 0.3,
-                                        ),
-                                      ),
-                                      Text(
-                                        'Quran Zone',
-                                        style: TextStyle(
-                                          color: Colors.white
-                                              .withValues(alpha: 0.6),
-                                          fontSize: 11,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                centerTitle: true,
+                title: FadeTransition(
+                  opacity: _headerFade,
+                  child: Text(
+                    l10n.settings,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
                 ),
               ),
 
@@ -421,15 +314,73 @@ class _SettingsScreenState extends State<SettingsScreen>
                         icon: Icons.mail_outline_rounded,
                         iconColor: const Color(0xFF00897B),
                         title: l10n.contactUs,
-                        onTap: () async {
-                          final Uri emailUri = Uri(
-                            scheme: 'mailto',
-                            path: 'umer.et.jm@gmail.com',
-                            query: 'subject=Quran Zone App Feedback',
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            backgroundColor: Colors.transparent,
+                            isScrollControlled: true,
+                            builder: (_) => Container(
+                              decoration: BoxDecoration(
+                                color: cardBg,
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(24),
+                                ),
+                              ),
+                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Drag handle
+                                  Container(
+                                    width: 36,
+                                    height: 4,
+                                    margin: const EdgeInsets.only(bottom: 16),
+                                    decoration: BoxDecoration(
+                                      color: isDark
+                                          ? Colors.white24
+                                          : Colors.black26,
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                  ),
+                                  _DeveloperCard(
+                                    primary: primary,
+                                    isDark: isDark,
+                                    onChat: () async {
+                                      final Uri url =
+                                          Uri.parse('https://t.me/UMER_jr');
+                                      if (!await launchUrl(url,
+                                          mode: LaunchMode
+                                              .externalApplication)) {
+                                        debugPrint(
+                                            'Could not launch Telegram');
+                                      }
+                                    },
+                                    onEmail: () async {
+                                      final Uri emailUri = Uri(
+                                        scheme: 'mailto',
+                                        path: 'umer.et.jm@gmail.com',
+                                        query: 'subject=Quran Zone App Feedback',
+                                      );
+                                      if (!await launchUrl(emailUri)) {
+                                        debugPrint('Could not launch email');
+                                      }
+                                    },
+                                    onCopy: () {
+                                      final nav = Navigator.of(context);
+                                      Clipboard.setData(const ClipboardData(
+                                              text: '@UMER_jr'))
+                                          .then((_) {
+                                        if (!mounted) return;
+                                        nav.pop();
+                                        _showSnack(
+                                            l10n.copiedToClipboard, primary);
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
                           );
-                          if (!await launchUrl(emailUri)) {
-                            debugPrint('Could not launch email');
-                          }
                         },
                         isDark: isDark,
                         textColor: textMain,
@@ -518,33 +469,16 @@ class _SettingsScreenState extends State<SettingsScreen>
                         textColor: textMain,
                       ),
                     ]),
-                    const SizedBox(height: 12),
-                    _DeveloperCard(
-                      primary: primary,
-                      isDark: isDark,
-                      onChat: () async {
-                        final Uri url = Uri.parse('https://t.me/UMER_jr');
-                        if (!await launchUrl(url,
-                            mode: LaunchMode.externalApplication)) {
-                          debugPrint('Could not launch Telegram');
-                        }
-                      },
-                      onCopy: () {
-                        Clipboard.setData(const ClipboardData(text: '@UMER_jr'))
-                            .then((_) {
-                          if (!mounted) return;
-                          _showSnack(l10n.copiedToClipboard, primary);
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     Center(
                       child: Text(
-                        'Made with ❤️ for the Ummah',   // Hardcoded EN — never translated
+                        'Made with ❤️ for the Ummah by Umer',
                         style: TextStyle(
-                          color: AppColors.textSecondary.withValues(alpha: 0.7),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.25)
+                              : Colors.black.withValues(alpha: 0.25),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                     ),
@@ -1036,12 +970,14 @@ class _DeveloperCard extends StatelessWidget {
   final Color primary;
   final bool isDark;
   final VoidCallback onChat;
+  final VoidCallback onEmail;
   final VoidCallback onCopy;
 
   const _DeveloperCard({
     required this.primary,
     required this.isDark,
     required this.onChat,
+    required this.onEmail,
     required this.onCopy,
   });
 
@@ -1055,177 +991,127 @@ class _DeveloperCard extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: isDark
               ? [
-                  primary.withValues(alpha: 0.18),
-                  primary.withValues(alpha: 0.06),
+                  primary.withValues(alpha: 0.12),
+                  primary.withValues(alpha: 0.04),
                 ]
               : [
-                  primary.withValues(alpha: 0.12),
-                  primary.withValues(alpha: 0.03),
+                  primary.withValues(alpha: 0.07),
+                  primary.withValues(alpha: 0.02),
                 ],
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
         border:
-            Border.all(color: primary.withValues(alpha: isDark ? 0.3 : 0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: primary.withValues(alpha: 0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
+            Border.all(color: primary.withValues(alpha: isDark ? 0.18 : 0.1)),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Profile avatar ──
+          Container(
+            width: 58,
+            height: 58,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [primary, primary.withValues(alpha: 0.55)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: primary.withValues(alpha: 0.3),
+                  blurRadius: 18,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.person_rounded,
+                color: Colors.white, size: 28),
+          ),
+          const SizedBox(height: 14),
+
+          // ── Name + verified badge ──
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
+              Text(
+                'Umer',
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 17,
+                  letterSpacing: 0.2,
+                ),
+              ),
+              const SizedBox(width: 6),
               Container(
-                width: 42,
-                height: 42,
+                width: 16,
+                height: 16,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [primary, primary.withValues(alpha: 0.6)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: primary,
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                        color: primary.withValues(alpha: 0.4),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3))
-                  ],
                 ),
-                child: const Icon(Icons.code_rounded,
-                    color: Colors.white, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.contactDeveloper,
-                    style: TextStyle(
-                      color: primary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                    ),
-                  ),
-                  Text(
-                    l10n.contactDeveloperDesc,
-                    style: TextStyle(
-                      color: isDark ? Colors.white38 : Colors.black45,
-                      fontSize: 10,
-                    ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: primary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.verified_rounded, color: primary, size: 11),
-                    const SizedBox(width: 3),
-                    Text('Dev',
-                        style: TextStyle(
-                            color: primary,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold)),
-                  ],
-                ),
+                child: const Icon(Icons.check_rounded,
+                    color: Colors.white, size: 10),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 3),
           Text(
-            l10n.contactDeveloperText,
+            'Quran Zone Developer',
             style: TextStyle(
-              color: isDark ? Colors.white60 : Colors.black54,
-              fontSize: 11,
-              height: 1.5,
+              color: isDark ? Colors.white38 : Colors.black45,
+              fontSize: 12,
+              letterSpacing: 0.1,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
+
+          // ── Description ──
+          Text(
+            l10n.contactDeveloperText,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isDark ? Colors.white54 : Colors.black54,
+              fontSize: 12,
+              height: 1.55,
+            ),
+          ),
+          const SizedBox(height: 22),
+
+          // ── Action tiles ──
           Row(
             children: [
               Expanded(
-                child: GestureDetector(
+                child: _ContactActionTile(
+                  icon: Icons.telegram,
+                  label: 'Telegram',
+                  gradientColors: const [
+                    Color(0xFF0088CC),
+                    Color(0xFF00AAEE),
+                  ],
                   onTap: onChat,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 11),
-                    decoration: BoxDecoration(
-                      color: primary,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: primary.withValues(alpha: 0.35),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
-                        )
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.telegram,
-                            color: Colors.white, size: 16),
-                        const SizedBox(width: 6),
-                        Flexible(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              l10n.chatOnTelegram,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Expanded(
-                child: GestureDetector(
+                child: _ContactActionTile(
+                  icon: Icons.email_rounded,
+                  label: 'Email',
+                  gradientColors: const [
+                    Color(0xFFD84315),
+                    Color(0xFFFF6E40),
+                  ],
+                  onTap: onEmail,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _ContactActionTile(
+                  icon: Icons.alternate_email_rounded,
+                  label: '@UMER_jr',
+                  outlineColor: primary,
                   onTap: onCopy,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 11),
-                    decoration: BoxDecoration(
-                      color: primary.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
-                      border:
-                          Border.all(color: primary.withValues(alpha: 0.25)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.copy_rounded, color: primary, size: 15),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              l10n.copyUsername,
-                              style: TextStyle(
-                                  color: primary,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
               ),
             ],
@@ -1235,3 +1121,122 @@ class _DeveloperCard extends StatelessWidget {
     );
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONTACT ACTION TILE — Animated icon tile for the developer card
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ContactActionTile extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final List<Color>? gradientColors; // filled style
+  final Color? outlineColor;         // outlined style
+  final VoidCallback onTap;
+
+  const _ContactActionTile({
+    required this.icon,
+    required this.label,
+    this.gradientColors,
+    this.outlineColor,
+    required this.onTap,
+  });
+
+  @override
+  State<_ContactActionTile> createState() => _ContactActionTileState();
+}
+
+class _ContactActionTileState extends State<_ContactActionTile>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _press;
+
+  bool get _isOutlined => widget.outlineColor != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _press = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+      lowerBound: 0.92,
+      upperBound: 1.0,
+      value: 1.0,
+    );
+  }
+
+  @override
+  void dispose() {
+    _press.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Color accent =
+        _isOutlined ? widget.outlineColor! : widget.gradientColors!.first;
+
+    return GestureDetector(
+      onTapDown: (_) => _press.reverse(),
+      onTapUp: (_) {
+        _press.forward();
+        widget.onTap();
+      },
+      onTapCancel: () => _press.forward(),
+      child: AnimatedBuilder(
+        animation: _press,
+        builder: (_, child) =>
+            Transform.scale(scale: _press.value, child: child),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          decoration: BoxDecoration(
+            gradient: _isOutlined
+                ? null
+                : LinearGradient(
+                    colors: widget.gradientColors!,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+            color: _isOutlined ? accent.withValues(alpha: 0.08) : null,
+            borderRadius: BorderRadius.circular(14),
+            border: _isOutlined
+                ? Border.all(color: accent.withValues(alpha: 0.3))
+                : null,
+            boxShadow: _isOutlined
+                ? []
+                : [
+                    BoxShadow(
+                      color: accent.withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                widget.icon,
+                color: _isOutlined ? accent : Colors.white,
+                size: 22,
+              ),
+              const SizedBox(height: 7),
+              Text(
+                widget.label,
+                style: TextStyle(
+                  color: _isOutlined
+                      ? accent
+                      : Colors.white.withValues(alpha: 0.92),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.3,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+

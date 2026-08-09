@@ -17,7 +17,8 @@ import '../core/constants/app_colors.dart';
 //   Tab 2 → MinbarTab           ("المنبر" / "Minbar")
 //   Tab 3 → SettingsScreen      ("الإعدادات" / "Settings")
 //
-// Uses IndexedStack so each tab's scroll/state is preserved across switches.
+// Uses PageView + AutomaticKeepAliveClientMixin so swiping works left/right
+// and each tab's scroll/state is preserved across switches.
 // ─────────────────────────────────────────────────────────────────────────────
 
 class MainNavigationScreen extends StatefulWidget {
@@ -29,6 +30,7 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
+  late final PageController _pageController;
 
   final List<GlobalKey> _tabKeys = [
     GlobalKey(debugLabel: 'dashboard_tab'),
@@ -37,16 +39,20 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     GlobalKey(debugLabel: 'settings_tab'),
   ];
 
-  late final PageController _pageController;
-
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentIndex);
+    _pageController.addListener(_onPageScroll);
+  }
+
+  void _onPageScroll() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
+    _pageController.removeListener(_onPageScroll);
     _pageController.dispose();
     super.dispose();
   }
@@ -80,13 +86,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   ];
 
   void _onTabTapped(int index) {
-    if (index == _currentIndex) {
-      return;
-    }
-    setState(() {
-      _currentIndex = index;
-    });
-    _pageController.jumpToPage(index);
+    if (index == _currentIndex) return;
+    setState(() => _currentIndex = index);
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 380),
+      curve: Curves.easeOutCubic,
+    );
   }
 
   @override
@@ -105,9 +111,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       body: PageView(
         controller: _pageController,
         onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+          if (_currentIndex != index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          }
         },
         physics: const BouncingScrollPhysics(),
         children: [
@@ -119,6 +127,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       bottomNavigationBar: _AppBottomNavBar(
         currentIndex: _currentIndex,
+        pageController: _pageController,
         navMeta: _navMeta,
         l10n: l10n,
         isDark: isDark,
@@ -129,16 +138,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
     );
   }
-
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// _AppBottomNavBar — custom styled nav bar
+// _AppBottomNavBar — ultra compact styled nav bar with scroll tracking & RTL
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _AppBottomNavBar extends StatelessWidget {
   const _AppBottomNavBar({
     required this.currentIndex,
+    required this.pageController,
     required this.navMeta,
     required this.l10n,
     required this.isDark,
@@ -149,6 +158,7 @@ class _AppBottomNavBar extends StatelessWidget {
   });
 
   final int currentIndex;
+  final PageController pageController;
   final List<_NavItem> navMeta;
   final AppLocalizations? l10n;
   final bool isDark;
@@ -159,44 +169,105 @@ class _AppBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: barBgColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.12),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
+    final bool isRtl = Directionality.of(context) == TextDirection.rtl;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double totalWidth = constraints.maxWidth;
+        final int count = navMeta.length;
+        final double itemWidth = totalWidth / count;
+
+        final double currentPage = (pageController.hasClients &&
+                pageController.position.haveDimensions)
+            ? (pageController.page ?? currentIndex.toDouble())
+            : currentIndex.toDouble();
+
+        // Calculate visual page position supporting RTL (Arabic)
+        final double visualPage = isRtl
+            ? ((count - 1) - currentPage)
+            : currentPage;
+
+        // Sliding pill parameters
+        final double pillWidth = itemWidth - 4;
+        const double pillHeight = 36;
+        final double pillLeft = (visualPage * itemWidth) + (itemWidth - pillWidth) / 2;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: barBgColor,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
+                blurRadius: 14,
+                offset: const Offset(0, -2),
+              ),
+            ],
+            border: Border(
+              top: BorderSide(
+                color: isDark ? AppColors.divider : Colors.grey.shade200,
+                width: 0.4,
+              ),
+            ),
           ),
-        ],
-        border: Border(
-          top: BorderSide(
-            color: isDark ? AppColors.divider : Colors.grey.shade200,
-            width: 0.5,
+          child: SafeArea(
+            top: false,
+            child: SizedBox(
+              height: 52,
+              child: Stack(
+                alignment: Alignment.centerLeft,
+                children: [
+                  // ── Floating Sliding Pill Indicator ────────────────────────
+                  Positioned(
+                    left: pillLeft,
+                    top: (52 - pillHeight) / 2,
+                    width: pillWidth,
+                    height: pillHeight,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: selectedColor.withValues(alpha: isDark ? 0.18 : 0.12),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: selectedColor.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: selectedColor.withValues(alpha: 0.2),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // ── 4 Nav Bar Item Buttons ──────────────────────────────────
+                  Row(
+                    children: List.generate(count, (i) {
+                      final item = navMeta[i];
+                      final double distance = (currentPage - i).abs();
+                      final double activeWeight = (1.0 - distance).clamp(0.0, 1.0);
+
+                      return SizedBox(
+                        width: itemWidth,
+                        height: 52,
+                        child: _NavBarButton(
+                          item: item,
+                          activeWeight: activeWeight,
+                          selectedColor: selectedColor,
+                          unselectedColor: unselectedColor,
+                          l10n: l10n,
+                          onTap: () => onTap(i),
+                        ),
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(navMeta.length, (i) {
-              final item   = navMeta[i];
-              final active = i == currentIndex;
-              return _NavBarButton(
-                item: item,
-                isActive: active,
-                selectedColor: selectedColor,
-                unselectedColor: unselectedColor,
-                l10n: l10n,
-                onTap: () => onTap(i),
-              );
-            }),
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -205,10 +276,10 @@ class _AppBottomNavBar extends StatelessWidget {
 // _NavBarButton — animated individual tab button
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _NavBarButton extends StatelessWidget {
+class _NavBarButton extends StatefulWidget {
   const _NavBarButton({
     required this.item,
-    required this.isActive,
+    required this.activeWeight,
     required this.selectedColor,
     required this.unselectedColor,
     required this.l10n,
@@ -216,94 +287,121 @@ class _NavBarButton extends StatelessWidget {
   });
 
   final _NavItem item;
-  final bool isActive;
+  final double activeWeight;
   final Color selectedColor;
   final Color unselectedColor;
   final AppLocalizations? l10n;
   final VoidCallback onTap;
 
   @override
+  State<_NavBarButton> createState() => _NavBarButtonState();
+}
+
+class _NavBarButtonState extends State<_NavBarButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _tapCtrl;
+  late Animation<double> _scaleAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _tapCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 120),
+    );
+    _scaleAnim = Tween<double>(begin: 1.0, end: 0.85).animate(
+      CurvedAnimation(parent: _tapCtrl, curve: Curves.easeOutCubic),
+    );
+  }
+
+  @override
+  void dispose() {
+    _tapCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final label = _resolveLabel(l10n);
-    final isSettings = item.labelKey == 'navSettings';
+    final label = _resolveLabel(widget.l10n);
+    final weight = widget.activeWeight;
+
+    // Smooth color lerp
+    final Color iconColor = Color.lerp(widget.unselectedColor, widget.selectedColor, weight)!;
+    final bool isSelected = weight > 0.5;
 
     return GestureDetector(
-      onTap: onTap,
+      onTapDown: (_) => _tapCtrl.forward(),
+      onTapUp: (_) {
+        _tapCtrl.reverse();
+        widget.onTap();
+      },
+      onTapCancel: () => _tapCtrl.reverse(),
       behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeInOut,
-        padding: EdgeInsets.symmetric(
-          horizontal: isSettings ? 12 : 16,
-          vertical: 6,
-        ),
-        decoration: BoxDecoration(
-          color: isActive
-              ? selectedColor.withValues(alpha: 0.12)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: Icon(
-                isActive ? item.activeIcon : item.icon,
-                key: ValueKey(isActive),
-                color: isActive ? selectedColor : unselectedColor,
-                size: isSettings ? 20 : 22,
+      child: Center(
+        child: ScaleTransition(
+          scale: _scaleAnim,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 180),
+                    transitionBuilder: (child, anim) =>
+                        ScaleTransition(scale: anim, child: child),
+                    child: Icon(
+                      isSelected ? widget.item.activeIcon : widget.item.icon,
+                      key: ValueKey('${widget.item.labelKey}_$isSelected'),
+                      color: iconColor,
+                      size: 19,
+                    ),
+                  ),
+                  ClipRect(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      widthFactor: weight,
+                      child: Opacity(
+                        opacity: weight,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 4, right: 2),
+                          child: Text(
+                            label,
+                            maxLines: 1,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: widget.selectedColor,
+                              letterSpacing: 0.1,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            if (!isSettings) ...[
-              const SizedBox(height: 2),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 200),
-                style: TextStyle(
-                  fontSize: isActive ? 10.5 : 10,
-                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
-                  color: isActive ? selectedColor : unselectedColor,
-                  letterSpacing: 0.2,
-                ),
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ] else ...[
-              const SizedBox(height: 14), // Aligns icons vertically by matching text height
-            ],
-            const SizedBox(height: 3),
-            // Subtle active indicator dot
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeOut,
-              width: isActive ? 5 : 0,
-              height: isActive ? 5 : 0,
-              decoration: BoxDecoration(
-                color: selectedColor,
-                shape: BoxShape.circle,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
   String _resolveLabel(AppLocalizations? l10n) {
-    if (l10n == null) return item.fallback;
+    if (l10n == null) return widget.item.fallback;
     try {
-      switch (item.labelKey) {
+      switch (widget.item.labelKey) {
         case 'navSettings':  return l10n.navSettings;
         case 'navDashboard': return l10n.navDashboard;
         case 'navMinbar':    return l10n.navMinbar;
         case 'navLibrary':   return l10n.navLibrary;
-        default: return item.fallback;
+        default: return widget.item.fallback;
       }
     } catch (_) {
-      return item.fallback;
+      return widget.item.fallback;
     }
   }
 }

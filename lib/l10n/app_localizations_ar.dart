@@ -517,4 +517,112 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get minbarHeaderSubtitle =>
       'استمع إلى تلاوات القرآن الكريم والدروس الإسلامية';
+
+  @override
+  String get forceSyncTimeAndLocation => 'فرض مزامنة الوقت والموقع';
+
+  @override
+  String get tapToSetLocation => 'اضغط لتحديد الموقع';
+
+  @override
+  String get notificationAlarmRequired =>
+      'إشعار التنبيه مطلوب لرفع الأذان في وقته بدقة';
+
+  @override
+  String get backgroundExecution => 'التشغيل في الخلفية';
+
+  @override
+  String get setupGuide => 'دليل الإعداد';
+
+  @override
+  String get selectLocation => 'اختر الموقع';
+
+  @override
+  String get country => 'الدولة';
+
+  @override
+  String get cityRegion => 'المدينة / المنطقة';
+
+  @override
+  String get search => 'بحث...';
+
+  @override
+  String get saveLocation => 'حفظ الموقع';
+
+  @override
+  String get fajr => 'الفجر';
+
+  @override
+  String get sunrise => 'الشروق';
+
+  @override
+  String get dhuhr => 'الظهر';
+
+  @override
+  String get asr => 'العصر';
+
+  @override
+  String get maghrib => 'المغرب';
+
+  @override
+  String get isha => 'العشاء';
+
+  @override
+  String get autoDetectLocation => 'تحديد الموقع تلقائيًا (GPS)';
+
+  @override
+  String get calculationMethod => 'طريقة الحساب';
+
+  @override
+  String get generalSettings => 'عام';
+
+  @override
+  String get twentyFourHourClock => 'نظام 24 ساعة';
+
+  @override
+  String get hijriDateOffset => 'تعديل التاريخ الهجري';
+
+  @override
+  String get hijriOffsetDescription => 'تعديل للتوافق مع رؤية الهلال المحلية';
+
+  @override
+  String get advancedSettings => 'متقدم';
+
+  @override
+  String get ensureAthanPlaysInBackground => 'ضمان عمل الأذان في الخلفية';
+
+  @override
+  String get recalculatePrayerTimes => 'إعادة حساب جميع أوقات الصلاة الآن';
+
+  @override
+  String get syncingLocation => 'جاري مزامنة الموقع...';
+
+  @override
+  String get neverMissPrayer => 'لا تفوت أي صلاة';
+
+  @override
+  String get setupGuideDescription =>
+      'لضمان عمل الأذان في الخلفية في الوقت المحدد بدقة، يرجى تفعيل الأذونات التالية.';
+
+  @override
+  String get notificationsTitle => 'الإشعارات';
+
+  @override
+  String get notificationsSubtitle => 'مطلوب لإظهار تنبيهات الأذان';
+
+  @override
+  String get exactAlarmsTitle => 'المنبهات الدقيقة';
+
+  @override
+  String get batteryOptimizationSubtitle =>
+      'يمنع الهاتف من إغلاق الأذان لتوفير البطارية';
+
+  @override
+  String get done => 'تم';
+
+  @override
+  String get completeSetupAbove => 'أكمل الإعداد أعلاه';
+
+  @override
+  String get allow => 'سماح';
 }

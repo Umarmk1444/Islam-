@@ -518,4 +518,113 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get minbarHeaderSubtitle =>
       'Listen to القرآن الكريم recitations and Islamic lessons';
+
+  @override
+  String get forceSyncTimeAndLocation => 'Force Sync Time & Location';
+
+  @override
+  String get tapToSetLocation => 'Tap to set location';
+
+  @override
+  String get notificationAlarmRequired =>
+      'Required to trigger the Athan exactly on time';
+
+  @override
+  String get backgroundExecution => 'Background Execution';
+
+  @override
+  String get setupGuide => 'Permissions Setup Guide';
+
+  @override
+  String get selectLocation => 'Select Location';
+
+  @override
+  String get country => 'Country';
+
+  @override
+  String get cityRegion => 'City / Region';
+
+  @override
+  String get search => 'Search...';
+
+  @override
+  String get saveLocation => 'Save Location';
+
+  @override
+  String get fajr => 'Fajr';
+
+  @override
+  String get sunrise => 'Sunrise';
+
+  @override
+  String get dhuhr => 'Dhuhr';
+
+  @override
+  String get asr => 'Asr';
+
+  @override
+  String get maghrib => 'Maghrib';
+
+  @override
+  String get isha => 'Isha';
+
+  @override
+  String get autoDetectLocation => 'Auto-detect Location (GPS)';
+
+  @override
+  String get calculationMethod => 'Calculation Method';
+
+  @override
+  String get generalSettings => 'General';
+
+  @override
+  String get twentyFourHourClock => '24-Hour Clock';
+
+  @override
+  String get hijriDateOffset => 'Hijri Date Offset';
+
+  @override
+  String get hijriOffsetDescription =>
+      'Adjust to match your local moon sighting';
+
+  @override
+  String get advancedSettings => 'Advanced';
+
+  @override
+  String get ensureAthanPlaysInBackground => 'Ensure Athan plays in background';
+
+  @override
+  String get recalculatePrayerTimes => 'Recalculate all prayer times now';
+
+  @override
+  String get syncingLocation => 'Syncing location...';
+
+  @override
+  String get neverMissPrayer => 'Never Miss a Prayer';
+
+  @override
+  String get setupGuideDescription =>
+      'To ensure the Athan plays reliably in the background exactly on time, please enable the following permissions.';
+
+  @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String get notificationsSubtitle => 'Required to show the Athan alerts';
+
+  @override
+  String get exactAlarmsTitle => 'Exact Alarms';
+
+  @override
+  String get batteryOptimizationSubtitle =>
+      'Prevents the phone from killing the Athan to save battery';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get completeSetupAbove => 'Complete Setup Above';
+
+  @override
+  String get allow => 'Allow';
 }

@@ -16,23 +16,23 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:adhan/adhan.dart' as adhan;
+import 'package:permission_handler/permission_handler.dart' as ph;
 
 import '../../data/models/prayer_config.dart';
 import '../../data/models/prayer_time_model.dart';
 import '../../../../core/services/background_engine.dart';
 import '../../../../services/notification_service.dart';
 import 'package:hijri/hijri_calendar.dart';
+import 'widget_data_sync.dart';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const double _makkahLat = 21.4225;
-const double _makkahLng = 39.8262;
-const String _makkahLabel = 'Makkah al-Mukarramah';
+// (Makkah constants removed to prevent hardcoded fallbacks)
 
 // ── PrayerController ──────────────────────────────────────────────────────────
 
@@ -51,6 +51,7 @@ class PrayerController extends ChangeNotifier {
   PrayerTimeModel? model;           // null while loading
   final ValueNotifier<String> countdownNotifier = ValueNotifier<String>('--:--:--');
   bool isLoading = true;
+  bool isLocationMissing = false;
   String? errorMessage;
 
   // ── Private internals ──────────────────────────────────────────────────────
@@ -72,12 +73,32 @@ class PrayerController extends ChangeNotifier {
   Future<void> _init() async {
     _prefs = await SharedPreferences.getInstance();
     _loadConfig();
-    await _resolveLocation();
+
+    bool isFirstTime = (config.latitude == 0.0 && config.longitude == 0.0 && !config.isManualLocation);
+
+    // 1. Boot Logic: Rely 100% on cached storage. DO NOT FETCH GPS unless first time.
+    if (config.latitude != 0.0 && config.longitude != 0.0) {
+      isLocationMissing = false;
+    } else {
+      isLocationMissing = true;
+    }
+
+    if (isFirstTime) {
+      // 2. First-Time Auto Fetch
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(milliseconds: 300), () {
+          _resolveLocation();
+        });
+      });
+    }
+
+    // Always finalize boot state, even if resolveLocation aborted/denied
     _compute();
-    await _scheduleNotifications();
-    _startCountdownTimer();
     isLoading = false;
     notifyListeners();
+
+    await _scheduleNotifications();
+    _startCountdownTimer();
   }
 
   void _loadConfig() {
@@ -85,22 +106,25 @@ class PrayerController extends ChangeNotifier {
     if (raw != null) {
       try {
         config = PrayerConfig.fromJsonString(raw);
+        isLocationMissing = (config.latitude == 0.0 && config.longitude == 0.0);
       } catch (_) {
         config = const PrayerConfig();
+        isLocationMissing = true;
       }
     } else {
       // First launch smart auto-detection from locale
       final country = ui.PlatformDispatcher.instance.locale.countryCode;
-      final autoMethod = _detectMethod(_makkahLat, _makkahLng, country);
+      final autoMethod = _detectMethod(0.0, 0.0, country);
       config = PrayerConfig(
-        latitude: _makkahLat,
-        longitude: _makkahLng,
-        locationLabel: _makkahLabel,
+        latitude: 0.0,
+        longitude: 0.0,
+        locationLabel: '',
         method: autoMethod,
         madhab: MadhabEnum.shafi, // Zero-config global default
         hasManualMethodOverride: false,
         hasManualMadhabOverride: false,
       );
+      isLocationMissing = true; // Mark as missing on fresh install until GPS or manual resolves
     }
   }
 
@@ -114,23 +138,33 @@ class PrayerController extends ChangeNotifier {
   /// Automatically reverse-geocodes city and country name.
   /// If permission is denied or an error occurs, retains stored coordinates.
   Future<void> _resolveLocation() async {
+    if (config.isManualLocation) {
+      isLocationMissing = false;
+      return;
+    }
     if (!config.useGps) return;
     try {
       await Future.microtask(() async {
-        bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-        if (!serviceEnabled) {
-          _applyFallbackMakkah();
-          return;
-        }
-
         LocationPermission permission = await Geolocator.checkPermission();
         if (permission == LocationPermission.denied) {
           permission = await Geolocator.requestPermission();
         }
         if (permission == LocationPermission.denied ||
             permission == LocationPermission.deniedForever) {
-          _applyFallbackMakkah();
-          return;
+          if (config.latitude == 0.0 && config.longitude == 0.0) {
+            isLocationMissing = true;
+            notifyListeners();
+          }
+          return; // Abort silently, preserving any existing cached location
+        }
+
+        bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+        if (!serviceEnabled) {
+          if (config.latitude == 0.0 && config.longitude == 0.0) {
+            isLocationMissing = true;
+            notifyListeners();
+          }
+          return; // Abort silently, preserving any existing cached location
         }
 
         final pos = await Geolocator.getCurrentPosition(
@@ -160,8 +194,10 @@ class PrayerController extends ChangeNotifier {
           latitude:      pos.latitude,
           longitude:     pos.longitude,
           locationLabel: newLabel,
+          isManualLocation: false, // Ensure it's marked as GPS
         );
 
+        isLocationMissing = false;
         _applySmartDefaults(pos.latitude, pos.longitude, null);
         await _saveConfig();
 
@@ -174,10 +210,16 @@ class PrayerController extends ChangeNotifier {
           await BackgroundEngine().scheduleAllAlarms(model!.entries, config);
         }
       }).timeout(const Duration(seconds: 5), onTimeout: () {
-        _applyFallbackMakkah();
+        if (config.latitude == 0.0 && config.longitude == 0.0) {
+          isLocationMissing = true;
+          notifyListeners();
+        }
       });
     } catch (_) {
-      _applyFallbackMakkah();
+      if (config.latitude == 0.0 && config.longitude == 0.0) {
+        isLocationMissing = true;
+        notifyListeners();
+      }
     }
   }
 
@@ -210,18 +252,6 @@ class PrayerController extends ChangeNotifier {
     return null;
   }
 
-  void _applyFallbackMakkah() {
-    // Always fall back to Makkah when GPS is unavailable.
-    // Preserve any valid existing city label (one without raw degree coordinates).
-    final existing = config.locationLabel;
-    final keepLabel = existing.isNotEmpty && !existing.contains('°');
-    config = config.copyWith(
-      latitude:      _makkahLat,
-      longitude:     _makkahLng,
-      locationLabel: keepLabel ? existing : _makkahLabel,
-    );
-    _applySmartDefaults(_makkahLat, _makkahLng, 'SA');
-  }
 
   /// Derives a short display label from decimal coordinates.
   String _coordsToLabel(double lat, double lng) {
@@ -234,6 +264,12 @@ class PrayerController extends ChangeNotifier {
   // ── Prayer time computation ────────────────────────────────────────────────
 
   void _compute() {
+    if (isLocationMissing || (config.latitude == 0.0 && config.longitude == 0.0)) {
+      model = null;
+      countdownNotifier.value = '--:--:--';
+      return;
+    }
+
     try {
       final coordinates = adhan.Coordinates(config.latitude, config.longitude);
       final params = _buildParams();
@@ -257,6 +293,9 @@ class PrayerController extends ChangeNotifier {
         nextPrayer:        nextEntry,
         calculationMethod: config.method.labelEn,
       );
+
+      // Sync data to native Home Screen Widget
+      WidgetDataSync.updateWidget(model!);
     } catch (e) {
       errorMessage = e.toString();
     }
@@ -527,14 +566,52 @@ class PrayerController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Re-trigger GPS and recompute times.
+  /// Re-trigger GPS and recompute times, forcefully overriding manual location.
   Future<void> syncLocation() async {
     isLoading = true;
     notifyListeners();
+
+    // 1. Storage Wipe: Unconditionally force GPS usage, clear manual flags, and wipe saved manual coordinates
+    config = config.copyWith(
+      isManualLocation: false,
+      useGps: true,
+      locationLabel: '',
+      latitude: 0.0,
+      longitude: 0.0,
+    );
+    await _saveConfig(); // Explicitly delete from local storage
+    
+    // 2. State Management: Trigger UI rebuild so it drops the manual location immediately
+    notifyListeners();
+
+    // 3. Permission Handling: Use permission_handler if permanently denied
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.deniedForever) {
+      await ph.openAppSettings();
+    }
+
     await _resolveLocation();
     _compute();
     await _scheduleNotifications();
     isLoading = false;
+    notifyListeners();
+  }
+
+
+  /// Manually set the location from offline city picker.
+  Future<void> setManualLocation(double lat, double lng, String label) async {
+    config = config.copyWith(
+      latitude: lat,
+      longitude: lng,
+      locationLabel: label,
+      isManualLocation: true,
+      useGps: false, // Turn off auto GPS since they chose manual
+    );
+    isLocationMissing = false;
+    await _saveConfig();
+    _applySmartDefaults(lat, lng, null); // Re-evaluate madhab defaults based on new location
+    _compute();
+    await _scheduleNotifications();
     notifyListeners();
   }
 

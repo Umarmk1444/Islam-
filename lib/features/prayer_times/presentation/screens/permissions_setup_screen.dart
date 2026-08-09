@@ -3,6 +3,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../theme_notifier.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class PermissionsSetupScreen extends StatefulWidget {
   const PermissionsSetupScreen({super.key});
@@ -56,6 +57,7 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
     return ValueListenableBuilder<QuranTheme>(
       valueListenable: AppTheme.notifier,
       builder: (context, theme, _) {
+        final l10n = AppLocalizations.of(context)!;
         final isDark = theme == QuranTheme.dark;
         final bg = AppTheme.getScreenBgColor(theme);
         final textColor = AppTheme.getMainTextColor(theme);
@@ -67,7 +69,7 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
         return Scaffold(
           backgroundColor: bg,
           appBar: AppBar(
-            title: const Text('Athan Setup Guide'),
+            title: Text(l10n.setupGuide),
             backgroundColor: AppTheme.getAppBarBgColor(theme),
             elevation: 0,
             leading: IconButton(
@@ -86,7 +88,7 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Never Miss a Prayer',
+                  l10n.neverMissPrayer,
                   textAlign: TextAlign.center,
                   style: AppTextStyles.headlineMedium.copyWith(
                     color: textColor,
@@ -95,7 +97,7 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'To ensure the Athan plays reliably in the background exactly on time, please enable the following permissions.',
+                  l10n.setupGuideDescription,
                   textAlign: TextAlign.center,
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: textColor.withValues(alpha: 0.7),
@@ -106,8 +108,8 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
 
                 // 1. Notification
                 _PermissionCard(
-                  title: 'Notifications',
-                  subtitle: 'Required to show the Athan alerts',
+                  title: l10n.notificationsTitle,
+                  subtitle: l10n.notificationsSubtitle,
                   icon: Icons.notifications_active_rounded,
                   isGranted: _hasNotification,
                   onRequest: _requestNotification,
@@ -117,8 +119,8 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
 
                 // 2. Exact Alarms
                 _PermissionCard(
-                  title: 'Exact Alarms',
-                  subtitle: 'Required to trigger the Athan exactly on time',
+                  title: l10n.exactAlarmsTitle,
+                  subtitle: l10n.notificationAlarmRequired,
                   icon: Icons.alarm_on_rounded,
                   isGranted: _hasExactAlarm,
                   onRequest: _requestExactAlarm,
@@ -128,9 +130,9 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
 
                 // 3. Battery Optimization
                 _PermissionCard(
-                  title: 'Background Execution',
+                  title: l10n.backgroundExecution,
                   subtitle:
-                      'Prevents the phone from killing the Athan to save battery',
+                      l10n.batteryOptimizationSubtitle,
                   icon: Icons.battery_charging_full_rounded,
                   isGranted: _hasBatteryIgnore,
                   onRequest: _requestBattery,
@@ -151,7 +153,7 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
                     ),
                   ),
                   child: Text(
-                    allGranted ? 'Done' : 'Complete Setup Above',
+                    allGranted ? l10n.done : l10n.completeSetupAbove,
                     style: AppTextStyles.bodyLarge.copyWith(
                       color: allGranted
                           ? Colors.white
@@ -188,6 +190,7 @@ class _PermissionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = theme == QuranTheme.dark;
     final cardBg = AppTheme.getCardBgColor(theme);
     final textColor = AppTheme.getMainTextColor(theme);
@@ -254,7 +257,7 @@ class _PermissionCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text('Allow'),
+              child: Text(l10n.allow),
             ),
         ],
       ),

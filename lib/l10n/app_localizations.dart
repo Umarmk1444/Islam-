@@ -1091,6 +1091,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Listen to القرآن الكريم recitations and Islamic lessons'**
   String get minbarHeaderSubtitle;
+
+  /// No description provided for @forceSyncTimeAndLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Force Sync Time & Location'**
+  String get forceSyncTimeAndLocation;
+
+  /// No description provided for @tapToSetLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to set location'**
+  String get tapToSetLocation;
+
+  /// No description provided for @notificationAlarmRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required to trigger the Athan exactly on time'**
+  String get notificationAlarmRequired;
+
+  /// No description provided for @backgroundExecution.
+  ///
+  /// In en, this message translates to:
+  /// **'Background Execution'**
+  String get backgroundExecution;
+
+  /// No description provided for @setupGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Permissions Setup Guide'**
+  String get setupGuide;
+
+  /// No description provided for @selectLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Location'**
+  String get selectLocation;
+
+  /// No description provided for @country.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get country;
+
+  /// No description provided for @cityRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'City / Region'**
+  String get cityRegion;
+
+  /// No description provided for @search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search...'**
+  String get search;
+
+  /// No description provided for @saveLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Location'**
+  String get saveLocation;
+
+  /// No description provided for @fajr.
+  ///
+  /// In en, this message translates to:
+  /// **'Fajr'**
+  String get fajr;
+
+  /// No description provided for @sunrise.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunrise'**
+  String get sunrise;
+
+  /// No description provided for @dhuhr.
+  ///
+  /// In en, this message translates to:
+  /// **'Dhuhr'**
+  String get dhuhr;
+
+  /// No description provided for @asr.
+  ///
+  /// In en, this message translates to:
+  /// **'Asr'**
+  String get asr;
+
+  /// No description provided for @maghrib.
+  ///
+  /// In en, this message translates to:
+  /// **'Maghrib'**
+  String get maghrib;
+
+  /// No description provided for @isha.
+  ///
+  /// In en, this message translates to:
+  /// **'Isha'**
+  String get isha;
+
+  /// No description provided for @autoDetectLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-detect Location (GPS)'**
+  String get autoDetectLocation;
+
+  /// No description provided for @calculationMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculation Method'**
+  String get calculationMethod;
+
+  /// No description provided for @generalSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get generalSettings;
+
+  /// No description provided for @twentyFourHourClock.
+  ///
+  /// In en, this message translates to:
+  /// **'24-Hour Clock'**
+  String get twentyFourHourClock;
+
+  /// No description provided for @hijriDateOffset.
+  ///
+  /// In en, this message translates to:
+  /// **'Hijri Date Offset'**
+  String get hijriDateOffset;
+
+  /// No description provided for @hijriOffsetDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust to match your local moon sighting'**
+  String get hijriOffsetDescription;
+
+  /// No description provided for @advancedSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get advancedSettings;
+
+  /// No description provided for @ensureAthanPlaysInBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Ensure Athan plays in background'**
+  String get ensureAthanPlaysInBackground;
+
+  /// No description provided for @recalculatePrayerTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'Recalculate all prayer times now'**
+  String get recalculatePrayerTimes;
+
+  /// No description provided for @syncingLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing location...'**
+  String get syncingLocation;
+
+  /// No description provided for @neverMissPrayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Never Miss a Prayer'**
+  String get neverMissPrayer;
+
+  /// No description provided for @setupGuideDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'To ensure the Athan plays reliably in the background exactly on time, please enable the following permissions.'**
+  String get setupGuideDescription;
+
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationsTitle;
+
+  /// No description provided for @notificationsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Required to show the Athan alerts'**
+  String get notificationsSubtitle;
+
+  /// No description provided for @exactAlarmsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Exact Alarms'**
+  String get exactAlarmsTitle;
+
+  /// No description provided for @batteryOptimizationSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prevents the phone from killing the Athan to save battery'**
+  String get batteryOptimizationSubtitle;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @completeSetupAbove.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Setup Above'**
+  String get completeSetupAbove;
+
+  /// No description provided for @allow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get allow;
 }
 
 class _AppLocalizationsDelegate

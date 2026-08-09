@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -10,7 +12,7 @@ final ValueNotifier<bool> kQuranScreenActive = ValueNotifier<bool>(false);
 final ValueNotifier<bool> kAdVisibleNotifier = ValueNotifier<bool>(false);
 
 /// A persistent, non-overlapping AdMob Banner that lives at the TOP of the
-/// app layout tree. It uses [AnimatedContainer] so the height animates smoothly
+/// app layout tree. It uses [AnimatedSize] so the height animates smoothly
 /// between its loaded size and zero, allowing the rest of the UI to resize
 /// without any overflow errors.
 ///
@@ -29,8 +31,11 @@ class PersistentBannerAd extends StatefulWidget {
 class _PersistentBannerAdState extends State<PersistentBannerAd> {
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
+  bool _isAdLoading = false;
+  int _retryAttempt = 0;
+  Timer? _retryTimer;
 
-  // Standard Test Ad Unit ID for Android Banners
+  // Standard Ad Unit ID for Android Banners
   static const String _adUnitId = 'ca-app-pub-5557619519970400/5577116496';
 
   @override
@@ -41,10 +46,13 @@ class _PersistentBannerAdState extends State<PersistentBannerAd> {
   }
 
   void _updateAdVisibility() {
-    final bool isVisible = _isAdLoaded && _bannerAd != null && !kQuranScreenActive.value;
+    final bool isVisible =
+        _isAdLoaded && _bannerAd != null && !kQuranScreenActive.value;
     if (kAdVisibleNotifier.value != isVisible) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        kAdVisibleNotifier.value = isVisible;
+        if (mounted) {
+          kAdVisibleNotifier.value = isVisible;
+        }
       });
     }
   }
@@ -61,74 +69,102 @@ class _PersistentBannerAdState extends State<PersistentBannerAd> {
   }
 
   void _loadAd() {
-    _bannerAd = BannerAd(
+    // Prevent duplicate concurrent load calls or reloading if already loaded successfully.
+    if (_isAdLoading) return;
+    if (_isAdLoaded && _bannerAd != null) return;
+
+    _retryTimer?.cancel();
+    _retryTimer = null;
+
+    // Dispose old instance if it exists before creating a new one
+    _bannerAd?.dispose();
+    _bannerAd = null;
+    _isAdLoaded = false;
+    _isAdLoading = true;
+
+    final BannerAd banner = BannerAd(
       adUnitId: _adUnitId,
       request: const AdRequest(),
       size: AdSize.banner,
       listener: BannerAdListener(
         onAdLoaded: (ad) {
-          if (mounted) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                setState(() => _isAdLoaded = true);
-                _updateAdVisibility();
-              }
-            });
+          debugPrint('AdMob BannerAd successfully loaded.');
+          if (!mounted) {
+            ad.dispose();
+            return;
           }
+          _retryAttempt = 0; // Reset retry attempt counter on success
+          setState(() {
+            _isAdLoaded = true;
+            _isAdLoading = false;
+          });
+          _updateAdVisibility();
         },
         onAdFailedToLoad: (ad, err) {
-          debugPrint('AdMob BannerAd failed to load: $err');
-          ad.dispose();
-          if (mounted) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                setState(() {
-                  _isAdLoaded = false;
-                  _bannerAd = null;
-                });
-                _updateAdVisibility();
-              }
-            });
-          }
-          // Retry after 60 seconds
-          Future.delayed(const Duration(seconds: 60), () {
-            if (mounted && _bannerAd == null) _loadAd();
+          debugPrint(
+              'AdMob BannerAd failed to load (code ${err.code}): ${err.message}');
+          ad.dispose(); // CRITICAL: Clear corrupted instance immediately
+          if (!mounted) return;
+
+          _retryAttempt++;
+          setState(() {
+            _isAdLoaded = false;
+            _isAdLoading = false;
+            _bannerAd = null;
+          });
+          _updateAdVisibility();
+
+          // Exponential backoff retry logic: 10s, 20s, 40s, capped at 60s
+          final int retryDelaySeconds =
+              (10 * math.pow(2, _retryAttempt - 1)).toInt().clamp(10, 60);
+
+          debugPrint(
+              'Scheduling AdMob retry attempt #$_retryAttempt in ${retryDelaySeconds}s');
+
+          _retryTimer?.cancel();
+          _retryTimer = Timer(Duration(seconds: retryDelaySeconds), () {
+            if (mounted && _bannerAd == null && !_isAdLoading) {
+              _loadAd();
+            }
           });
         },
       ),
-    )..load();
+    );
+
+    _bannerAd = banner;
+    banner.load();
   }
 
   @override
   void dispose() {
+    _retryTimer?.cancel();
+    _retryTimer = null;
     kQuranScreenActive.removeListener(_onQuranScreenChanged);
     _bannerAd?.dispose();
+    _bannerAd = null;
+    _isAdLoaded = false;
+    _isAdLoading = false;
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool shouldShow = _isAdLoaded
-        && _bannerAd != null
-        && !kQuranScreenActive.value;
+    final bool shouldShow =
+        _isAdLoaded && _bannerAd != null && !kQuranScreenActive.value;
 
-    final double targetHeight = shouldShow
-        ? _bannerAd!.size.height.toDouble()
-        : 0.0;
-
-    return AnimatedContainer(
+    return AnimatedSize(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
-      height: targetHeight,
-      clipBehavior: Clip.hardEdge,
-      decoration: const BoxDecoration(), // required for clipBehavior
       child: shouldShow
-          ? SizedBox(
-              width: double.infinity,
-              height: _bannerAd!.size.height.toDouble(),
-              child: AdWidget(ad: _bannerAd!),
+          ? Center(
+              child: SizedBox(
+                width: _bannerAd!.size.width.toDouble(),
+                height: _bannerAd!.size.height.toDouble(),
+                child: AdWidget(ad: _bannerAd!),
+              ),
             )
           : const SizedBox.shrink(),
     );
   }
 }
+

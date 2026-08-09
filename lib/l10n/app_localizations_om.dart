@@ -119,7 +119,7 @@ class AppLocalizationsOm extends AppLocalizations {
       'Rakkoo kamiyyuu, yaada ykn gaaffii kamiyyuuf, kallattiin karaa Telegram na qunnamaa.';
 
   @override
-  String get chatOnTelegram => 'Telegram irratti haasa\'aa';
+  String get chatOnTelegram => 'Karaa Telegrama';
 
   @override
   String get copyUsername => 'Maqaa copii';
@@ -435,7 +435,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get muezzinAlafasy => 'Mishaarii Al Afaasii';
 
   @override
-  String get navLibrary => 'Library';
+  String get navLibrary => 'Kitaabota';
 
   @override
   String get libraryAll => 'All';
@@ -522,4 +522,116 @@ class AppLocalizationsOm extends AppLocalizations {
   @override
   String get minbarHeaderSubtitle =>
       'Qara\'iitii Qur\'aanaa fi barnoota Islaamaa dhaggeeffadhaa';
+
+  @override
+  String get forceSyncTimeAndLocation => 'Yeroo fi Iddoo Dirqamaan Sirreessi';
+
+  @override
+  String get tapToSetLocation => 'Iddoo filachuuf cuqaasaa';
+
+  @override
+  String get notificationAlarmRequired =>
+      'Azaanni yeroo sirrii ta\'etti akka dhaga\'amuuf barbaachisa';
+
+  @override
+  String get backgroundExecution => 'Duuba irratti hojjechuu';
+
+  @override
+  String get setupGuide => 'Qajeelfama Hayyamaa';
+
+  @override
+  String get selectLocation => 'Bakka Filadhu';
+
+  @override
+  String get country => 'Biyya';
+
+  @override
+  String get cityRegion => 'Magaalaa / Naannoo';
+
+  @override
+  String get search => 'Barbaadi...';
+
+  @override
+  String get saveLocation => 'Bakka Olkaa\'i';
+
+  @override
+  String get fajr => 'Fajjrii';
+
+  @override
+  String get sunrise => 'Shuruuq';
+
+  @override
+  String get dhuhr => 'Zuhrii';
+
+  @override
+  String get asr => 'Asrii';
+
+  @override
+  String get maghrib => 'Maghriiba';
+
+  @override
+  String get isha => 'Ishaa';
+
+  @override
+  String get autoDetectLocation => 'Iddoo ofiin barbaadi (GPS)';
+
+  @override
+  String get calculationMethod => 'Mala Herregaa';
+
+  @override
+  String get generalSettings => 'Waliigala';
+
+  @override
+  String get twentyFourHourClock => 'Sa\'aatii 24';
+
+  @override
+  String get hijriDateOffset => 'Sirreeffama Guyyaa Hijiraa';
+
+  @override
+  String get hijriOffsetDescription =>
+      'Akka baatii naannoo keetiitti sirreessi';
+
+  @override
+  String get advancedSettings => 'Sadarkaa Olaanaa';
+
+  @override
+  String get ensureAthanPlaysInBackground =>
+      'Azaanni duubatti hojjechuu isaa mirkaneessi';
+
+  @override
+  String get recalculatePrayerTimes =>
+      'Yeroo salaataa hunda ammaa irra deebi\'ii shallagi';
+
+  @override
+  String get syncingLocation => 'Iddoo sirreessaa jira...';
+
+  @override
+  String get neverMissPrayer => 'Salaata Tokkollee Hin Dabarsin';
+
+  @override
+  String get setupGuideDescription =>
+      'Azaanni duubatti yeroo sirrii ta\'etti akka hojjetu mirkaneessuuf, maaloo hayyamoota armaan gadii banaa.';
+
+  @override
+  String get notificationsTitle => 'Beeksisoota';
+
+  @override
+  String get notificationsSubtitle =>
+      'Akeekkachiisa Azaanaa agarsiisuuf barbaachisa';
+
+  @override
+  String get exactAlarmsTitle => 'Alaarmota Sirrii';
+
+  @override
+  String get batteryOptimizationSubtitle =>
+      'Baaatiri qusachuuf bilbilli Azaana akka hin cufne ittisa';
+
+  @override
+  String get done => 'Xumurame';
+
+  @override
+  String get completeSetupAbove => 'Qindaa\'ina Armaan Oli Xumuri';
+
+  @override
+  String get allow => 'Eyyemi';
 }

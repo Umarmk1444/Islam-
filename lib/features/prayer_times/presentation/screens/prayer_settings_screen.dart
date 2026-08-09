@@ -115,7 +115,7 @@ class _PrayerSettingsScreenState extends State<PrayerSettingsScreen> {
                       children: [
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: Text('Auto-detect Location (GPS)',
+                          title: Text(l10n.autoDetectLocation,
                               style: AppTextStyles.bodyMedium.copyWith(
                                   color: textColor,
                                   fontWeight: FontWeight.bold)),
@@ -129,7 +129,7 @@ class _PrayerSettingsScreenState extends State<PrayerSettingsScreen> {
                         ),
                         const Divider(),
                         const SizedBox(height: 12),
-                        Text('Calculation Method',
+                        Text(l10n.calculationMethod,
                             style: AppTextStyles.labelLarge.copyWith(
                                 color: textColor.withValues(alpha: 0.6))),
                         const SizedBox(height: 4),
@@ -205,13 +205,13 @@ class _PrayerSettingsScreenState extends State<PrayerSettingsScreen> {
                   ),
 
                   // ── Display & General ───────────────────────────────────────────────
-                  sectionHeader('General', Icons.tune_rounded),
+                  sectionHeader(l10n.generalSettings, Icons.tune_rounded),
                   settingsCard(
                     child: Column(
                       children: [
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: Text('24-Hour Clock',
+                          title: Text(l10n.twentyFourHourClock,
                               style: AppTextStyles.bodyMedium.copyWith(
                                   color: textColor,
                                   fontWeight: FontWeight.bold)),
@@ -229,12 +229,12 @@ class _PrayerSettingsScreenState extends State<PrayerSettingsScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Hijri Date Offset',
+                              Text(l10n.hijriDateOffset,
                                   style: AppTextStyles.bodyMedium.copyWith(
                                       color: textColor,
                                       fontWeight: FontWeight.bold)),
                               const SizedBox(height: 4),
-                              Text('Adjust to match your local moon sighting',
+                              Text(l10n.hijriOffsetDescription,
                                   style: AppTextStyles.labelSmall.copyWith(
                                       color: textColor.withValues(alpha: 0.6))),
                               const SizedBox(height: 16),
@@ -290,93 +290,8 @@ class _PrayerSettingsScreenState extends State<PrayerSettingsScreen> {
                     ),
                   ),
 
-                  // ── Prayer Adjustments ────────────────────────────────────
-                  sectionHeader('Time Adjustments', Icons.schedule_rounded),
-                  settingsCard(
-                    child: Column(
-                      children: [
-                        'fajr',
-                        'sunrise',
-                        'dhuhr',
-                        'asr',
-                        'maghrib',
-                        'isha'
-                      ].map((key) {
-                        final offsetVal = cfg.prayerOffsets[key] ?? 0;
-                        final prayerLabel =
-                            key[0].toUpperCase() + key.substring(1);
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Row(
-                            children: [
-                              SizedBox(
-                                  width: 80,
-                                  child: Text(prayerLabel,
-                                      style: AppTextStyles.bodyMedium.copyWith(
-                                          color: textColor,
-                                          fontWeight: FontWeight.w600))),
-                              Expanded(
-                                child: SliderTheme(
-                                  data: const SliderThemeData(
-                                    trackHeight: 4,
-                                    thumbShape: RoundSliderThumbShape(
-                                        enabledThumbRadius: 8),
-                                    overlayShape: RoundSliderOverlayShape(
-                                        overlayRadius: 16),
-                                  ),
-                                  child: Slider(
-                                    value: offsetVal.toDouble(),
-                                    min: -30,
-                                    max: 30,
-                                    divisions: 60,
-                                    activeColor: primary,
-                                    inactiveColor:
-                                        primary.withValues(alpha: 0.15),
-                                    onChanged: (val) {
-                                      final newOffsets = Map<String, int>.from(
-                                          cfg.prayerOffsets)
-                                        ..[key] = val.round();
-                                      ctrl.updateConfig(cfg.copyWith(
-                                          prayerOffsets: newOffsets));
-                                    },
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 40,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 4, horizontal: 8),
-                                  decoration: BoxDecoration(
-                                    color: offsetVal != 0
-                                        ? primary.withValues(alpha: 0.1)
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    offsetVal == 0
-                                        ? '0'
-                                        : (offsetVal > 0
-                                            ? '+$offsetVal'
-                                            : '$offsetVal'),
-                                    style: TextStyle(
-                                        color: offsetVal != 0
-                                            ? primary
-                                            : textColor.withValues(alpha: 0.5),
-                                        fontWeight: FontWeight.bold),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-
                   // ── Advanced ──────────────────────────────────────────────
-                  sectionHeader('Advanced', Icons.admin_panel_settings_rounded),
+                  sectionHeader(l10n.advancedSettings, Icons.admin_panel_settings_rounded),
                   settingsCard(
                     child: Column(
                       children: [
@@ -391,11 +306,11 @@ class _PrayerSettingsScreenState extends State<PrayerSettingsScreen> {
                             child: const Icon(Icons.security_rounded,
                                 color: AppColors.emeraldLight, size: 20),
                           ),
-                          title: Text('Permissions Setup Guide',
+                          title: Text(l10n.setupGuide,
                               style: AppTextStyles.bodyMedium.copyWith(
                                   color: textColor,
                                   fontWeight: FontWeight.bold)),
-                          subtitle: Text('Ensure Athan plays in background',
+                          subtitle: Text(l10n.ensureAthanPlaysInBackground,
                               style: AppTextStyles.labelSmall.copyWith(
                                   color: textColor.withValues(alpha: 0.6))),
                           trailing: const Icon(Icons.arrow_forward_ios_rounded,
@@ -419,18 +334,17 @@ class _PrayerSettingsScreenState extends State<PrayerSettingsScreen> {
                             child: Icon(Icons.sync_rounded,
                                 color: primary, size: 20),
                           ),
-                          title: Text('Force Sync Time & Location',
+                          title: Text(l10n.forceSyncTimeAndLocation,
                               style: AppTextStyles.bodyMedium.copyWith(
                                   color: textColor,
                                   fontWeight: FontWeight.bold)),
-                          subtitle: Text('Recalculate all prayer times now',
+                          subtitle: Text(l10n.recalculatePrayerTimes,
                               style: AppTextStyles.labelSmall.copyWith(
                                   color: textColor.withValues(alpha: 0.6))),
                           onTap: () {
                             ctrl.syncLocation();
                             ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text('Syncing location...')));
+                                SnackBar(content: Text(l10n.syncingLocation)));
                           },
                         ),
                       ],

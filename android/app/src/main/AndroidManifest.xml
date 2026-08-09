@@ -130,6 +130,16 @@
             android:name=".AthanForegroundService"
             android:foregroundServiceType="mediaPlayback"
             android:exported="false" />
+            
+        <!-- NATIVE PRAYER TIMES WIDGET -->
+        <receiver android:name=".PrayerWidgetProvider" android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info" />
+        </receiver>
     </application>
 
     <queries>

@@ -20,7 +20,10 @@ import '../../data/models/prayer_time_model.dart';
 import '../controllers/prayer_controller.dart';
 import 'prayer_settings_screen.dart';
 import 'muezzin_selection_screen.dart';
+import 'location_selection_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PrayerTimesScreen extends StatefulWidget {
   const PrayerTimesScreen({super.key, required this.controller});
@@ -35,9 +38,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   @override
   void initState() {
     super.initState();
-    // Re-resolve location and times when opening the screen to ensure accuracy.
+    // The controller purely drives state from RAM/Storage. No GPS fetching here.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      widget.controller.syncLocation();
       _checkAndRequestPermissions();
     });
   }
@@ -53,6 +55,22 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     }
     // 3. ignoreBatteryOptimizations
     if (!await Permission.ignoreBatteryOptimizations.isGranted) {
+      final prefs = await SharedPreferences.getInstance();
+      final promptCount = prefs.getInt('background_prompt_count') ?? 0;
+
+      final notifs = widget.controller.config.notifications;
+      final anyEnabled = notifs.fajrEnabled ||
+          notifs.sunriseEnabled ||
+          notifs.dhuhrEnabled ||
+          notifs.asrEnabled ||
+          notifs.maghribEnabled ||
+          notifs.ishaEnabled;
+
+      // Strike System (Max 2 prompts) and respect Settings choice
+      if (promptCount >= 2 || !anyEnabled) {
+        return;
+      }
+
       if (mounted) {
         await showDialog(
           context: context,
@@ -64,12 +82,17 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(ctx),
+                onPressed: () async {
+                  await prefs.setInt(
+                      'background_prompt_count', promptCount + 1);
+                  // ignore: use_build_context_synchronously
+                  if (mounted) Navigator.pop(ctx);
+                },
                 child: const Text('Cancel'),
               ),
               TextButton(
                 onPressed: () async {
-                  Navigator.pop(ctx);
+                  if (mounted) Navigator.pop(ctx);
                   await Permission.ignoreBatteryOptimizations.request();
                 },
                 child: const Text('Proceed'),
@@ -80,7 +103,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
       }
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +146,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               ),
               body: ctrl.isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : model == null
+                  : (model == null && !ctrl.isLocationMissing)
                       ? Center(
                           child: Text(
                             ctrl.errorMessage ?? l10n.loading,
@@ -132,99 +154,226 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                                 .copyWith(color: textColor),
                           ),
                         )
-                      : SafeArea(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // ── 1. Top Hero Countdown Panel ────────────────
-                              ValueListenableBuilder<String>(
-                                valueListenable: ctrl.countdownNotifier,
-                                builder: (context, countdownStr, _) {
-                                  return _HeroCountdownPanel(
-                                    model: model,
-                                    countdown: countdownStr,
-                                    l10n: l10n,
-                                  );
-                                },
-                              ),
+                      : Builder(builder: (context) {
+                          final isEmpty =
+                              ctrl.isLocationMissing && model == null;
+                          final displayModel = model ??
+                              PrayerTimeModel(
+                                date: DateTime.now(),
+                                hijriDate: const HijriDate(
+                                    year: 1445,
+                                    month: 1,
+                                    day: 1,
+                                    monthNameAr: '',
+                                    monthNameEn: ''),
+                                locationLabel: '',
+                                latitude: 0,
+                                longitude: 0,
+                                entries: [
+                                  PrayerTimeEntry(
+                                      prayer: PrayerName.fajr,
+                                      time: DateTime.now(),
+                                      alertMode: PrayerAlertMode.silent),
+                                  PrayerTimeEntry(
+                                      prayer: PrayerName.sunrise,
+                                      time: DateTime.now(),
+                                      alertMode: PrayerAlertMode.silent),
+                                  PrayerTimeEntry(
+                                      prayer: PrayerName.dhuhr,
+                                      time: DateTime.now(),
+                                      alertMode: PrayerAlertMode.silent),
+                                  PrayerTimeEntry(
+                                      prayer: PrayerName.asr,
+                                      time: DateTime.now(),
+                                      alertMode: PrayerAlertMode.silent),
+                                  PrayerTimeEntry(
+                                      prayer: PrayerName.maghrib,
+                                      time: DateTime.now(),
+                                      alertMode: PrayerAlertMode.silent),
+                                  PrayerTimeEntry(
+                                      prayer: PrayerName.isha,
+                                      time: DateTime.now(),
+                                      alertMode: PrayerAlertMode.silent),
+                                ],
+                                daySegment: DaySegment.morning,
+                                nextPrayer: PrayerTimeEntry(
+                                    prayer: PrayerName.fajr,
+                                    time: DateTime.now(),
+                                    alertMode: PrayerAlertMode.silent),
+                                calculationMethod: '',
+                              );
 
-                              // ── 2. Current Location & Hijri Date Info ─────────
-                              Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(20, 16, 20, 8),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(Icons.location_on,
-                                            size: 16, color: primaryColor),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          model.locationLabel,
-                                          style:
-                                              AppTextStyles.bodyMedium.copyWith(
-                                            color: textColor,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Text(
-                                      Localizations.localeOf(context)
-                                                  .languageCode ==
-                                              'ar'
-                                          ? model.hijriDate.formattedAr
-                                          : model.hijriDate.formattedEn,
-                                      style: AppTextStyles.bodyMedium.copyWith(
-                                        color: AppTheme.getGoldTextColor(theme),
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // ── 3. Vertical List of 6 Prayers ───────────────
-                              Expanded(
-                                child: ListView.builder(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 8),
-                                  itemCount: model.entries.length,
-                                  itemBuilder: (context, index) {
-                                    final entry = model.entries[index];
-                                    final isNext =
-                                        entry.prayer == model.nextPrayer.prayer;
-                                    return _PrayerRowCard(
-                                      entry: entry,
-                                      isNext: isNext,
-                                      cardBg: cardBg,
-                                      textColor: textColor,
-                                      primaryColor: primaryColor,
-                                      theme: theme,
+                          return SafeArea(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                // ── 1. Top Hero Countdown Panel ────────────────
+                                ValueListenableBuilder<String>(
+                                  valueListenable: ctrl.countdownNotifier,
+                                  builder: (context, countdownStr, _) {
+                                    return _HeroCountdownPanel(
+                                      model: displayModel,
+                                      countdown: countdownStr,
                                       l10n: l10n,
-                                      onToggleNotif: () async {
-                                        final isEnabled =
-                                            ctrl.isNotifEnabled(entry.prayer);
-                                        if (!isEnabled) {
-                                          await _checkAndRequestPermissions();
-                                        }
-                                        ctrl.toggleNotification(entry.prayer);
-                                      },
-                                      notifEnabled:
-                                          ctrl.isNotifEnabled(entry.prayer),
-                                      is24HourFormat:
-                                          ctrl.config.is24HourFormat,
-                                      onTap: () => _showPrayerOptionsSheet(
-                                          context, entry, ctrl, theme),
                                     );
                                   },
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
+
+                                // ── 2. Current Location & Hijri Date Info ─────────
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  LocationSelectionScreen(
+                                                      controller: ctrl),
+                                            ),
+                                          );
+                                        },
+                                        child: ctrl.isLocationMissing
+                                            ? Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 12,
+                                                        vertical: 6),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.orange.shade700
+                                                      .withValues(alpha: 0.15),
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  border: Border.all(
+                                                      color: Colors
+                                                          .orange.shade400,
+                                                      width: 1.5),
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    const Icon(
+                                                        Icons
+                                                            .warning_amber_rounded,
+                                                        size: 16,
+                                                        color: Colors.orange),
+                                                    const SizedBox(width: 6),
+                                                    Text(
+                                                      l10n.tapToSetLocation,
+                                                      style: AppTextStyles
+                                                          .bodyMedium
+                                                          .copyWith(
+                                                        color: theme ==
+                                                                QuranTheme.dark
+                                                            ? Colors
+                                                                .orange.shade300
+                                                            : Colors.orange
+                                                                .shade800,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                                .animate(
+                                                  onPlay: (controller) =>
+                                                      controller.repeat(
+                                                          reverse: true),
+                                                )
+                                                .scaleXY(
+                                                    end: 1.05, duration: 800.ms)
+                                            : Row(
+                                                children: [
+                                                  Icon(Icons.location_on,
+                                                      size: 16,
+                                                      color: primaryColor),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    displayModel.locationLabel,
+                                                    style: AppTextStyles
+                                                        .bodyMedium
+                                                        .copyWith(
+                                                      color: textColor,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                      ),
+                                      Text(
+                                        isEmpty
+                                            ? '--/--/----'
+                                            : (Localizations.localeOf(context)
+                                                        .languageCode ==
+                                                    'ar'
+                                                ? displayModel
+                                                    .hijriDate.formattedAr
+                                                : displayModel
+                                                    .hijriDate.formattedEn),
+                                        style:
+                                            AppTextStyles.bodyMedium.copyWith(
+                                          color:
+                                              AppTheme.getGoldTextColor(theme),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                // ── 3. Vertical List of 6 Prayers ───────────────
+                                Expanded(
+                                  child: ListView.builder(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 8),
+                                    itemCount: displayModel.entries.length,
+                                    itemBuilder: (context, index) {
+                                      final entry = displayModel.entries[index];
+                                      final isNext = !isEmpty &&
+                                          entry.prayer ==
+                                              displayModel.nextPrayer.prayer;
+                                      return _PrayerRowCard(
+                                        entry: entry,
+                                        isNext: isNext,
+                                        cardBg: cardBg,
+                                        textColor: textColor,
+                                        primaryColor: primaryColor,
+                                        theme: theme,
+                                        l10n: l10n,
+                                        isEmptyState: isEmpty,
+                                        onToggleNotif: () async {
+                                          if (isEmpty) return;
+                                          final isEnabled =
+                                              ctrl.isNotifEnabled(entry.prayer);
+                                          if (!isEnabled) {
+                                            await _checkAndRequestPermissions();
+                                          }
+                                          ctrl.toggleNotification(entry.prayer);
+                                        },
+                                        notifEnabled:
+                                            ctrl.isNotifEnabled(entry.prayer),
+                                        is24HourFormat:
+                                            ctrl.config.is24HourFormat,
+                                        onTap: () {
+                                          if (!isEmpty) {
+                                            _showPrayerOptionsSheet(
+                                                context, entry, ctrl, theme);
+                                          }
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
             );
           },
         );
@@ -737,6 +886,7 @@ class _PrayerRowCard extends StatelessWidget {
     required this.notifEnabled,
     required this.is24HourFormat,
     required this.onTap,
+    this.isEmptyState = false,
   });
 
   final PrayerTimeEntry entry;
@@ -750,12 +900,14 @@ class _PrayerRowCard extends StatelessWidget {
   final bool notifEnabled;
   final bool is24HourFormat;
   final VoidCallback onTap;
+  final bool isEmptyState;
 
   @override
   Widget build(BuildContext context) {
     final name = _localizePrayerName(entry.prayer, l10n);
     final isDark = theme == QuranTheme.dark;
-    final formattedTime = _formatTime(entry.time, is24HourFormat);
+    final formattedTime =
+        isEmptyState ? '--:--' : _formatTime(entry.time, is24HourFormat);
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -899,17 +1051,17 @@ String _formatTime(DateTime time, bool is24h) {
 String _localizePrayerName(PrayerName prayer, AppLocalizations l10n) {
   switch (prayer) {
     case PrayerName.fajr:
-      return l10n.prayerFajr;
+      return l10n.fajr;
     case PrayerName.sunrise:
-      return l10n.prayerSunrise;
+      return l10n.sunrise;
     case PrayerName.dhuhr:
-      return l10n.prayerDhuhr;
+      return l10n.dhuhr;
     case PrayerName.asr:
-      return l10n.prayerAsr;
+      return l10n.asr;
     case PrayerName.maghrib:
-      return l10n.prayerMaghrib;
+      return l10n.maghrib;
     case PrayerName.isha:
-      return l10n.prayerIsha;
+      return l10n.isha;
     default:
       return prayer.name;
   }
