@@ -638,12 +638,22 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
       ayah = _ayahNameEn;
     }
 
-    return LiquidPressable(
-      onTap: () => _navigateToQuran(context),
-      scaleFactor: 0.96,
-      child: AnimatedBuilder(
-        animation: _pulseAnim,
-        builder: (context, child) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0.85, end: 1.0),
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeOutBack,
+      builder: (context, scaleVal, child) {
+        return Transform.scale(
+          scale: scaleVal,
+          child: child,
+        );
+      },
+      child: LiquidPressable(
+        onTap: () => _navigateToQuran(context),
+        scaleFactor: 0.96,
+        child: AnimatedBuilder(
+          animation: _pulseAnim,
+          builder: (context, child) {
           final t = _pulseAnim.value;
           final scale = 1.0 + 0.015 * t;
           final double shadowSpread = 1.0 + 2.0 * t;
@@ -914,7 +924,7 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
           );
         },
       ),
-    );
+    ));
   }
 }
 
@@ -1062,39 +1072,7 @@ class _ToolGridCell extends StatefulWidget {
   State<_ToolGridCell> createState() => _ToolGridCellState();
 }
 
-class _ToolGridCellState extends State<_ToolGridCell>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _entranceCtrl;
-  late final Animation<double> _fadeAnim;
-  late final Animation<Offset> _slideAnim;
-
-  @override
-  void initState() {
-    super.initState();
-    _entranceCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-    _fadeAnim = CurvedAnimation(parent: _entranceCtrl, curve: Curves.easeOut);
-    _slideAnim = Tween<Offset>(begin: const Offset(0, 0.22), end: Offset.zero)
-        .animate(
-            CurvedAnimation(parent: _entranceCtrl, curve: Curves.easeOutCubic));
-
-    if (!_globalHasAnimatedDashboard) {
-      Future.delayed(widget.entranceDelay, () {
-        if (mounted) _entranceCtrl.forward();
-      });
-    } else {
-      _entranceCtrl.value = 1.0;
-    }
-  }
-
-  @override
-  void dispose() {
-    _entranceCtrl.dispose();
-    super.dispose();
-  }
-
+class _ToolGridCellState extends State<_ToolGridCell> {
   double _phased(double raw) {
     final shifted = (raw + widget.phaseOffset) % 1.0;
     final tri = shifted < 0.5 ? shifted * 2.0 : (1.0 - shifted) * 2.0;
@@ -1111,13 +1089,9 @@ class _ToolGridCellState extends State<_ToolGridCell>
     final accent = widget.item.color;
     final bright = Color.lerp(accent, Colors.white, 0.30)!;
 
-    return FadeTransition(
-      opacity: _fadeAnim,
-      child: SlideTransition(
-        position: _slideAnim,
-        child: LiquidPressable(
-          scaleFactor: 0.94,
-          onTap: () {
+    return LiquidPressable(
+      scaleFactor: 0.94,
+      onTap: () {
             switch (widget.item.key) {
               case 'moazin':
                 Navigator.push(
@@ -1326,8 +1300,6 @@ class _ToolGridCellState extends State<_ToolGridCell>
               ),
             ),
           ),
-        ),
-      ),
-    );
+        );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../theme_notifier.dart';
 import '../../data/models/muezzin_model.dart';
@@ -24,9 +25,8 @@ class MuezzinSelectionScreen extends StatefulWidget {
 class _MuezzinSelectionScreenState extends State<MuezzinSelectionScreen> {
   final MuezzinManager _manager = MuezzinManager();
   final AudioPlayer _previewPlayer = AudioPlayer();
-  
+
   bool _isLoading = true;
-  bool _applyToAll = false;
   String _searchQuery = '';
   String? _playingMuezzinId;
   final Map<String, double> _downloadProgress = {};
@@ -40,7 +40,7 @@ class _MuezzinSelectionScreenState extends State<MuezzinSelectionScreen> {
 
   Future<void> _initManager() async {
     await _manager.init();
-    
+
     // Check download states
     for (var m in _manager.muezzins) {
       if (!m.isLocal) {
@@ -100,7 +100,7 @@ class _MuezzinSelectionScreenState extends State<MuezzinSelectionScreen> {
 
         await _previewPlayer.setAudioSource(source);
         await _previewPlayer.play();
-        
+
         Future.delayed(const Duration(seconds: 20), () async {
           if (mounted && _playingMuezzinId == m.id) {
             await _previewPlayer.stop();
@@ -142,7 +142,8 @@ class _MuezzinSelectionScreenState extends State<MuezzinSelectionScreen> {
         setState(() {
           _downloadProgress.remove(m.id);
         });
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Download failed: $e')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Download failed: $e')));
       }
     }
   }
@@ -156,10 +157,12 @@ class _MuezzinSelectionScreenState extends State<MuezzinSelectionScreen> {
     }
   }
 
-  void _onSaveMuezzin(MuezzinModel m) {
+  Future<void> _onSaveMuezzin(MuezzinModel m) async {
     if (_downloadedState[m.id] == false) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please download the Adhan first before selecting it.')),
+        const SnackBar(
+            content:
+                Text('Please download the Adhan first before selecting it.')),
       );
       return;
     }
@@ -167,7 +170,82 @@ class _MuezzinSelectionScreenState extends State<MuezzinSelectionScreen> {
     final cfg = widget.controller.config;
     final newMap = Map<String, String>.from(cfg.prayerMuezzins);
 
-    final isGlobal = _applyToAll || widget.prayerName == null;
+    if (widget.prayerName == null) {
+      // If no specific prayer is passed, it means global by default
+      _applyMuezzin(m, newMap, true);
+    } else {
+      // Ask user whether to apply to all or just the specific prayer
+      final prayerDisplay =
+          '${widget.prayerName![0].toUpperCase()}${widget.prayerName!.substring(1)}';
+
+      final bool? applyGlobal = await showModalBottomSheet<bool>(
+          context: context,
+          backgroundColor: Colors.transparent,
+          builder: (ctx) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            final bgColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
+            final textColor = isDark ? Colors.white : Colors.black87;
+
+            return Container(
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Apply Adhan',
+                    style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: textColor),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Do you want to apply ${m.name} to $prayerDisplay only, or to all prayers?',
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.bodyMedium
+                        .copyWith(color: textColor.withValues(alpha: 0.7)),
+                  ),
+                  const SizedBox(height: 24),
+                  ListTile(
+                    leading:
+                        Icon(Icons.done_all_rounded, color: AppColors.primary),
+                    title: Text('Apply to All Prayers',
+                        style:
+                            AppTextStyles.bodyLarge.copyWith(color: textColor)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    tileColor: AppColors.primary.withValues(alpha: 0.1),
+                    onTap: () => Navigator.pop(ctx, true),
+                  ),
+                  const SizedBox(height: 12),
+                  ListTile(
+                    leading: Icon(Icons.done_rounded, color: AppColors.primary),
+                    title: Text('Apply to $prayerDisplay Only',
+                        style:
+                            AppTextStyles.bodyLarge.copyWith(color: textColor)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    onTap: () => Navigator.pop(ctx, false),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            );
+          });
+
+      if (applyGlobal != null) {
+        _applyMuezzin(m, newMap, applyGlobal);
+      }
+    }
+  }
+
+  void _applyMuezzin(
+      MuezzinModel m, Map<String, String> newMap, bool isGlobal) {
     if (isGlobal) {
       for (var k in ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha']) {
         newMap[k] = m.id;
@@ -176,9 +254,10 @@ class _MuezzinSelectionScreenState extends State<MuezzinSelectionScreen> {
       newMap[widget.prayerName!] = m.id;
     }
 
-    widget.controller.updateConfig(cfg.copyWith(prayerMuezzins: newMap));
-    
-    final prayerDisplay = widget.prayerName != null 
+    widget.controller.updateConfig(
+        widget.controller.config.copyWith(prayerMuezzins: newMap));
+
+    final prayerDisplay = widget.prayerName != null
         ? '${widget.prayerName![0].toUpperCase()}${widget.prayerName!.substring(1)}'
         : 'all prayers';
 
@@ -203,13 +282,15 @@ class _MuezzinSelectionScreenState extends State<MuezzinSelectionScreen> {
         final primary = AppTheme.getPrimaryColor(theme);
 
         final targetPrayer = widget.prayerName ?? 'fajr';
-        final currentMuezzinId = widget.controller.config.prayerMuezzins[targetPrayer] ?? 'adhan_abdulbasit';
+        final currentMuezzinId =
+            widget.controller.config.prayerMuezzins[targetPrayer] ??
+                'takbir_mishary_alafasy';
 
         List<MuezzinModel> filtered = _manager.muezzins.where((m) {
           final q = _searchQuery.toLowerCase();
           return m.name.toLowerCase().contains(q) ||
-                 m.country.toLowerCase().contains(q) ||
-                 m.mosque.toLowerCase().contains(q);
+              m.country.toLowerCase().contains(q) ||
+              m.mosque.toLowerCase().contains(q);
         }).toList();
 
         // Sort: Favorites first
@@ -219,7 +300,7 @@ class _MuezzinSelectionScreenState extends State<MuezzinSelectionScreen> {
           return bFav.compareTo(aFav);
         });
 
-        final appBarTitle = widget.prayerName != null 
+        final appBarTitle = widget.prayerName != null
             ? 'Select Muezzin (${widget.prayerName![0].toUpperCase()}${widget.prayerName!.substring(1)})'
             : 'Select Muezzin';
 
@@ -234,186 +315,186 @@ class _MuezzinSelectionScreenState extends State<MuezzinSelectionScreen> {
               onPressed: () => Navigator.pop(context),
             ),
           ),
-          body: _isLoading 
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-              children: [
-                if (widget.prayerName != null)
-                  Container(
-                    margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: primary.withValues(alpha: 0.2)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.tune_rounded, color: primary, size: 20),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Apply to all prayers',
-                              style: AppTextStyles.bodyMedium.copyWith(
-                                color: textColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Switch(
-                          value: _applyToAll,
-                          activeThumbColor: primary,
-                          onChanged: (val) => setState(() => _applyToAll = val),
-                        ),
-                      ],
-                    ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: TextField(
-                    onChanged: (val) => setState(() => _searchQuery = val),
-                    decoration: InputDecoration(
-                      hintText: 'Search by Name, Mosque, or Country...',
-                      prefixIcon: Icon(Icons.search, color: primary),
-                      filled: true,
-                      fillColor: cardBg,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      final m = filtered[index];
-                      final isSelected = currentMuezzinId == m.id;
-                      final isPlaying = _playingMuezzinId == m.id;
-                      final isFav = _manager.isFavorite(m.id);
-                      final isDownloaded = _downloadedState[m.id] ?? true;
-                      final progress = _downloadProgress[m.id];
-
-                      return Hero(
-                        tag: 'muezzin_${m.id}',
-                        child: GestureDetector(
-                          onTap: () => _onSaveMuezzin(m),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            margin: const EdgeInsets.only(bottom: 12),
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: isSelected 
-                                  ? primary.withValues(alpha: isDark ? 0.15 : 0.08)
-                                  : cardBg,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: isSelected 
-                                    ? primary.withValues(alpha: 0.5) 
-                                    : Colors.transparent,
-                                width: 0.5,
-                              ),
-                              boxShadow: isSelected
-                                  ? [
-                                      BoxShadow(
-                                        color: primary.withValues(alpha: 0.2),
-                                        blurRadius: 20,
-                                        offset: const Offset(0, 8),
-                                      )
-                                    ]
-                                  : [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 4),
-                                      )
-                                    ],
-                            ),
-                            child: Row(
-                              children: [
-                                GestureDetector(
-                                  onTap: () async {
-                                    await _manager.toggleFavorite(m.id);
-                                    setState(() {});
-                                  },
-                                  child: Icon(
-                                    isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                                    color: isFav ? Colors.redAccent : textColor.withValues(alpha: 0.5),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        m.name,
-                                        style: AppTextStyles.bodyLarge.copyWith(
-                                          color: isSelected ? primary : textColor,
-                                          fontWeight: isSelected ? FontWeight.w900 : FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        '${m.mosque} • ${m.country}',
-                                        style: AppTextStyles.labelSmall.copyWith(
-                                          color: textColor.withValues(alpha: 0.6),
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                if (!m.isLocal && !isDownloaded && progress == null)
-                                  IconButton(
-                                    icon: Icon(Icons.cloud_download_rounded, color: primary),
-                                    onPressed: () => _download(m),
-                                  ),
-                                if (!m.isLocal && progress != null)
-                                  Padding(
-                                    padding: const EdgeInsets.all(12),
-                                    child: SizedBox(
-                                      width: 24, height: 24,
-                                      child: CircularProgressIndicator(value: progress, color: primary, strokeWidth: 2),
-                                    ),
-                                  ),
-                                if (!m.isLocal && isDownloaded && !isSelected)
-                                  IconButton(
-                                    icon: Icon(Icons.delete_outline_rounded, color: textColor.withValues(alpha: 0.4)),
-                                    onPressed: () => _delete(m),
-                                  ),
-                                const SizedBox(width: 8),
-                                GestureDetector(
-                                  onTap: () => _togglePreview(m),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: isPlaying ? primary : primary.withValues(alpha: 0.1),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      isPlaying ? Icons.stop_rounded : Icons.play_arrow_rounded,
-                                      color: isPlaying ? Colors.white : primary,
-                                      size: 22,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+          body: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      child: TextField(
+                        onChanged: (val) => setState(() => _searchQuery = val),
+                        decoration: InputDecoration(
+                          hintText: 'Search by Name, Mosque, or Country...',
+                          prefixIcon: Icon(Icons.search, color: primary),
+                          filled: true,
+                          fillColor: cardBg,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
                           ),
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: filtered.length,
+                        itemBuilder: (context, index) {
+                          final m = filtered[index];
+                          final isSelected = currentMuezzinId == m.id;
+                          final isPlaying = _playingMuezzinId == m.id;
+                          final isFav = _manager.isFavorite(m.id);
+                          final isDownloaded = _downloadedState[m.id] ?? true;
+                          final progress = _downloadProgress[m.id];
+
+                          return Hero(
+                            tag: 'muezzin_${m.id}',
+                            child: GestureDetector(
+                              onTap: () => _onSaveMuezzin(m),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 250),
+                                margin: const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? primary.withValues(
+                                          alpha: isDark ? 0.15 : 0.08)
+                                      : cardBg,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? primary.withValues(alpha: 0.5)
+                                        : Colors.transparent,
+                                    width: 0.5,
+                                  ),
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                            color:
+                                                primary.withValues(alpha: 0.2),
+                                            blurRadius: 20,
+                                            offset: const Offset(0, 8),
+                                          )
+                                        ]
+                                      : [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(
+                                                alpha: isDark ? 0.2 : 0.03),
+                                            blurRadius: 12,
+                                            offset: const Offset(0, 4),
+                                          )
+                                        ],
+                                ),
+                                child: Row(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () async {
+                                        await _manager.toggleFavorite(m.id);
+                                        setState(() {});
+                                      },
+                                      child: Icon(
+                                        isFav
+                                            ? Icons.favorite_rounded
+                                            : Icons.favorite_border_rounded,
+                                        color: isFav
+                                            ? Colors.redAccent
+                                            : textColor.withValues(alpha: 0.5),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            m.name,
+                                            style: AppTextStyles.bodyLarge
+                                                .copyWith(
+                                              color: isSelected
+                                                  ? primary
+                                                  : textColor,
+                                              fontWeight: isSelected
+                                                  ? FontWeight.w900
+                                                  : FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            '${m.mosque} • ${m.country}',
+                                            style: AppTextStyles.labelSmall
+                                                .copyWith(
+                                              color: textColor.withValues(
+                                                  alpha: 0.6),
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    if (!m.isLocal &&
+                                        !isDownloaded &&
+                                        progress == null)
+                                      IconButton(
+                                        icon: Icon(Icons.cloud_download_rounded,
+                                            color: primary),
+                                        onPressed: () => _download(m),
+                                      ),
+                                    if (!m.isLocal && progress != null)
+                                      Padding(
+                                        padding: const EdgeInsets.all(12),
+                                        child: SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(
+                                              value: progress,
+                                              color: primary,
+                                              strokeWidth: 2),
+                                        ),
+                                      ),
+                                    if (!m.isLocal &&
+                                        isDownloaded &&
+                                        !isSelected)
+                                      IconButton(
+                                        icon: Icon(Icons.delete_outline_rounded,
+                                            color: textColor.withValues(
+                                                alpha: 0.4)),
+                                        onPressed: () => _delete(m),
+                                      ),
+                                    const SizedBox(width: 8),
+                                    GestureDetector(
+                                      onTap: () => _togglePreview(m),
+                                      child: Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: isPlaying
+                                              ? primary
+                                              : primary.withValues(alpha: 0.1),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          isPlaying
+                                              ? Icons.stop_rounded
+                                              : Icons.play_arrow_rounded,
+                                          color: isPlaying
+                                              ? Colors.white
+                                              : primary,
+                                          size: 22,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
         );
       },
     );

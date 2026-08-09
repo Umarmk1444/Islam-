@@ -24,6 +24,7 @@ import 'location_selection_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:geolocator/geolocator.dart';
 
 class PrayerTimesScreen extends StatefulWidget {
   const PrayerTimesScreen({super.key, required this.controller});
@@ -48,6 +49,52 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     // 1. POST_NOTIFICATIONS
     if (!await Permission.notification.isGranted) {
       await Permission.notification.request();
+    }
+
+    // 1.5. Location Permission (Ask when entering Moazin place)
+    var locPermission = await Geolocator.checkPermission();
+    if (locPermission == LocationPermission.denied) {
+      locPermission = await Geolocator.requestPermission();
+    }
+    if (locPermission == LocationPermission.deniedForever) {
+      // If permanently denied, prompt to open settings
+      if (mounted) {
+        final prefs = await SharedPreferences.getInstance();
+        final locPromptCount = prefs.getInt('location_prompt_count') ?? 0;
+        // Limit prompts so it doesn't harass them every single time
+        if (locPromptCount < 2) {
+          await showDialog(
+            // ignore: use_build_context_synchronously
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Location Required'),
+              content: const Text(
+                  'Location permission is permanently denied. Please enable it in Settings to get accurate prayer times.'),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    await prefs.setInt(
+                        'location_prompt_count', locPromptCount + 1);
+                    // ignore: use_build_context_synchronously
+                    if (mounted) Navigator.pop(ctx);
+                  },
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    await prefs.setInt(
+                        'location_prompt_count', locPromptCount + 1);
+                    // ignore: use_build_context_synchronously
+                    if (mounted) Navigator.pop(ctx);
+                    await Geolocator.openAppSettings();
+                  },
+                  child: const Text('Open Settings'),
+                ),
+              ],
+            ),
+          );
+        }
+      }
     }
     // 2. SCHEDULE_EXACT_ALARM
     if (!await Permission.scheduleExactAlarm.isGranted) {
@@ -404,8 +451,9 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                 ctrl.config.prayerOffsets[entry.prayer.name] ?? 0;
             final currentMuezzinId =
                 ctrl.config.prayerMuezzins[entry.prayer.name] ??
-                    'adhan_abdulbasit';
+                    'takbir_mishary_alafasy';
             final muezzinNames = {
+              'takbir_mishary_alafasy': 'Takbir Mishary Alafasy',
               'adhan_abdulbasit': l10n.muezzinAbdulbasit,
               'adhan_mecca_ali_mulla': l10n.muezzinMecca,
               'adhan_mishary_alafasy': l10n.muezzinAlafasy,
@@ -586,7 +634,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                             color: textColor, fontWeight: FontWeight.bold)),
                     subtitle: Text(
                         muezzinNames[currentMuezzinId] ??
-                            l10n.muezzinAbdulbasit,
+                            'Takbir Mishary Alafasy',
                         style:
                             AppTextStyles.labelSmall.copyWith(color: primary)),
                     trailing:

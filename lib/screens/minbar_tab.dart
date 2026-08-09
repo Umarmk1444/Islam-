@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_text_styles.dart';
 import '../theme_notifier.dart';
@@ -13,9 +12,7 @@ import '../l10n/app_localizations.dart';
 bool _globalHasAnimatedMinbar = false;
 
 Widget _wrapAnim(Widget child, bool animate, int delayMs, {bool slideY = false}) {
-  if (!animate) return child;
-  if (slideY) return child.animate().fade(delay: delayMs.ms).slideY(begin: 0.2);
-  return child.animate().fade(delay: delayMs.ms).slideX(begin: 0.1);
+  return child;
 }
 
 class MinbarTab extends StatelessWidget {

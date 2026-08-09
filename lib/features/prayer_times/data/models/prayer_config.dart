@@ -152,12 +152,12 @@ class PrayerConfig {
       'isha': 0,
     },
     this.prayerMuezzins = const {
-      'fajr': 'adhan_abdulbasit',
-      'sunrise': 'adhan_abdulbasit',
-      'dhuhr': 'adhan_abdulbasit',
-      'asr': 'adhan_abdulbasit',
-      'maghrib': 'adhan_abdulbasit',
-      'isha': 'adhan_abdulbasit',
+      'fajr': 'takbir_mishary_alafasy',
+      'sunrise': 'takbir_mishary_alafasy',
+      'dhuhr': 'takbir_mishary_alafasy',
+      'asr': 'takbir_mishary_alafasy',
+      'maghrib': 'takbir_mishary_alafasy',
+      'isha': 'takbir_mishary_alafasy',
     },
     this.athanDurationSeconds = 0, // 0 = play full audio. Native foreground service handles timing.
   });
@@ -259,12 +259,12 @@ class PrayerConfig {
       });
     } else {
       parsedMuezzins.addAll({
-        'fajr': 'adhan_abdulbasit',
-        'sunrise': 'adhan_abdulbasit',
-        'dhuhr': 'adhan_abdulbasit',
-        'asr': 'adhan_abdulbasit',
-        'maghrib': 'adhan_abdulbasit',
-        'isha': 'adhan_abdulbasit',
+        'fajr': 'takbir_mishary_alafasy',
+        'sunrise': 'takbir_mishary_alafasy',
+        'dhuhr': 'takbir_mishary_alafasy',
+        'asr': 'takbir_mishary_alafasy',
+        'maghrib': 'takbir_mishary_alafasy',
+        'isha': 'takbir_mishary_alafasy',
       });
     }
 

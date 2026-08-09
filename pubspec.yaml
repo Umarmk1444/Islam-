@@ -47,6 +47,7 @@ dependencies:
   dio: ^5.4.0
   youtube_player_flutter: ^10.0.1
   google_mobile_ads: ^5.1.0
+  archive: ^3.4.9
   home_widget: ^0.9.3
 
 dev_dependencies:
@@ -59,7 +60,7 @@ flutter:
   uses-material-design: true
   generate: true
   assets:
-    - assets/muslim_house.db
+    - assets/muslim_house.zip
     - assets/images/
     - assets/audio/
     - assets/muezzins.json

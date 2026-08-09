@@ -6,6 +6,10 @@ import 'minbar_tab.dart';
 import 'settings_screen.dart';
 import 'library_screen.dart';
 import '../core/constants/app_colors.dart';
+import '../main.dart';
+import 'quran_screen.dart';
+import 'package:geolocator/geolocator.dart';
+import '../features/prayer_times/presentation/controllers/prayer_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MainNavigationScreen
@@ -44,6 +48,45 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     super.initState();
     _pageController = PageController(initialPage: _currentIndex);
     _pageController.addListener(_onPageScroll);
+    
+    // Mark global navigation as ready
+    kMainNavigationReady = true;
+
+    // Check if there was a pending deep link from the Android Widget
+    if (kPendingQuranWidgetClick) {
+      kPendingQuranWidgetClick = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const QuranScreen()),
+        );
+      });
+    }
+
+    // Request location permission on app launch if not determined or denied
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _requestLocationPermission();
+    });
+  }
+
+  Future<void> _requestLocationPermission() async {
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      
+      if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+        if (mounted) {
+          final prayerCtrl = PrayerController();
+          if (prayerCtrl.isLocationMissing || prayerCtrl.config.latitude == 0.0) {
+            await prayerCtrl.syncLocation();
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('[MainNavigationScreen] Location permission error: $e');
+    }
   }
 
   void _onPageScroll() {

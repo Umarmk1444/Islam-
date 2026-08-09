@@ -1,5 +1,14 @@
 [
   {
+    "id": "takbir_mishary_alafasy",
+    "name": "Takbir Mishary Alafasy",
+    "country": "Kuwait",
+    "mosque": "Grand Mosque",
+    "duration": "0:04",
+    "type": "local",
+    "url": "assets/audio/Takbir_mishary_alafasy.mp3"
+  },
+  {
     "id": "adhan_mishary_alafasy",
     "name": "Mishary Alafasy",
     "country": "Kuwait",

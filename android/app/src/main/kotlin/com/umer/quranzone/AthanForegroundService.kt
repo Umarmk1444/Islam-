@@ -181,13 +181,13 @@ class AthanForegroundService : Service() {
                 return tryBundledFallback(player, audioPath)
             }
         }
-        return tryRawResource(player, "adhan_abdulbasit")
+        return tryRawResource(player, "takbir_mishary_alafasy")
     }
 
     private fun tryBundledFallback(player: MediaPlayer, audioPath: String): Boolean {
         val fileName = audioPath.substringAfterLast("/").substringBeforeLast(".")
         return if (tryRawResource(player, fileName)) true
-        else tryRawResource(player, "adhan_abdulbasit")
+        else tryRawResource(player, "takbir_mishary_alafasy")
     }
 
     private fun tryRawResource(player: MediaPlayer, rawName: String): Boolean {

@@ -17,6 +17,8 @@ import 'core/services/background_engine.dart';
 import 'services/minbar_player.dart';
 import 'widgets/custom_banner_ad.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
+import 'package:home_widget/home_widget.dart';
+import 'screens/quran_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ENTRY POINT
@@ -32,6 +34,10 @@ import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+
+// Global variables to handle deep linking from widgets when app is launching
+bool kPendingQuranWidgetClick = false;
+bool kMainNavigationReady = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -122,6 +128,49 @@ class _QuranDawahAppState extends State<QuranDawahApp> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initHeavyServices();
     });
+
+    // Listen for widget clicks when app is already running
+    HomeWidget.widgetClicked.listen(_handleWidgetAction);
+
+    // Check if app was launched from a widget click
+    HomeWidget.initiallyLaunchedFromHomeWidget().then(_handleWidgetAction);
+  }
+
+  void _handleWidgetAction(Uri? uri) {
+    if (uri == null) return;
+    debugPrint('[_handleWidgetAction] Triggered with URI: $uri');
+    
+    // Check if it's the Quran action or the legacy Qibla action just in case
+    if (uri.host == 'quran_action' || uri.host == 'qibla_action') {
+      debugPrint('[_handleWidgetAction] Action matched, attempting navigation...');
+      if (kMainNavigationReady) {
+        _forceNavigateToQuran();
+      } else {
+        kPendingQuranWidgetClick = true;
+        debugPrint('[_handleWidgetAction] Main screen not ready. Pending navigation.');
+      }
+    }
+  }
+
+  void _forceNavigateToQuran([int attempts = 0]) {
+    final navigator = rootNavigatorKey.currentState;
+    if (navigator != null && navigator.mounted) {
+      debugPrint('[_forceNavigateToQuran] Navigator ready. Pushing QuranScreen...');
+      // Use addPostFrameCallback to guarantee the widget tree is stable before pushing
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // First, clear any existing stacked screens so we don't push multiple instances
+        navigator.popUntil((route) => route.isFirst);
+        // Then, forcefully push the QuranScreen
+        navigator.push(
+          MaterialPageRoute(builder: (_) => const QuranScreen()),
+        );
+      });
+    } else if (attempts < 15) {
+      debugPrint('[_forceNavigateToQuran] Waiting for Navigator... Attempt $attempts');
+      Future.delayed(const Duration(milliseconds: 250), () {
+        _forceNavigateToQuran(attempts + 1);
+      });
+    }
   }
 
   @override

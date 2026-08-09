@@ -42,7 +42,7 @@ class AthanAudioService {
   /// Plays the Athan audio in-app (foreground only).
   ///
   /// [audioPath] can be:
-  ///  - An asset path: "assets/audio/adhan_abdulbasit.mp3"
+  ///  - An asset path: "assets/audio/Takbir_mishary_alafasy.mp3"
   ///  - An absolute file path: "/data/user/0/.../adhan_mishary.mp3"
   ///
   /// [durationSeconds] optionally caps playback. 0 or null = play full file.
@@ -85,7 +85,7 @@ class AthanAudioService {
       } catch (e) {
         debugPrint('[AthanAudioService] Failed to load $audioPath: $e. Using default.');
         try {
-          await _player.setAsset('assets/audio/adhan_abdulbasit.mp3');
+          await _player.setAsset('assets/audio/Takbir_mishary_alafasy.mp3');
           loaded = true;
         } catch (e2) {
           debugPrint('[AthanAudioService] Default asset also failed: $e2');

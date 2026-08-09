@@ -369,38 +369,7 @@ class _DomainCard extends StatefulWidget {
   State<_DomainCard> createState() => _DomainCardState();
 }
 
-class _DomainCardState extends State<_DomainCard>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _entranceCtrl;
-  late final Animation<double>   _fadeAnim;
-  late final Animation<Offset>   _slideAnim;
-
-  @override
-  void initState() {
-    super.initState();
-    _entranceCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-    _fadeAnim  = CurvedAnimation(parent: _entranceCtrl, curve: Curves.easeOut);
-    _slideAnim = Tween<Offset>(begin: const Offset(0, 0.22), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _entranceCtrl, curve: Curves.easeOutCubic));
-
-    if (!_globalHasAnimatedLibrary) {
-      Future.delayed(widget.entranceDelay, () {
-        if (mounted) _entranceCtrl.forward();
-      });
-    } else {
-      _entranceCtrl.value = 1.0;
-    }
-  }
-
-  @override
-  void dispose() {
-    _entranceCtrl.dispose();
-    super.dispose();
-  }
-
+class _DomainCardState extends State<_DomainCard> {
   /// Converts the shared 0→1 animation into a per-card phase-shifted
   /// smooth sine value (0.0 – 1.0) using easeInOut.
   double _phased(double raw) {
@@ -420,15 +389,11 @@ class _DomainCardState extends State<_DomainCard>
     // A brighter "lit" version of the accent for color interpolation
     final bright = Color.lerp(accent, Colors.white, 0.30)!;
 
-    return FadeTransition(
-      opacity: _fadeAnim,
-      child: SlideTransition(
-        position: _slideAnim,
-        child: LiquidPressable(
-          onTap: widget.onTap,
-          child: AnimatedBuilder(
-            animation: widget.pulseAnim,
-            builder: (_, child) {
+    return LiquidPressable(
+      onTap: widget.onTap,
+      child: AnimatedBuilder(
+        animation: widget.pulseAnim,
+        builder: (_, child) {
               final t = _phased(widget.pulseAnim.value);
 
               // ── Scale: 1.00 → 1.035 (clearly visible, non-jarring) ──────────
@@ -579,9 +544,7 @@ class _DomainCardState extends State<_DomainCard>
               ),
             ),
           ),
-        ),
-      ),
-    );
+        );
   }
 }
 

@@ -610,7 +610,7 @@ class BackgroundEngine {
     } catch (e) {
       debugPrint(
           '[BackgroundEngine] _resolveAudioPath error: $e. Using default.');
-      return await _copyAssetToCache('assets/audio/adhan_abdulbasit.mp3');
+      return await _copyAssetToCache('assets/audio/Takbir_mishary_alafasy.mp3');
     }
   }
 
@@ -650,7 +650,7 @@ class BackgroundEngine {
     final localTime = time.toLocal();
     if (localTime.isBefore(DateTime.now())) return;
 
-    final muezzinId = config.prayerMuezzins[prayerName] ?? 'adhan_abdulbasit';
+    final muezzinId = config.prayerMuezzins[prayerName] ?? 'takbir_mishary_alafasy';
     final durationSeconds = config.athanDurationSeconds;
 
     // Only schedule audio for full athan alarms (not pre-adhan)
@@ -658,7 +658,7 @@ class BackgroundEngine {
 
     if (!isPreAdhan) {
       // Resolve and cache audio path before scheduling
-      String audioPath = 'assets/audio/adhan_abdulbasit.mp3';
+      String audioPath = 'assets/audio/Takbir_mishary_alafasy.mp3';
       try {
         audioPath = await _resolveAudioPath(muezzinId, config);
       } catch (e) {

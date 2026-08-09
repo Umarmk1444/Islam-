@@ -17,10 +17,8 @@ import 'dart:developer' as dev;
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show ByteData, rootBundle;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 /// A thread-safe, lazy singleton that manages the application's bundled
@@ -72,17 +70,12 @@ class DatabaseHelper {
   // Constants
   // ---------------------------------------------------------------------------
 
-  static const String _kAssetPath = 'assets/muslim_house.db';
   static const String _kDbName    = 'muslim_house.db';
   static const String _kDbSubDir  = 'databases';
   static const String _kLogName   = 'DatabaseHelper';
 
-  /// Bump this number whenever the bundled `muslim_house.db` asset changes.
-  /// The on-device copy will be deleted and re-copied from assets.
-  static const int    _kDbVersion    = 2;
-  static const String _kDbVersionKey = 'db_asset_version';
-
   Future<void> init() async {
+    // Just trigger database getter
     await database;
   }
 
@@ -110,7 +103,12 @@ class DatabaseHelper {
   Future<Database> _initDatabase() async {
     try {
       final dbPath = await _resolveDevicePath();
-      await _copyFromAssetsIfAbsent(dbPath);
+      
+      final dbFile = File(dbPath);
+      if (!await dbFile.exists()) {
+        throw Exception('Database file not found at $dbPath. It should be downloaded first.');
+      }
+
       _db = await _openDatabase(dbPath);
       
       await insertDuaAfterSalahIfNotExists(_db!);
@@ -153,68 +151,8 @@ class DatabaseHelper {
   }
 
   // ---------------------------------------------------------------------------
-  // Asset → device copy
+  // Asset → device copy (REMOVED: Now downloaded dynamically)
   // ---------------------------------------------------------------------------
-
-  /// Copies the bundled asset to [dbPath] when the file is absent **or**
-  /// when the on-device version is older than [_kDbVersion].
-  ///
-  /// Strategy:
-  /// - Checks SharedPreferences for the installed DB version.
-  /// - If the version is stale or the file is missing, deletes any existing
-  ///   copy and writes a fresh one from the asset bundle.
-  /// - Loads asset as [ByteData] (zero-copy [Uint8List] view).
-  /// - Writes through a [RandomAccessFile] to avoid allocating a second
-  ///   71 MB [List<int>] on the Dart heap.
-  /// - Flushes and closes the handle in a `finally` block to prevent leaks
-  ///   even if the write is interrupted.
-  Future<void> _copyFromAssetsIfAbsent(String dbPath) async {
-    final File dbFile = File(dbPath);
-    final prefs = await SharedPreferences.getInstance();
-    final int installedVersion = prefs.getInt(_kDbVersionKey) ?? 0;
-
-    final fileExists = await dbFile.exists();
-    if (fileExists && installedVersion >= _kDbVersion) {
-      final len = await dbFile.length();
-      dev.log(
-        'DB v$installedVersion already on device (${len ~/ 1024} KB) — skipping copy.',
-        name: _kLogName,
-      );
-      return;
-    }
-
-    // Delete stale DB if it exists from a previous version.
-    if (await dbFile.exists()) {
-      dev.log(
-        'Deleting stale DB v$installedVersion (need v$_kDbVersion).',
-        name: _kLogName,
-      );
-      await dbFile.delete();
-    }
-
-
-    dev.log('Copying DB v$_kDbVersion from assets → $dbPath …', name: _kLogName);
-
-    // rootBundle.load is safe from any isolate after
-    // WidgetsFlutterBinding.ensureInitialized() has been called.
-    final ByteData assetData = await rootBundle.load(_kAssetPath);
-
-    // Zero-copy view of the underlying byte buffer — no extra allocation.
-    final bytes = assetData.buffer.asUint8List(
-      assetData.offsetInBytes,
-      assetData.lengthInBytes,
-    );
-
-    await dbFile.writeAsBytes(bytes, flush: true);
-
-
-    await prefs.setInt(_kDbVersionKey, _kDbVersion);
-
-    dev.log(
-      'Copy complete — ${assetData.lengthInBytes ~/ 1024} KB written (v$_kDbVersion).',
-      name: _kLogName,
-    );
-  }
 
   // ---------------------------------------------------------------------------
   // Database open

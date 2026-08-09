@@ -49,7 +49,7 @@ class MuezzinManager {
       }
       // If it's remote but not downloaded, we must return a failure or default.
       // This path is returned when attempting to play.
-      return 'assets/audio/adhan_abdulbasit.mp3'; 
+      return 'assets/audio/Takbir_mishary_alafasy.mp3'; 
     }
   }
 

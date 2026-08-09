@@ -4,6 +4,7 @@ import 'main_navigation_screen.dart';
 import 'dart:io' show Platform;
 import 'package:in_app_update/in_app_update.dart';
 import '../core/database/database_helper.dart';
+import 'setup_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SplashScreen
@@ -25,6 +26,31 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _runInitSequence() async {
+    final isDbPresent = await DatabaseHelper.instance.isDatabaseOnDevice;
+
+    if (!isDbPresent) {
+      await Future.delayed(const Duration(milliseconds: 3200));
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (_, __, ___) => const SetupScreen(),
+            transitionsBuilder: (_, animation, __, child) {
+              return FadeTransition(
+                opacity: CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOut,
+                ),
+                child: child,
+              );
+            },
+            transitionDuration: const Duration(milliseconds: 400),
+          ),
+        );
+      }
+      return;
+    }
+
     // Run DB init and minimum splash display in parallel.
     // Navigation fires only when BOTH complete.
     await Future.wait([
