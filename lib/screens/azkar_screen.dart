@@ -639,14 +639,28 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
       soundName = '$soundName.mp3';
     }
 
-    // 4. Build the final absolute asset path
-    String finalPath = 'assets/audio/$soundName';
+    final List<String> localFiles = [
+      'azkarsabah.mp3',
+      'azkarmassa.mp3',
+      'seb7a.mp3',
+      'wrong_ans.mp3',
+      'coreec_ans_1.mp3',
+      'coreec_ans_2.mp3',
+      'azkartone.mp3'
+    ];
 
-    debugPrint("🚀 FORCE PLAYING: $finalPath");
+    Uri audioUri;
+    if (localFiles.contains(soundName)) {
+      audioUri = Uri.parse('asset:///assets/audio/$soundName');
+    } else {
+      audioUri = Uri.parse('https://raw.githubusercontent.com/Umarmk1444/quran_zone_audio/main/$soundName');
+    }
+
+    debugPrint("🚀 FORCE PLAYING: $audioUri");
 
     try {
       await _audioPlayer.setAudioSource(AudioSource.uri(
-        Uri.parse('asset:///$finalPath'),
+        audioUri,
         tag: MediaItem(
           id: zekr.id.toString(),
           title: zekr.type.isNotEmpty ? zekr.type : 'أذكار',
@@ -843,6 +857,23 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
             .replaceAll('/', '');
         if (!soundName.endsWith('.mp3')) soundName = '$soundName.mp3';
 
+        final List<String> localFiles = [
+          'azkarsabah.mp3',
+          'azkarmassa.mp3',
+          'seb7a.mp3',
+          'wrong_ans.mp3',
+          'coreec_ans_1.mp3',
+          'coreec_ans_2.mp3',
+          'azkartone.mp3'
+        ];
+
+        Uri getZekrUri(String name) {
+          if (localFiles.contains(name)) {
+            return Uri.parse('asset:///assets/audio/$name');
+          }
+          return Uri.parse('https://raw.githubusercontent.com/Umarmk1444/quran_zone_audio/main/$name');
+        }
+
         List<AudioSource> playlist = [];
         int zekrIndex = _azkar.indexOf(zekr);
 
@@ -856,7 +887,7 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
               .replaceAll('/', '');
           if (!prevSound.endsWith('.mp3')) prevSound = '$prevSound.mp3';
           playlist.add(AudioSource.uri(
-            Uri.parse('asset:///assets/audio/$prevSound'),
+            getZekrUri(prevSound),
             tag: MediaItem(
               id: _azkar[zekrIndex - 1].id.toString(),
               title: _azkar[zekrIndex - 1].type.isNotEmpty
@@ -869,7 +900,7 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
 
         // 2. Current
         playlist.add(AudioSource.uri(
-          Uri.parse('asset:///assets/audio/$soundName'),
+          getZekrUri(soundName),
           tag: MediaItem(
             id: zekr.id.toString(),
             title: zekr.type.isNotEmpty ? zekr.type : 'أذكار',
@@ -887,7 +918,7 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
               .replaceAll('/', '');
           if (!nextSound.endsWith('.mp3')) nextSound = '$nextSound.mp3';
           playlist.add(AudioSource.uri(
-            Uri.parse('asset:///assets/audio/$nextSound'),
+            getZekrUri(nextSound),
             tag: MediaItem(
               id: _azkar[zekrIndex + 1].id.toString(),
               title: _azkar[zekrIndex + 1].type.isNotEmpty

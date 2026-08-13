@@ -6,7 +6,7 @@
     "mosque": "Grand Mosque",
     "duration": "0:04",
     "type": "local",
-    "url": "assets/audio/Takbir_mishary_alafasy.mp3"
+    "url": "android.resource://com.umer.quranzone/raw/takbir_mishary_alafasy"
   },
   {
     "id": "adhan_mishary_alafasy",
@@ -14,8 +14,8 @@
     "country": "Kuwait",
     "mosque": "Grand Mosque of Kuwait",
     "duration": "3:15",
-    "type": "local",
-    "url": "assets/audio/adhan_mishary_alafasy.mp3"
+    "type": "remote",
+    "url": "https://raw.githubusercontent.com/Umarmk1444/quran_zone_audio/main/adhan_mishary_alafasy.mp3"
   },
   {
     "id": "adhan_abdulbasit",
@@ -23,8 +23,8 @@
     "country": "Egypt",
     "mosque": "Imam Muhammad ibn Abd al-Wahhab",
     "duration": "3:45",
-    "type": "local",
-    "url": "assets/audio/adhan_abdulbasit.mp3"
+    "type": "remote",
+    "url": "https://raw.githubusercontent.com/Umarmk1444/quran_zone_audio/main/adhan_abdulbasit.mp3"
   },
   {
     "id": "adhan_mecca_ali_mulla",
@@ -32,8 +32,8 @@
     "country": "Saudi Arabia",
     "mosque": "Masjid Al-Haram",
     "duration": "3:30",
-    "type": "local",
-    "url": "assets/audio/adhan_mecca_ali_mulla.mp3"
+    "type": "remote",
+    "url": "https://raw.githubusercontent.com/Umarmk1444/quran_zone_audio/main/adhan_mecca_ali_mulla.mp3"
   },
   {
     "id": "adhan_yasser_al_dosari",
@@ -41,8 +41,8 @@
     "country": "Saudi Arabia",
     "mosque": "Masjid Al-Haram",
     "duration": "3:20",
-    "type": "local",
-    "url": "assets/audio/adhan_yasser_al_dosari.mp3"
+    "type": "remote",
+    "url": "https://raw.githubusercontent.com/Umarmk1444/quran_zone_audio/main/adhan_yasser_al_dosari.mp3"
   },
   {
     "id": "adhan_nasser_al_qatami",
@@ -50,7 +50,7 @@
     "country": "Saudi Arabia",
     "mosque": "Princess Latifa Bint Sultan",
     "duration": "3:10",
-    "type": "local",
-    "url": "assets/audio/adhan_nasser_al_qatami.mp3"
+    "type": "remote",
+    "url": "https://raw.githubusercontent.com/Umarmk1444/quran_zone_audio/main/adhan_nasser_al_qatami.mp3"
   }
 ]

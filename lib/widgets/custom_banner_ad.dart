@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -59,6 +59,16 @@ class _PersistentBannerAdState extends State<PersistentBannerAd> {
 
   void _onQuranScreenChanged() {
     if (mounted) {
+      // CRITICAL FIX: If we are LEAVING the Quran screen, we must discard the old ad instance
+      // and load a fresh one, because Flutter's AdWidget destroys the native view
+      // when it's removed from the tree.
+      if (!kQuranScreenActive.value) {
+        _isAdLoaded = false;
+        _bannerAd?.dispose();
+        _bannerAd = null;
+        _loadAd();
+      }
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           setState(() {});
@@ -114,14 +124,15 @@ class _PersistentBannerAdState extends State<PersistentBannerAd> {
           });
           _updateAdVisibility();
 
-          // Exponential backoff retry logic: 10s, 20s, 40s, capped at 60s
-          final int retryDelaySeconds =
-              (10 * math.pow(2, _retryAttempt - 1)).toInt().clamp(10, 60);
+          // Aggressive retry logic: constantly try every 10 seconds so it appears
+          // almost immediately when the internet is turned back on.
+          const int retryDelaySeconds = 10;
 
           debugPrint(
               'Scheduling AdMob retry attempt #$_retryAttempt in ${retryDelaySeconds}s');
 
           _retryTimer?.cancel();
+          // ignore: prefer_const_constructors
           _retryTimer = Timer(Duration(seconds: retryDelaySeconds), () {
             if (mounted && _bannerAd == null && !_isAdLoading) {
               _loadAd();
@@ -167,4 +178,3 @@ class _PersistentBannerAdState extends State<PersistentBannerAd> {
     );
   }
 }
-

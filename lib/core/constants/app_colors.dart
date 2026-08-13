@@ -70,5 +70,5 @@ abstract final class AppColors {
     colors: [Color(0xFFB8860B), Color(0xFFFFD966)],
   );
 
-  static get primary => null;
+  static const Color primary = emeraldMid;
 }

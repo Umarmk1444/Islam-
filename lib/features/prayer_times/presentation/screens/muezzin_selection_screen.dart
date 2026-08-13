@@ -82,7 +82,9 @@ class _MuezzinSelectionScreenState extends State<MuezzinSelectionScreen> {
         if (m.isLocal) {
           final path = await _manager.getAudioPath(m);
           source = AudioSource.uri(
-            Uri.parse('asset:///$path'),
+            path.startsWith('android.resource://')
+                ? Uri.parse(path)
+                : Uri.parse('asset:///$path'),
             tag: mediaItem,
           );
         } else if (isDownloaded) {
@@ -212,8 +214,8 @@ class _MuezzinSelectionScreenState extends State<MuezzinSelectionScreen> {
                   ),
                   const SizedBox(height: 24),
                   ListTile(
-                    leading:
-                        Icon(Icons.done_all_rounded, color: AppColors.primary),
+                    leading: const Icon(Icons.done_all_rounded,
+                        color: AppColors.primary),
                     title: Text('Apply to All Prayers',
                         style:
                             AppTextStyles.bodyLarge.copyWith(color: textColor)),
@@ -224,7 +226,8 @@ class _MuezzinSelectionScreenState extends State<MuezzinSelectionScreen> {
                   ),
                   const SizedBox(height: 12),
                   ListTile(
-                    leading: Icon(Icons.done_rounded, color: AppColors.primary),
+                    leading: const Icon(Icons.done_rounded,
+                        color: AppColors.primary),
                     title: Text('Apply to $prayerDisplay Only',
                         style:
                             AppTextStyles.bodyLarge.copyWith(color: textColor)),

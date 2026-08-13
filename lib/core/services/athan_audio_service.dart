@@ -78,6 +78,8 @@ class AthanAudioService {
       try {
         if (audioPath.startsWith('assets/')) {
           await _player.setAsset(audioPath);
+        } else if (audioPath.startsWith('android.resource://')) {
+          await _player.setAudioSource(AudioSource.uri(Uri.parse(audioPath)));
         } else {
           await _player.setFilePath(audioPath);
         }
@@ -85,7 +87,7 @@ class AthanAudioService {
       } catch (e) {
         debugPrint('[AthanAudioService] Failed to load $audioPath: $e. Using default.');
         try {
-          await _player.setAsset('assets/audio/Takbir_mishary_alafasy.mp3');
+          await _player.setAudioSource(AudioSource.uri(Uri.parse('android.resource://com.umer.quranzone/raw/takbir_mishary_alafasy')));
           loaded = true;
         } catch (e2) {
           debugPrint('[AthanAudioService] Default asset also failed: $e2');

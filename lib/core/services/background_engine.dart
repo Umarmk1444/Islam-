@@ -452,6 +452,68 @@ Future<void> _syncAlarmsPrefsOnly(
   }
 }
 
+// ── Azkar Reminder Callback ──────────────────────────────────────────────────
+
+@pragma('vm:entry-point')
+void azkarReminderCallback(int id) async {
+  WidgetsFlutterBinding.ensureInitialized();
+  DartPluginRegistrant.ensureInitialized();
+  try {
+    final bool isMorning = id == 300;
+    final title = isMorning ? '☀️ أذكار الصباح' : '🌙 أذكار المساء';
+    final body = isMorning
+        ? 'حان وقت أذكار الصباح، لا تنس ذكر الله'
+        : 'حان وقت أذكار المساء، لا تنس ذكر الله';
+    final soundName = isMorning ? 'azkarsabah' : 'azkarmassa';
+    final channelId = isMorning ? 'azkar_sabah_channel' : 'azkar_massa_channel';
+
+    final plugin = FlutterLocalNotificationsPlugin();
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initSettings = InitializationSettings(android: androidSettings);
+    await plugin.initialize(initSettings);
+
+    final androidImplementation = plugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+
+    if (androidImplementation != null) {
+      await androidImplementation.createNotificationChannel(
+        AndroidNotificationChannel(
+          channelId,
+          isMorning ? 'Morning Azkar' : 'Evening Azkar',
+          description: 'Azkar reminders 40 mins after prayer',
+          importance: Importance.max,
+          playSound: true,
+          sound: RawResourceAndroidNotificationSound(soundName),
+          enableVibration: true,
+        ),
+      );
+    }
+
+    final androidDetails = AndroidNotificationDetails(
+      channelId,
+      isMorning ? 'Morning Azkar' : 'Evening Azkar',
+      channelDescription: 'Azkar reminders 40 mins after prayer',
+      importance: Importance.max,
+      priority: Priority.high,
+      sound: RawResourceAndroidNotificationSound(soundName),
+      playSound: true,
+      category: AndroidNotificationCategory.reminder,
+      visibility: NotificationVisibility.public,
+    );
+
+    await plugin.show(
+      id,
+      title,
+      body,
+      NotificationDetails(android: androidDetails),
+    );
+    debugPrint('[azkarReminderCallback] Notification shown for id: $id');
+  } catch (e, stack) {
+    debugPrint('[azkarReminderCallback] Error: $e');
+    debugPrint(stack.toString());
+  }
+}
+
 // ── Zekr Notification Callback ───────────────────────────────────────────────
 
 @pragma('vm:entry-point')
@@ -728,6 +790,8 @@ class BackgroundEngine {
       await cancelAlarm(id);
       await cancelAlarm(id + 100);
     }
+    await cancelAlarm(300); // Morning Azkar
+    await cancelAlarm(301); // Evening Azkar
 
     for (final prayer in PrayerName.values) {
       if (!baseIds.containsKey(prayer)) continue;
@@ -798,6 +862,47 @@ class BackgroundEngine {
               body:
                   'باقي $preAthanMinutes دقائق على أذان ${_prayerNameDisplay(prayer)}',
               config: config,
+            );
+          }
+        }
+
+        // 3. Smart Azkar Reminder (40 mins after Fajr/Asr)
+        if (prayer == PrayerName.fajr || prayer == PrayerName.asr) {
+          final isMorning = prayer == PrayerName.fajr;
+          final azkarId = isMorning ? 300 : 301;
+          final azkarTime = targetEntry.time.add(const Duration(minutes: 40)).toLocal();
+
+          if (azkarTime.isBefore(now)) {
+            // Today's Azkar passed; find tomorrow's entry
+            final tomorrowEntry = prayerEntries.firstWhere(
+              (e) => e.time.toLocal().isAfter(targetEntry!.time.toLocal()),
+              orElse: () => targetEntry!,
+            );
+            if (tomorrowEntry != targetEntry) {
+              final tomorrowAzkarTime = tomorrowEntry.time.add(const Duration(minutes: 40)).toLocal();
+              if (tomorrowAzkarTime.isAfter(now)) {
+                await AndroidAlarmManager.oneShotAt(
+                  tomorrowAzkarTime,
+                  azkarId,
+                  azkarReminderCallback,
+                  exact: true,
+                  wakeup: true,
+                  rescheduleOnReboot: true,
+                  alarmClock: true,
+                  allowWhileIdle: true,
+                );
+              }
+            }
+          } else {
+            await AndroidAlarmManager.oneShotAt(
+              azkarTime,
+              azkarId,
+              azkarReminderCallback,
+              exact: true,
+              wakeup: true,
+              rescheduleOnReboot: true,
+              alarmClock: true,
+              allowWhileIdle: true,
             );
           }
         }
