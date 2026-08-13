@@ -134,6 +134,7 @@ class PrayerConfig {
     this.hasManualMadhabOverride = false,
     this.isManualLocation   = false,
     this.is24HourFormat     = false,
+    this.autoSilentEnabled  = false,
     this.hijriOffset        = 0,
     this.prayerOffsets      = const {
       'fajr': 0,
@@ -193,6 +194,9 @@ class PrayerConfig {
   /// Whether the UI displays 24-hour formats (e.g. 16:30) or 12-hour (e.g. 04:30 PM).
   final bool is24HourFormat;
 
+  /// Whether the phone should automatically go to silent mode during prayers.
+  final bool autoSilentEnabled;
+
   /// Current moon sighting offset in days (-2 to +2).
   final int hijriOffset;
 
@@ -224,6 +228,7 @@ class PrayerConfig {
     'hasManualMadhabOverride': hasManualMadhabOverride,
     'isManualLocation':      isManualLocation,
     'is24HourFormat': is24HourFormat,
+    'autoSilentEnabled': autoSilentEnabled,
     'hijriOffset':    hijriOffset,
     'prayerOffsets':  prayerOffsets,
     'preAthanMinutes': preAthanMinutes,
@@ -304,6 +309,7 @@ class PrayerConfig {
       hasManualMadhabOverride: j['hasManualMadhabOverride'] as bool? ?? false,
       isManualLocation: j['isManualLocation'] as bool? ?? false,
       is24HourFormat: j['is24HourFormat'] as bool? ?? false,
+      autoSilentEnabled: j['autoSilentEnabled'] as bool? ?? false,
       hijriOffset:    j['hijriOffset'] as int? ?? 0,
       prayerOffsets:  parsedOffsets,
       preAthanMinutes: parsedPreAthan,
@@ -329,6 +335,7 @@ class PrayerConfig {
     bool? hasManualMadhabOverride,
     bool? isManualLocation,
     bool? is24HourFormat,
+    bool? autoSilentEnabled,
     int? hijriOffset,
     Map<String, int>? prayerOffsets,
     Map<String, int>? preAthanMinutes,
@@ -347,6 +354,7 @@ class PrayerConfig {
       hasManualMadhabOverride: hasManualMadhabOverride ?? this.hasManualMadhabOverride,
       isManualLocation: isManualLocation ?? this.isManualLocation,
       is24HourFormat: is24HourFormat ?? this.is24HourFormat,
+      autoSilentEnabled: autoSilentEnabled ?? this.autoSilentEnabled,
       hijriOffset:    hijriOffset    ?? this.hijriOffset,
       prayerOffsets:  prayerOffsets  ?? this.prayerOffsets,
       preAthanMinutes: preAthanMinutes ?? this.preAthanMinutes,

@@ -16,6 +16,7 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
   bool _hasNotification = false;
   bool _hasExactAlarm = false;
   bool _hasBatteryIgnore = false;
+  bool _hasDndAccess = false;
 
   @override
   void initState() {
@@ -27,12 +28,14 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
     final notif = await Permission.notification.isGranted;
     final exact = await Permission.scheduleExactAlarm.isGranted;
     final battery = await Permission.ignoreBatteryOptimizations.isGranted;
+    final dnd = await Permission.accessNotificationPolicy.isGranted;
 
     if (mounted) {
       setState(() {
         _hasNotification = notif;
         _hasExactAlarm = exact;
         _hasBatteryIgnore = battery;
+        _hasDndAccess = dnd;
       });
     }
   }
@@ -52,6 +55,11 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
     setState(() => _hasBatteryIgnore = status.isGranted);
   }
 
+  Future<void> _requestDnd() async {
+    final status = await Permission.accessNotificationPolicy.request();
+    setState(() => _hasDndAccess = status.isGranted);
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<QuranTheme>(
@@ -64,7 +72,7 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
         final primary = AppTheme.getPrimaryColor(theme);
 
         final allGranted =
-            _hasNotification && _hasExactAlarm && _hasBatteryIgnore;
+            _hasNotification && _hasExactAlarm && _hasBatteryIgnore && _hasDndAccess;
 
         return Scaffold(
           backgroundColor: bg,
@@ -136,6 +144,17 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
                   icon: Icons.battery_charging_full_rounded,
                   isGranted: _hasBatteryIgnore,
                   onRequest: _requestBattery,
+                  theme: theme,
+                ),
+                const SizedBox(height: 16),
+
+                // 4. Do Not Disturb
+                _PermissionCard(
+                  title: 'Auto-Silent (DND)',
+                  subtitle: 'Silence phone during prayers',
+                  icon: Icons.do_not_disturb_on_rounded,
+                  isGranted: _hasDndAccess,
+                  onRequest: _requestDnd,
                   theme: theme,
                 ),
 

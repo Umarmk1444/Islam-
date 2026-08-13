@@ -14,6 +14,7 @@
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
 
     <application
         android:label="Quran Zone"
@@ -122,6 +123,15 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="com.umer.quranzone.ACTION_PLAY_ATHAN" />
+            </intent-filter>
+        </receiver>
+
+        <!-- NATIVE AUTO-SILENT MODE — BroadcastReceiver triggered by AlarmManager -->
+        <receiver
+            android:name=".SilentModeReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.umer.quranzone.ACTION_SET_SILENT_MODE" />
             </intent-filter>
         </receiver>
 

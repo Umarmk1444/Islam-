@@ -1301,6 +1301,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Allow'**
   String get allow;
+
+  /// No description provided for @smartContextualReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Contextual Reminders'**
+  String get smartContextualReminders;
+
+  /// No description provided for @smartContextualRemindersDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Provide intelligent context-aware Adhkar'**
+  String get smartContextualRemindersDesc;
+
+  /// No description provided for @contextMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning Adhkar'**
+  String get contextMorning;
+
+  /// No description provided for @contextMorningDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'From Fajr to Sunrise'**
+  String get contextMorningDesc;
+
+  /// No description provided for @contextEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Evening Adhkar'**
+  String get contextEvening;
+
+  /// No description provided for @contextEveningDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'From Asr to Maghrib'**
+  String get contextEveningDesc;
+
+  /// No description provided for @contextWakingUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Waking-Up Dhikr'**
+  String get contextWakingUp;
+
+  /// No description provided for @contextWakingUpDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Before Fajr'**
+  String get contextWakingUpDesc;
+
+  /// No description provided for @contextAfterPrayer.
+  ///
+  /// In en, this message translates to:
+  /// **'After-Prayer Adhkar'**
+  String get contextAfterPrayer;
+
+  /// No description provided for @contextAfterPrayerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'After Obligatory Prayers'**
+  String get contextAfterPrayerDesc;
+
+  /// No description provided for @contextDuha.
+  ///
+  /// In en, this message translates to:
+  /// **'Duha Reminder'**
+  String get contextDuha;
+
+  /// No description provided for @contextDuhaDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Forenoon period'**
+  String get contextDuhaDesc;
+
+  /// No description provided for @contextBeforeSleep.
+  ///
+  /// In en, this message translates to:
+  /// **'Before-Sleep Adhkar'**
+  String get contextBeforeSleep;
+
+  /// No description provided for @contextBeforeSleepDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Night time'**
+  String get contextBeforeSleepDesc;
 }
 
 class _AppLocalizationsDelegate

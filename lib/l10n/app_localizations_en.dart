@@ -627,4 +627,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allow => 'Allow';
+
+  @override
+  String get smartContextualReminders => 'Smart Contextual Reminders';
+
+  @override
+  String get smartContextualRemindersDesc =>
+      'Provide intelligent context-aware Adhkar';
+
+  @override
+  String get contextMorning => 'Morning Adhkar';
+
+  @override
+  String get contextMorningDesc => 'From Fajr to Sunrise';
+
+  @override
+  String get contextEvening => 'Evening Adhkar';
+
+  @override
+  String get contextEveningDesc => 'From Asr to Maghrib';
+
+  @override
+  String get contextWakingUp => 'Waking-Up Dhikr';
+
+  @override
+  String get contextWakingUpDesc => 'Before Fajr';
+
+  @override
+  String get contextAfterPrayer => 'After-Prayer Adhkar';
+
+  @override
+  String get contextAfterPrayerDesc => 'After Obligatory Prayers';
+
+  @override
+  String get contextDuha => 'Duha Reminder';
+
+  @override
+  String get contextDuhaDesc => 'Forenoon period';
+
+  @override
+  String get contextBeforeSleep => 'Before-Sleep Adhkar';
+
+  @override
+  String get contextBeforeSleepDesc => 'Night time';
 }

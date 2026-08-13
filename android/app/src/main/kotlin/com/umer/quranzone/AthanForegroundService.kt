@@ -10,9 +10,13 @@ import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
+import android.database.ContentObserver
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.PowerManager
+import android.provider.Settings
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import java.io.File
@@ -38,6 +42,7 @@ class AthanForegroundService : Service() {
     private var mediaPlayer: MediaPlayer? = null
     private var wakeLock: PowerManager.WakeLock? = null
     private var durationTimer: Timer? = null
+    private var volumeObserver: ContentObserver? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -149,6 +154,9 @@ class AthanForegroundService : Service() {
             player.start()
             Log.d(TAG, "MediaPlayer started for: $prayerName")
 
+            // Register Volume Observer to act as a Kill Switch
+            registerVolumeObserver()
+
             // Safety timer: enforce max duration
             val maxSecs = if (durationSeconds > 0) durationSeconds else DEFAULT_MAX_DURATION_SECONDS
             durationTimer = Timer()
@@ -208,6 +216,54 @@ class AthanForegroundService : Service() {
         }
     }
 
+    private var initialVolumeSum: Int = -1
+
+    private fun registerVolumeObserver() {
+        try {
+            val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            val alarmVol = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
+            val musicVol = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+            val ringVol = audioManager.getStreamVolume(AudioManager.STREAM_RING)
+            initialVolumeSum = alarmVol + musicVol + ringVol
+
+            volumeObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
+                override fun onChange(selfChange: Boolean) {
+                    super.onChange(selfChange)
+                    
+                    val newAlarm = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
+                    val newMusic = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+                    val newRing = audioManager.getStreamVolume(AudioManager.STREAM_RING)
+                    val newSum = newAlarm + newMusic + newRing
+                    
+                    if (newSum != initialVolumeSum) {
+                        Log.d(TAG, "Volume change detected ($initialVolumeSum -> $newSum). Silencing Adhan.")
+                        cleanupAndStop()
+                    }
+                }
+            }
+            contentResolver.registerContentObserver(
+                Settings.System.CONTENT_URI,
+                true,
+                volumeObserver!!
+            )
+            Log.d(TAG, "Volume observer registered with initialSum=$initialVolumeSum")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to register volume observer: ${e.message}")
+        }
+    }
+
+    private fun unregisterVolumeObserver() {
+        try {
+            volumeObserver?.let {
+                contentResolver.unregisterContentObserver(it)
+                volumeObserver = null
+                Log.d(TAG, "Volume observer unregistered.")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to unregister volume observer: ${e.message}")
+        }
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Cleanup
     // ─────────────────────────────────────────────────────────────────────────
@@ -215,6 +271,8 @@ class AthanForegroundService : Service() {
     private fun cleanupAndStop() {
         durationTimer?.cancel()
         durationTimer = null
+
+        unregisterVolumeObserver()
 
         try {
             if (mediaPlayer?.isPlaying == true) mediaPlayer?.stop()

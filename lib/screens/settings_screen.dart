@@ -29,6 +29,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   String _selectedLanguage = 'English';
   bool _notificationsEnabled = true;
   int _notificationInterval = 60;
+  
   String _appVersion = 'Loading...';
 
   late final AnimationController _headerCtrl;
@@ -97,6 +98,8 @@ class _SettingsScreenState extends State<SettingsScreen>
       await BackgroundEngine().scheduleZekrNotification(value);
     }
   }
+
+
 
   void _showSnack(String msg, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -278,6 +281,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                             : const SizedBox.shrink(),
                       ),
                     ]),
+
                     const SizedBox(height: 6),
                     _label('SHARE & INFO', primary),
                     _PremiumCard(isDark: isDark, cardBg: cardBg, children: [

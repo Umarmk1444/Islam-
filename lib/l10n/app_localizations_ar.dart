@@ -625,4 +625,47 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get allow => 'سماح';
+
+  @override
+  String get smartContextualReminders => 'تذكيرات ذكية حسب الوقت';
+
+  @override
+  String get smartContextualRemindersDesc =>
+      'تقديم أذكار تتناسب مع وقتك الحالي';
+
+  @override
+  String get contextMorning => 'أذكار الصباح';
+
+  @override
+  String get contextMorningDesc => 'من الفجر إلى الشروق';
+
+  @override
+  String get contextEvening => 'أذكار المساء';
+
+  @override
+  String get contextEveningDesc => 'من العصر إلى المغرب';
+
+  @override
+  String get contextWakingUp => 'أذكار الاستيقاظ';
+
+  @override
+  String get contextWakingUpDesc => 'قبل الفجر';
+
+  @override
+  String get contextAfterPrayer => 'أذكار بعد الصلاة';
+
+  @override
+  String get contextAfterPrayerDesc => 'بعد الصلوات المفروضة';
+
+  @override
+  String get contextDuha => 'تذكير الضحى';
+
+  @override
+  String get contextDuhaDesc => 'وقت الضحى';
+
+  @override
+  String get contextBeforeSleep => 'أذكار النوم';
+
+  @override
+  String get contextBeforeSleepDesc => 'وقت الليل';
 }

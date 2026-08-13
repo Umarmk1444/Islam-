@@ -96,6 +96,62 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
         }
       }
     }
+
+    // 1.6. Auto-Silent DND Prompt
+    if (!await Permission.accessNotificationPolicy.isGranted) {
+      final prefs = await SharedPreferences.getInstance();
+      final dndPromptCount = prefs.getInt('dnd_prompt_count') ?? 0;
+      final dndSnoozeTime = prefs.getInt('dnd_snooze_timestamp') ?? 0;
+
+      bool shouldPrompt = true;
+      if (dndPromptCount >= 3) {
+        final snoozeDate = DateTime.fromMillisecondsSinceEpoch(dndSnoozeTime);
+        final now = DateTime.now();
+        if (now.difference(snoozeDate).inDays >= 3) {
+          // Reset count and ask again
+          await prefs.setInt('dnd_prompt_count', 0);
+        } else {
+          shouldPrompt = false;
+        }
+      }
+
+      if (shouldPrompt && mounted) {
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Auto-Silent Mode'),
+            content: const Text(
+              'To automatically silence your phone during prayers in the mosque, please grant Do Not Disturb access on the next screen.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  final newCount = (prefs.getInt('dnd_prompt_count') ?? 0) + 1;
+                  await prefs.setInt('dnd_prompt_count', newCount);
+                  if (newCount >= 3) {
+                    await prefs.setInt('dnd_snooze_timestamp',
+                        DateTime.now().millisecondsSinceEpoch);
+                  }
+                  // ignore: use_build_context_synchronously
+                  if (mounted) Navigator.pop(ctx);
+                },
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  if (mounted) Navigator.pop(ctx);
+                  // The controller handles the permission request and enabling the feature
+                  await widget.controller.toggleAutoSilent(true);
+                },
+                child: const Text('Proceed'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+
     // 2. SCHEDULE_EXACT_ALARM
     if (!await Permission.scheduleExactAlarm.isGranted) {
       await Permission.scheduleExactAlarm.request();

@@ -7,7 +7,7 @@ import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_overlay_window/flutter_overlay_window.dart' as overlay;
+
 import 'package:path_provider/path_provider.dart';
 
 import 'package:adhan/adhan.dart' as adhan;
@@ -170,7 +170,8 @@ void athanAlarmCallback(int id) async {
     final preMins = config.preAthanMinutes[prayerNameStr] ?? 0;
 
     final plugin = FlutterLocalNotificationsPlugin();
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: androidSettings);
     await plugin.initialize(initSettings);
 
@@ -211,7 +212,8 @@ void athanAlarmCallback(int id) async {
       const NotificationDetails(android: androidDetails),
       payload: 'prayer_times',
     );
-    debugPrint('[athanAlarmCallback] Pre-Adhan notification shown for: $prayerNameStr');
+    debugPrint(
+        '[athanAlarmCallback] Pre-Adhan notification shown for: $prayerNameStr');
   } catch (e, stack) {
     debugPrint('[athanAlarmCallback] ERROR: $e');
     debugPrint(stack.toString());
@@ -356,8 +358,11 @@ void workmanagerDispatcher() {
     if (task == 'show_zekr_overlay') {
       try {
         final zekrService = AzkarService();
-        final zekr = await zekrService.getRandomShortZekr();
-        if (zekr != null && zekr.isNotEmpty) {
+        final contextualZekr =
+            await zekrService.getSmartContextualZekr(shortOnly: true);
+        if (contextualZekr != null && contextualZekr.zekr.isNotEmpty) {
+          final zekr = contextualZekr.zekr;
+          final title = contextualZekr.title;
           final plugin = FlutterLocalNotificationsPlugin();
           const androidSettings =
               AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -395,7 +400,7 @@ void workmanagerDispatcher() {
 
           await plugin.show(
             888,
-            '✨ ذكر الله',
+            title,
             zekr,
             const NotificationDetails(android: androidDetails),
           );
@@ -404,28 +409,6 @@ void workmanagerDispatcher() {
       } catch (e, stack) {
         debugPrint('[workmanagerDispatcher] Zekr notification error: $e');
         debugPrint(stack.toString());
-      }
-
-      try {
-        final bool isGranted =
-            await overlay.FlutterOverlayWindow.isPermissionGranted();
-        if (isGranted) {
-          final bool isActive = await overlay.FlutterOverlayWindow.isActive();
-          if (!isActive) {
-            await overlay.FlutterOverlayWindow.showOverlay(
-              alignment: overlay.OverlayAlignment.center,
-              visibility: overlay.NotificationVisibility.visibilityPublic,
-              positionGravity: overlay.PositionGravity.auto,
-              height: 320,
-              width: 380,
-              flag: overlay.OverlayFlag.defaultFlag,
-              overlayTitle: 'Zekr Reminder',
-              overlayContent: 'Showing Zekr overlay on screen',
-            );
-          }
-        }
-      } catch (e) {
-        debugPrint('[workmanagerDispatcher] Overlay error: $e');
       }
     }
     return Future.value(true);
@@ -468,12 +451,13 @@ void azkarReminderCallback(int id) async {
     final channelId = isMorning ? 'azkar_sabah_channel' : 'azkar_massa_channel';
 
     final plugin = FlutterLocalNotificationsPlugin();
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: androidSettings);
     await plugin.initialize(initSettings);
 
-    final androidImplementation = plugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    final androidImplementation = plugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
 
     if (androidImplementation != null) {
       await androidImplementation.createNotificationChannel(
@@ -522,8 +506,11 @@ void zekrNotificationCallback(int id) async {
   DartPluginRegistrant.ensureInitialized();
   try {
     final zekrService = AzkarService();
-    final zekr = await zekrService.getRandomShortZekr();
-    if (zekr != null && zekr.isNotEmpty) {
+    final contextualZekr =
+        await zekrService.getSmartContextualZekr(shortOnly: true);
+    if (contextualZekr != null && contextualZekr.zekr.isNotEmpty) {
+      final zekr = contextualZekr.zekr;
+      final title = contextualZekr.title;
       final plugin = FlutterLocalNotificationsPlugin();
       const androidSettings =
           AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -560,7 +547,7 @@ void zekrNotificationCallback(int id) async {
 
       await plugin.show(
         888,
-        '✨ ذكر الله',
+        title,
         zekr,
         const NotificationDetails(android: androidDetails),
       );
@@ -712,7 +699,8 @@ class BackgroundEngine {
     final localTime = time.toLocal();
     if (localTime.isBefore(DateTime.now())) return;
 
-    final muezzinId = config.prayerMuezzins[prayerName] ?? 'takbir_mishary_alafasy';
+    final muezzinId =
+        config.prayerMuezzins[prayerName] ?? 'takbir_mishary_alafasy';
     final durationSeconds = config.athanDurationSeconds;
 
     // Only schedule audio for full athan alarms (not pre-adhan)
@@ -789,6 +777,14 @@ class BackgroundEngine {
     for (int id = 100; id <= 105; id++) {
       await cancelAlarm(id);
       await cancelAlarm(id + 100);
+      try {
+        await _kAthanAlarmChannel
+            .invokeMethod('cancelSilentAlarm', {'id': id + 400});
+        await _kAthanAlarmChannel
+            .invokeMethod('cancelSilentAlarm', {'id': id + 500});
+      } catch (e) {
+        debugPrint('[BackgroundEngine] cancelSilentAlarm error (id=$id): $e');
+      }
     }
     await cancelAlarm(300); // Morning Azkar
     await cancelAlarm(301); // Evening Azkar
@@ -870,7 +866,8 @@ class BackgroundEngine {
         if (prayer == PrayerName.fajr || prayer == PrayerName.asr) {
           final isMorning = prayer == PrayerName.fajr;
           final azkarId = isMorning ? 300 : 301;
-          final azkarTime = targetEntry.time.add(const Duration(minutes: 40)).toLocal();
+          final azkarTime =
+              targetEntry.time.add(const Duration(minutes: 40)).toLocal();
 
           if (azkarTime.isBefore(now)) {
             // Today's Azkar passed; find tomorrow's entry
@@ -879,7 +876,8 @@ class BackgroundEngine {
               orElse: () => targetEntry!,
             );
             if (tomorrowEntry != targetEntry) {
-              final tomorrowAzkarTime = tomorrowEntry.time.add(const Duration(minutes: 40)).toLocal();
+              final tomorrowAzkarTime =
+                  tomorrowEntry.time.add(const Duration(minutes: 40)).toLocal();
               if (tomorrowAzkarTime.isAfter(now)) {
                 await AndroidAlarmManager.oneShotAt(
                   tomorrowAzkarTime,
@@ -904,6 +902,45 @@ class BackgroundEngine {
               alarmClock: true,
               allowWhileIdle: true,
             );
+          }
+        }
+
+        // 4. Auto-Silent Mode
+        if (config.autoSilentEnabled) {
+          final silentId = slotId + 400;
+          final normalId = slotId + 500;
+
+          final int silentStartDelay = prayer == PrayerName.maghrib ? 5 : 10;
+          const int silentDuration = 15;
+
+          final silentTime = targetEntry.time
+              .add(Duration(minutes: silentStartDelay))
+              .toLocal();
+          final normalTime =
+              silentTime.add(const Duration(minutes: silentDuration)).toLocal();
+
+          if (silentTime.isAfter(now)) {
+            try {
+              await _kAthanAlarmChannel.invokeMethod('scheduleSilentAlarm', {
+                'id': silentId,
+                'epochMillis': silentTime.millisecondsSinceEpoch,
+                'isSilent': true,
+              });
+            } catch (e) {
+              debugPrint('[BackgroundEngine] scheduleSilentAlarm error: $e');
+            }
+          }
+
+          if (normalTime.isAfter(now)) {
+            try {
+              await _kAthanAlarmChannel.invokeMethod('scheduleSilentAlarm', {
+                'id': normalId,
+                'epochMillis': normalTime.millisecondsSinceEpoch,
+                'isSilent': false,
+              });
+            } catch (e) {
+              debugPrint('[BackgroundEngine] scheduleSilentAlarm error: $e');
+            }
           }
         }
       }

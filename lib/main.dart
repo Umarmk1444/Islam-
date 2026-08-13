@@ -16,7 +16,6 @@ import 'core/services/background_engine.dart';
 
 import 'services/minbar_player.dart';
 import 'widgets/custom_banner_ad.dart';
-import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:home_widget/home_widget.dart';
 import 'screens/quran_screen.dart';
 
@@ -277,77 +276,4 @@ class _QuranDawahAppState extends State<QuranDawahApp> {
   }
 }
 
-// ── Overlay Window Entry Point ───────────────────────────────────────────────
 
-@pragma('vm:entry-point')
-void overlayMain() {
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: ZekrOverlayWidget(),
-  ));
-}
-
-class ZekrOverlayWidget extends StatelessWidget {
-  const ZekrOverlayWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: Center(
-        child: Container(
-          margin: const EdgeInsets.all(16),
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0D4F3C),
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black45,
-                blurRadius: 16,
-                offset: Offset(0, 8),
-              )
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    '✨ ذكر الله',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  IconButton(
-                    icon:
-                        const Icon(Icons.close_rounded, color: Colors.white70),
-                    onPressed: () {
-                      FlutterOverlayWindow.closeOverlay();
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'سبحان الله وبحمده، سبحان الله العظيم',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  height: 1.4,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

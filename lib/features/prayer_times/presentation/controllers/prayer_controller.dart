@@ -555,6 +555,22 @@ class PrayerController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Toggle Auto-Silent mode during prayers
+  Future<void> toggleAutoSilent(bool value) async {
+    if (value) {
+      final status = await ph.Permission.accessNotificationPolicy.request();
+      if (!status.isGranted) {
+        // User denied DND permission, abort enabling
+        return;
+      }
+    }
+    config = config.copyWith(autoSilentEnabled: value);
+    await _saveConfig();
+    _compute();
+    await _scheduleNotifications();
+    notifyListeners();
+  }
+
   /// Re-trigger GPS and recompute times, forcefully overriding manual location.
   Future<void> syncLocation() async {
     isLoading = true;

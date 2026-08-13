@@ -211,6 +211,23 @@ class _PrayerSettingsScreenState extends State<PrayerSettingsScreen> {
                       children: [
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
+                          title: Text('Auto-Silent during Prayers',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                  color: textColor,
+                                  fontWeight: FontWeight.bold)),
+                          subtitle: Text('Silences phone 5 mins after prayer for 20 mins',
+                              style: AppTextStyles.labelSmall.copyWith(
+                                  color: textColor.withValues(alpha: 0.6))),
+                          activeThumbColor: Colors.white,
+                          activeTrackColor: primary,
+                          value: cfg.autoSilentEnabled,
+                          onChanged: (val) {
+                            ctrl.toggleAutoSilent(val);
+                          },
+                        ),
+                        const Divider(),
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
                           title: Text(l10n.twentyFourHourClock,
                               style: AppTextStyles.bodyMedium.copyWith(
                                   color: textColor,

@@ -66,6 +66,31 @@ class MainActivity : AudioServiceActivity() {
                         result.error("CANCEL_ERROR", e.message, null)
                     }
                 }
+                "scheduleSilentAlarm" -> {
+                    try {
+                        val id = call.argument<Int>("id") ?: 0
+                        val epochMillis = call.argument<Long>("epochMillis") ?: 0L
+                        val isSilent = call.argument<Boolean>("isSilent") ?: false
+                        
+                        scheduleSilentAlarm(id, epochMillis, isSilent)
+                        Log.d("MainActivity", "scheduleSilentAlarm: id=$id, time=$epochMillis, isSilent=$isSilent")
+                        result.success(true)
+                    } catch (e: Exception) {
+                        Log.e("MainActivity", "scheduleSilentAlarm error: ${e.message}", e)
+                        result.error("SCHEDULE_ERROR", e.message, null)
+                    }
+                }
+                "cancelSilentAlarm" -> {
+                    try {
+                        val id = call.argument<Int>("id") ?: 0
+                        cancelSilentAlarm(id)
+                        Log.d("MainActivity", "cancelSilentAlarm: id=$id")
+                        result.success(true)
+                    } catch (e: Exception) {
+                        Log.e("MainActivity", "cancelSilentAlarm error: ${e.message}", e)
+                        result.error("CANCEL_ERROR", e.message, null)
+                    }
+                }
                 "stopAthanService" -> {
                     try {
                         stopAthanService()
@@ -145,6 +170,56 @@ class MainActivity : AudioServiceActivity() {
             alarmManager.cancel(pendingIntent)
             pendingIntent.cancel()
             Log.d("MainActivity", "Native alarm cancelled: id=$id")
+        }
+    }
+
+    private fun buildSilentPendingIntent(id: Int, isSilent: Boolean): PendingIntent {
+        val intent = Intent(this, SilentModeReceiver::class.java).apply {
+            action = SilentModeReceiver.ACTION_SET_SILENT_MODE
+            putExtra(SilentModeReceiver.EXTRA_IS_SILENT, isSilent)
+        }
+        return PendingIntent.getBroadcast(
+            this,
+            id,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
+    private fun scheduleSilentAlarm(id: Int, epochMillis: Long, isSilent: Boolean) {
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val pendingIntent = buildSilentPendingIntent(id, isSilent)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (alarmManager.canScheduleExactAlarms()) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
+            } else {
+                alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
+                Log.w("MainActivity", "Exact alarm permission not granted. Using inexact alarm for SilentMode id=$id")
+            }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
+        } else {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
+        }
+        Log.d("MainActivity", "SilentMode alarm scheduled: id=$id at $epochMillis, isSilent=$isSilent")
+    }
+
+    private fun cancelSilentAlarm(id: Int) {
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, SilentModeReceiver::class.java).apply {
+            action = SilentModeReceiver.ACTION_SET_SILENT_MODE
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            id,
+            intent,
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+        )
+        if (pendingIntent != null) {
+            alarmManager.cancel(pendingIntent)
+            pendingIntent.cancel()
+            Log.d("MainActivity", "SilentMode alarm cancelled: id=$id")
         }
     }
 
