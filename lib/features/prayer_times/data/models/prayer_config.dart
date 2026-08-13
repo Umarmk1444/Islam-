@@ -135,6 +135,8 @@ class PrayerConfig {
     this.isManualLocation   = false,
     this.is24HourFormat     = false,
     this.autoSilentEnabled  = false,
+    this.autoSilentDelayMins = 5,
+    this.autoSilentDurationMins = 20,
     this.hijriOffset        = 0,
     this.prayerOffsets      = const {
       'fajr': 0,
@@ -160,7 +162,7 @@ class PrayerConfig {
       'maghrib': 'takbir_mishary_alafasy',
       'isha': 'takbir_mishary_alafasy',
     },
-    this.athanDurationSeconds = 0, // 0 = play full audio. Native foreground service handles timing.
+    this.athanDurationSeconds = 30,
   });
 
   /// Stored coordinates — updated whenever GPS succeeds.
@@ -197,6 +199,12 @@ class PrayerConfig {
   /// Whether the phone should automatically go to silent mode during prayers.
   final bool autoSilentEnabled;
 
+  /// Minutes to wait after the prayer time before silencing the phone.
+  final int autoSilentDelayMins;
+
+  /// Duration in minutes for the phone to remain in silent mode.
+  final int autoSilentDurationMins;
+
   /// Current moon sighting offset in days (-2 to +2).
   final int hijriOffset;
 
@@ -229,6 +237,8 @@ class PrayerConfig {
     'isManualLocation':      isManualLocation,
     'is24HourFormat': is24HourFormat,
     'autoSilentEnabled': autoSilentEnabled,
+    'autoSilentDelayMins': autoSilentDelayMins,
+    'autoSilentDurationMins': autoSilentDurationMins,
     'hijriOffset':    hijriOffset,
     'prayerOffsets':  prayerOffsets,
     'preAthanMinutes': preAthanMinutes,
@@ -310,14 +320,13 @@ class PrayerConfig {
       isManualLocation: j['isManualLocation'] as bool? ?? false,
       is24HourFormat: j['is24HourFormat'] as bool? ?? false,
       autoSilentEnabled: j['autoSilentEnabled'] as bool? ?? false,
+      autoSilentDelayMins: j['autoSilentDelayMins'] as int? ?? 5,
+      autoSilentDurationMins: j['autoSilentDurationMins'] as int? ?? 20,
       hijriOffset:    j['hijriOffset'] as int? ?? 0,
       prayerOffsets:  parsedOffsets,
       preAthanMinutes: parsedPreAthan,
-      // ── CRITICAL FIX: parsedMuezzins was parsed above but never passed here.
-      // Without this, the muezzin config was silently dropped on every app restart,
-      // causing background isolate to always use the default audio path.
       prayerMuezzins: parsedMuezzins,
-      athanDurationSeconds: j['athanDurationSeconds'] as int? ?? 7,
+      athanDurationSeconds: j['athanDurationSeconds'] as int? ?? 30,
     );
   }
 
@@ -336,6 +345,8 @@ class PrayerConfig {
     bool? isManualLocation,
     bool? is24HourFormat,
     bool? autoSilentEnabled,
+    int? autoSilentDelayMins,
+    int? autoSilentDurationMins,
     int? hijriOffset,
     Map<String, int>? prayerOffsets,
     Map<String, int>? preAthanMinutes,
@@ -355,6 +366,8 @@ class PrayerConfig {
       isManualLocation: isManualLocation ?? this.isManualLocation,
       is24HourFormat: is24HourFormat ?? this.is24HourFormat,
       autoSilentEnabled: autoSilentEnabled ?? this.autoSilentEnabled,
+      autoSilentDelayMins: autoSilentDelayMins ?? this.autoSilentDelayMins,
+      autoSilentDurationMins: autoSilentDurationMins ?? this.autoSilentDurationMins,
       hijriOffset:    hijriOffset    ?? this.hijriOffset,
       prayerOffsets:  prayerOffsets  ?? this.prayerOffsets,
       preAthanMinutes: preAthanMinutes ?? this.preAthanMinutes,

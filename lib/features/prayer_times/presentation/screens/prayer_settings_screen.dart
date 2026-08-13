@@ -215,7 +215,7 @@ class _PrayerSettingsScreenState extends State<PrayerSettingsScreen> {
                               style: AppTextStyles.bodyMedium.copyWith(
                                   color: textColor,
                                   fontWeight: FontWeight.bold)),
-                          subtitle: Text('Silences phone 5 mins after prayer for 20 mins',
+                          subtitle: Text('Silences phone ${cfg.autoSilentDelayMins} mins after prayer for ${cfg.autoSilentDurationMins} mins',
                               style: AppTextStyles.labelSmall.copyWith(
                                   color: textColor.withValues(alpha: 0.6))),
                           activeThumbColor: Colors.white,
@@ -225,6 +225,44 @@ class _PrayerSettingsScreenState extends State<PrayerSettingsScreen> {
                             ctrl.toggleAutoSilent(val);
                           },
                         ),
+                        if (cfg.autoSilentEnabled) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16.0, right: 8.0, bottom: 4.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Start Delay:', style: AppTextStyles.bodySmall.copyWith(color: textColor.withValues(alpha: 0.8))),
+                                DropdownButton<int>(
+                                  value: cfg.autoSilentDelayMins,
+                                  dropdownColor: Theme.of(context).cardColor,
+                                  underline: const SizedBox(),
+                                  items: [0, 1, 2, 5, 10].map((val) => DropdownMenuItem(value: val, child: Text('$val min', style: AppTextStyles.bodySmall.copyWith(color: textColor)))).toList(),
+                                  onChanged: (val) {
+                                    if (val != null) ctrl.updateConfig(cfg.copyWith(autoSilentDelayMins: val));
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16.0, right: 8.0, bottom: 8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Duration:', style: AppTextStyles.bodySmall.copyWith(color: textColor.withValues(alpha: 0.8))),
+                                DropdownButton<int>(
+                                  value: cfg.autoSilentDurationMins,
+                                  dropdownColor: Theme.of(context).cardColor,
+                                  underline: const SizedBox(),
+                                  items: [15, 20, 25, 30, 45, 60].map((val) => DropdownMenuItem(value: val, child: Text('$val min', style: AppTextStyles.bodySmall.copyWith(color: textColor)))).toList(),
+                                  onChanged: (val) {
+                                    if (val != null) ctrl.updateConfig(cfg.copyWith(autoSilentDurationMins: val));
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                         const Divider(),
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,

@@ -798,7 +798,19 @@ class BackgroundEngine {
 
       PrayerTimeEntry? targetEntry;
       for (final entry in prayerEntries) {
-        if (entry.time.toLocal().isAfter(now)) {
+        final prayerTime = entry.time.toLocal();
+        DateTime activeUntil = prayerTime;
+        
+        if (config.autoSilentEnabled) {
+          final dndEnd = prayerTime.add(Duration(minutes: config.autoSilentDelayMins + config.autoSilentDurationMins));
+          if (dndEnd.isAfter(activeUntil)) activeUntil = dndEnd;
+        }
+        if (prayer == PrayerName.fajr || prayer == PrayerName.asr) {
+          final azkarEnd = prayerTime.add(const Duration(minutes: 41));
+          if (azkarEnd.isAfter(activeUntil)) activeUntil = azkarEnd;
+        }
+
+        if (activeUntil.isAfter(now)) {
           targetEntry = entry;
           break;
         }
@@ -808,15 +820,17 @@ class BackgroundEngine {
         final slotId = baseIds[prayer]!;
 
         // 1. Schedule full Athan
-        await scheduleAthan(
-          id: slotId,
-          time: targetEntry.time.toLocal(),
-          prayerName: prayer.name,
-          isModeA: true,
-          title: '🕌 ${_prayerNameDisplay(prayer)}',
-          body: 'حان الآن موعد أذان ${_prayerNameDisplay(prayer)}',
-          config: config,
-        );
+        if (targetEntry.time.toLocal().isAfter(now)) {
+          await scheduleAthan(
+            id: slotId,
+            time: targetEntry.time.toLocal(),
+            prayerName: prayer.name,
+            isModeA: true,
+            title: '🕌 ${_prayerNameDisplay(prayer)}',
+            body: 'حان الآن موعد أذان ${_prayerNameDisplay(prayer)}',
+            config: config,
+          );
+        }
 
         // 2. Schedule Pre-Adhan if configured
         final preAthanMinutes = config.preAthanMinutes[prayer.name] ?? 0;
@@ -910,14 +924,14 @@ class BackgroundEngine {
           final silentId = slotId + 400;
           final normalId = slotId + 500;
 
-          final int silentStartDelay = prayer == PrayerName.maghrib ? 5 : 10;
-          const int silentDuration = 15;
+          final int silentStartDelay = config.autoSilentDelayMins;
+          final int silentDuration = config.autoSilentDurationMins;
 
           final silentTime = targetEntry.time
               .add(Duration(minutes: silentStartDelay))
               .toLocal();
           final normalTime =
-              silentTime.add(const Duration(minutes: silentDuration)).toLocal();
+              silentTime.add(Duration(minutes: silentDuration)).toLocal();
 
           if (silentTime.isAfter(now)) {
             try {

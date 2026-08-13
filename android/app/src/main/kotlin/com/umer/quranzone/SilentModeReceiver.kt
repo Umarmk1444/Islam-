@@ -31,8 +31,8 @@ class SilentModeReceiver : BroadcastReceiver() {
                 // True DND mode (API 23+)
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                     if (notificationManager.isNotificationPolicyAccessGranted) {
-                        notificationManager.setInterruptionFilter(android.app.NotificationManager.INTERRUPTION_FILTER_NONE)
-                        Log.d(TAG, "DND Filter set to NONE")
+                        notificationManager.setInterruptionFilter(android.app.NotificationManager.INTERRUPTION_FILTER_ALARMS)
+                        Log.d(TAG, "DND Filter set to ALARMS")
                     } else {
                         Log.w(TAG, "DND permission missing. Cannot set Interruption Filter.")
                     }
