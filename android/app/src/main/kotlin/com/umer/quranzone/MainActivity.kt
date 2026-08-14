@@ -134,24 +134,25 @@ class MainActivity : AudioServiceActivity() {
     ) {
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val pendingIntent = buildAthanPendingIntent(id, prayerName, audioPath, durationSeconds)
+        val showIntent = PendingIntent.getActivity(
+            this, id, Intent(this, MainActivity::class.java),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val alarmClockInfo = AlarmManager.AlarmClockInfo(epochMillis, showIntent)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // Android 12+: must check permission before using setExactAndAllowWhileIdle
             if (alarmManager.canScheduleExactAlarms()) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
+                alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
             } else {
-                // Fallback to inexact if exact alarm permission not granted
                 alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
                 Log.w("MainActivity", "Exact alarm permission not granted. Using inexact alarm for id=$id")
             }
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // Android 6-11: use setExactAndAllowWhileIdle to bypass Doze
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
         } else {
-            // Android 5 and below: setExact
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
+            // Android 11 and below (including API 33/Android 13 Xiaomi if not SDK_INT check)
+            // Wait, Android 12 is Build.VERSION_CODES.S
+            alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
         }
-        Log.d("MainActivity", "Native alarm scheduled: id=$id at $epochMillis for $prayerName")
+        Log.d("MainActivity", "Native alarm scheduled (AlarmClock): id=$id at $epochMillis for $prayerName")
     }
 
     private fun cancelAthanAlarm(id: Int) {
@@ -189,20 +190,23 @@ class MainActivity : AudioServiceActivity() {
     private fun scheduleSilentAlarm(id: Int, epochMillis: Long, isSilent: Boolean) {
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val pendingIntent = buildSilentPendingIntent(id, isSilent)
+        val showIntent = PendingIntent.getActivity(
+            this, id, Intent(this, MainActivity::class.java),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val alarmClockInfo = AlarmManager.AlarmClockInfo(epochMillis, showIntent)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (alarmManager.canScheduleExactAlarms()) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
+                alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
             } else {
                 alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
                 Log.w("MainActivity", "Exact alarm permission not granted. Using inexact alarm for SilentMode id=$id")
             }
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
         } else {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
+            alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
         }
-        Log.d("MainActivity", "SilentMode alarm scheduled: id=$id at $epochMillis, isSilent=$isSilent")
+        Log.d("MainActivity", "SilentMode alarm scheduled (AlarmClock): id=$id at $epochMillis, isSilent=$isSilent")
     }
 
     private fun cancelSilentAlarm(id: Int) {
