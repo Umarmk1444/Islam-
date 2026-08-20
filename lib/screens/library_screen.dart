@@ -8,6 +8,8 @@ import 'library_category_screen.dart';
 import 'library_content_list_screen.dart';
 import 'story_reading_screen.dart';
 import 'ruqyah_screen.dart';
+import 'fiqh_and_fatawa_screen.dart';
+import 'quiz_intro_screen.dart';
 import '../widgets/liquid_pressable.dart';
 import '../widgets/custom_banner_ad.dart';
 
@@ -17,10 +19,10 @@ import '../widgets/custom_banner_ad.dart';
 const _kDomainPalette = [
   [Color(0xFF1DB97A), Color(0xFF0E7A4F)], // Islamic Library — emerald
   [Color(0xFF1E88E5), Color(0xFF0D47A1)], // Bukhari — azure blue
-  [Color(0xFF8E24AA), Color(0xFF4A0072)], // Fiqh — violet
-  [Color(0xFFFFB300), Color(0xFFE65100)], // Fatwas — amber→orange
+  [Color(0xFF8E24AA), Color(0xFF4A0072)], // Fiqh & Fatawa — violet
   [Color(0xFF00ACC1), Color(0xFF006064)], // Dream Tafsir — cyan
   [Color(0xFFE91E8C), Color(0xFF880E4F)], // Ruqyah — hot pink
+  [Color(0xFFF9A825), Color(0xFFE65100)], // Quiz & Games — amber/gold
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -50,10 +52,10 @@ class _LibraryScreenState extends State<LibraryScreen>
   final List<Map<String, dynamic>> _domains = [
     {'part': 'المكتبة',        'title': 'المكتبة الإسلامية', 'icon': Icons.local_library_rounded},
     {'part': 'صحيح البخارى',   'title': 'صحيح البخاري',     'icon': Icons.menu_book_rounded},
-    {'part': 'فقه',            'title': 'فقه',               'icon': Icons.balance_rounded},
-    {'part': 'فتاوى',          'title': 'فتاوى',             'icon': Icons.question_answer_rounded},
+    {'part': 'فقه وفتاوى',     'title': 'الفقه والفتاوى',   'icon': Icons.balance_rounded},
     {'part': 'تفسير أحلام',    'title': 'تفسير الأحلام',     'icon': Icons.nights_stay_rounded},
     {'part': 'الرقية الشرعية', 'title': 'الرقية الشرعية',   'icon': Icons.healing_rounded},
+    {'part': 'مسابقات',        'title': 'مسابقات وألعاب',   'icon': Icons.quiz_rounded},
   ];
 
   @override
@@ -104,6 +106,14 @@ class _LibraryScreenState extends State<LibraryScreen>
   void _navigateToDomain(Map<String, dynamic> domain) {
     if (domain['part'] == 'الرقية الشرعية') {
       Navigator.push(context, MaterialPageRoute(builder: (_) => const RuqyahScreen()));
+      return;
+    }
+    if (domain['part'] == 'فقه وفتاوى') {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => const FiqhAndFatawaScreen()));
+      return;
+    }
+    if (domain['part'] == 'مسابقات') {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizIntroScreen()));
       return;
     }
     Navigator.push(context, MaterialPageRoute(

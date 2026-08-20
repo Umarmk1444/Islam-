@@ -14,7 +14,7 @@ import '../features/qibla/presentation/screens/qibla_screen.dart';
 import 'azkar_screen.dart';
 import 'tasbih_screen.dart';
 import '../core/utils/map_launcher.dart';
-import 'quiz_intro_screen.dart';
+import 'qaida_nooraniyah_screen.dart';
 import '../widgets/liquid_pressable.dart';
 import '../widgets/custom_banner_ad.dart';
 
@@ -1017,14 +1017,14 @@ const _tools = <_ToolItem>[
 
   // Row 3
   _ToolItem(
-    key: 'quiz',
-    svgIconName: 'quiz',
+    key: 'qaida_noorania',
+    svgIconName: 'qaida_noorania',
     color: Color(0xFFF9A825),
     labels: {
-      'en': 'Quiz & Games',
-      'ar': 'مسابقات',
-      'am': 'ጥያቄና መልስ',
-      'om': 'Gaaffii fi Deebii',
+      'en': 'Noorani Qaida',
+      'ar': 'القاعدة النورانية',
+      'am': 'ቃዒዳ ኑራንያ',
+      'om': 'Qaa\'idaa Nuuraaniyaa',
     },
   ),
 
@@ -1125,11 +1125,11 @@ class _ToolGridCellState extends State<_ToolGridCell> {
                       builder: (_) => const TasbihScreen(),
                     ));
                 break;
-              case 'quiz':
+              case 'qaida_noorania':
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const QuizIntroScreen(),
+                      builder: (_) => const QaidaNooraniyahScreen(),
                     ));
                 break;
             }
