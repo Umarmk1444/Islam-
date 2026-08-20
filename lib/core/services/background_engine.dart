@@ -920,7 +920,7 @@ class BackgroundEngine {
         }
 
         // 4. Auto-Silent Mode
-        if (config.autoSilentEnabled) {
+        if (config.autoSilentEnabled && config.autoSilentDurationMins > 0) {
           final silentId = slotId + 400;
           final normalId = slotId + 500;
 

@@ -48,10 +48,15 @@ class AthanAlarmReceiver : BroadcastReceiver() {
             putExtra(AthanForegroundService.EXTRA_ALARM_ID, alarmId)
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(serviceIntent)
-        } else {
-            context.startService(serviceIntent)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(serviceIntent)
+            } else {
+                context.startService(serviceIntent)
+            }
+            Log.d(TAG, "AthanForegroundService started successfully for $prayerName")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to start AthanForegroundService: ${e.message}", e)
         }
     }
 }

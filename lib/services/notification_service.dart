@@ -185,9 +185,17 @@ class NotificationService {
 
   /// Cancels only the Adhan and Pre-Adhan notification IDs (100–105, 200-205)
   Future<void> cancelAdhanNotifications() async {
-    for (int id = 100; id <= 105; id++) {
-      await _plugin.cancel(id);
-      await _plugin.cancel(id + 100);
+    try {
+      for (int id = 100; id <= 105; id++) {
+        try {
+          await _plugin.cancel(id);
+        } catch (_) {}
+        try {
+          await _plugin.cancel(id + 100);
+        } catch (_) {}
+      }
+    } catch (e) {
+      debugPrint('[NotificationService] cancelAdhanNotifications error: $e');
     }
   }
 }

@@ -195,9 +195,7 @@ class PrayerController extends ChangeNotifier {
         notifyListeners();
 
         // Immediately reschedule alarms on background engine to apply updated coordinates/label
-        if (model != null) {
-          await BackgroundEngine().scheduleAllAlarms(model!.entries, config);
-        }
+        await _scheduleNotifications();
       }).timeout(const Duration(seconds: 5), onTimeout: () {
         if (config.latitude == 0.0 && config.longitude == 0.0) {
           isLocationMissing = true;
@@ -665,7 +663,11 @@ class PrayerController extends ChangeNotifier {
       final upcomingEntries = [...todayEntries, ...tomorrowEntries];
 
       // Cancel stale notifications first, then schedule new alarms.
-      await NotificationService().cancelAdhanNotifications();
+      try {
+        await NotificationService().cancelAdhanNotifications();
+      } catch (e) {
+        debugPrint('[PrayerController] cancelAdhanNotifications error: $e');
+      }
       await BackgroundEngine().scheduleAllAlarms(upcomingEntries, config);
     } catch (e, stack) {
       // Log scheduling failures — these are NOT always harmless (e.g. AlarmManager not initialized).

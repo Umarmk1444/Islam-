@@ -42,7 +42,6 @@ class AthanForegroundService : Service() {
     private var mediaPlayer: MediaPlayer? = null
     private var wakeLock: PowerManager.WakeLock? = null
     private var durationTimer: Timer? = null
-    private var volumeObserver: ContentObserver? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -67,7 +66,11 @@ class AthanForegroundService : Service() {
 
         // ── 1. Post foreground notification (MUST be within 5 seconds on API 26+) ──
         val notification = buildNotification(prayerName)
-        startForeground(NOTIF_ID, notification)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(NOTIF_ID, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+        } else {
+            startForeground(NOTIF_ID, notification)
+        }
         Log.d(TAG, "Foreground notification posted for: $prayerName")
 
         // ── 2. Acquire WakeLock to keep the CPU alive during playback ──
@@ -154,9 +157,6 @@ class AthanForegroundService : Service() {
             player.start()
             Log.d(TAG, "MediaPlayer started for: $prayerName")
 
-            // Register Volume Observer to act as a Kill Switch
-            registerVolumeObserver()
-
             // Safety timer: enforce max duration
             val maxSecs = if (durationSeconds > 0) durationSeconds else DEFAULT_MAX_DURATION_SECONDS
             durationTimer = Timer()
@@ -216,54 +216,6 @@ class AthanForegroundService : Service() {
         }
     }
 
-    private var initialVolumeSum: Int = -1
-
-    private fun registerVolumeObserver() {
-        try {
-            val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            val alarmVol = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
-            val musicVol = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
-            val ringVol = audioManager.getStreamVolume(AudioManager.STREAM_RING)
-            initialVolumeSum = alarmVol + musicVol + ringVol
-
-            volumeObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
-                override fun onChange(selfChange: Boolean) {
-                    super.onChange(selfChange)
-                    
-                    val newAlarm = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
-                    val newMusic = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
-                    val newRing = audioManager.getStreamVolume(AudioManager.STREAM_RING)
-                    val newSum = newAlarm + newMusic + newRing
-                    
-                    if (newSum != initialVolumeSum) {
-                        Log.d(TAG, "Volume change detected ($initialVolumeSum -> $newSum). Silencing Adhan.")
-                        cleanupAndStop()
-                    }
-                }
-            }
-            contentResolver.registerContentObserver(
-                Settings.System.CONTENT_URI,
-                true,
-                volumeObserver!!
-            )
-            Log.d(TAG, "Volume observer registered with initialSum=$initialVolumeSum")
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to register volume observer: ${e.message}")
-        }
-    }
-
-    private fun unregisterVolumeObserver() {
-        try {
-            volumeObserver?.let {
-                contentResolver.unregisterContentObserver(it)
-                volumeObserver = null
-                Log.d(TAG, "Volume observer unregistered.")
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to unregister volume observer: ${e.message}")
-        }
-    }
-
     // ─────────────────────────────────────────────────────────────────────────
     // Cleanup
     // ─────────────────────────────────────────────────────────────────────────
@@ -271,8 +223,6 @@ class AthanForegroundService : Service() {
     private fun cleanupAndStop() {
         durationTimer?.cancel()
         durationTimer = null
-
-        unregisterVolumeObserver()
 
         try {
             if (mediaPlayer?.isPlaying == true) mediaPlayer?.stop()
