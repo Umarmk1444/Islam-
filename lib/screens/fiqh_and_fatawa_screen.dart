@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../core/constants/app_colors.dart';
 import '../theme_notifier.dart';
 import '../services/library_service.dart';
 import '../widgets/liquid_pressable.dart';
@@ -76,7 +75,7 @@ class _FiqhAndFatawaScreenState extends State<FiqhAndFatawaScreen>
   }
 
   void _onFiqhSearch(String query) {
-    if (query.isEmpty) {
+    if (query.trim().isEmpty) {
       setState(() => _filteredFiqhCategories = _fiqhCategories);
       return;
     }
@@ -89,7 +88,7 @@ class _FiqhAndFatawaScreenState extends State<FiqhAndFatawaScreen>
   }
 
   void _onFatawaSearch(String query) {
-    if (query.isEmpty) {
+    if (query.trim().isEmpty) {
       setState(() => _filteredFatawaCategories = _fatawaCategories);
       return;
     }
@@ -117,138 +116,137 @@ class _FiqhAndFatawaScreenState extends State<FiqhAndFatawaScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = AppTheme.notifier.value == QuranTheme.dark;
-    final bgColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-    final cardBg = isDark ? AppColors.surfaceCard : AppColors.surfaceCardLight;
-    final textColor = isDark ? AppColors.textPrimary : AppColors.emeraldDeep;
-    const primaryAccent = Color(0xFF8E24AA); // Violet accent for Fiqh/Fatawa
+    final bgColor = isDark ? const Color(0xFF090E11) : const Color(0xFFFAF7F0);
+    final cardBg = isDark ? const Color(0xFF131C1A) : const Color(0xFFFFFDF9);
+    final textColor = isDark ? const Color(0xFFF0F4F0) : const Color(0xFF0D3B2E);
+    const primaryAccent = Color(0xFFAB47BC);
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: bgColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: textColor),
-        centerTitle: true,
-        title: Text(
-          'الفقه والفتاوى',
-          style: TextStyle(
-            color: textColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios_new_rounded, color: textColor, size: 20),
+            onPressed: () => Navigator.pop(context),
           ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(56),
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.08)
-                    : Colors.black.withValues(alpha: 0.06),
-              ),
+          centerTitle: true,
+          title: Text(
+            'الفقه والفتاوى',
+            style: TextStyle(
+              color: textColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              fontFamily: 'Amiri',
             ),
-            child: TabBar(
-              controller: _tabController,
-              indicator: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                gradient: LinearGradient(
-                  colors: isDark
-                      ? [const Color(0xFF8E24AA), const Color(0xFF5E1078)]
-                      : [const Color(0xFF9C27B0), const Color(0xFF7B1FA2)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+          ),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(50),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: primaryAccent.withValues(alpha: 0.35),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
+              ),
+              child: TabBar(
+                controller: _tabController,
+                indicator: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF4A154B), Color(0xFF7A257C)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryAccent.withValues(alpha: 0.35),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                indicatorSize: TabBarIndicatorSize.tab,
+                labelColor: Colors.white,
+                unselectedLabelColor: isDark ? const Color(0xFF8A9995) : const Color(0xFF657B74),
+                labelStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  fontFamily: 'Amiri',
+                ),
+                unselectedLabelStyle: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  fontFamily: 'Amiri',
+                ),
+                dividerColor: Colors.transparent,
+                tabs: const [
+                  Tab(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.balance_rounded, size: 16),
+                        SizedBox(width: 6),
+                        Text('الفقه الإسلامي'),
+                      ],
+                    ),
+                  ),
+                  Tab(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.question_answer_rounded, size: 16),
+                        SizedBox(width: 6),
+                        Text('فتاوى وإرشادات'),
+                      ],
+                    ),
                   ),
                 ],
               ),
-              indicatorSize: TabBarIndicatorSize.tab,
-              labelColor: Colors.white,
-              unselectedLabelColor:
-                  isDark ? AppColors.textSecondary : AppColors.textMuted,
-              labelStyle: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-              ),
-              unselectedLabelStyle: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 15,
-              ),
-              dividerColor: Colors.transparent,
-              tabs: const [
-                Tab(
-                  iconMargin: EdgeInsets.only(bottom: 2),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.balance_rounded, size: 18),
-                      SizedBox(width: 8),
-                      Text('الفقه الإسلامي'),
-                    ],
-                  ),
-                ),
-                Tab(
-                  iconMargin: EdgeInsets.only(bottom: 2),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.question_answer_rounded, size: 18),
-                      SizedBox(width: 8),
-                      Text('فتاوى وإرشادات'),
-                    ],
-                  ),
-                ),
-              ],
             ),
           ),
         ),
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            // Tab 1: Fiqh
+            _buildCategoryTab(
+              part: 'فقه',
+              searchCtrl: _fiqhSearchCtrl,
+              onSearch: _onFiqhSearch,
+              isLoading: _isFiqhLoading,
+              categories: _filteredFiqhCategories,
+              searchHint: 'ابحث في أبواب الفقه الإسلامي...',
+              iconData: Icons.balance_rounded,
+              iconGradient: const [Color(0xFF4A154B), Color(0xFF7A257C)],
+              textColor: textColor,
+              cardBg: cardBg,
+              isDark: isDark,
+            ),
+            // Tab 2: Fatawa
+            _buildCategoryTab(
+              part: 'فتاوى',
+              searchCtrl: _fatawaSearchCtrl,
+              onSearch: _onFatawaSearch,
+              isLoading: _isFatawaLoading,
+              categories: _filteredFatawaCategories,
+              searchHint: 'ابحث في تصنيفات الفتاوى الشرعية...',
+              iconData: Icons.question_answer_rounded,
+              iconGradient: const [Color(0xFF744210), Color(0xFFB7791F)],
+              textColor: textColor,
+              cardBg: cardBg,
+              isDark: isDark,
+            ),
+          ],
+        ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          // Tab 1: Fiqh
-          _buildCategoryTab(
-            part: 'فقه',
-            searchCtrl: _fiqhSearchCtrl,
-            onSearch: _onFiqhSearch,
-            isLoading: _isFiqhLoading,
-            categories: _filteredFiqhCategories,
-            searchHint: 'بحث في أبواب الفقه...',
-            iconData: Icons.balance_rounded,
-            iconGradient: const [Color(0xFF8E24AA), Color(0xFF4A0072)],
-            textColor: textColor,
-            cardBg: cardBg,
-            isDark: isDark,
-          ),
-          // Tab 2: Fatawa
-          _buildCategoryTab(
-            part: 'فتاوى',
-            searchCtrl: _fatawaSearchCtrl,
-            onSearch: _onFatawaSearch,
-            isLoading: _isFatawaLoading,
-            categories: _filteredFatawaCategories,
-            searchHint: 'بحث في تصنيفات الفتاوى...',
-            iconData: Icons.question_answer_rounded,
-            iconGradient: const [Color(0xFFFFB300), Color(0xFFE65100)],
-            textColor: textColor,
-            cardBg: cardBg,
-            isDark: isDark,
-          ),
-        ],
-      ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildCategoryTab({
     required String part,
@@ -263,31 +261,49 @@ class _FiqhAndFatawaScreenState extends State<FiqhAndFatawaScreen>
     required Color cardBg,
     required bool isDark,
   }) {
+    final borderColor = isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05);
+
     return Column(
       children: [
         // Search Bar
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-          child: TextField(
-            controller: searchCtrl,
-            onChanged: onSearch,
-            style: TextStyle(color: textColor),
-            decoration: InputDecoration(
-              hintText: searchHint,
-              hintStyle: TextStyle(
-                color: isDark ? AppColors.textSecondary : AppColors.textMuted,
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+          child: Container(
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: borderColor, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: TextField(
+              controller: searchCtrl,
+              onChanged: onSearch,
+              style: TextStyle(color: textColor, fontSize: 14),
+              decoration: InputDecoration(
+                hintText: searchHint,
+                hintStyle: TextStyle(
+                  color: isDark ? const Color(0xFF6C7C78) : const Color(0xFF9AA8A4),
+                  fontSize: 13,
+                ),
+                prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFFAB47BC), size: 20),
+                suffixIcon: searchCtrl.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear_rounded, size: 18),
+                        onPressed: () {
+                          searchCtrl.clear();
+                          onSearch('');
+                        },
+                      )
+                    : null,
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
               ),
-              prefixIcon: Icon(
-                Icons.search,
-                color: isDark ? AppColors.textSecondary : AppColors.emeraldDeep,
-              ),
-              filled: true,
-              fillColor: cardBg,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: const EdgeInsets.symmetric(vertical: 0),
             ),
           ),
         ),
@@ -296,28 +312,22 @@ class _FiqhAndFatawaScreenState extends State<FiqhAndFatawaScreen>
         Expanded(
           child: isLoading
               ? const Center(
-                  child: CircularProgressIndicator(
-                    color: AppColors.emeraldLight,
-                  ),
+                  child: CircularProgressIndicator(color: Color(0xFFAB47BC)),
                 )
               : categories.isEmpty
                   ? Center(
                       child: Text(
-                        'لا توجد نتائج',
+                        'لا توجد نتائج مطابقة',
                         style: TextStyle(
-                          color: isDark
-                              ? AppColors.textSecondary
-                              : AppColors.textMuted,
-                          fontSize: 16,
+                          color: isDark ? const Color(0xFF8A9995) : const Color(0xFF5A726A),
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     )
                   : ListView.builder(
                       physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                       itemCount: categories.length,
                       itemBuilder: (context, index) {
                         final cat = categories[index];
@@ -332,15 +342,11 @@ class _FiqhAndFatawaScreenState extends State<FiqhAndFatawaScreen>
                             decoration: BoxDecoration(
                               color: cardBg,
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: isDark
-                                    ? Colors.white.withValues(alpha: 0.06)
-                                    : Colors.black.withValues(alpha: 0.05),
-                              ),
+                              border: Border.all(color: borderColor, width: 1),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withValues(
-                                    alpha: isDark ? 0.2 : 0.04,
+                                    alpha: isDark ? 0.2 : 0.03,
                                   ),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
@@ -358,7 +364,7 @@ class _FiqhAndFatawaScreenState extends State<FiqhAndFatawaScreen>
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                     ),
-                                    shape: BoxShape.circle,
+                                    borderRadius: BorderRadius.circular(10),
                                     boxShadow: [
                                       BoxShadow(
                                         color: iconGradient.first
@@ -381,16 +387,16 @@ class _FiqhAndFatawaScreenState extends State<FiqhAndFatawaScreen>
                                     style: TextStyle(
                                       color: textColor,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 15,
+                                      fontSize: 15.5,
+                                      fontFamily: 'Amiri',
+                                      height: 1.25,
                                     ),
                                   ),
                                 ),
-                                Icon(
+                                const Icon(
                                   Icons.arrow_forward_ios_rounded,
-                                  size: 15,
-                                  color: isDark
-                                      ? AppColors.textMuted
-                                      : Colors.black26,
+                                  size: 14,
+                                  color: Colors.black26,
                                 ),
                               ],
                             ),

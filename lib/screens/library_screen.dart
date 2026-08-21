@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../core/constants/app_colors.dart';
 import '../l10n/app_localizations.dart';
 import '../theme_notifier.dart';
 import '../services/library_service.dart';
@@ -14,20 +13,77 @@ import '../widgets/liquid_pressable.dart';
 import '../widgets/custom_banner_ad.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Per-domain accent palette
+// Domain Configuration with Curated Luxury Islamic Palettes
 // ─────────────────────────────────────────────────────────────────────────────
-const _kDomainPalette = [
-  [Color(0xFF1DB97A), Color(0xFF0E7A4F)], // Islamic Library — emerald
-  [Color(0xFF1E88E5), Color(0xFF0D47A1)], // Bukhari — azure blue
-  [Color(0xFF8E24AA), Color(0xFF4A0072)], // Fiqh & Fatawa — violet
-  [Color(0xFF00ACC1), Color(0xFF006064)], // Dream Tafsir — cyan
-  [Color(0xFFE91E8C), Color(0xFF880E4F)], // Ruqyah — hot pink
-  [Color(0xFFF9A825), Color(0xFFE65100)], // Quiz & Games — amber/gold
+class _DomainInfo {
+  final String part;
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final List<Color> gradient;
+  final Color accentColor;
+
+  const _DomainInfo({
+    required this.part,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.gradient,
+    required this.accentColor,
+  });
+}
+
+const List<_DomainInfo> _kDomainList = [
+  _DomainInfo(
+    part: 'المكتبة',
+    title: 'المكتبة الإسلامية',
+    subtitle: 'كتب، كتيبات، ومطويات دعوية',
+    icon: Icons.local_library_rounded,
+    gradient: [Color(0xFF0F5A47), Color(0xFF1B8A6B)],
+    accentColor: Color(0xFF2ECC9A),
+  ),
+  _DomainInfo(
+    part: 'صحيح البخارى',
+    title: 'صحيح البخاري',
+    subtitle: 'الجامع الصحيح المسند',
+    icon: Icons.menu_book_rounded,
+    gradient: [Color(0xFF8D5B18), Color(0xFFC68A2E)],
+    accentColor: Color(0xFFE5A93C),
+  ),
+  _DomainInfo(
+    part: 'فقه وفتاوى',
+    title: 'فقه وفتاوى',
+    subtitle: 'أحكام العبادات والمعاملات',
+    icon: Icons.balance_rounded,
+    gradient: [Color(0xFF4A154B), Color(0xFF7A257C)],
+    accentColor: Color(0xFFAB47BC),
+  ),
+  _DomainInfo(
+    part: 'تفسير أحلام',
+    title: 'تفسير الأحلام',
+    subtitle: 'جامع تفاسير الرؤى والأحلام',
+    icon: Icons.nightlight_round,
+    gradient: [Color(0xFF1A365D), Color(0xFF2B6CB0)],
+    accentColor: Color(0xFF4299E1),
+  ),
+  _DomainInfo(
+    part: 'الرقية الشرعية',
+    title: 'الرقية الشرعية',
+    subtitle: 'تحصينات وأدعية الشفاء',
+    icon: Icons.healing_rounded,
+    gradient: [Color(0xFF702459), Color(0xFF97266D)],
+    accentColor: Color(0xFFED64A6),
+  ),
+  _DomainInfo(
+    part: 'مسابقات',
+    title: 'المسابقات الإسلامية',
+    subtitle: 'اختبر معلوماتك وثقافتك',
+    icon: Icons.emoji_events_rounded,
+    gradient: [Color(0xFF744210), Color(0xFFB7791F)],
+    accentColor: Color(0xFFECC94B),
+  ),
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// LibraryScreen
-// ─────────────────────────────────────────────────────────────────────────────
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
 
@@ -35,311 +91,705 @@ class LibraryScreen extends StatefulWidget {
   State<LibraryScreen> createState() => _LibraryScreenState();
 }
 
-bool _globalHasAnimatedLibrary = false;
-
-class _LibraryScreenState extends State<LibraryScreen>
-    with SingleTickerProviderStateMixin {
+class _LibraryScreenState extends State<LibraryScreen> {
   final LibraryService _libraryService = LibraryService();
   final TextEditingController _searchController = TextEditingController();
 
   List<LibraryItem> _searchResults = [];
   bool _isSearching = false;
+  int _favCount = 0;
 
-  // Shared smooth pulse: 0 → 1 → 0 with easeInOut
-  late final AnimationController _pulseCtrl;
-  late final Animation<double> _pulseAnim;
-
-  final List<Map<String, dynamic>> _domains = [
-    {'part': 'المكتبة',        'title': 'المكتبة الإسلامية', 'icon': Icons.local_library_rounded},
-    {'part': 'صحيح البخارى',   'title': 'صحيح البخاري',     'icon': Icons.menu_book_rounded},
-    {'part': 'فقه وفتاوى',     'title': 'الفقه والفتاوى',   'icon': Icons.balance_rounded},
-    {'part': 'تفسير أحلام',    'title': 'تفسير الأحلام',     'icon': Icons.nights_stay_rounded},
-    {'part': 'الرقية الشرعية', 'title': 'الرقية الشرعية',   'icon': Icons.healing_rounded},
-    {'part': 'مسابقات',        'title': 'مسابقات وألعاب',   'icon': Icons.quiz_rounded},
-  ];
+  List<LibraryItem> _featuredPamphlets = [];
+  bool _isLoadingPamphlets = true;
 
   @override
   void initState() {
     super.initState();
-    _pulseCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2000),
-    );
-    _pulseAnim = CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut);
-
-    if (!_globalHasAnimatedLibrary) {
-      _pulseCtrl.forward();
-      Future.delayed(const Duration(milliseconds: 2000), () {
-        _globalHasAnimatedLibrary = true;
-      });
-    } else {
-      _pulseCtrl.value = 1.0;
-    }
+    _loadFavCount();
+    _loadFeaturedPamphlets();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
-    _pulseCtrl.dispose();
     super.dispose();
   }
 
+  Future<void> _loadFavCount() async {
+    final favs = await _libraryService.getFavorites();
+    if (mounted) {
+      setState(() {
+        _favCount = favs.length;
+      });
+    }
+  }
+
+  Future<void> _loadFeaturedPamphlets() async {
+    final pamphlets = await _libraryService.getFeaturedPamphlets();
+    if (mounted) {
+      setState(() {
+        _featuredPamphlets = pamphlets;
+        _isLoadingPamphlets = false;
+      });
+    }
+  }
+
   void _onSearchChanged(String query) async {
-    if (query.isEmpty) {
-      setState(() { _searchResults = []; _isSearching = false; });
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) {
+      setState(() {
+        _isSearching = false;
+        _searchResults = [];
+      });
       return;
     }
     setState(() => _isSearching = true);
-    final results = await _libraryService.searchLibrary(query);
-    setState(() => _searchResults = results);
+    final results = await _libraryService.searchLibrary(trimmed);
+    if (mounted) {
+      setState(() {
+        _searchResults = results;
+      });
+    }
   }
 
-  void _navigateToFavorites() {
+  void _navigateToFavorites() async {
     final l10n = AppLocalizations.of(context);
-    Navigator.push(context, MaterialPageRoute(
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
         builder: (_) => LibraryContentListScreen(
-            part: 'favorites',
-            categoryId: 'favorites',
-            categoryTitle: l10n?.libraryFavorites ?? 'Favorites')));
+          part: 'favorites',
+          categoryId: 'favorites',
+          categoryTitle: l10n?.libraryFavorites ?? 'المفضلة',
+        ),
+      ),
+    );
+    _loadFavCount();
   }
 
-  void _navigateToDomain(Map<String, dynamic> domain) {
-    if (domain['part'] == 'الرقية الشرعية') {
+  void _navigateToDomain(_DomainInfo domain) {
+    if (domain.part == 'الرقية الشرعية') {
       Navigator.push(context, MaterialPageRoute(builder: (_) => const RuqyahScreen()));
       return;
     }
-    if (domain['part'] == 'فقه وفتاوى') {
+    if (domain.part == 'فقه وفتاوى') {
       Navigator.push(context, MaterialPageRoute(builder: (_) => const FiqhAndFatawaScreen()));
       return;
     }
-    if (domain['part'] == 'مسابقات') {
+    if (domain.part == 'مسابقات') {
       Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizIntroScreen()));
       return;
     }
-    Navigator.push(context, MaterialPageRoute(
+    Navigator.push(
+      context,
+      MaterialPageRoute(
         builder: (_) => LibraryCategoryScreen(
-              domainPart: domain['part'],
-              domainTitle: domain['title'],
-            )));
+          domainPart: domain.part,
+          domainTitle: domain.title,
+        ),
+      ),
+    );
   }
 
-  void _openStory(LibraryItem item) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => StoryReadingScreen(item: item)));
+  void _openStory(LibraryItem item) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => StoryReadingScreen(item: item)),
+    );
+    _loadFavCount();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = AppTheme.notifier.value == QuranTheme.dark;
-    final l10n   = AppLocalizations.of(context);
-    final bgColor  = isDark ? AppColors.surfaceDark  : AppColors.surfaceLight;
-    final cardBg   = isDark ? AppColors.surfaceCard  : AppColors.surfaceCardLight;
-    final textColor = isDark ? AppColors.textPrimary : AppColors.emeraldDeep;
+    final l10n = AppLocalizations.of(context);
 
-    return Scaffold(
-      backgroundColor: bgColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          l10n?.navLibrary ?? 'Library',
-          style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 22),
-        ),
-        centerTitle: true,
-      ),
-      body: ValueListenableBuilder<bool>(
-        valueListenable: kAdVisibleNotifier,
-        builder: (context, isAdVisible, _) {
-          return Column(
-            children: [
-              // ── Search Bar ─────────────────────────────────────────────────
-              Padding(
-                padding: EdgeInsets.fromLTRB(16, 0, 16, isAdVisible ? 12 * 0.93 : 12),
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: _onSearchChanged,
-                  style: TextStyle(color: textColor),
-                  decoration: InputDecoration(
-                    hintText: 'Search library...',
-                    hintStyle: TextStyle(
-                        color: isDark ? AppColors.textSecondary : AppColors.textMuted),
-                    prefixIcon: Icon(Icons.search,
-                        color: isDark ? AppColors.textSecondary : AppColors.emeraldDeep),
-                    filled: true,
-                    fillColor: cardBg,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
+    return ValueListenableBuilder<QuranTheme>(
+      valueListenable: AppTheme.notifier,
+      builder: (context, currentTheme, _) {
+        final bool isDark = currentTheme == QuranTheme.dark;
+        final bool isCream = currentTheme == QuranTheme.cream;
+
+        // Distinct colors for Cream vs White vs Dark
+        final Color bgColor = isDark
+            ? const Color(0xFF090E11)
+            : (isCream ? const Color(0xFFF6F0E2) : const Color(0xFFF3F7F5));
+
+        final Color textColor = isDark
+            ? const Color(0xFFF0F4F0)
+            : (isCream ? const Color(0xFF2C1C11) : const Color(0xFF0F382C));
+
+        final Color cardBg = isDark
+            ? const Color(0xFF121B19)
+            : (isCream ? const Color(0xFFFFFDF8) : Colors.white);
+
+        final Color borderColor = isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : (isCream ? const Color(0xFFE2D5BE) : const Color(0xFFE2EBE7));
+
+        return Scaffold(
+          backgroundColor: bgColor,
+          body: SafeArea(
+            child: ValueListenableBuilder<bool>(
+              valueListenable: kAdVisibleNotifier,
+              builder: (context, isAdVisible, _) {
+                return Column(
+                  children: [
+                    // ── Luxury Top Header with Small Bookmark Counter ─────────────
+                    _buildHeader(isDark, isCream, textColor, cardBg, borderColor, l10n),
+
+                    // ── Modern Search Bar ────────────────────────────────────────
+                    _buildSearchBar(isDark, isCream, textColor, cardBg, borderColor),
+
+                    // ── Main Content Area ────────────────────────────────────────
+                    Expanded(
+                      child: _isSearching
+                          ? _buildSearchResults(isDark, isCream, textColor, cardBg, borderColor, isAdVisible)
+                          : CustomScrollView(
+                              physics: const BouncingScrollPhysics(),
+                              slivers: [
+                                // Inspiring & Speed Reading Section (Randomized 50% Library / 50% Bukhari)
+                                SliverToBoxAdapter(
+                                  child: _buildFeaturedPamphletsSection(
+                                    isDark,
+                                    isCream,
+                                    textColor,
+                                    cardBg,
+                                    borderColor,
+                                    isAdVisible,
+                                  ),
+                                ),
+
+                                // Section Title: Main Library Categories
+                                SliverToBoxAdapter(
+                                  child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 4,
+                                          height: 18,
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF2ECC9A),
+                                            borderRadius: BorderRadius.circular(2),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'أقسام المكتبة الرئيسية',
+                                          style: TextStyle(
+                                            color: textColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 17,
+                                            fontFamily: 'Amiri',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                // Domain Grid
+                                _buildDomainGrid(isDark, isCream, cardBg, borderColor, isAdVisible),
+
+                                const SliverToBoxAdapter(
+                                  child: SizedBox(height: 24),
+                                ),
+                              ],
+                            ),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                  ),
-                ),
-              ),
-
-              Expanded(
-                child: _searchController.text.isNotEmpty
-                    ? _buildSearchResults(textColor, cardBg, isDark, isAdVisible)
-                    : CustomScrollView(
-                        physics: const BouncingScrollPhysics(),
-                        slivers: [
-                          SliverToBoxAdapter(
-                            child: _buildFavoritesBanner(isDark, l10n, isAdVisible),
-                          ),
-                          _buildDomainGrid(isDark, isAdVisible),
-                        ],
-                      ),
-              ),
-            ],
-          );
-        },
-      ),
+                  ],
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 
-  // ── Favourites banner ───────────────────────────────────────────────────────
-  Widget _buildFavoritesBanner(bool isDark, AppLocalizations? l10n, bool isAdVisible) {
-    return LiquidPressable(
-      onTap: _navigateToFavorites,
-      child: Container(
-        margin: EdgeInsets.fromLTRB(16, 0, 16, isAdVisible ? 12 * 0.93 : 12),
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: isAdVisible ? 18 * 0.93 : 18),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: isDark
-                ? [const Color(0xFF1A7A5E), const Color(0xFF0D3B2B)]
-                : [AppColors.emeraldLight, AppColors.emeraldDeep],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.emeraldDeep.withValues(alpha: isDark ? 0.4 : 0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: isAdVisible ? 48 * 0.93 : 48,
-              height: isAdVisible ? 48 * 0.93 : 48,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.18),
-                shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: Colors.white.withValues(alpha: 0.25), blurRadius: 12, spreadRadius: 2)],
+  // ── Header ─────────────────────────────────────────────────────────────────
+  Widget _buildHeader(
+    bool isDark,
+    bool isCream,
+    Color textColor,
+    Color cardBg,
+    Color borderColor,
+    AppLocalizations? l10n,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF0F5A47), Color(0xFF1B8A6B)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF1B8A6B).withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: const Icon(Icons.auto_stories_rounded, color: Colors.white, size: 22),
               ),
-              child: Icon(Icons.favorite_rounded, color: Colors.white, size: isAdVisible ? 26 * 0.93 : 26),
-            ),
-            SizedBox(width: isAdVisible ? 14 * 0.93 : 14),
-            Expanded(
-              child: Column(
+              const SizedBox(width: 12),
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l10n?.libraryFavorites ?? 'المفضلة',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: isAdVisible ? 18 * 0.93 : 18)),
-                  const SizedBox(height: 3),
-                  Text('Your saved books, hadiths, and fatwas',
-                      style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: isAdVisible ? 12 * 0.93 : 12)),
+                  Text(
+                    l10n?.navLibrary ?? 'المكتبة الإسلامية',
+                    style: TextStyle(
+                      color: textColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      fontFamily: 'Amiri',
+                    ),
+                  ),
+                  Text(
+                    'كنوز المعرفة والعلوم الشرعية',
+                    style: TextStyle(
+                      color: isDark ? const Color(0xFF8A9995) : const Color(0xFF5A726A),
+                      fontSize: 12,
+                    ),
+                  ),
                 ],
               ),
+            ],
+          ),
+          // Compact Bookmark Badge Button
+          IconButton(
+            onPressed: _navigateToFavorites,
+            tooltip: 'المفضلة',
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: cardBg,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: borderColor,
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.bookmark_added_rounded, color: Color(0xFFD4AF37), size: 20),
+                ),
+                if (_favCount > 0)
+                  Positioned(
+                    top: -2,
+                    right: -2,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFE53935),
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                      child: Center(
+                        child: Text(
+                          '$_favCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), shape: BoxShape.circle),
-              child: Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: isAdVisible ? 14 * 0.93 : 14),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Search Bar ─────────────────────────────────────────────────────────────
+  Widget _buildSearchBar(
+    bool isDark,
+    bool isCream,
+    Color textColor,
+    Color cardBg,
+    Color borderColor,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      child: Container(
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: borderColor, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
           ],
+        ),
+        child: TextField(
+          controller: _searchController,
+          onChanged: _onSearchChanged,
+          style: TextStyle(color: textColor, fontSize: 14.5),
+          decoration: InputDecoration(
+            hintText: 'ابحث في الكتب، المطويات، الفتاوى، والأحاديث...',
+            hintStyle: TextStyle(
+              color: isDark ? const Color(0xFF6C7C78) : const Color(0xFF9AA8A4),
+              fontSize: 13.5,
+            ),
+            prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF1B8A6B), size: 22),
+            suffixIcon: _searchController.text.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.clear_rounded, size: 18),
+                    onPressed: () {
+                      _searchController.clear();
+                      _onSearchChanged('');
+                    },
+                  )
+                : null,
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(vertical: 13),
+          ),
         ),
       ),
     );
   }
 
-  // ── Domain grid ─────────────────────────────────────────────────────────────
-  Widget _buildDomainGrid(bool isDark, bool isAdVisible) {
+  // ── Featured Inspirations / Speed Reading Carousel ─────────────────────────
+  Widget _buildFeaturedPamphletsSection(
+    bool isDark,
+    bool isCream,
+    Color textColor,
+    Color cardBg,
+    Color borderColor,
+    bool isAdVisible,
+  ) {
+    if (_isLoadingPamphlets || _featuredPamphlets.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final titleColor = isDark ? Colors.white : textColor;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD4AF37),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'قبسات وقراءات ملهمة',
+                    style: TextStyle(
+                      color: isDark ? const Color(0xFFF0F4F0) : textColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 17,
+                      fontFamily: 'Amiri',
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                'قراءة سريعة متجددة',
+                style: TextStyle(
+                  color: isDark ? const Color(0xFF8A9995) : const Color(0xFF6B8079),
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 130,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: _featuredPamphlets.length,
+            itemBuilder: (context, idx) {
+              final item = _featuredPamphlets[idx];
+              final bool isBukhariItem = item.part == 'صحيح البخارى' || item.part == 'البخارى';
+              final Color badgeColor = isBukhariItem ? const Color(0xFFC68A2E) : const Color(0xFF1B8A6B);
+              final String badgeText = isBukhariItem ? 'صحيح البخاري' : 'المكتبة الإسلامية';
+
+              final String cleanTitle = item.title
+                  .replaceAll('{', '')
+                  .replaceAll('}', '')
+                  .replaceAll(RegExp(r'\s+'), ' ')
+                  .trim();
+
+              return LiquidPressable(
+                onTap: () => _openStory(item),
+                child: Container(
+                  width: 220,
+                  margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                  padding: const EdgeInsets.all(13),
+                  decoration: BoxDecoration(
+                    color: cardBg,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: borderColor, width: 1),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.03),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Badge and Icon
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: badgeColor.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              badgeText,
+                              style: TextStyle(
+                                color: badgeColor,
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Icon(
+                            isBukhariItem ? Icons.menu_book_rounded : Icons.auto_stories_rounded,
+                            size: 15,
+                            color: badgeColor,
+                          ),
+                        ],
+                      ),
+
+                      // Title
+                      Text(
+                        cleanTitle,
+                        style: TextStyle(
+                          color: titleColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13.5,
+                          fontFamily: 'Amiri',
+                          height: 1.25,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+
+                      // Footer stats
+                      Row(
+                        children: [
+                          const Icon(Icons.remove_red_eye_rounded, size: 12, color: Color(0xFFD4AF37)),
+                          const SizedBox(width: 4),
+                          Text(
+                            item.numReadings > 0 ? '${item.numReadings} قراءة' : 'مستحسن',
+                            style: TextStyle(
+                              color: isDark ? const Color(0xFF8A9995) : const Color(0xFF6B8079),
+                              fontSize: 10.5,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            'اقرأ الآن ←',
+                            style: TextStyle(
+                              color: badgeColor,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── Domain Grid ────────────────────────────────────────────────────────────
+  Widget _buildDomainGrid(
+    bool isDark,
+    bool isCream,
+    Color cardBg,
+    Color borderColor,
+    bool isAdVisible,
+  ) {
     return SliverPadding(
-      padding: EdgeInsets.fromLTRB(16, 0, 16, isAdVisible ? 16 * 0.93 : 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       sliver: SliverGrid(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          mainAxisSpacing: isAdVisible ? 14 * 0.93 : 14,
-          crossAxisSpacing: isAdVisible ? 14 * 0.93 : 14,
-          childAspectRatio: isAdVisible ? 1.15 : 1.05, // slightly larger ratio = shorter card
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 1.15,
         ),
         delegate: SliverChildBuilderDelegate(
           (context, index) {
-            final domain  = _domains[index];
-            final palette = _kDomainPalette[index % _kDomainPalette.length];
-            return _DomainCard(
+            final domain = _kDomainList[index];
+            return _LuxuryDomainCard(
               domain: domain,
-              accent: palette[0],
-              deep: palette[1],
               isDark: isDark,
-              pulseAnim: _pulseAnim,
-              phaseOffset: index * 0.15, // stagger the breathing phase for wave effect
-              entranceDelay: Duration(milliseconds: index * 80),
+              cardBg: cardBg,
+              borderColor: borderColor,
               onTap: () => _navigateToDomain(domain),
-              isAdVisible: isAdVisible,
             );
           },
-          childCount: _domains.length,
+          childCount: _kDomainList.length,
         ),
       ),
     );
   }
 
-  // ── Search results ──────────────────────────────────────────────────────────
-  Widget _buildSearchResults(Color textColor, Color cardBg, bool isDark, bool isAdVisible) {
-    if (_isSearching && _searchResults.isEmpty) {
+  // ── Search Results ─────────────────────────────────────────────────────────
+  Widget _buildSearchResults(
+    bool isDark,
+    bool isCream,
+    Color textColor,
+    Color cardBg,
+    Color borderColor,
+    bool isAdVisible,
+  ) {
+    if (_searchResults.isEmpty) {
       return Center(
-        child: Text('No results found.',
-            style: TextStyle(color: isDark ? AppColors.textSecondary : AppColors.emeraldDeep)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off_rounded,
+              size: 54,
+              color: isDark ? Colors.white24 : Colors.black26,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'لا توجد نتائج مطابقة للبحث',
+              style: TextStyle(
+                color: isDark ? const Color(0xFF8A9995) : const Color(0xFF5A726A),
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
       );
     }
+
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
       itemCount: _searchResults.length,
       itemBuilder: (context, index) {
         final item = _searchResults[index];
+        final cleanTitle = item.title
+            .replaceAll('{', '')
+            .replaceAll('}', '')
+            .replaceAll(RegExp(r'\s+'), ' ')
+            .trim();
+
         return LiquidPressable(
           onTap: () => _openStory(item),
           child: Container(
-            margin: EdgeInsets.only(bottom: isAdVisible ? 10 * 0.93 : 10),
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: isAdVisible ? 12 * 0.93 : 12),
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(14.0),
             decoration: BoxDecoration(
               color: cardBg,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isDark ? Colors.white.withValues(alpha: 0.06) : Colors.black.withValues(alpha: 0.05),
-              ),
+              border: Border.all(color: borderColor, width: 1),
               boxShadow: [
-                BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05), blurRadius: 10, offset: const Offset(0, 3)),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
               ],
             ),
             child: Row(
               children: [
                 Container(
-                  width: isAdVisible ? 40 * 0.93 : 40,
-                  height: isAdVisible ? 40 * 0.93 : 40,
-                  decoration: BoxDecoration(color: AppColors.emeraldLight.withValues(alpha: 0.14), shape: BoxShape.circle),
-                  child: Icon(Icons.book_rounded, color: AppColors.emeraldLight, size: isAdVisible ? 20 * 0.93 : 20),
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1B8A6B).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.menu_book_rounded,
+                    color: Color(0xFF1B8A6B),
+                    size: 20,
+                  ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(item.title,
-                          style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: isAdVisible ? 14 * 0.93 : 14),
-                          maxLines: 1, overflow: TextOverflow.ellipsis),
-                      const SizedBox(height: 3),
-                      Text(item.type,
-                          style: TextStyle(color: isDark ? AppColors.textSecondary : AppColors.textMuted, fontSize: isAdVisible ? 12 * 0.93 : 12)),
+                      Text(
+                        cleanTitle,
+                        style: TextStyle(
+                          color: textColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          fontFamily: 'Amiri',
+                          height: 1.25,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        item.part.isNotEmpty ? item.part : 'المكتبة الإسلامية',
+                        style: TextStyle(
+                          color: isDark ? const Color(0xFF8A9995) : const Color(0xFF6B8079),
+                          fontSize: 11,
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                Icon(Icons.arrow_forward_ios_rounded,
-                    color: isDark ? AppColors.textMuted : Colors.black26, size: isAdVisible ? 14 * 0.93 : 14),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: Colors.black26,
+                ),
               ],
             ),
           ),
@@ -350,211 +800,131 @@ class _LibraryScreenState extends State<LibraryScreen>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// _DomainCard — wave-phased breathing: scale + glow + color shift
+// Luxury Domain Card Component (Distinct Cream / White / Dark Styles)
 // ─────────────────────────────────────────────────────────────────────────────
-class _DomainCard extends StatefulWidget {
-  const _DomainCard({
-    required this.domain,
-    required this.accent,
-    required this.deep,
-    required this.isDark,
-    required this.pulseAnim,   // shared 0→1→0 animation
-    required this.phaseOffset, // 0.0 – 1.0: each card starts at a different phase
-    required this.entranceDelay,
-    required this.onTap,
-    required this.isAdVisible,
-  });
-
-  final Map<String, dynamic> domain;
-  final Color accent;
-  final Color deep;
+class _LuxuryDomainCard extends StatelessWidget {
+  final _DomainInfo domain;
   final bool isDark;
-  final Animation<double> pulseAnim;
-  final double phaseOffset;
-  final Duration entranceDelay;
+  final Color cardBg;
+  final Color borderColor;
   final VoidCallback onTap;
-  final bool isAdVisible;
 
-  @override
-  State<_DomainCard> createState() => _DomainCardState();
-}
-
-class _DomainCardState extends State<_DomainCard> {
-  /// Converts the shared 0→1 animation into a per-card phase-shifted
-  /// smooth sine value (0.0 – 1.0) using easeInOut.
-  double _phased(double raw) {
-    final shifted = (raw + widget.phaseOffset) % 1.0;
-    // fold [0,1] into [0,0.5,0] triangle then apply easeInOut
-    final tri = shifted < 0.5 ? shifted * 2.0 : (1.0 - shifted) * 2.0;
-    return Curves.easeInOut.transform(tri);
-  }
+  const _LuxuryDomainCard({
+    required this.domain,
+    required this.isDark,
+    required this.cardBg,
+    required this.borderColor,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final accent = widget.accent;
-    final deep   = widget.deep;
-    final isDark = widget.isDark;
-    final isAdVisible = widget.isAdVisible;
-
-    // A brighter "lit" version of the accent for color interpolation
-    final bright = Color.lerp(accent, Colors.white, 0.30)!;
+    final titleColor = isDark ? Colors.white : const Color(0xFF152A24);
 
     return LiquidPressable(
-      onTap: widget.onTap,
-      child: AnimatedBuilder(
-        animation: widget.pulseAnim,
-        builder: (_, child) {
-              final t = _phased(widget.pulseAnim.value);
-
-              // ── Scale: 1.00 → 1.035 (clearly visible, non-jarring) ──────────
-              final scale = 1.0 + 0.035 * t;
-
-              // ── Glow: dim → vivid ────────────────────────────────────────────
-              final glowAlpha  = isDark ? (0.10 + 0.45 * t) : (0.08 + 0.35 * t);
-              final glowBlur   = 8.0 + 24.0 * t;
-              final glowSpread = 0.5 + 3.0 * t;
-
-              // ── Border: faint → bright ───────────────────────────────────────
-              final borderAlpha = isDark ? (0.20 + 0.45 * t) : (0.12 + 0.35 * t);
-              final borderWidth = 1.2 + 0.8 * t;
-
-              // ── Fill gradient: shifts from subtle to richer ──────────────────
-              final fillA = isDark ? (0.10 + 0.20 * t) : (0.05 + 0.12 * t);
-              final fillB = isDark ? (0.04 + 0.12 * t) : (0.02 + 0.06 * t);
-
-              // ── Current accent color lerps toward bright on peak ─────────────
-              final currentAccent = Color.lerp(accent, bright, t * 0.6)!;
-
-              return Transform.scale(
-                scale: scale,
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: borderColor, width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: domain.accentColor.withValues(alpha: isDark ? 0.12 : 0.06),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: Stack(
+            children: [
+              // Subtle background accent glow
+              Positioned(
+                top: -16,
+                right: -16,
                 child: Container(
+                  width: 80,
+                  height: 80,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
                       colors: [
-                        currentAccent.withValues(alpha: fillA),
-                        deep.withValues(alpha: fillB),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(22),
-                    border: Border.all(
-                      color: currentAccent.withValues(alpha: borderAlpha),
-                      width: borderWidth,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: currentAccent.withValues(alpha: glowAlpha),
-                        blurRadius: glowBlur,
-                        spreadRadius: glowSpread,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(22),
-                    child: Stack(
-                      children: [
-                        // Accent color internal glowing orb
-                        Positioned(
-                          top: -30,
-                          left: -30,
-                          child: Container(
-                            width: isAdVisible ? 130 * 0.93 : 130,
-                            height: isAdVisible ? 130 * 0.93 : 130,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: RadialGradient(
-                                colors: [
-                                  currentAccent.withValues(alpha: isDark ? 0.35 * t : 0.28 * t),
-                                  currentAccent.withValues(alpha: 0.0),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        // Deep color internal glowing orb
-                        Positioned(
-                          bottom: -20,
-                          right: -20,
-                          child: Container(
-                            width: isAdVisible ? 110 * 0.93 : 110,
-                            height: isAdVisible ? 110 * 0.93 : 110,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: RadialGradient(
-                                colors: [
-                                  deep.withValues(alpha: isDark ? 0.28 * t : 0.20 * t),
-                                  deep.withValues(alpha: 0.0),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        // Main content centered correctly
-                        Positioned.fill(child: child!),
+                        domain.accentColor.withValues(alpha: isDark ? 0.18 : 0.10),
+                        Colors.transparent,
                       ],
                     ),
                   ),
                 ),
-              );
-            },
-            child: Padding(
-              padding: EdgeInsets.all(isAdVisible ? 16 * 0.93 : 16),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Icon circle — gradient shifts with accent
-                  AnimatedBuilder(
-                    animation: widget.pulseAnim,
-                    builder: (_, __) {
-                      final t = _phased(widget.pulseAnim.value);
-                      final bright = Color.lerp(accent, Colors.white, 0.30)!;
-                      final currentAccent = Color.lerp(accent, bright, t * 0.6)!;
-                      return Container(
-                        width: isAdVisible ? 64 * 0.93 : 64,
-                        height: isAdVisible ? 64 * 0.93 : 64,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [currentAccent, deep],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: currentAccent.withValues(alpha: 0.35 + 0.30 * t),
-                              blurRadius: 10 + 14 * t,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          widget.domain['icon'] as IconData,
-                          color: Colors.white,
-                          size: isAdVisible ? 30 * 0.93 : 30,
-                        ),
-                      );
-                    },
-                  ),
-                  SizedBox(height: isAdVisible ? 12 * 0.93 : 12),
-                  Text(
-                    widget.domain['title'] as String,
-                    style: TextStyle(
-                      color: isDark ? Colors.white : const Color(0xFF1A1A2E),
-                      fontWeight: FontWeight.bold,
-                      fontSize: isAdVisible ? 14.5 * 0.93 : 14.5,
-                      height: 1.3,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
               ),
-            ),
+
+              // Card content
+              Padding(
+                padding: const EdgeInsets.all(14.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Icon Badge
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: domain.gradient,
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: domain.accentColor.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Icon(domain.icon, color: Colors.white, size: 22),
+                    ),
+
+                    // Titles
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          domain.title,
+                          style: TextStyle(
+                            color: titleColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            fontFamily: 'Amiri',
+                            height: 1.15,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          domain.subtitle,
+                          style: TextStyle(
+                            color: isDark
+                                ? const Color(0xFF8A9995)
+                                : const Color(0xFF657B74),
+                            fontSize: 11,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        );
+        ),
+      ),
+    );
   }
 }
-
