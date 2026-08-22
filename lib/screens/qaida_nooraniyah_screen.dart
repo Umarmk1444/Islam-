@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants/app_colors.dart';
+import '../language_notifier.dart';
 import '../theme_notifier.dart';
 import '../widgets/liquid_pressable.dart';
 
@@ -3082,7 +3085,7 @@ const List<QaidaPage> _kQaidaPages = [
         inlineHeaderStacked: true,
         headerLessonTitle: 'الدَّرْسُ الخَامِسَ عَشَرَ',
         headerLessonSubtitle: 'تَدْرِيبَاتٌ عَلَى الشَّدَّتَيْنِ فِي كَلِمَةٍ',
-        inlineHeaderFlex: 2,
+        inlineHeaderFlex: 1,
         cells: [
           QaidaCell(text: 'يَزَّكَّىٰ', color: _kBlue, flex: 1),
           QaidaCell(text: 'يَذَّكَّرُ', flex: 1),
@@ -3571,6 +3574,43 @@ const List<QaidaPage> _kQaidaPages = [
   ),
 ];
 
+class QaidaLessonIndex {
+  final int lessonNumber;
+  final String title;
+  final int startPageIndex;
+  final int endPageIndex;
+
+  const QaidaLessonIndex({
+    required this.lessonNumber,
+    required this.title,
+    required this.startPageIndex,
+    required this.endPageIndex,
+  });
+
+  bool containsPage(int pageIndex) =>
+      pageIndex >= startPageIndex && pageIndex <= endPageIndex;
+}
+
+const List<QaidaLessonIndex> _kQaidaLessons = [
+  QaidaLessonIndex(lessonNumber: 1, title: 'حُرُوفُ الهِجَاءِ المُفْرَدَة', startPageIndex: 0, endPageIndex: 0),
+  QaidaLessonIndex(lessonNumber: 2, title: 'حُرُوفُ الهِجَاءِ المُرَكَّبَة', startPageIndex: 1, endPageIndex: 2),
+  QaidaLessonIndex(lessonNumber: 3, title: 'الحُرُوفُ المُقَطَّعَة', startPageIndex: 3, endPageIndex: 3),
+  QaidaLessonIndex(lessonNumber: 4, title: 'الحُرُوفُ المُتَحَرِّكَة', startPageIndex: 4, endPageIndex: 5),
+  QaidaLessonIndex(lessonNumber: 5, title: 'الحُرُوفُ المُنَوَّنَة (التَّنْوِين)', startPageIndex: 5, endPageIndex: 6),
+  QaidaLessonIndex(lessonNumber: 6, title: 'تَدْرِيبَاتٌ عَلَى الحَرَكَاتِ وَالتَّنْوِين', startPageIndex: 6, endPageIndex: 7),
+  QaidaLessonIndex(lessonNumber: 7, title: 'الأَلِفُ الصَّغِيرَةُ وَاليَاءُ وَالوَاوُ', startPageIndex: 7, endPageIndex: 7),
+  QaidaLessonIndex(lessonNumber: 8, title: 'حُرُوفُ المَدِّ وَاللِّين', startPageIndex: 8, endPageIndex: 9),
+  QaidaLessonIndex(lessonNumber: 9, title: 'تَدْرِيبَاتٌ عَلَى التَّنْوِينِ وَالمَدّ', startPageIndex: 10, endPageIndex: 11),
+  QaidaLessonIndex(lessonNumber: 10, title: 'السُّكُون', startPageIndex: 12, endPageIndex: 12),
+  QaidaLessonIndex(lessonNumber: 11, title: 'تَدْرِيبَاتٌ عَلَى السُّكُون', startPageIndex: 13, endPageIndex: 15),
+  QaidaLessonIndex(lessonNumber: 12, title: 'الشَّدَّة', startPageIndex: 16, endPageIndex: 16),
+  QaidaLessonIndex(lessonNumber: 13, title: 'تَدْرِيبَاتٌ عَلَى الشَّدَّة', startPageIndex: 17, endPageIndex: 18),
+  QaidaLessonIndex(lessonNumber: 14, title: 'تَدْرِيبَاتٌ عَلَى الشَّدَّةِ وَالسُّكُون', startPageIndex: 19, endPageIndex: 19),
+  QaidaLessonIndex(lessonNumber: 15, title: 'تَدْرِيبَاتٌ عَلَى الشَّدَّتَيْنِ فِي كَلِمَة', startPageIndex: 19, endPageIndex: 19),
+  QaidaLessonIndex(lessonNumber: 16, title: 'تَدْرِيبَاتٌ عَلَى الشَّدَّةِ مَعَ المَدّ', startPageIndex: 20, endPageIndex: 20),
+  QaidaLessonIndex(lessonNumber: 17, title: 'تَدْرِيبَاتٌ عَلَى مَا سَبَق (الخاتمة)', startPageIndex: 20, endPageIndex: 22),
+];
+
 class QaidaNooraniyahScreen extends StatefulWidget {
   final int initialPageIndex;
 
@@ -3583,13 +3623,19 @@ class QaidaNooraniyahScreen extends StatefulWidget {
   State<QaidaNooraniyahScreen> createState() => _QaidaNooraniyahScreenState();
 }
 
-class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
+class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen>
+    with SingleTickerProviderStateMixin {
   late PageController _pageController;
   late int _currentPageIndex;
   String _selectedItem = '';
-  final double _fontSizeScale = 1.0;
-  bool _isPlaying = false;
+  double _fontSizeScale = 1.0;
   int _repeatCount = 0;
+  double _playbackSpeed = 1.0;
+  int? _highlightedLessonNumber;
+  Timer? _highlightTimer;
+  late AnimationController _breathingController;
+  late Animation<double> _scaleAnimation;
+  late Animation<Color?> _colorAnimation;
 
   @override
   void initState() {
@@ -3597,11 +3643,48 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
     _currentPageIndex =
         widget.initialPageIndex.clamp(0, _kQaidaPages.length - 1);
     _pageController = PageController(initialPage: _currentPageIndex);
+    _loadSavedPageIndex();
+    _breathingController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 650),
+    );
+    _scaleAnimation = Tween<double>(begin: 0.98, end: 1.04).animate(
+      CurvedAnimation(parent: _breathingController, curve: Curves.easeInOutSine),
+    );
+    _colorAnimation = ColorTween(
+      begin: const Color(0xFFD4AF37), // Luminous Gold
+      end: const Color(0xFF2ECC71),   // Vivid Emerald
+    ).animate(
+      CurvedAnimation(parent: _breathingController, curve: Curves.easeInOutSine),
+    );
+  }
+
+  Future<void> _loadSavedPageIndex() async {
+    if (widget.initialPageIndex == 0) {
+      final prefs = await SharedPreferences.getInstance();
+      final savedIdx = prefs.getInt('qaida_last_page_index');
+      if (savedIdx != null &&
+          savedIdx >= 0 &&
+          savedIdx < _kQaidaPages.length &&
+          mounted) {
+        _pageController.jumpToPage(savedIdx);
+        setState(() {
+          _currentPageIndex = savedIdx;
+        });
+      }
+    }
+  }
+
+  void _savePageIndex(int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('qaida_last_page_index', index);
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    _highlightTimer?.cancel();
+    _breathingController.dispose();
     super.dispose();
   }
 
@@ -3616,142 +3699,304 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
         _currentPageIndex = index;
         _selectedItem = '';
       });
+      _savePageIndex(index);
+    }
+  }
+
+  void _goToLesson(QaidaLessonIndex lesson) {
+    _highlightTimer?.cancel();
+    _breathingController.repeat(reverse: true);
+    setState(() {
+      _highlightedLessonNumber = lesson.lessonNumber;
+    });
+    _goToPage(lesson.startPageIndex);
+    _highlightTimer = Timer(const Duration(seconds: 5), () {
+      if (mounted) {
+        _breathingController.stop();
+        _breathingController.reset();
+        setState(() {
+          _highlightedLessonNumber = null;
+        });
+      }
+    });
+  }
+
+  void _showComingSoon() {
+    final langCode = AppLanguage.notifier.value.languageCode;
+    final isArabic = langCode == 'ar';
+    final message = isArabic
+        ? 'التلاوة الصوتية قريباً بإذن الله'
+        : 'Coming soon inshaallah';
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.volume_up_rounded, color: Color(0xFFD4AF37), size: 20),
+            const SizedBox(width: 8),
+            Text(
+              message,
+              style: TextStyle(
+                fontFamily: isArabic ? 'Amiri' : null,
+                fontWeight: FontWeight.bold,
+                fontSize: isArabic ? 15 : 14.5,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF1B2820),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: const BorderSide(color: Color(0xFFD4AF37), width: 1.2),
+        ),
+        duration: const Duration(seconds: 2),
+        margin: const EdgeInsets.symmetric(horizontal: 36, vertical: 16),
+      ),
+    );
+  }
+
+  bool _isHeaderHighlighted(String titleAr) {
+    if (_highlightedLessonNumber == null) return false;
+    final num = _highlightedLessonNumber!;
+    const arabicMap = {
+      1: 'الأَوَّل',
+      2: 'الثَّانِي',
+      3: 'الثَّالِث',
+      4: 'الرَّابِع',
+      5: 'الخَامِس',
+      6: 'السَّادِس',
+      7: 'السَّابِع',
+      8: 'الثَّامِن',
+      9: 'التَّاسِع',
+      10: 'العَاشِر',
+      11: 'الحَادِي عَشَر',
+      12: 'الثَّانِي عَشَر',
+      13: 'الثَّالِثَ عَشَر',
+      14: 'الرَّابِعَ عَشَر',
+      15: 'الخَامِسَ عَشَر',
+      16: 'السَّادِسَ عَشَر',
+      17: 'الأَخِير',
+    };
+    final kw = arabicMap[num];
+    return kw != null && titleAr.contains(kw);
+  }
+
+  int _getActiveLessonNumberForPage(int pageIndex) {
+    switch (pageIndex) {
+      case 0:
+        return 1;
+      case 1:
+      case 2:
+        return 2;
+      case 3:
+        return 3;
+      case 4:
+        return 4;
+      case 5:
+        return 5;
+      case 6:
+        return 6;
+      case 7:
+        return 7;
+      case 8:
+      case 9:
+        return 8;
+      case 10:
+      case 11:
+        return 9;
+      case 12:
+        return 10;
+      case 13:
+      case 14:
+      case 15:
+        return 11;
+      case 16:
+        return 12;
+      case 17:
+      case 18:
+        return 13;
+      case 19:
+        return 14;
+      case 20:
+        return 16;
+      case 21:
+      case 22:
+        return 17;
+      default:
+        return 1;
     }
   }
 
   void _showPagePicker() {
     final isDark = AppTheme.notifier.value == QuranTheme.dark;
-    final cardBg = isDark ? AppColors.surfaceCard : AppColors.surfaceCardLight;
-    final textColor = isDark ? AppColors.textPrimary : AppColors.emeraldDeep;
+    final cardBg = isDark ? const Color(0xFF131C18) : const Color(0xFFFFFDF8);
+    final textColor = isDark ? AppColors.textPrimary : const Color(0xFF0F3B2E);
+    final itemBorderColor = isDark ? Colors.white12 : const Color(0xFFE5DAC4);
+    final activeLessonNumber = _getActiveLessonNumberForPage(_currentPageIndex);
 
     showModalBottomSheet(
       context: context,
       backgroundColor: cardBg,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
       ),
       builder: (ctx) {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: DraggableScrollableSheet(
-            initialChildSize: 0.72,
+            initialChildSize: 0.76,
             minChildSize: 0.45,
             maxChildSize: 0.92,
             expand: false,
             builder: (context, scrollController) {
               return Container(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
                 child: Column(
                   children: [
                     Container(
-                      width: 44,
+                      width: 40,
                       height: 4,
                       decoration: BoxDecoration(
                         color: isDark ? Colors.white24 : Colors.black12,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
-                    const SizedBox(height: 14),
-                    Text(
-                      'فهرس صفحات القاعدة النورانية',
-                      style: TextStyle(
-                        color: textColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        fontFamily: 'Amiri',
-                      ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.menu_book_rounded, color: Color(0xFFD4AF37), size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          'فهرس دروس القاعدة النورانية',
+                          style: TextStyle(
+                            color: textColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17.5,
+                            fontFamily: 'Amiri',
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 12),
                     Expanded(
-                      child: ListView.builder(
+                      child: GridView.builder(
                         controller: scrollController,
                         physics: const BouncingScrollPhysics(),
-                        itemCount: _kQaidaPages.length,
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 2.3,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                        ),
+                        itemCount: _kQaidaLessons.length,
                         itemBuilder: (ctx, idx) {
-                          final page = _kQaidaPages[idx];
-                          final isSelected = idx == _currentPageIndex;
-                          return ListTile(
-                            leading: Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? const Color(0xFFC5A059)
-                                    : (isDark
-                                        ? Colors.white10
-                                        : const Color(0xFFF3EDE0)),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: const Color(0xFFC5A059)
-                                      .withValues(alpha: 0.45),
-                                  width: 1.2,
-                                ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '${page.pageNumber}',
-                                  style: TextStyle(
-                                    color: isSelected
-                                        ? Colors.white
-                                        : (isDark
-                                            ? Colors.white
-                                            : const Color(0xFF8D6E63)),
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            title: Row(
-                              children: [
-                                Text(
-                                  page.lessonTitleAr,
-                                  style: const TextStyle(
-                                    color: Color(0xFFB71C1C),
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    fontFamily: 'Amiri',
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    page.lessonSubtitleAr,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: isSelected
-                                          ? textColor
-                                          : (isDark
-                                              ? AppColors.textPrimary
-                                              : const Color(0xFF4A3B32)),
-                                      fontWeight: isSelected
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                      fontSize: 14,
-                                      fontFamily: 'Amiri',
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            subtitle: Text(
-                              page.titleEn,
-                              style: TextStyle(
-                                color: isDark
-                                    ? AppColors.textSecondary
-                                    : AppColors.textMuted,
-                                fontSize: 11,
-                              ),
-                            ),
-                            trailing: isSelected
-                                ? const Icon(Icons.check_circle_rounded,
-                                    color: Color(0xFFC5A059), size: 22)
-                                : null,
+                          final lesson = _kQaidaLessons[idx];
+                          final isSelected = lesson.lessonNumber == activeLessonNumber;
+
+                          return InkWell(
                             onTap: () {
                               Navigator.pop(ctx);
-                              _goToPage(idx);
+                              _goToLesson(lesson);
                             },
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? const Color(0xFFD4AF37).withValues(alpha: 0.14)
+                                    : (isDark ? Colors.white.withValues(alpha: 0.03) : const Color(0xFFFAF7EE)),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? const Color(0xFFD4AF37)
+                                      : itemBorderColor,
+                                  width: isSelected ? 1.5 : 0.9,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
+                                    blurRadius: 2,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  // Lesson Number Coin
+                                  Container(
+                                    width: 28,
+                                    height: 28,
+                                    decoration: BoxDecoration(
+                                      color: isSelected
+                                          ? const Color(0xFFD4AF37)
+                                          : (isDark ? Colors.white10 : const Color(0xFFEDE4D0)),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                                        width: 0.9,
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        '${lesson.lessonNumber}',
+                                        style: TextStyle(
+                                          color: isSelected
+                                              ? Colors.white
+                                              : (isDark ? const Color(0xFFD4AF37) : const Color(0xFF8B5E14)),
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12.5,
+                                          fontFamily: 'Amiri',
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+
+                                  // Lesson Title + Page Number
+                                  Expanded(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(
+                                            lesson.title,
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              color: isSelected
+                                                  ? (isDark ? const Color(0xFFD4AF37) : const Color(0xFF8B5E14))
+                                                  : (isDark ? const Color(0xFFEF9A9A) : const Color(0xFFB71C1C)),
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12.5,
+                                              fontFamily: 'Amiri',
+                                              height: 1.1,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          lesson.startPageIndex == lesson.endPageIndex
+                                              ? 'ص ${lesson.startPageIndex + 1}'
+                                              : 'ص ${lesson.startPageIndex + 1} - ${lesson.endPageIndex + 1}',
+                                          style: TextStyle(
+                                            fontSize: 10.0,
+                                            color: isDark ? Colors.white54 : const Color(0xFF8D6E63),
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           );
                         },
                       ),
@@ -3766,109 +4011,137 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
     );
   }
 
-  void _showItemDetail(QaidaCell cell, String lessonTitle) {
-    setState(() => _selectedItem = cell.fullText);
-    final isDark = AppTheme.notifier.value == QuranTheme.dark;
-    final cardBg = isDark ? const Color(0xFF1B2420) : const Color(0xFFFFFDF9);
 
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: Dialog(
-            backgroundColor: cardBg,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(22),
-              side: const BorderSide(color: Color(0xFFC5A059), width: 1.5),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    lessonTitle,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: isDark
-                          ? AppColors.textSecondary
-                          : const Color(0xFF8D6E63),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Amiri',
-                    ),
-                  ),
-                  if (cell.phonetic != null) ...[
-                    const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFB71C1C).withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        'النطق: ${cell.phonetic!}',
-                        style: const TextStyle(
-                          color: Color(0xFFB71C1C),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          fontFamily: 'Amiri',
-                        ),
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 18),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 24),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFF141C18)
-                          : const Color(0xFFFAF6EC),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: const Color(0xFFC5A059).withValues(alpha: 0.4),
-                        width: 1.2,
-                      ),
-                    ),
-                    child: Center(
-                      child: _buildCellContent(cell, isDark, 48),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  LiquidPressable(
-                    onTap: () => Navigator.pop(ctx),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 36, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFC5A059),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color:
-                                const Color(0xFFC5A059).withValues(alpha: 0.35),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: const Text(
-                        'إغلاق',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          fontFamily: 'Amiri',
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<QuranTheme>(
+      valueListenable: AppTheme.notifier,
+      builder: (context, currentTheme, _) {
+        final isDark = currentTheme == QuranTheme.dark;
+        final isCream = currentTheme == QuranTheme.cream;
+
+        final outerBg = isDark
+            ? const Color(0xFF070D0A)
+            : (isCream ? const Color(0xFFECE4D0) : const Color(0xFFF1F5F9));
+        final topIconColor = isDark
+            ? const Color(0xFFF0F4F0)
+            : (isCream ? const Color(0xFF1B4332) : const Color(0xFF0F172A));
+
+        return Scaffold(
+          backgroundColor: outerBg,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            toolbarHeight: 44,
+            iconTheme: IconThemeData(color: topIconColor),
+            centerTitle: false,
+            titleSpacing: 0,
+            title: Text(
+              'القاعدة النورانية',
+              style: TextStyle(
+                color: topIconColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 16.5,
+                fontFamily: 'Amiri',
               ),
+            ),
+            actions: [
+              // Theme Switcher Toggle (Cream / Dark / White)
+              IconButton(
+                padding: const EdgeInsets.all(6),
+                constraints: const BoxConstraints(),
+                icon: Icon(
+                  currentTheme == QuranTheme.cream
+                      ? Icons.auto_awesome_rounded
+                      : (currentTheme == QuranTheme.dark
+                          ? Icons.dark_mode_rounded
+                          : Icons.light_mode_rounded),
+                  color: topIconColor,
+                  size: 20,
+                ),
+                tooltip: currentTheme == QuranTheme.cream
+                    ? 'المظهر: كريمي أصيل'
+                    : (currentTheme == QuranTheme.dark
+                        ? 'المظهر: ليلي داكن'
+                        : 'المظهر: أبيض ناصع'),
+                onPressed: () {
+                  if (currentTheme == QuranTheme.cream) {
+                    AppTheme.changeTheme(QuranTheme.dark);
+                  } else if (currentTheme == QuranTheme.dark) {
+                    AppTheme.changeTheme(QuranTheme.white);
+                  } else {
+                    AppTheme.changeTheme(QuranTheme.cream);
+                  }
+                },
+              ),
+              const SizedBox(width: 4),
+              // Font Scaler Controls
+              IconButton(
+                padding: const EdgeInsets.all(6),
+                constraints: const BoxConstraints(),
+                icon: const Icon(Icons.text_decrease_rounded, size: 19),
+                tooltip: 'تصغير الخط',
+                onPressed: () {
+                  setState(() {
+                    if (_fontSizeScale > 0.85) _fontSizeScale -= 0.05;
+                  });
+                },
+              ),
+              IconButton(
+                padding: const EdgeInsets.all(6),
+                constraints: const BoxConstraints(),
+                icon: const Icon(Icons.text_increase_rounded, size: 19),
+                tooltip: 'تكبير الخط',
+                onPressed: () {
+                  setState(() {
+                    if (_fontSizeScale < 1.45) _fontSizeScale += 0.05;
+                  });
+                },
+              ),
+              const SizedBox(width: 4),
+              IconButton(
+                padding: const EdgeInsets.all(6),
+                constraints: const BoxConstraints(),
+                icon: const Icon(Icons.format_list_bulleted_rounded, size: 21),
+                tooltip: 'فهرس الصفحات',
+                onPressed: _showPagePicker,
+              ),
+              const SizedBox(width: 8),
+            ],
+          ),
+          body: SafeArea(
+            child: Column(
+              children: [
+                // Main Swipeable PageView with Modern Islamic Layout
+                Expanded(
+                  child: Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: PageView.builder(
+                      controller: _pageController,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: _kQaidaPages.length,
+                      onPageChanged: (idx) {
+                        setState(() {
+                          _currentPageIndex = idx;
+                          _selectedItem = '';
+                        });
+                        _savePageIndex(idx);
+                      },
+                      itemBuilder: (context, index) {
+                        final page = _kQaidaPages[index];
+                        return _QaidaKeepAlivePage(
+                          key: ValueKey(page.pageNumber),
+                          child: _buildAuthenticNooraniaPage(page, isDark, isCream),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+
+                // Bottom Modern Control Toolbar
+                _buildBottomControls(isDark, isCream),
+              ],
             ),
           ),
         );
@@ -3876,83 +4149,24 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final isDark = AppTheme.notifier.value == QuranTheme.dark;
-    final outerBg = isDark ? const Color(0xFF0F1512) : const Color(0xFFF4EFE6);
-    final topIconColor =
-        isDark ? AppColors.textPrimary : const Color(0xFF5D4037);
-
-    return Scaffold(
-      backgroundColor: outerBg,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: topIconColor),
-        centerTitle: true,
-        title: Text(
-          'القاعدة النورانية',
-          style: TextStyle(
-            color: topIconColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-            fontFamily: 'Amiri',
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.format_list_bulleted_rounded),
-            tooltip: 'فهرس الصفحات',
-            onPressed: _showPagePicker,
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Main Swipeable PageView with Authentic Book Layout (Scrolls Right-to-Left)
-            Expanded(
-              child: Directionality(
-                textDirection: TextDirection.rtl,
-                child: PageView.builder(
-                  controller: _pageController,
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: _kQaidaPages.length,
-                  onPageChanged: (idx) {
-                    setState(() {
-                      _currentPageIndex = idx;
-                      _selectedItem = '';
-                    });
-                  },
-                  itemBuilder: (context, index) {
-                    final page = _kQaidaPages[index];
-                    return _buildAuthenticNooraniaPage(page, isDark);
-                  },
-                ),
-              ),
-            ),
-
-            // Bottom Page Switcher & Control Toolbar
-            _buildBottomControls(isDark),
-          ],
-        ),
-      ),
-    );
-  }
-
   // ═══════════════════════════════════════════════════════════════════════════
-  // AUTHENTIC NOORANIYAH PAGE CARD (Ornate Frame, Bismillah, Dual Header, Grid)
+  // LUXURY NOORANIYAH PAGE CARD (Arched Islamic Canvas Frame)
   // ═══════════════════════════════════════════════════════════════════════════
-  Widget _buildAuthenticNooraniaPage(QaidaPage page, bool isDark) {
-    final pageBg = isDark ? const Color(0xFF161E1A) : const Color(0xFFFAF7EE);
-    const borderColor = Color(0xFFC5A059);
+  Widget _buildAuthenticNooraniaPage(QaidaPage page, bool isDark, bool isCream) {
+    final pageBg = isDark
+        ? const Color(0xFF0F1B15)
+        : (isCream ? const Color(0xFFFFF8E7) : Colors.white);
+    final borderColor = isDark
+        ? const Color(0xFFD4AF37)
+        : (isCream ? const Color(0xFFC29B38) : const Color(0xFF94A3B8));
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      child: Container(
+    return RepaintBoundary(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+        child: Container(
         decoration: BoxDecoration(
           color: pageBg,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
@@ -3965,122 +4179,140 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
           painter: _IslamicPageBorderPainter(
             borderColor: borderColor,
             isDark: isDark,
+            isCream: isCream,
           ),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(9, 9, 9, 7),
+            padding: const EdgeInsets.fromLTRB(6, 4, 6, 2),
             child: Column(
               children: [
                 // 1. Top Bismillah (Optional per page)
                 if (page.showBismillah) ...[
                   Padding(
-                    padding: const EdgeInsets.only(top: 4, bottom: 8),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
-                        textAlign: TextAlign.center,
-                        textDirection: TextDirection.rtl,
-                        style: TextStyle(
-                          fontFamily: 'Amiri',
-                          fontSize: 34 * _fontSizeScale,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.8,
-                          color: isDark
-                              ? const Color(0xFFE8DFC8)
-                              : const Color(0xFF2C241E),
-                          height: 1.2,
+                    padding: const EdgeInsets.only(top: 1, bottom: 4),
+                    child: LiquidPressable(
+                      onTap: () {
+                        setState(() {
+                          _selectedItem = (_selectedItem == 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ')
+                              ? ''
+                              : 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: _selectedItem == 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ'
+                              ? (isDark ? const Color(0xFF1E382B) : const Color(0xFFFAF2DC))
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                          border: _selectedItem == 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ'
+                              ? Border.all(color: const Color(0xFFD4AF37), width: 1.5)
+                              : null,
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
+                            textAlign: TextAlign.center,
+                            textDirection: TextDirection.rtl,
+                            style: TextStyle(
+                              fontFamily: 'Amiri',
+                              fontSize: 32 * _fontSizeScale,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.8,
+                              color: isDark
+                                  ? const Color(0xFFE8DFC8)
+                                  : const Color(0xFF2C241E),
+                              height: 1.2,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ],
 
-                // 2. Authentic Dual Header Box (Right: Lesson No. | Left: Lesson Name)
+                // 2. Dual Capsule Header Box (Right: Lesson No. | Left: Lesson Name)
                 if (page.showHeader) ...[
                   _buildDualHeaderBox(
                     page.lessonTitleAr,
                     page.lessonSubtitleAr,
                     isDark,
+                    isCream: isCream,
                   ),
                   const SizedBox(height: 6),
                 ],
 
-                // 3. Grid or Custom Rows (e.g. Page 4, 6, 7 multi-section layout)
+                // 3. Grid or Custom Rows
                 Expanded(
                   child: page.customRows != null
-                      ? _buildCustomRowsPage(page, isDark)
-                      : _buildGridPage(page, isDark),
+                      ? _buildCustomRowsPage(page, isDark, isCream)
+                      : _buildGridPage(page, isDark, isCream),
                 ),
 
-                // 4. Page Number Badge Inside the Page Frame
+                // 4. Page Number Emblem
                 _buildPageNumberBadge(page.pageNumber, isDark),
               ],
             ),
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   // ═══════════════════════════════════════════════════════════════════════════
   // STANDARD GRID PAGE BUILDER
   // ═══════════════════════════════════════════════════════════════════════════
-  Widget _buildGridPage(QaidaPage page, bool isDark) {
+  Widget _buildGridPage(QaidaPage page, bool isDark, bool isCream) {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: GridView.builder(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: page.crossAxisCount,
-          mainAxisSpacing: 6,
-          crossAxisSpacing: 6,
+          mainAxisSpacing: 3,
+          crossAxisSpacing: 3,
           childAspectRatio: page.childAspectRatio,
         ),
         itemCount: page.cells.length,
         itemBuilder: (context, cellIndex) {
           final cell = page.cells[cellIndex];
-          return _buildAuthenticCell(cell, page, isDark);
+          final cellId = 'p${page.pageNumber}_c$cellIndex';
+          return _buildAuthenticCell(cell, page, isDark, isCream, cellId: cellId);
         },
       ),
     );
   }
 
+  int _computeDynamicFlex(QaidaCell cell, List<QaidaCell> allCells) {
+    if (allCells.length <= 1) return 1;
+    final hasCustomFlex = allCells.any((c) => c.flex != 1);
+    if (hasCustomFlex) return cell.flex;
+
+    final text = cell.fullText;
+    final baseLetters =
+        text.replaceAll(RegExp(r'[\u064B-\u065F\u0670\u06D6-\u06ED\s]'), '');
+    final wordCount =
+        text.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+
+    final weight =
+        (baseLetters.length * 1.4 + wordCount * 2.5 + 6.0).round();
+    return weight.clamp(6, 70);
+  }
+
   // ═══════════════════════════════════════════════════════════════════════════
-  // CUSTOM ROWS PAGE BUILDER (For Multi-Section Pages like Page 4, 6, 7, 8, 11, 13)
+  // CUSTOM ROWS PAGE BUILDER
   // ═══════════════════════════════════════════════════════════════════════════
-  Widget _buildCustomRowsPage(QaidaPage page, bool isDark) {
+  Widget _buildCustomRowsPage(QaidaPage page, bool isDark, bool isCream) {
     final rows = page.customRows!;
 
-    // Contextual lesson title for split pages before headers
     String activeLessonTitle =
         '${page.lessonTitleAr}: ${page.lessonSubtitleAr}';
-    if (page.pageNumber == 8) {
-      activeLessonTitle =
-          'الدَّرْسُ السَّادِسُ: تَدْرِيبَاتٌ عَلَى الحَرَكَاتِ وَالتَّنْوِينِ';
-    } else if (page.pageNumber == 11) {
-      activeLessonTitle = 'الدَّرْسُ الثَّامِنُ: حُرُوفُ المَدِّ وَاللِّينِ';
-    } else if (page.pageNumber == 13) {
-      activeLessonTitle =
-          'الدَّرْسُ التَّاسِعُ: تَدْرِيبَاتٌ عَلَى التَّنْوِينِ وَأَحْرُفِ المَدِّ وَاللِّين';
-    } else if (page.pageNumber == 17) {
-      activeLessonTitle =
-          'الدَّرْسُ الحَادِي عَشَرَ: تَدْرِيبَاتٌ عَلَى السُّكُونِ';
-    } else if (page.pageNumber == 18) {
-      activeLessonTitle = 'الدَّرْسُ الثَّانِي عَشَرَ: الشَّدَّةُ ( ّ )';
-    } else if (page.pageNumber == 20) {
-      activeLessonTitle =
-          'الدَّرْسُ الثَّالِثَ عَشَرَ: تَدْرِيبَاتٌ عَلَى الشَّدَّة';
-    } else if (page.pageNumber == 21) {
-      activeLessonTitle =
-          'الدَّرْسُ الخَامِسَ عَشَرَ: تَدْرِيبَاتٌ عَلَى الشَّدَّتَيْنِ فِي كَلِمَةٍ';
-    } else if (page.pageNumber == 22 || page.pageNumber == 23) {
-      activeLessonTitle =
-          'الدَّرْسُ الأَخِيرُ: تَدْرِيبَاتٌ عَلَى مَا سَبَقَ';
-    }
 
     final List<Widget> rowWidgets = [];
-    for (final r in rows) {
+    for (int rIdx = 0; rIdx < rows.length; rIdx++) {
+      final r = rows[rIdx];
       if (r.isHeader) {
         if (r.headerLessonTitle != null && r.headerLessonSubtitle != null) {
           activeLessonTitle =
@@ -4093,6 +4325,7 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
               r.headerLessonTitle ?? '',
               r.headerLessonSubtitle ?? '',
               isDark,
+              isCream: isCream,
             ),
           ),
         );
@@ -4119,23 +4352,31 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
                         r.headerLessonTitle ?? '',
                         r.headerLessonSubtitle ?? '',
                         isDark,
+                        isCream: isCream,
                         isInline: true,
                         isStacked: r.inlineHeaderStacked,
                       ),
                     ),
                   ),
-                  ...?r.cells?.map((c) => Expanded(
-                        flex: c.flex,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 1.0),
-                          child: _buildAuthenticCell(
-                            c,
-                            page,
-                            isDark,
-                            customLessonTitle: currentLesson,
-                          ),
+                  ...?r.cells?.asMap().entries.map((entry) {
+                    final cIdx = entry.key;
+                    final c = entry.value;
+                    final cellId = 'p${page.pageNumber}_r${rIdx}_c$cIdx';
+                    return Expanded(
+                      flex: c.flex,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 1.0),
+                        child: _buildAuthenticCell(
+                          c,
+                          page,
+                          isDark,
+                          isCream,
+                          cellId: cellId,
+                          customLessonTitle: currentLesson,
                         ),
-                      )),
+                      ),
+                    );
+                  }),
                 ],
               ),
             ),
@@ -4167,18 +4408,25 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Spacer(flex: 2),
-                  ...?r.cells?.map((c) => Expanded(
-                        flex: 1,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 1.0),
-                          child: _buildAuthenticCell(
-                            c,
-                            page,
-                            isDark,
-                            customLessonTitle: currentLesson,
-                          ),
+                  ...?r.cells?.asMap().entries.map((entry) {
+                    final cIdx = entry.key;
+                    final c = entry.value;
+                    final cellId = 'p${page.pageNumber}_r${rIdx}_c$cIdx';
+                    return Expanded(
+                      flex: _computeDynamicFlex(c, r.cells!),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 1.0),
+                        child: _buildAuthenticCell(
+                          c,
+                          page,
+                          isDark,
+                          isCream,
+                          cellId: cellId,
+                          customLessonTitle: currentLesson,
                         ),
-                      )),
+                      ),
+                    );
+                  }),
                   const Spacer(flex: 2),
                 ],
               ),
@@ -4193,15 +4441,20 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 1.0),
             child: Row(
-              children: r.cells!.map((c) {
+              children: r.cells!.asMap().entries.map((entry) {
+                final cIdx = entry.key;
+                final c = entry.value;
+                final cellId = 'p${page.pageNumber}_r${rIdx}_c$cIdx';
                 return Expanded(
-                  flex: c.flex,
+                  flex: _computeDynamicFlex(c, r.cells!),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 1.0),
                     child: _buildAuthenticCell(
                       c,
                       page,
                       isDark,
+                      isCream,
+                      cellId: cellId,
                       customLessonTitle: currentLesson,
                     ),
                   ),
@@ -4220,27 +4473,128 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // DUAL COMPARTMENT LESSON HEADER BOX (Original Noorania Book Style)
+  // DUAL CAPSULE LESSON HEADER BOX (Modern Islamic Luxury Ornament)
   // ═══════════════════════════════════════════════════════════════════════════
   Widget _buildDualHeaderBox(
     String titleAr,
     String subtitleAr,
     bool isDark, {
+    bool isCream = true,
     bool isInline = false,
     bool isStacked = false,
   }) {
-    const borderColor = Color(0xFFC8A86B);
-    final headerBg = isDark ? const Color(0xFF1E2824) : const Color(0xFFFAF6EC);
+    final bool isHighlighted = _isHeaderHighlighted(titleAr);
+    final headerKey = '$titleAr $subtitleAr'.trim();
+    final bool isManualSelected = _selectedItem == headerKey;
+
+    if (isHighlighted) {
+      return AnimatedBuilder(
+        animation: _breathingController,
+        builder: (context, child) {
+          final currentColor = _colorAnimation.value ?? const Color(0xFFD4AF37);
+          final currentScale = _scaleAnimation.value;
+          final dynamicHeaderBg = isDark
+              ? currentColor.withValues(alpha: 0.18)
+              : currentColor.withValues(alpha: 0.12);
+
+          return Transform.scale(
+            scale: currentScale,
+            child: _buildRawHeaderBox(
+              titleAr,
+              subtitleAr,
+              isDark,
+              isCream: isCream,
+              isInline: isInline,
+              isStacked: isStacked,
+              customBorderColor: currentColor,
+              customBgColor: dynamicHeaderBg,
+              customBorderWidth: 2.2,
+              customShadow: [
+                BoxShadow(
+                  color: currentColor.withValues(alpha: 0.55),
+                  blurRadius: 12 * currentScale,
+                  spreadRadius: 2.0 * currentScale,
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
+
+    return LiquidPressable(
+      onTap: () {
+        setState(() {
+          _selectedItem = isManualSelected ? '' : headerKey;
+        });
+      },
+      child: _buildRawHeaderBox(
+        titleAr,
+        subtitleAr,
+        isDark,
+        isCream: isCream,
+        isInline: isInline,
+        isStacked: isStacked,
+        customBorderColor: isManualSelected
+            ? (isDark
+                ? const Color(0xFFD4AF37)
+                : (isCream ? const Color(0xFFC29B38) : const Color(0xFF475569)))
+            : null,
+        customBgColor: isManualSelected
+            ? (isDark
+                ? const Color(0xFF1E382B)
+                : (isCream ? const Color(0xFFF3E5C8) : const Color(0xFFE2E8F0)))
+            : null,
+        customBorderWidth: isManualSelected ? 1.8 : null,
+        customShadow: isManualSelected
+            ? [
+                BoxShadow(
+                  color: (isDark
+                          ? const Color(0xFFD4AF37)
+                          : (isCream
+                              ? const Color(0xFFC29B38)
+                              : const Color(0xFF475569)))
+                      .withValues(alpha: 0.35),
+                  blurRadius: 8,
+                  offset: const Offset(0, 1),
+                ),
+              ]
+            : null,
+      ),
+    );
+  }
+
+  Widget _buildRawHeaderBox(
+    String titleAr,
+    String subtitleAr,
+    bool isDark, {
+    bool isCream = true,
+    bool isInline = false,
+    bool isStacked = false,
+    Color? customBorderColor,
+    Color? customBgColor,
+    double? customBorderWidth,
+    List<BoxShadow>? customShadow,
+  }) {
+    final borderColor = customBorderColor ??
+        (isDark
+            ? const Color(0xFFD4AF37)
+            : (isCream ? const Color(0xFFC29B38) : const Color(0xFF94A3B8)));
+    final headerBg = customBgColor ??
+        (isDark
+            ? const Color(0xFF1E2824)
+            : (isCream ? const Color(0xFFFAF0D9) : const Color(0xFFF1F5F9)));
+    final borderWidth = customBorderWidth ?? (isInline ? 1.0 : 1.2);
 
     final double titleFontSize = isStacked
         ? 18.0 * _fontSizeScale
-        : (isInline ? 17.0 * _fontSizeScale : 22.0 * _fontSizeScale);
+        : (isInline ? 16.5 * _fontSizeScale : 21.0 * _fontSizeScale);
     final double subtitleFontSize = isStacked
         ? 14.5 * _fontSizeScale
-        : (isInline ? 14.5 * _fontSizeScale : 18.5 * _fontSizeScale);
+        : (isInline ? 14.0 * _fontSizeScale : 18.0 * _fontSizeScale);
     final EdgeInsets boxPadding = isInline
         ? const EdgeInsets.symmetric(horizontal: 4, vertical: 2)
-        : const EdgeInsets.symmetric(horizontal: 12, vertical: 7);
+        : const EdgeInsets.symmetric(horizontal: 12, vertical: 6);
 
     if (isStacked) {
       return Directionality(
@@ -4249,14 +4603,16 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
           width: double.infinity,
           decoration: BoxDecoration(
             color: headerBg,
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: borderColor.withValues(alpha: isDark ? 0.7 : 0.9),
-              width: 1.0,
+              color: customBorderColor ??
+                  borderColor.withValues(alpha: isDark ? 0.7 : 0.85),
+              width: borderWidth,
             ),
+            boxShadow: customShadow,
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -4278,7 +4634,7 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 7),
+                const SizedBox(height: 4),
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
@@ -4308,25 +4664,27 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
       child: Container(
         decoration: BoxDecoration(
           color: headerBg,
-          borderRadius: BorderRadius.circular(isInline ? 6 : 9),
+          borderRadius: BorderRadius.circular(isInline ? 8 : 12),
           border: Border.all(
-            color: borderColor.withValues(alpha: isDark ? 0.7 : 0.9),
-            width: isInline ? 1.0 : 1.3,
+            color: customBorderColor ??
+                borderColor.withValues(alpha: isDark ? 0.7 : 0.85),
+            width: borderWidth,
           ),
-          boxShadow: isInline
-              ? null
-              : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.03),
-                    blurRadius: 3,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
+          boxShadow: customShadow ??
+              (isInline
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.03),
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
+                      ),
+                    ]),
         ),
         child: IntrinsicHeight(
           child: Row(
             children: [
-              // Right Part in RTL (First child): Lesson Title / Number (e.g. "الدَّرْسُ الأَوَّل")
+              // Right Part in RTL: Lesson Number
               Expanded(
                 flex: isInline ? 1 : 2,
                 child: Padding(
@@ -4356,12 +4714,12 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
 
               // Vertical Separator
               VerticalDivider(
-                color: borderColor.withValues(alpha: isDark ? 0.7 : 0.9),
-                thickness: isInline ? 1.0 : 1.3,
-                width: isInline ? 1.0 : 1.3,
+                color: borderColor.withValues(alpha: isDark ? 0.7 : 0.85),
+                thickness: isInline ? 1.0 : 1.2,
+                width: isInline ? 1.0 : 1.2,
               ),
 
-              // Left Part in RTL (Second child): Lesson Subtitle / Name (e.g. "حُرُوفُ الهِجَاءِ المُفْرَدَة")
+              // Left Part in RTL: Lesson Name
               Expanded(
                 flex: isInline ? 1 : 3,
                 child: Padding(
@@ -4396,11 +4754,13 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // CELL CONTENT (Supports Multi-Colored Segments & Single Text)
+  // CELL CONTENT (Multi-Colored Segments & Single Text)
   // ═══════════════════════════════════════════════════════════════════════════
-  Widget _buildCellContent(QaidaCell cell, bool isDark, double fontSize) {
-    final defaultColor =
-        isDark ? const Color(0xFFF2EADC) : const Color(0xFF1F1B18);
+  Widget _buildCellContent(
+      QaidaCell cell, bool isDark, bool isCream, double fontSize) {
+    final defaultColor = isDark
+        ? const Color(0xFFEAE3D2)
+        : (isCream ? const Color(0xFF1F150C) : const Color(0xFF0F172A));
 
     if (cell.segments != null && cell.segments!.isNotEmpty) {
       return Text.rich(
@@ -4459,67 +4819,84 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // AUTHENTIC CELL (Clean Rounded Border, Large Prominent Letter, Delicate Outline)
+  // MODERN TACTILE ISLAMIC CELL (Refined Radius, Soft Depth, Active Highlight)
   // ═══════════════════════════════════════════════════════════════════════════
   Widget _buildAuthenticCell(
     QaidaCell cell,
     QaidaPage page,
-    bool isDark, {
+    bool isDark,
+    bool isCream, {
+    required String cellId,
     String? customLessonTitle,
   }) {
-    final isSelected = _selectedItem == cell.fullText;
+    final isSelected = _selectedItem == cellId;
     final cellBg = isDark
-        ? (isSelected ? const Color(0xFF23362C) : const Color(0xFF1E2824))
-        : (isSelected ? const Color(0xFFFBF4E2) : const Color(0xFFFFFFFF));
+        ? (isSelected ? const Color(0xFF1E382B) : const Color(0xFF16251E))
+        : (isCream
+            ? (isSelected ? const Color(0xFFF3E5C8) : const Color(0xFFFAF2DF))
+            : (isSelected ? const Color(0xFFE2E8F0) : const Color(0xFFF8FAFC)));
 
     final borderColor = isSelected
-        ? const Color(0xFFB71C1C)
-        : const Color(0xFFD4B982).withValues(alpha: isDark ? 0.45 : 0.75);
+        ? (isDark
+            ? const Color(0xFFD4AF37)
+            : (isCream ? const Color(0xFFC29B38) : const Color(0xFF475569)))
+        : (isDark
+            ? const Color(0xFF334A3C)
+            : (isCream
+                ? const Color(0xFFDAC79B)
+                : const Color(0xFFCBD5E1)));
 
-    // Large base font size so letters fill the cell with prominence
-    double baseFontSize = 32;
+    double baseFontSize = 38;
     if (page.customRows != null) {
-      baseFontSize = 30;
-    } else if (page.crossAxisCount >= 6) {
-      baseFontSize = 28;
-    } else if (page.crossAxisCount == 5) {
-      baseFontSize = 32;
-    } else if (page.crossAxisCount == 4) {
       baseFontSize = 34;
+    } else if (page.crossAxisCount >= 6) {
+      baseFontSize = 32;
+    } else if (page.crossAxisCount == 5) {
+      baseFontSize = 38;
+    } else if (page.crossAxisCount == 4) {
+      baseFontSize = 42;
     } else if (page.crossAxisCount <= 3) {
-      baseFontSize = 36;
+      baseFontSize = 46;
     }
 
     final double effectiveFontSize = baseFontSize * _fontSizeScale;
 
     return LiquidPressable(
-      onTap: () => _showItemDetail(
-        cell,
-        customLessonTitle ?? '${page.lessonTitleAr}: ${page.lessonSubtitleAr}',
-      ),
+      onTap: () {
+        setState(() {
+          _selectedItem = (_selectedItem == cellId) ? '' : cellId;
+        });
+      },
       child: Container(
         decoration: BoxDecoration(
           color: cellBg,
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: borderColor,
-            width: isSelected ? 1.5 : 0.85,
+            width: isSelected ? 1.6 : 0.9,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.02),
-              blurRadius: 2,
+              color: isSelected
+                  ? (isDark
+                          ? const Color(0xFFD4AF37)
+                          : (isCream
+                              ? const Color(0xFFC29B38)
+                              : const Color(0xFF475569)))
+                      .withValues(alpha: 0.25)
+                  : Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+              blurRadius: isSelected ? 6 : 2,
               offset: const Offset(0, 1),
             ),
           ],
         ),
         child: Stack(
           children: [
-            // Small Red Phonetic / Pronunciation Name in Corner (e.g. 'أَلِف', 'با', 'تا')
+            // Small Red Phonetic / Pronunciation Name in Corner
             if (cell.phonetic != null)
               Positioned(
                 top: 2,
-                left: 3,
+                left: 4,
                 child: Text(
                   cell.phonetic!,
                   textDirection: TextDirection.rtl,
@@ -4535,18 +4912,18 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
                 ),
               ),
 
-            // Embedded Corner Badge Tag (e.g. 'المَدّ' in red or 'اللِّين' in blue)
+            // Embedded Corner Badge Tag
             if (cell.cornerBadge != null)
               Positioned(
-                right: 2,
-                top: 2,
-                bottom: 2,
+                right: 3,
+                top: 3,
+                bottom: 3,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 2.0, vertical: 1.0),
+                      horizontal: 2.5, vertical: 1.0),
                   decoration: BoxDecoration(
                     color: cell.cornerBadgeBg ?? const Color(0xFFC62828),
-                    borderRadius: BorderRadius.circular(3),
+                    borderRadius: BorderRadius.circular(4),
                   ),
                   child: Center(
                     child: RotatedBox(
@@ -4568,7 +4945,7 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
                 ),
               ),
 
-            // Main Central Letter (Fitted to scale down dynamically and fill the box)
+            // Main Central Letter
             Center(
               child: Padding(
                 padding: EdgeInsets.only(
@@ -4579,7 +4956,8 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
                 ),
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: _buildCellContent(cell, isDark, effectiveFontSize),
+                  child: _buildCellContent(
+                      cell, isDark, isCream, effectiveFontSize),
                 ),
               ),
             ),
@@ -4590,16 +4968,16 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // PAGE NUMBER BADGE (Bottom Emblem)
+  // PAGE NUMBER BADGE (Modern Coin / Emblem)
   // ═══════════════════════════════════════════════════════════════════════════
   Widget _buildPageNumberBadge(int pageNumber, bool isDark) {
     return Padding(
       padding: const EdgeInsets.only(top: 4),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 1.5),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E2824) : const Color(0xFFFAF7EE),
-          borderRadius: BorderRadius.circular(10),
+          color: isDark ? const Color(0xFF1E2824) : const Color(0xFFFAF6EC),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: const Color(0xFFC5A059).withValues(alpha: 0.75),
             width: 1.0,
@@ -4619,21 +4997,25 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // BOTTOM CONTROLS (Audio Toolbar, Loop, Navigation Arrows)
+  // BOTTOM CONTROLS (Floating Modern Toolbar)
   // ═══════════════════════════════════════════════════════════════════════════
-  Widget _buildBottomControls(bool isDark) {
-    final barBg = isDark ? const Color(0xFF141A17) : const Color(0xFFEFE8DA);
-    const iconColor = Color(0xFFC5A059);
+  Widget _buildBottomControls(bool isDark, bool isCream) {
+    final barBg = isDark
+        ? const Color(0xFF0C1611)
+        : (isCream ? const Color(0xFFE5DABF) : const Color(0xFFE2E8F0));
+    final iconColor = isDark
+        ? const Color(0xFFD4AF37)
+        : (isCream ? const Color(0xFF8C6618) : const Color(0xFF475569));
     final hasPrev = _currentPageIndex > 0;
     final hasNext = _currentPageIndex < _kQaidaPages.length - 1;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 3),
       decoration: BoxDecoration(
         color: barBg,
         border: Border(
           top: BorderSide(
-            color: const Color(0xFFC5A059).withValues(alpha: 0.3),
+            color: iconColor.withValues(alpha: 0.3),
             width: 1.0,
           ),
         ),
@@ -4645,57 +5027,26 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
           IconButton(
             icon: Icon(
               Icons.chevron_left_rounded,
-              size: 30,
+              size: 32,
               color: hasNext ? iconColor : iconColor.withValues(alpha: 0.3),
             ),
             tooltip: 'الصفحة التالية',
             onPressed: hasNext ? () => _goToPage(_currentPageIndex + 1) : null,
           ),
 
-          // Page Index Quick Jump
-          IconButton(
-            icon: const Icon(
-              Icons.menu_book_rounded,
-              size: 22,
-              color: iconColor,
-            ),
-            tooltip: 'فهرس الصفحات',
-            onPressed: _showPagePicker,
-          ),
-
-          // Play / Pause Audio
-          IconButton(
-            icon: Icon(
-              _isPlaying
-                  ? Icons.pause_circle_outline_rounded
-                  : Icons.play_circle_outline_rounded,
-              size: 32,
-              color: iconColor,
-            ),
-            tooltip: _isPlaying ? 'إيقاف مؤقت' : 'تشغيل قراءة الصفحة',
-            onPressed: () {
-              setState(() => _isPlaying = !_isPlaying);
-            },
-          ),
-
-          // Stop Audio
-          IconButton(
-            icon: const Icon(
-              Icons.stop_circle_outlined,
-              size: 30,
-              color: iconColor,
-            ),
-            tooltip: 'إيقاف',
-            onPressed: () {
-              setState(() => _isPlaying = false);
-            },
-          ),
-
-          // Repeat / Loop Counter
+          // Playback Speed Controller (0.75x, 1.0x, 1.25x, 1.5x)
           LiquidPressable(
             onTap: () {
               setState(() {
-                _repeatCount = (_repeatCount + 1) % 4; // 0, 1, 2, 3
+                if (_playbackSpeed == 1.0) {
+                  _playbackSpeed = 1.25;
+                } else if (_playbackSpeed == 1.25) {
+                  _playbackSpeed = 0.75;
+                } else if (_playbackSpeed == 0.75) {
+                  _playbackSpeed = 0.5;
+                } else {
+                  _playbackSpeed = 1.0;
+                }
               });
             },
             child: Container(
@@ -4710,14 +5061,79 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
                   width: 1,
                 ),
               ),
+              child: Text(
+                '${_playbackSpeed}x',
+                style: TextStyle(
+                  color: iconColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ),
+
+          // Play / Pause Audio with Circular Glow
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: IconButton(
+              icon: const Icon(
+                Icons.play_circle_filled_rounded,
+                size: 36,
+                color: Color(0xFFD4AF37),
+              ),
+              tooltip: 'تشغيل قراءة الصفحة (قريباً)',
+              onPressed: _showComingSoon,
+            ),
+          ),
+
+          // Stop Audio
+          IconButton(
+            icon: Icon(
+              Icons.stop_circle_outlined,
+              size: 28,
+              color: iconColor,
+            ),
+            tooltip: 'إيقاف (قريباً)',
+            onPressed: _showComingSoon,
+          ),
+
+          // Repeat / Loop Counter
+          LiquidPressable(
+            onTap: () {
+              setState(() {
+                _repeatCount = (_repeatCount + 1) % 4;
+              });
+              _showComingSoon();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.white10
+                    : Colors.black.withValues(alpha: 0.04),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: iconColor.withValues(alpha: 0.5),
+                  width: 1,
+                ),
+              ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.repeat_rounded, size: 18, color: iconColor),
+                  Icon(Icons.repeat_rounded, size: 16, color: iconColor),
                   const SizedBox(width: 4),
                   Text(
                     ': $_repeatCount',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: iconColor,
                       fontWeight: FontWeight.bold,
                       fontSize: 13,
@@ -4732,7 +5148,7 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
           IconButton(
             icon: Icon(
               Icons.chevron_right_rounded,
-              size: 30,
+              size: 32,
               color: hasPrev ? iconColor : iconColor.withValues(alpha: 0.3),
             ),
             tooltip: 'الصفحة السابقة',
@@ -4745,29 +5161,31 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen> {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// ISLAMIC PAGE BORDER PAINTER (Ornate Golden Double Border with Corner Arches)
+// ISLAMIC PAGE BORDER PAINTER (Modern Arched Frame with Soft Corner Flourishes)
 // ═════════════════════════════════════════════════════════════════════════════
 class _IslamicPageBorderPainter extends CustomPainter {
   final Color borderColor;
   final bool isDark;
+  final bool isCream;
 
   const _IslamicPageBorderPainter({
     required this.borderColor,
     required this.isDark,
+    required this.isCream,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    const double padOuter = 3.0;
-    const double padInner = 6.5;
+    const double padOuter = 3.5;
+    const double padInner = 7.0;
 
     final outerPaint = Paint()
-      ..color = borderColor.withValues(alpha: isDark ? 0.70 : 0.80)
+      ..color = borderColor.withValues(alpha: isDark ? 0.70 : 0.85)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
+      ..strokeWidth = 1.4;
 
     final innerPaint = Paint()
-      ..color = borderColor.withValues(alpha: isDark ? 0.35 : 0.45)
+      ..color = borderColor.withValues(alpha: isDark ? 0.30 : 0.45)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.8;
 
@@ -4778,7 +5196,7 @@ class _IslamicPageBorderPainter extends CustomPainter {
         size.width - padOuter * 2,
         size.height - padOuter * 2,
       ),
-      const Radius.circular(12),
+      const Radius.circular(16),
     );
 
     final innerRRect = RRect.fromRectAndRadius(
@@ -4788,7 +5206,7 @@ class _IslamicPageBorderPainter extends CustomPainter {
         size.width - padInner * 2,
         size.height - padInner * 2,
       ),
-      const Radius.circular(8),
+      const Radius.circular(12),
     );
 
     canvas.drawRRect(outerRRect, outerPaint);
@@ -4798,7 +5216,8 @@ class _IslamicPageBorderPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _IslamicPageBorderPainter oldDelegate) {
     return oldDelegate.borderColor != borderColor ||
-        oldDelegate.isDark != isDark;
+        oldDelegate.isDark != isDark ||
+        oldDelegate.isCream != isCream;
   }
 }
 
@@ -4817,27 +5236,30 @@ class _UthmaniReferenceWidget extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: Column(
         children: [
-          // 1. Calligraphic Conclusion "تَمَّتۡ"
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'تَمَّتۡ',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Amiri',
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? const Color(0xFFEF5350) : const Color(0xFFB71C1C),
-                  height: 1.1,
+          // 1. Calligraphic Conclusion "تَمَّتۡ بِالْخَيْرِ"
+          Padding(
+            padding: const EdgeInsets.only(top: 1, bottom: 2),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'تَمَّتۡ بِالْخَيْرِ',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Amiri',
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? const Color(0xFFEF5350) : const Color(0xFFB71C1C),
+                    height: 1.1,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
 
           // 2. Subtitle Banner
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
@@ -4845,28 +5267,29 @@ class _UthmaniReferenceWidget extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'Amiri',
-                  fontSize: 12.5,
+                  fontSize: 12.0,
                   fontWeight: FontWeight.bold,
                   color: isDark ? const Color(0xFFE8DFC8) : const Color(0xFF3E2723),
+                  height: 1.1,
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 3),
 
           // 3. Comparison Table (Side-by-side Dual Table)
           Expanded(
             child: Container(
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1E2824) : const Color(0xFFFAF6EC),
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: tableBorderColor.withValues(alpha: isDark ? 0.7 : 0.9),
+                  color: tableBorderColor.withValues(alpha: isDark ? 0.7 : 0.85),
                   width: 1.0,
                 ),
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(5),
+                borderRadius: BorderRadius.circular(7),
                 child: Row(
                   children: [
                     // Right Table (Entries 1 to 8 in RTL)
@@ -4890,7 +5313,7 @@ class _UthmaniReferenceWidget extends StatelessWidget {
                     // Center Divider
                     Container(
                       width: 1.0,
-                      color: tableBorderColor.withValues(alpha: isDark ? 0.7 : 0.9),
+                      color: tableBorderColor.withValues(alpha: isDark ? 0.7 : 0.85),
                     ),
 
                     // Left Table (Entries 9 to 16 in RTL)
@@ -5085,6 +5508,33 @@ class _UthmaniReferenceWidget extends StatelessWidget {
       width: 0.7,
       color: color,
     );
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// KEEP-ALIVE PAGE WRAPPER (Prevents Swipe Micro-Stutter / Instant 3-Page Cache)
+// ═════════════════════════════════════════════════════════════════════════════
+class _QaidaKeepAlivePage extends StatefulWidget {
+  final Widget child;
+
+  const _QaidaKeepAlivePage({
+    super.key,
+    required this.child,
+  });
+
+  @override
+  State<_QaidaKeepAlivePage> createState() => _QaidaKeepAlivePageState();
+}
+
+class _QaidaKeepAlivePageState extends State<_QaidaKeepAlivePage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }
 
