@@ -39,19 +39,28 @@ class _LibraryCategoryScreenState extends State<LibraryCategoryScreen> {
   }
 
   Future<void> _loadCategories() async {
-    List<Map<String, String>> cats;
-    if (widget.domainPart == 'فتاوى') {
-      cats = await _libraryService.getFatawyCategories();
-    } else {
-      cats = await _libraryService.getLibraryCategories(widget.domainPart);
-    }
+    try {
+      List<Map<String, String>> cats;
+      if (widget.domainPart == 'فتاوى') {
+        cats = await _libraryService.getFatawyCategories();
+      } else {
+        cats = await _libraryService.getLibraryCategories(widget.domainPart);
+      }
 
-    if (mounted) {
-      setState(() {
-        _categories = cats;
-        _filteredCategories = cats;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _categories = cats;
+          _filteredCategories = cats;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('[LibraryCategoryScreen] Error loading categories: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -157,7 +166,9 @@ class _LibraryCategoryScreenState extends State<LibraryCategoryScreen> {
                 onChanged: _onSearchChanged,
                 style: TextStyle(color: textColor, fontSize: 14),
                 decoration: InputDecoration(
-                  hintText: 'ابحث في أقسام ${widget.domainTitle}...',
+                  hintText: (Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar') == 'ar'
+                      ? 'ابحث بالعربية في أقسام ${widget.domainTitle}...'
+                      : 'Search in Arabic in ${widget.domainTitle}...',
                   hintStyle: TextStyle(
                     color: isDark ? const Color(0xFF6C7C78) : const Color(0xFF9AA8A4),
                     fontSize: 13,

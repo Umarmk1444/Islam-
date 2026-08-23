@@ -17,14 +17,14 @@ class LibraryService {
   Future<List<Map<String, String>>> getLibraryCategories(String part) async {
     final db = await _dbHelper.database;
     if (part == 'صحيح البخارى' || part == 'البخارى') {
-      final result = await db.rawQuery('SELECT abc, abc2 FROM all_index WHERE title = "البخارى"');
+      final result = await db.rawQuery("SELECT abc, abc2 FROM all_index WHERE title = 'البخارى'");
       return result.map((e) => {
         'id': e['abc2'].toString(),
         'title': e['abc'].toString(),
       }).toList();
     } else if (part == 'الرقية الشرعية') {
       final result = await db.rawQuery(
-        'SELECT DISTINCT level FROM roqua WHERE level IS NOT NULL AND level != ""',
+        "SELECT DISTINCT level FROM roqua WHERE level IS NOT NULL AND level != ''",
       );
       return result.map((e) => {
         'id': e['level'].toString(),
@@ -32,7 +32,7 @@ class LibraryService {
       }).toList();
     } else {
       final result = await db.rawQuery(
-        'SELECT DISTINCT type FROM library WHERE part = ? AND type IS NOT NULL AND type != ""',
+        "SELECT DISTINCT type FROM library WHERE part = ? AND type IS NOT NULL AND type != ''",
         [part],
       );
       return result.map((e) => {
@@ -45,7 +45,7 @@ class LibraryService {
   Future<List<Map<String, String>>> getFatawyCategories() async {
     final db = await _dbHelper.database;
     final result = await db.rawQuery(
-      'SELECT DISTINCT fatwy_type FROM fatawy WHERE fatwy_type IS NOT NULL AND fatwy_type != ""',
+      "SELECT DISTINCT fatwy_type FROM fatawy WHERE fatwy_type IS NOT NULL AND fatwy_type != ''",
     );
     return result.map((e) => {
       'id': e['fatwy_type'].toString(),
@@ -58,7 +58,7 @@ class LibraryService {
     final db = await _dbHelper.database;
     if (part == 'صحيح البخارى' || part == 'البخارى') {
       final rows = await db.rawQuery(
-        'SELECT abc FROM all_index WHERE (abc2 = ? OR abc = ?) AND (title = "البخارى" OR title LIKE "%البخار%")',
+        "SELECT abc FROM all_index WHERE (abc2 = ? OR abc = ?) AND (title = 'البخارى' OR title LIKE '%البخار%')",
         [typeId, typeId],
       );
       if (rows.isNotEmpty) {
@@ -77,12 +77,12 @@ class LibraryService {
     try {
       // 1. Fetch 4 random items from Islamic Library (المكتبة)
       final libraryRows = await db.rawQuery(
-        'SELECT $_libraryListCols FROM library WHERE part = "المكتبة" AND title IS NOT NULL AND title != "" ORDER BY RANDOM() LIMIT 4',
+        "SELECT $_libraryListCols FROM library WHERE part = 'المكتبة' AND title IS NOT NULL AND title != '' ORDER BY RANDOM() LIMIT 4",
       );
 
       // 2. Fetch 4 random items from Sahih Al-Bukhari (صحيح البخارى)
       final bukhariRows = await db.rawQuery(
-        'SELECT $_libraryListCols FROM library WHERE (part = "صحيح البخارى" OR part = "البخارى") AND title IS NOT NULL AND title != "" ORDER BY RANDOM() LIMIT 4',
+        "SELECT $_libraryListCols FROM library WHERE (part = 'صحيح البخارى' OR part = 'البخارى') AND title IS NOT NULL AND title != '' ORDER BY RANDOM() LIMIT 4",
       );
 
       final List<LibraryItem> results = [];
@@ -118,7 +118,7 @@ class LibraryService {
     List<dynamic> args;
 
     if (part == 'صحيح البخارى' || part == 'البخارى') {
-      query = 'SELECT $_libraryListCols FROM library WHERE (part = "صحيح البخارى" OR part = "البخارى") AND type = ?';
+      query = "SELECT $_libraryListCols FROM library WHERE (part = 'صحيح البخارى' OR part = 'البخارى') AND type = ?";
       args = [typeId];
     } else {
       query = 'SELECT $_libraryListCols FROM library WHERE part = ? AND type = ?';
@@ -148,7 +148,7 @@ class LibraryService {
   
   Future<List<RoquaItem>> getRoquaItems(String level, {String? searchQuery}) async {
     final db = await _dbHelper.database;
-    String query = 'SELECT $_roquaListCols, "" as story, info FROM roqua WHERE level = ?';
+    String query = "SELECT $_roquaListCols, '' as story, info FROM roqua WHERE level = ?";
     List<dynamic> args = [level];
     
     if (searchQuery != null && searchQuery.isNotEmpty) {
@@ -177,7 +177,7 @@ class LibraryService {
     if (query.isEmpty) return [];
     final db = await _dbHelper.database;
     final rows = await db.rawQuery(
-      'SELECT $_libraryListCols FROM library WHERE title LIKE ? AND part NOT IN ("صوتيات", "مرئيات")',
+      "SELECT $_libraryListCols FROM library WHERE title LIKE ? AND part NOT IN ('صوتيات', 'مرئيات')",
       ['%$query%']
     );
     return rows.map((e) => LibraryItem.fromMap(e)).toList();
@@ -207,18 +207,18 @@ class LibraryService {
 
     String text = raw.trim();
 
-    // 1. Remove duplicate non-voweled trailing block
-    final int lastOpen = text.lastIndexOf('{');
-    if (lastOpen > 20) {
-      final after = text.substring(lastOpen).trim();
-      if (after.length >= 20 &&
-          (after.endsWith('}') ||
-              after.endsWith('}.') ||
-              after.endsWith('} .'))) {
-        final before = text.substring(0, lastOpen).trim();
-        if (before.length > 20) {
-          text = before;
-        }
+    // 1. If text contains two distinct {...} blocks, extract only the first complete voweled block
+    final firstOpen = text.indexOf('{');
+    final firstClose = text.indexOf('}');
+    final lastOpen = text.lastIndexOf('{');
+    final lastClose = text.lastIndexOf('}');
+
+    if (firstOpen != -1 && firstClose != -1 && lastOpen > firstClose && (firstClose - firstOpen) > 20) {
+      text = text.substring(firstOpen + 1, firstClose).trim();
+    } else if (lastOpen > 20 && lastClose > lastOpen) {
+      final before = text.substring(0, lastOpen).trim();
+      if (before.length > 20) {
+        text = before;
       }
     }
 

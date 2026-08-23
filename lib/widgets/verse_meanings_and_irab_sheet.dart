@@ -144,9 +144,11 @@ class _VerseMeaningsAndIrabSheetState extends State<VerseMeaningsAndIrabSheet> {
         final titleSurahName = _currentSurahName;
         final titleAyahNumber = _currentAyahNumber;
 
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.78,
-          decoration: BoxDecoration(
+        return SafeArea(
+          top: false,
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.78,
+            decoration: BoxDecoration(
             color: bg,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             border: Border.all(color: border, width: 1.5),
@@ -244,7 +246,7 @@ class _VerseMeaningsAndIrabSheetState extends State<VerseMeaningsAndIrabSheet> {
               ),
             ],
           ),
-        );
+        ));
       },
     );
   }

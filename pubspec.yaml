@@ -24,6 +24,7 @@ dependencies:
   timezone: ^0.9.3
   intl: ^0.20.2
   just_audio: ^0.9.0
+  just_audio_windows: ^0.2.0
   just_audio_background: ^0.0.1-beta.14
   audio_session: ^0.1.19
   http: 1.6.0
@@ -49,12 +50,13 @@ dependencies:
   google_mobile_ads: ^5.1.0
   archive: ^3.4.9
   home_widget: ^0.9.3
+  wakelock_plus: ^1.2.8
+  sqflite_common_ffi: ^2.3.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
-  sqflite_common_ffi: ^2.3.3
 
 flutter:
   uses-material-design: true

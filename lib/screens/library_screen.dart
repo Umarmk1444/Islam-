@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../theme_notifier.dart';
@@ -13,71 +14,134 @@ import '../widgets/liquid_pressable.dart';
 import '../widgets/custom_banner_ad.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Domain Configuration with Curated Luxury Islamic Palettes
+// Domain Configuration with Curated Luxury Islamic Palettes & Localization
 // ─────────────────────────────────────────────────────────────────────────────
 class _DomainInfo {
   final String part;
-  final String title;
-  final String subtitle;
+  final Map<String, String> titles;
+  final Map<String, String> subtitles;
   final IconData icon;
   final List<Color> gradient;
   final Color accentColor;
 
   const _DomainInfo({
     required this.part,
-    required this.title,
-    required this.subtitle,
+    required this.titles,
+    required this.subtitles,
     required this.icon,
     required this.gradient,
     required this.accentColor,
   });
+
+  String title(String locale) => titles[locale] ?? titles['ar'] ?? titles['en']!;
+  String subtitle(String locale) => subtitles[locale] ?? subtitles['ar'] ?? subtitles['en']!;
 }
 
 const List<_DomainInfo> _kDomainList = [
   _DomainInfo(
     part: 'المكتبة',
-    title: 'المكتبة الإسلامية',
-    subtitle: 'كتب، كتيبات، ومطويات دعوية',
+    titles: {
+      'ar': 'المكتبة الإسلامية',
+      'en': 'Islamic Library',
+      'am': 'ኢስላማዊ ቤተ-መጽሐፍት',
+      'om': 'Mana Kitaaba Islaamaa',
+    },
+    subtitles: {
+      'ar': 'كتب، كتيبات، ومطويات دعوية',
+      'en': 'Books, booklets & pamphlets',
+      'am': 'መጽሐፍት እና የዳዕዋ ጽሑፎች',
+      'om': 'Kitaabota fi barruulee da\'waa',
+    },
     icon: Icons.local_library_rounded,
     gradient: [Color(0xFF0F5A47), Color(0xFF1B8A6B)],
     accentColor: Color(0xFF2ECC9A),
   ),
   _DomainInfo(
     part: 'صحيح البخارى',
-    title: 'صحيح البخاري',
-    subtitle: 'الجامع الصحيح المسند',
+    titles: {
+      'ar': 'صحيح البخاري',
+      'en': 'Sahih Al-Bukhari',
+      'am': 'ሶሂህ አል-ቡኻሪ',
+      'om': 'Sahiih Al-Bukhaarii',
+    },
+    subtitles: {
+      'ar': 'الجامع الصحيح المسند',
+      'en': 'Authentic Hadith collection',
+      'am': 'ትክክለኛ የሐዲስ ስብስብ',
+      'om': 'Kilaasika hadiisota sahiiha',
+    },
     icon: Icons.menu_book_rounded,
     gradient: [Color(0xFF8D5B18), Color(0xFFC68A2E)],
     accentColor: Color(0xFFE5A93C),
   ),
   _DomainInfo(
     part: 'فقه وفتاوى',
-    title: 'فقه وفتاوى',
-    subtitle: 'أحكام العبادات والمعاملات',
+    titles: {
+      'ar': 'فقه وفتاوى',
+      'en': 'Fiqh & Fatawa',
+      'am': 'ፊቅህ እና ፈትዋ',
+      'om': 'Fiqhii fi Fatwaa',
+    },
+    subtitles: {
+      'ar': 'أحكام العبادات والمعاملات',
+      'en': 'Islamic rulings & guidance',
+      'am': 'የኢባዳ እና የሙዓመላት ህጎች',
+      'om': 'Murteewwan amantii fi seera',
+    },
     icon: Icons.balance_rounded,
     gradient: [Color(0xFF4A154B), Color(0xFF7A257C)],
     accentColor: Color(0xFFAB47BC),
   ),
   _DomainInfo(
     part: 'تفسير أحلام',
-    title: 'تفسير الأحلام',
-    subtitle: 'جامع تفاسير الرؤى والأحلام',
+    titles: {
+      'ar': 'تفسير الأحلام',
+      'en': 'Dream Interpretation',
+      'am': 'የሕልም ፍቺ',
+      'om': 'Hiika Abjuu',
+    },
+    subtitles: {
+      'ar': 'جامع تفاسير الرؤى والأحلام',
+      'en': 'Meanings of dreams & visions',
+      'am': 'የሕልሞች እና ራእዮች ማብራሪያ',
+      'om': 'Hiikkaa abjuu fi mul\'ataa',
+    },
     icon: Icons.nightlight_round,
     gradient: [Color(0xFF1A365D), Color(0xFF2B6CB0)],
     accentColor: Color(0xFF4299E1),
   ),
   _DomainInfo(
     part: 'الرقية الشرعية',
-    title: 'الرقية الشرعية',
-    subtitle: 'تحصينات وأدعية الشفاء',
+    titles: {
+      'ar': 'الرقية الشرعية',
+      'en': 'Ruqyah Shariyyah',
+      'am': 'ሩቅያህ ሸርዒያህ',
+      'om': 'Ruqiyaa Shar\'iyyaa',
+    },
+    subtitles: {
+      'ar': 'تحصينات وأدعية الشفاء',
+      'en': 'Healing & spiritual protection',
+      'am': 'የፈውስ እና የጥበቃ ዱዓዎች',
+      'om': 'Dawaa fi du\'aa\'ii eegumsaa',
+    },
     icon: Icons.healing_rounded,
     gradient: [Color(0xFF702459), Color(0xFF97266D)],
     accentColor: Color(0xFFED64A6),
   ),
   _DomainInfo(
     part: 'مسابقات',
-    title: 'المسابقات الإسلامية',
-    subtitle: 'اختبر معلوماتك وثقافتك',
+    titles: {
+      'ar': 'المسابقات الإسلامية',
+      'en': 'Islamic Quizzes',
+      'am': 'ኢስላማዊ ውድድሮች',
+      'om': 'Dorgommii Islaamaa',
+    },
+    subtitles: {
+      'ar': 'اختبر معلوماتك وثقافتك',
+      'en': 'Test knowledge & culture',
+      'am': 'እውቀትዎን ይፈትሹ',
+      'om': 'Beekumsa kee qori',
+    },
     icon: Icons.emoji_events_rounded,
     gradient: [Color(0xFF744210), Color(0xFFB7791F)],
     accentColor: Color(0xFFECC94B),
@@ -94,6 +158,7 @@ class LibraryScreen extends StatefulWidget {
 class _LibraryScreenState extends State<LibraryScreen> {
   final LibraryService _libraryService = LibraryService();
   final TextEditingController _searchController = TextEditingController();
+  Timer? _searchDebounce;
 
   List<LibraryItem> _searchResults = [];
   bool _isSearching = false;
@@ -111,6 +176,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -134,7 +200,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
     }
   }
 
-  void _onSearchChanged(String query) async {
+  void _onSearchChanged(String query) {
+    _searchDebounce?.cancel();
     final trimmed = query.trim();
     if (trimmed.isEmpty) {
       setState(() {
@@ -144,12 +211,14 @@ class _LibraryScreenState extends State<LibraryScreen> {
       return;
     }
     setState(() => _isSearching = true);
-    final results = await _libraryService.searchLibrary(trimmed);
-    if (mounted) {
-      setState(() {
-        _searchResults = results;
-      });
-    }
+    _searchDebounce = Timer(const Duration(milliseconds: 250), () async {
+      final results = await _libraryService.searchLibrary(trimmed);
+      if (mounted && _isSearching) {
+        setState(() {
+          _searchResults = results;
+        });
+      }
+    });
   }
 
   void _navigateToFavorites() async {
@@ -168,6 +237,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   void _navigateToDomain(_DomainInfo domain) {
+    final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
     if (domain.part == 'الرقية الشرعية') {
       Navigator.push(context, MaterialPageRoute(builder: (_) => const RuqyahScreen()));
       return;
@@ -185,7 +255,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
       MaterialPageRoute(
         builder: (_) => LibraryCategoryScreen(
           domainPart: domain.part,
-          domainTitle: domain.title,
+          domainTitle: domain.title(locale),
         ),
       ),
     );
@@ -202,6 +272,14 @@ class _LibraryScreenState extends State<LibraryScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
+
+    final String secTitleMain = {
+      'ar': 'أقسام المكتبة الرئيسية',
+      'en': 'Main Library Categories',
+      'am': 'ዋና ዋና የቤተ-መጽሐፍት ክፍሎች',
+      'om': 'Kutaa Mana Kitaabaa Ijoo',
+    }[locale] ?? 'أقسام المكتبة الرئيسية';
 
     return ValueListenableBuilder<QuranTheme>(
       valueListenable: AppTheme.notifier,
@@ -209,7 +287,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
         final bool isDark = currentTheme == QuranTheme.dark;
         final bool isCream = currentTheme == QuranTheme.cream;
 
-        // Distinct colors for Cream vs White vs Dark
         final Color bgColor = isDark
             ? const Color(0xFF090E11)
             : (isCream ? const Color(0xFFF6F0E2) : const Color(0xFFF3F7F5));
@@ -234,20 +311,14 @@ class _LibraryScreenState extends State<LibraryScreen> {
               builder: (context, isAdVisible, _) {
                 return Column(
                   children: [
-                    // ── Luxury Top Header with Small Bookmark Counter ─────────────
-                    _buildHeader(isDark, isCream, textColor, cardBg, borderColor, l10n),
-
-                    // ── Modern Search Bar ────────────────────────────────────────
-                    _buildSearchBar(isDark, isCream, textColor, cardBg, borderColor),
-
-                    // ── Main Content Area ────────────────────────────────────────
+                    _buildHeader(isDark, isCream, textColor, cardBg, borderColor, l10n, locale),
+                    _buildSearchBar(isDark, isCream, textColor, cardBg, borderColor, locale),
                     Expanded(
                       child: _isSearching
                           ? _buildSearchResults(isDark, isCream, textColor, cardBg, borderColor, isAdVisible)
                           : CustomScrollView(
                               physics: const BouncingScrollPhysics(),
                               slivers: [
-                                // Inspiring & Speed Reading Section (Randomized 50% Library / 50% Bukhari)
                                 SliverToBoxAdapter(
                                   child: _buildFeaturedPamphletsSection(
                                     isDark,
@@ -256,10 +327,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                     cardBg,
                                     borderColor,
                                     isAdVisible,
+                                    locale,
                                   ),
                                 ),
-
-                                // Section Title: Main Library Categories
                                 SliverToBoxAdapter(
                                   child: Padding(
                                     padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
@@ -275,24 +345,21 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          'أقسام المكتبة الرئيسية',
+                                          secTitleMain,
                                           style: TextStyle(
                                             color: textColor,
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 17,
-                                            fontFamily: 'Amiri',
+                                            fontSize: 16.5,
+                                            fontFamily: locale == 'ar' ? 'Amiri' : null,
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
                                 ),
-
-                                // Domain Grid
-                                _buildDomainGrid(isDark, isCream, cardBg, borderColor, isAdVisible),
-
-                                const SliverToBoxAdapter(
-                                  child: SizedBox(height: 24),
+                                _buildDomainGrid(isDark, isCream, cardBg, borderColor, isAdVisible, locale),
+                                SliverToBoxAdapter(
+                                  child: SizedBox(height: isAdVisible ? 70 : 28),
                                 ),
                               ],
                             ),
@@ -307,7 +374,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
     );
   }
 
-  // ── Header ─────────────────────────────────────────────────────────────────
   Widget _buildHeader(
     bool isDark,
     bool isCream,
@@ -315,7 +381,15 @@ class _LibraryScreenState extends State<LibraryScreen> {
     Color cardBg,
     Color borderColor,
     AppLocalizations? l10n,
+    String locale,
   ) {
+    final String subtitleText = {
+      'ar': 'كنوز المعرفة والعلوم الشرعية',
+      'en': 'Treasures of Islamic Knowledge',
+      'am': 'የእስልምና እውቀት ውድ ሀብቶች',
+      'om': 'Qabeenya Beekumsa Islaamaa',
+    }[locale] ?? 'كنوز المعرفة والعلوم الشرعية';
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
       child: Row(
@@ -352,25 +426,25 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     style: TextStyle(
                       color: textColor,
                       fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      fontFamily: 'Amiri',
+                      fontSize: 19,
+                      fontFamily: locale == 'ar' ? 'Amiri' : null,
                     ),
                   ),
                   Text(
-                    'كنوز المعرفة والعلوم الشرعية',
+                    subtitleText,
                     style: TextStyle(
                       color: isDark ? const Color(0xFF8A9995) : const Color(0xFF5A726A),
-                      fontSize: 12,
+                      fontSize: 11.5,
+                      fontFamily: locale == 'ar' ? 'Amiri' : null,
                     ),
                   ),
                 ],
               ),
             ],
           ),
-          // Compact Bookmark Badge Button
           IconButton(
             onPressed: _navigateToFavorites,
-            tooltip: 'المفضلة',
+            tooltip: l10n?.libraryFavorites ?? 'المفضلة',
             icon: Stack(
               clipBehavior: Clip.none,
               children: [
@@ -424,14 +498,21 @@ class _LibraryScreenState extends State<LibraryScreen> {
     );
   }
 
-  // ── Search Bar ─────────────────────────────────────────────────────────────
   Widget _buildSearchBar(
     bool isDark,
     bool isCream,
     Color textColor,
     Color cardBg,
     Color borderColor,
+    String locale,
   ) {
+    final String hint = {
+      'ar': 'ابحث باللغة العربية (في الكتب، الأحاديث، والفتاوى)...',
+      'en': 'Search in Arabic only (books, hadiths, fatawa)...',
+      'am': 'በአረብኛ ብቻ ይፈልጉ (መጽሐፍት፣ ሐዲሶች፣ ፈትዋ)...',
+      'om': 'Afaan Arabaatiin qofa barbaadi (kitaabota, hadiisota)...',
+    }[locale] ?? 'ابحث باللغة العربية (في الكتب، الأحاديث، والفتاوى)...';
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       child: Container(
@@ -452,10 +533,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
           onChanged: _onSearchChanged,
           style: TextStyle(color: textColor, fontSize: 14.5),
           decoration: InputDecoration(
-            hintText: 'ابحث في الكتب، المطويات، الفتاوى، والأحاديث...',
+            hintText: hint,
             hintStyle: TextStyle(
               color: isDark ? const Color(0xFF6C7C78) : const Color(0xFF9AA8A4),
-              fontSize: 13.5,
+              fontSize: 13,
             ),
             prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF1B8A6B), size: 22),
             suffixIcon: _searchController.text.isNotEmpty
@@ -475,7 +556,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
     );
   }
 
-  // ── Featured Inspirations / Speed Reading Carousel ─────────────────────────
   Widget _buildFeaturedPamphletsSection(
     bool isDark,
     bool isCream,
@@ -483,12 +563,34 @@ class _LibraryScreenState extends State<LibraryScreen> {
     Color cardBg,
     Color borderColor,
     bool isAdVisible,
+    String locale,
   ) {
     if (_isLoadingPamphlets || _featuredPamphlets.isEmpty) {
       return const SizedBox.shrink();
     }
 
     final titleColor = isDark ? Colors.white : textColor;
+
+    final String secTitleInspire = {
+      'ar': 'قبسات وقراءات ملهمة',
+      'en': 'Inspiring Quick Reads',
+      'am': 'አነቃቂ አጫጭር ንባቦች',
+      'om': 'Dubbisa Gabaabduu',
+    }[locale] ?? 'قبسات وقراءات ملهمة';
+
+    final String secSubtitleInspire = {
+      'ar': 'قراءة سريعة متجددة',
+      'en': 'Fresh daily insights',
+      'am': 'ዕለታዊ ፈጣን ንባብ',
+      'om': 'Beekumsa haarawaa',
+    }[locale] ?? 'قراءة سريعة متجددة';
+
+    final String readNowText = {
+      'ar': 'اقرأ الآن ←',
+      'en': 'Read now →',
+      'am': 'አሁን ያንብቡ →',
+      'om': 'Amma dubbisi →',
+    }[locale] ?? 'اقرأ الآن ←';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -510,21 +612,21 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'قبسات وقراءات ملهمة',
+                    secTitleInspire,
                     style: TextStyle(
                       color: isDark ? const Color(0xFFF0F4F0) : textColor,
                       fontWeight: FontWeight.bold,
-                      fontSize: 17,
-                      fontFamily: 'Amiri',
+                      fontSize: 16.5,
+                      fontFamily: locale == 'ar' ? 'Amiri' : null,
                     ),
                   ),
                 ],
               ),
               Text(
-                'قراءة سريعة متجددة',
+                secSubtitleInspire,
                 style: TextStyle(
                   color: isDark ? const Color(0xFF8A9995) : const Color(0xFF6B8079),
-                  fontSize: 12,
+                  fontSize: 11.5,
                 ),
               ),
             ],
@@ -541,7 +643,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
               final item = _featuredPamphlets[idx];
               final bool isBukhariItem = item.part == 'صحيح البخارى' || item.part == 'البخارى';
               final Color badgeColor = isBukhariItem ? const Color(0xFFC68A2E) : const Color(0xFF1B8A6B);
-              final String badgeText = isBukhariItem ? 'صحيح البخاري' : 'المكتبة الإسلامية';
+              final String badgeText = isBukhariItem
+                  ? (locale == 'ar' ? 'صحيح البخاري' : 'Sahih Bukhari')
+                  : (locale == 'ar' ? 'المكتبة الإسلامية' : 'Islamic Library');
 
               final String cleanTitle = item.title
                   .replaceAll('{', '')
@@ -571,7 +675,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Badge and Icon
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -597,28 +700,26 @@ class _LibraryScreenState extends State<LibraryScreen> {
                           ),
                         ],
                       ),
-
-                      // Title
                       Text(
                         cleanTitle,
                         style: TextStyle(
                           color: titleColor,
                           fontWeight: FontWeight.bold,
                           fontSize: 13.5,
-                          fontFamily: 'Amiri',
+                          fontFamily: locale == 'ar' ? 'Amiri' : null,
                           height: 1.25,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-
-                      // Footer stats
                       Row(
                         children: [
                           const Icon(Icons.remove_red_eye_rounded, size: 12, color: Color(0xFFD4AF37)),
                           const SizedBox(width: 4),
                           Text(
-                            item.numReadings > 0 ? '${item.numReadings} قراءة' : 'مستحسن',
+                            item.numReadings > 0
+                                ? '${item.numReadings} ${locale == 'ar' ? 'قراءة' : 'reads'}'
+                                : (locale == 'ar' ? 'مستحسن' : 'Featured'),
                             style: TextStyle(
                               color: isDark ? const Color(0xFF8A9995) : const Color(0xFF6B8079),
                               fontSize: 10.5,
@@ -626,7 +727,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                           ),
                           const Spacer(),
                           Text(
-                            'اقرأ الآن ←',
+                            readNowText,
                             style: TextStyle(
                               color: badgeColor,
                               fontSize: 11,
@@ -646,13 +747,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
     );
   }
 
-  // ── Domain Grid ────────────────────────────────────────────────────────────
   Widget _buildDomainGrid(
     bool isDark,
     bool isCream,
     Color cardBg,
     Color borderColor,
     bool isAdVisible,
+    String locale,
   ) {
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -671,6 +772,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               isDark: isDark,
               cardBg: cardBg,
               borderColor: borderColor,
+              locale: locale,
               onTap: () => _navigateToDomain(domain),
             );
           },
@@ -680,7 +782,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
     );
   }
 
-  // ── Search Results ─────────────────────────────────────────────────────────
   Widget _buildSearchResults(
     bool isDark,
     bool isCream,
@@ -701,11 +802,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              'لا توجد نتائج مطابقة للبحث',
+              'لا توجد نتائج بحث مطابقة',
               style: TextStyle(
-                color: isDark ? const Color(0xFF8A9995) : const Color(0xFF5A726A),
+                color: isDark ? const Color(0xFF8A9995) : const Color(0xFF6B8079),
                 fontSize: 15,
-                fontWeight: FontWeight.bold,
               ),
             ),
           ],
@@ -715,10 +815,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
     return ListView.builder(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+      padding: EdgeInsets.fromLTRB(16, 8, 16, isAdVisible ? 70 : 20),
       itemCount: _searchResults.length,
-      itemBuilder: (context, index) {
-        final item = _searchResults[index];
+      itemBuilder: (context, idx) {
+        final item = _searchResults[idx];
         final cleanTitle = item.title
             .replaceAll('{', '')
             .replaceAll('}', '')
@@ -728,8 +828,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
         return LiquidPressable(
           onTap: () => _openStory(item),
           child: Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            padding: const EdgeInsets.all(14.0),
+            margin: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: cardBg,
               borderRadius: BorderRadius.circular(16),
@@ -737,7 +837,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
-                  blurRadius: 8,
+                  blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
               ],
@@ -799,14 +899,12 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Luxury Domain Card Component (Distinct Cream / White / Dark Styles)
-// ─────────────────────────────────────────────────────────────────────────────
 class _LuxuryDomainCard extends StatelessWidget {
   final _DomainInfo domain;
   final bool isDark;
   final Color cardBg;
   final Color borderColor;
+  final String locale;
   final VoidCallback onTap;
 
   const _LuxuryDomainCard({
@@ -814,12 +912,15 @@ class _LuxuryDomainCard extends StatelessWidget {
     required this.isDark,
     required this.cardBg,
     required this.borderColor,
+    required this.locale,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final titleColor = isDark ? Colors.white : const Color(0xFF152A24);
+    final title = domain.title(locale);
+    final subtitle = domain.subtitle(locale);
 
     return LiquidPressable(
       onTap: onTap,
@@ -840,7 +941,6 @@ class _LuxuryDomainCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           child: Stack(
             children: [
-              // Subtle background accent glow
               Positioned(
                 top: -16,
                 right: -16,
@@ -858,15 +958,12 @@ class _LuxuryDomainCard extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // Card content
               Padding(
                 padding: const EdgeInsets.all(14.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Icon Badge
                     Container(
                       width: 44,
                       height: 44,
@@ -887,18 +984,16 @@ class _LuxuryDomainCard extends StatelessWidget {
                       ),
                       child: Icon(domain.icon, color: Colors.white, size: 22),
                     ),
-
-                    // Titles
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          domain.title,
+                          title,
                           style: TextStyle(
                             color: titleColor,
                             fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            fontFamily: 'Amiri',
+                            fontSize: 14.5,
+                            fontFamily: locale == 'ar' ? 'Amiri' : null,
                             height: 1.15,
                           ),
                           maxLines: 1,
@@ -906,12 +1001,12 @@ class _LuxuryDomainCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          domain.subtitle,
+                          subtitle,
                           style: TextStyle(
                             color: isDark
                                 ? const Color(0xFF8A9995)
                                 : const Color(0xFF657B74),
-                            fontSize: 11,
+                            fontSize: 10.5,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

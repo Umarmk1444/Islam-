@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_text_styles.dart';
 import '../models/minbar_models.dart';
 import '../services/minbar_repository.dart';
 import '../theme_notifier.dart';
 import '../widgets/persistent_audio_bar.dart';
+import '../widgets/liquid_pressable.dart';
 import 'author_audio_screen.dart';
 
 class AudioCategoriesScreen extends StatefulWidget {
@@ -36,6 +36,13 @@ class _AudioCategoriesScreenState extends State<AudioCategoriesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
+    final isArabic = locale == 'ar';
+
+    final String screenTitle = widget.onlyQuran
+        ? (isArabic ? 'القرآن الكريم' : 'Holy Quran')
+        : (isArabic ? 'صوتيات دعوية' : 'Islamic Audios');
+
     return ValueListenableBuilder<QuranTheme>(
       valueListenable: AppTheme.notifier,
       builder: (context, theme, _) {
@@ -58,10 +65,11 @@ class _AudioCategoriesScreenState extends State<AudioCategoriesScreen> {
                         : textColor,
                   ),
                   title: Text(
-                    'صوتيات',
-                    style: AppTextStyles.headlineMedium.copyWith(
-                      fontFamily: 'Amiri',
-                      fontSize: 22,
+                    screenTitle,
+                    style: TextStyle(
+                      fontFamily: isArabic ? 'Amiri' : null,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                       color: theme == QuranTheme.cream
                           ? AppColors.emeraldDeep
                           : textColor,
@@ -91,10 +99,11 @@ class _AudioCategoriesScreenState extends State<AudioCategoriesScreen> {
                         : textColor,
                   ),
                   title: Text(
-                    'صوتيات',
-                    style: AppTextStyles.headlineMedium.copyWith(
-                      fontFamily: 'Amiri',
-                      fontSize: 22,
+                    screenTitle,
+                    style: TextStyle(
+                      fontFamily: isArabic ? 'Amiri' : null,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                       color: theme == QuranTheme.cream
                           ? AppColors.emeraldDeep
                           : textColor,
@@ -104,7 +113,7 @@ class _AudioCategoriesScreenState extends State<AudioCategoriesScreen> {
                 ),
                 body: Center(
                   child: Text(
-                    'خطأ في تحميل التصنيفات',
+                    isArabic ? 'خطأ في تحميل التصنيفات' : 'Error loading categories',
                     style: AppTextStyles.audioTitle.copyWith(color: textColor),
                   ),
                 ),
@@ -134,10 +143,11 @@ class _AudioCategoriesScreenState extends State<AudioCategoriesScreen> {
                   ),
                   centerTitle: true,
                   title: Text(
-                    widget.onlyQuran ? 'القرآن الكريم' : 'صوتيات دعوية',
-                    style: AppTextStyles.headlineMedium.copyWith(
-                      fontFamily: 'Amiri',
-                      fontSize: 22,
+                    screenTitle,
+                    style: TextStyle(
+                      fontFamily: isArabic ? 'Amiri' : null,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                       color: theme == QuranTheme.cream
                           ? AppColors.emeraldDeep
                           : textColor,
@@ -153,12 +163,19 @@ class _AudioCategoriesScreenState extends State<AudioCategoriesScreen> {
                         : primaryColor,
                     unselectedLabelColor: textColor.withValues(alpha: 0.5),
                     indicatorWeight: 3,
-                    labelStyle: AppTextStyles.labelLarge.copyWith(
+                    labelStyle: TextStyle(
+                      fontFamily: isArabic ? 'Amiri' : null,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
                     tabs: categories.map((cat) {
-                      return Tab(text: cat.name);
+                      String tabLabel = cat.name;
+                      if (!isArabic) {
+                        if (cat.id == 'quran') tabLabel = 'Holy Quran';
+                        if (cat.id == 'khutbah') tabLabel = 'Khutbahs';
+                        if (cat.id == 'lessons') tabLabel = 'Lessons';
+                      }
+                      return Tab(text: tabLabel);
                     }).toList(),
                   ),
                 ),
@@ -263,6 +280,9 @@ class _CategoryAuthorsListState extends State<_CategoryAuthorsList> {
         ? const Color(0xFFC9A84C).withValues(alpha: 0.3)
         : (isDark ? AppColors.divider : AppColors.textMuted.withValues(alpha: 0.2));
 
+    final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
+    final isArabic = locale == 'ar';
+
     return Column(
       children: [
         // Elegant Local Search Bar
@@ -271,28 +291,30 @@ class _CategoryAuthorsListState extends State<_CategoryAuthorsList> {
           child: Container(
             decoration: BoxDecoration(
               color: cardBg,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: borderColor,
+                width: 1.2,
               ),
             ),
             child: TextField(
               controller: _searchController,
-              textAlign: TextAlign.right,
-              style: AppTextStyles.audioTitle
-                  .copyWith(fontSize: 14, color: textColor),
+              textAlign: isArabic ? TextAlign.right : TextAlign.left,
+              style: TextStyle(fontSize: 14, color: textColor),
               decoration: InputDecoration(
-                hintText: widget.isSingleCategory
-                    ? 'البحث عن قارئ...'
-                    : 'البحث عن ${widget.categoryName == "قرآن كريم" ? "قارئ" : "شيخ/تصنيف"}...',
-                hintStyle: AppTextStyles.audioSubtitle.copyWith(
+                hintText: isArabic
+                    ? 'البحث عن قارئ أو شيخ (بالعربية)...'
+                    : 'Search reciter or scholar (in Arabic)...',
+                hintStyle: TextStyle(
                   color: textColor.withValues(alpha: 0.4),
+                  fontSize: 13,
                 ),
                 prefixIcon: Icon(
-                  Icons.search,
+                  Icons.search_rounded,
                   color: widget.theme == QuranTheme.cream
                       ? AppColors.emeraldDeep
                       : primaryColor,
+                  size: 20,
                 ),
                 border: InputBorder.none,
                 contentPadding:
@@ -320,7 +342,9 @@ class _CategoryAuthorsListState extends State<_CategoryAuthorsList> {
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(
-                      'خطأ في تحميل القائمة: ${snapshot.error}',
+                      isArabic
+                          ? 'خطأ في تحميل القائمة: ${snapshot.error}'
+                          : 'Error loading list: ${snapshot.error}',
                       style: AppTextStyles.audioSubtitle
                           .copyWith(color: textColor),
                       textAlign: TextAlign.center,
@@ -333,7 +357,7 @@ class _CategoryAuthorsListState extends State<_CategoryAuthorsList> {
               if (authors.isEmpty) {
                 return Center(
                   child: Text(
-                    'لا توجد نتائج متوفرة.',
+                    isArabic ? 'لا توجد نتائج متوفرة.' : 'No results found.',
                     style: AppTextStyles.audioTitle.copyWith(color: textColor),
                   ),
                 );
@@ -350,7 +374,6 @@ class _CategoryAuthorsListState extends State<_CategoryAuthorsList> {
                 itemCount: _filteredAuthors.length,
                 itemBuilder: (context, index) {
                   final author = _filteredAuthors[index];
-                  // Create letter avatar
                   final letter = author.name.trim().isNotEmpty
                       ? author.name.trim().split(' ').last.substring(0, 1)
                       : 'م';
@@ -359,7 +382,11 @@ class _CategoryAuthorsListState extends State<_CategoryAuthorsList> {
                       ? AppColors.emeraldDeep
                       : primaryColor;
 
-                  return GestureDetector(
+                  final riwayahTag = author.type != null && author.type!.trim().isNotEmpty
+                      ? author.type!.trim()
+                      : (widget.categoryId == 'quran' ? 'مصحف مرتل' : 'تسجيل صوتي');
+
+                  return LiquidPressable(
                     onTap: () {
                       Navigator.push(
                         context,
@@ -379,51 +406,53 @@ class _CategoryAuthorsListState extends State<_CategoryAuthorsList> {
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: borderColor,
+                          width: 1.2,
                         ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black
-                                .withValues(alpha: isDark ? 0.05 : 0.02),
-                            blurRadius: 6,
-                            offset: const Offset(0, 3),
+                                .withValues(alpha: isDark ? 0.2 : 0.03),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       child: Row(
                         children: [
                           // circular letter avatar
                           Container(
-                            width: 46,
-                            height: 46,
+                            width: 48,
+                            height: 48,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
-                                  avatarColor.withValues(alpha: 0.85),
-                                  avatarColor.withValues(alpha: 0.6),
+                                  avatarColor.withValues(alpha: 0.9),
+                                  avatarColor.withValues(alpha: 0.65),
                                 ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: avatarColor.withValues(alpha: 0.5),
+                                color: avatarColor.withValues(alpha: 0.4),
                                 width: 1.5,
                               ),
                             ),
                             child: Center(
                               child: Text(
                                 letter,
-                                style: AppTextStyles.headlineMedium.copyWith(
+                                style: const TextStyle(
                                   fontFamily: 'Amiri',
-                                  fontSize: 20,
+                                  fontSize: 21,
+                                  fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
                               ),
                             ),
                           ),
                           const SizedBox(width: 14),
-                          // name
+                          // name & tag
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -431,9 +460,9 @@ class _CategoryAuthorsListState extends State<_CategoryAuthorsList> {
                               children: [
                                 Text(
                                   author.name,
-                                  style: AppTextStyles.audioTitle.copyWith(
+                                  style: TextStyle(
                                     fontFamily: 'Amiri',
-                                    fontSize: 15,
+                                    fontSize: 15.5,
                                     fontWeight: FontWeight.bold,
                                     color: widget.theme == QuranTheme.cream
                                         ? AppColors.emeraldDeep
@@ -441,35 +470,42 @@ class _CategoryAuthorsListState extends State<_CategoryAuthorsList> {
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  textDirection: TextDirection.rtl,
+                                  textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
                                 ),
-                                if (author.type != null) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    author.type!,
-                                    style: AppTextStyles.audioSubtitle.copyWith(
-                                      fontSize: 12,
-                                      color: textColor.withValues(alpha: 0.55),
+                                const SizedBox(height: 5),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: avatarColor.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: avatarColor.withValues(alpha: 0.2),
+                                      width: 0.8,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    riwayahTag,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: avatarColor,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                ],
+                                ),
                               ],
                             ),
                           ),
                           const SizedBox(width: 8),
                           Icon(
                             Icons.play_circle_fill_rounded,
-                            color: avatarColor.withValues(alpha: 0.8),
-                            size: 28,
+                            color: avatarColor,
+                            size: 30,
                           ),
                         ],
                       ),
-                    )
-                        .animate()
-                        .fade(duration: 250.ms)
-                        .scale(begin: const Offset(0.98, 0.98)),
+                    ),
                   );
                 },
               );

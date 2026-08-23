@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:home_widget/home_widget.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/prayer_time_model.dart';
@@ -7,6 +9,7 @@ class WidgetDataSync {
   static const String androidWidgetName = 'PrayerWidgetProvider';
 
   static Future<void> updateWidget(PrayerTimeModel model) async {
+    if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) return;
     try {
       final hijriDate = model.hijriDate.formattedEn; // Using EN to ensure it displays nicely, or could save both and let native decide
       final gregorianDate = DateFormat('d MMM yyyy').format(model.date);

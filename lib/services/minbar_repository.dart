@@ -136,6 +136,11 @@ class MinbarRepository {
           throw Exception('Incomplete URL metadata for reciter ID $authorId.');
         }
 
+        final normalizedServer = serverNum.trim().startsWith('server')
+            ? serverNum.trim()
+            : (serverNum.trim().startsWith('http') ? serverNum.trim() : 'server${serverNum.trim()}');
+        final normalizedEngName = engName.trim();
+
         // Step B: Query the list of 114 Surahs from all_index
         final surahRows = await db.rawQuery(
           "SELECT abc AS title, abc2 AS surah_num FROM all_index WHERE title = 'السور' ORDER BY id ASC",
@@ -143,9 +148,12 @@ class MinbarRepository {
 
         // Step C: Build direct Quran audio URLs dynamically using the mp3quran.net CDN
         return surahRows.map((row) {
-          final surahNum = row['surah_num'] as String;
+          final rawSurahNum = (row['surah_num'] as String).trim();
+          final surahNum = rawSurahNum.padLeft(3, '0');
           final title = row['title'] as String;
-          final url = 'https://$serverNum.mp3quran.net/$engName/$surahNum.mp3';
+          final url = normalizedServer.startsWith('http')
+              ? '$normalizedServer/$normalizedEngName/$surahNum.mp3'
+              : 'https://$normalizedServer.mp3quran.net/$normalizedEngName/$surahNum.mp3';
 
           return MinbarAudioItem(
             id: '${authorId}_$surahNum',

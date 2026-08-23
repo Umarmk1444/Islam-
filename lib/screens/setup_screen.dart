@@ -35,31 +35,37 @@ class _SetupScreenState extends State<SetupScreen> {
         assetData.lengthInBytes,
       );
 
-      // 2. Decode the zip
-      final archive = ZipDecoder().decodeBytes(bytes);
-
-      // 3. Prepare the destination directory
+      // 2. Prepare the destination directory
       final docDir = await getApplicationDocumentsDirectory();
       final dbDir = Directory(p.join(docDir.path, 'databases'));
       if (!await dbDir.exists()) {
         await dbDir.create(recursive: true);
       }
       final dbFileDest = p.join(dbDir.path, 'muslim_house.db');
+      final tempDest = '$dbFileDest.tmp';
 
-      // 4. Extract the .db file
+      // 3. Decode the zip and write to temp file
+      final archive = ZipDecoder().decodeBytes(bytes);
       for (final file in archive) {
         if (file.isFile && file.name.endsWith('.db')) {
           final extractedData = file.content as List<int>;
-          final dbFile = File(dbFileDest);
-          await dbFile.writeAsBytes(extractedData, flush: true);
+          final tmpFile = File(tempDest);
+          await tmpFile.writeAsBytes(extractedData, flush: true);
+          if (await tmpFile.exists() && await tmpFile.length() > 5 * 1024 * 1024) {
+            final destFile = File(dbFileDest);
+            if (await destFile.exists()) {
+              await destFile.delete();
+            }
+            await tmpFile.rename(dbFileDest);
+          }
           break; // We only need the db file
         }
       }
 
-      // 5. Initialize the Database so it's ready for the app
+      // 4. Initialize the Database so it's ready for the app
       await DatabaseHelper.instance.init();
 
-      // 6. Navigate to Home
+      // 5. Navigate to Home
       if (mounted) {
         Navigator.pushReplacement(
           context,
@@ -71,7 +77,7 @@ class _SetupScreenState extends State<SetupScreen> {
       if (mounted) {
         setState(() {
           _hasError = true;
-          _statusMessage = 'Error setting up database.\\nPlease restart the app.';
+          _statusMessage = 'Error setting up database: $e\nPlease click Retry.';
         });
       }
     }

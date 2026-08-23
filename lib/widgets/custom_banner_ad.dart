@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -41,8 +43,10 @@ class _PersistentBannerAdState extends State<PersistentBannerAd> {
   @override
   void initState() {
     super.initState();
-    _loadAd();
-    kQuranScreenActive.addListener(_onQuranScreenChanged);
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+      _loadAd();
+      kQuranScreenActive.addListener(_onQuranScreenChanged);
+    }
   }
 
   void _updateAdVisibility() {
@@ -79,6 +83,9 @@ class _PersistentBannerAdState extends State<PersistentBannerAd> {
   }
 
   void _loadAd() {
+    // AdMob only supports Android and iOS
+    if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) return;
+
     // Prevent duplicate concurrent load calls or reloading if already loaded successfully.
     if (_isAdLoading) return;
     if (_isAdLoaded && _bannerAd != null) return;
@@ -150,8 +157,10 @@ class _PersistentBannerAdState extends State<PersistentBannerAd> {
   void dispose() {
     _retryTimer?.cancel();
     _retryTimer = null;
-    kQuranScreenActive.removeListener(_onQuranScreenChanged);
-    _bannerAd?.dispose();
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+      kQuranScreenActive.removeListener(_onQuranScreenChanged);
+      _bannerAd?.dispose();
+    }
     _bannerAd = null;
     _isAdLoaded = false;
     _isAdLoading = false;

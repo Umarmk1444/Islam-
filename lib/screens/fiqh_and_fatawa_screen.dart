@@ -221,7 +221,9 @@ class _FiqhAndFatawaScreenState extends State<FiqhAndFatawaScreen>
               onSearch: _onFiqhSearch,
               isLoading: _isFiqhLoading,
               categories: _filteredFiqhCategories,
-              searchHint: 'ابحث في أبواب الفقه الإسلامي...',
+              searchHint: (Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar') == 'ar'
+                  ? 'ابحث بالعربية في أبواب الفقه الإسلامي...'
+                  : 'Search in Arabic in Islamic Fiqh chapters...',
               iconData: Icons.balance_rounded,
               iconGradient: const [Color(0xFF4A154B), Color(0xFF7A257C)],
               textColor: textColor,
@@ -235,7 +237,9 @@ class _FiqhAndFatawaScreenState extends State<FiqhAndFatawaScreen>
               onSearch: _onFatawaSearch,
               isLoading: _isFatawaLoading,
               categories: _filteredFatawaCategories,
-              searchHint: 'ابحث في تصنيفات الفتاوى الشرعية...',
+              searchHint: (Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar') == 'ar'
+                  ? 'ابحث بالعربية في تصنيفات الفتاوى الشرعية...'
+                  : 'Search in Arabic in Fatawa categories...',
               iconData: Icons.question_answer_rounded,
               iconGradient: const [Color(0xFF744210), Color(0xFFB7791F)],
               textColor: textColor,

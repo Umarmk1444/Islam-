@@ -105,8 +105,8 @@ class DatabaseHelper {
       final dbPath = await _resolveDevicePath();
       
       final dbFile = File(dbPath);
-      if (!await dbFile.exists()) {
-        throw Exception('Database file not found at $dbPath. It should be downloaded first.');
+      if (!await dbFile.exists() || await dbFile.length() < 5 * 1024 * 1024) {
+        throw Exception('Database file not found or corrupted at $dbPath. It should be extracted first.');
       }
 
       _db = await _openDatabase(dbPath);
@@ -171,10 +171,11 @@ class DatabaseHelper {
   // Diagnostic helpers
   // ---------------------------------------------------------------------------
 
-  /// `true` when the database file is present in device storage.
+  /// `true` when the database file is present in device storage with valid size.
   Future<bool> get isDatabaseOnDevice async {
     final dbPath = await _resolveDevicePath();
-    return File(dbPath).existsSync();
+    final file   = File(dbPath);
+    return file.existsSync() && file.lengthSync() > 5 * 1024 * 1024;
   }
 
   /// Size of the on-device database file in bytes; `0` if not yet copied.

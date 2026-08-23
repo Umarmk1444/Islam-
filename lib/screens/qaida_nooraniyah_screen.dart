@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import '../core/constants/app_colors.dart';
 import '../language_notifier.dart';
 import '../theme_notifier.dart';
@@ -3633,13 +3634,23 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen>
   double _playbackSpeed = 1.0;
   int? _highlightedLessonNumber;
   Timer? _highlightTimer;
+  Timer? _inactivityWakelockTimer;
   late AnimationController _breathingController;
   late Animation<double> _scaleAnimation;
   late Animation<Color?> _colorAnimation;
 
+  void _resetInactivityWakelock() {
+    WakelockPlus.enable();
+    _inactivityWakelockTimer?.cancel();
+    _inactivityWakelockTimer = Timer(const Duration(minutes: 10), () {
+      WakelockPlus.disable();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    _resetInactivityWakelock();
     _currentPageIndex =
         widget.initialPageIndex.clamp(0, _kQaidaPages.length - 1);
     _pageController = PageController(initialPage: _currentPageIndex);
@@ -3682,6 +3693,8 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen>
 
   @override
   void dispose() {
+    _inactivityWakelockTimer?.cancel();
+    WakelockPlus.disable();
     _pageController.dispose();
     _highlightTimer?.cancel();
     _breathingController.dispose();
@@ -4111,37 +4124,43 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen>
             ],
           ),
           body: SafeArea(
-            child: Column(
-              children: [
-                // Main Swipeable PageView with Modern Islamic Layout
-                Expanded(
-                  child: Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: PageView.builder(
-                      controller: _pageController,
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: _kQaidaPages.length,
-                      onPageChanged: (idx) {
-                        setState(() {
-                          _currentPageIndex = idx;
-                          _selectedItem = '';
-                        });
-                        _savePageIndex(idx);
-                      },
-                      itemBuilder: (context, index) {
-                        final page = _kQaidaPages[index];
-                        return _QaidaKeepAlivePage(
-                          key: ValueKey(page.pageNumber),
-                          child: _buildAuthenticNooraniaPage(page, isDark, isCream),
-                        );
-                      },
+            child: Listener(
+              behavior: HitTestBehavior.translucent,
+              onPointerDown: (_) => _resetInactivityWakelock(),
+              onPointerMove: (_) => _resetInactivityWakelock(),
+              child: Column(
+                children: [
+                  // Main Swipeable PageView with Modern Islamic Layout
+                  Expanded(
+                    child: Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: PageView.builder(
+                        controller: _pageController,
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: _kQaidaPages.length,
+                        onPageChanged: (idx) {
+                          _resetInactivityWakelock();
+                          setState(() {
+                            _currentPageIndex = idx;
+                            _selectedItem = '';
+                          });
+                          _savePageIndex(idx);
+                        },
+                        itemBuilder: (context, index) {
+                          final page = _kQaidaPages[index];
+                          return _QaidaKeepAlivePage(
+                            key: ValueKey(page.pageNumber),
+                            child: _buildAuthenticNooraniaPage(page, isDark, isCream),
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
 
-                // Bottom Modern Control Toolbar
-                _buildBottomControls(isDark, isCream),
-              ],
+                  // Bottom Modern Control Toolbar
+                  _buildBottomControls(isDark, isCream),
+                ],
+              ),
             ),
           ),
         );

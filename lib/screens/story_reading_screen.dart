@@ -74,7 +74,8 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
       final singleItem = widget.item ?? widget.fatwaItem ?? widget.roquaItem;
       _itemList = [singleItem];
       _currentIndex = 0;
-      _isBukhariStream = false;
+      _isBukhariStream = singleItem is LibraryItem &&
+          (singleItem.part == 'صحيح البخارى' || singleItem.part == 'البخارى');
     }
 
     _initChapterName();
@@ -107,7 +108,13 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
     } else {
       final current = _itemList.first;
       if (current is LibraryItem) {
-        if (current.type.isNotEmpty && int.tryParse(current.type) == null) {
+        if (current.part == 'صحيح البخارى' || current.part == 'البخارى') {
+          final fetched =
+              await _libraryService.getCategoryTitleById(current.part, current.type);
+          if (mounted) {
+            setState(() => _chapterName = fetched.isNotEmpty ? fetched : 'صحيح البخاري');
+          }
+        } else if (current.type.isNotEmpty && int.tryParse(current.type) == null) {
           _chapterName = current.type;
         } else {
           final fetched =
@@ -145,6 +152,112 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
     return content;
   }
 
+  static const Map<String, Map<String, String>> _localizedStrings = {
+    'en': {
+      'copied': 'Text & reference copied successfully',
+      'added_fav': 'Added to favorites',
+      'removed_fav': 'Removed from favorites',
+      'copy': 'Copy',
+      'save': 'Save',
+      'saved': 'Saved',
+      'share': 'Share',
+      'font_inc': 'Increase font size',
+      'font_dec': 'Decrease font size',
+      'theme': 'Change theme (Cream / Light / Dark)',
+      'hadith_num': 'Hadith #',
+      'reads': 'reads',
+      'book': 'Book',
+      'chapter': 'Chapter / Section',
+      'source': 'Source',
+      'fatawa': 'Fiqh & Fatawa',
+      'category': 'Category',
+      'mufti': 'Mufti',
+      'question': 'Question',
+      'ruqyah': 'Ruqyah Shariyyah',
+      'level': 'Stage',
+      'fav_tooltip': 'Favorites',
+    },
+    'ar': {
+      'copied': 'تم نسخ النص مع التوثيق والمصدر بنجاح',
+      'added_fav': 'تمت الإضافة إلى المفضلة',
+      'removed_fav': 'تمت الإزالة من المفضلة',
+      'copy': 'نسخ',
+      'save': 'حفظ',
+      'saved': 'المفضلة',
+      'share': 'مشاركة',
+      'font_inc': 'تكبير الخط',
+      'font_dec': 'تصغير الخط',
+      'theme': 'تغيير المظهر (كريمي / فاتح / داكن)',
+      'hadith_num': 'حديث رقم',
+      'reads': 'قراءة',
+      'book': 'الكتاب',
+      'chapter': 'الباب / القسم',
+      'source': 'المصدر',
+      'fatawa': 'الفقه والفتاوى',
+      'category': 'التصنيف',
+      'mufti': 'المفتي',
+      'question': 'السؤال',
+      'ruqyah': 'الرقية الشرعية',
+      'level': 'المرحلة',
+      'fav_tooltip': 'المفضلة',
+    },
+    'am': {
+      'copied': 'ጽሑፉ እና ማጣቀሻው በተሳካ ሁኔታ ተገልብጧል',
+      'added_fav': 'ወደ ተወዳጆች ታክሏል',
+      'removed_fav': 'ከተወዳጆች ተወግዷል',
+      'copy': 'ኮፒ',
+      'save': 'አስቀምጥ',
+      'saved': 'ተቀምጧል',
+      'share': 'አጋራ',
+      'font_inc': 'ፊደል አሳድግ',
+      'font_dec': 'ፊደል አሳንስ',
+      'theme': 'ገጽታ ቀይር (ክሬም / ነጭ / ጥቁር)',
+      'hadith_num': 'ሐዲስ ቁጥር',
+      'reads': 'ንባቦች',
+      'book': 'መጽሐፍ',
+      'chapter': 'ምዕራፍ / ክፍል',
+      'source': 'ምንጭ',
+      'fatawa': 'ፊቅህ እና ፈትዋ',
+      'category': 'ምድብ',
+      'mufti': 'ሙፍቲ',
+      'question': 'ጥያቄ',
+      'ruqyah': 'ሩቅያህ ሸርዒያህ',
+      'level': 'ደረጃ',
+      'fav_tooltip': 'ተወዳጆች',
+    },
+    'om': {
+      'copied': 'Barruun fi wabii milkaa\'inaan waraabameera',
+      'added_fav': 'Gara filannootti dabalameera',
+      'removed_fav': 'Filannoo keessaa haqameera',
+      'copy': 'Waraabi',
+      'save': 'Olkaawi',
+      'saved': 'Olkaawameera',
+      'share': 'Qoodi',
+      'font_inc': 'Guddisi',
+      'font_dec': 'Xiqqeessi',
+      'theme': 'Bifaa jijjiiri',
+      'hadith_num': 'Hadiisa',
+      'reads': 'dubbisa',
+      'book': 'Kitaaba',
+      'chapter': 'Boqonnaa',
+      'source': 'Madda',
+      'fatawa': 'Fiqhii fi Fatwaa',
+      'category': 'Ramaddii',
+      'mufti': 'Muftii',
+      'question': 'Gaaffii',
+      'ruqyah': 'Ruqiyaa Shar\'iyyaa',
+      'level': 'Sadarkaa',
+      'fav_tooltip': 'Filannoo',
+    },
+  };
+
+  String _t(String key) {
+    final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
+    return _localizedStrings[locale]?[key] ??
+        _localizedStrings['ar']?[key] ??
+        _localizedStrings['en']![key]!;
+  }
+
   Future<void> _toggleFav(int index) async {
     final item = _itemList[index];
     if (item is LibraryItem) {
@@ -158,7 +271,7 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              newFav ? 'تمت الإضافة إلى المفضلة' : 'تمت الإزالة من المفضلة',
+              newFav ? _t('added_fav') : _t('removed_fav'),
               textAlign: TextAlign.center,
             ),
             duration: const Duration(seconds: 1),
@@ -191,28 +304,28 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
 
     if (item is LibraryItem) {
       final bookName = item.part.isNotEmpty ? item.part : 'المكتبة الإسلامية';
-      buffer.writeln('📖 الكتاب: $bookName');
+      buffer.writeln('📖 ${_t('book')}: $bookName');
       if (_chapterName.isNotEmpty &&
           _chapterName != item.title &&
           _chapterName != 'المفضلة') {
-        buffer.writeln('📑 الباب / القسم: $_chapterName');
+        buffer.writeln('📑 ${_t('chapter')}: $_chapterName');
       }
       if (_isBukhariStream && _itemList.length > 1) {
-        buffer.writeln('🔢 رقم الحديث: ${index + 1}');
+        buffer.writeln('🔢 ${_t('hadith_num')} ${index + 1}');
       }
     } else if (item is FatwaItem) {
-      buffer.writeln('📖 المصدر: الفقه والفتاوى');
+      buffer.writeln('📖 ${_t('source')}: ${_t('fatawa')}');
       if (item.fatwyType.isNotEmpty) {
-        buffer.writeln('📑 التصنيف: ${item.fatwyType}');
+        buffer.writeln('📑 ${_t('category')}: ${item.fatwyType}');
       }
       if (item.moftyName.isNotEmpty) {
-        buffer.writeln('👤 المفتي: ${item.moftyName}');
+        buffer.writeln('👤 ${_t('mufti')}: ${item.moftyName}');
       }
-      buffer.writeln('❓ السؤال: ${item.question}');
+      buffer.writeln('❓ ${_t('question')}: ${item.question}');
     } else if (item is RoquaItem) {
-      buffer.writeln('📖 المصدر: الرقية الشرعية');
+      buffer.writeln('📖 ${_t('source')}: ${_t('ruqyah')}');
       if (item.level.isNotEmpty) {
-        buffer.writeln('📑 المرحلة: ${item.level}');
+        buffer.writeln('📑 ${_t('level')}: ${item.level}');
       }
     }
     return buffer.toString();
@@ -223,12 +336,12 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
     if (textToCopy.isNotEmpty) {
       Clipboard.setData(ClipboardData(text: textToCopy));
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'تم نسخ النص مع التوثيق والمصدر بنجاح',
+            _t('copied'),
             textAlign: TextAlign.center,
           ),
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -240,7 +353,7 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
     if (textToShare.isNotEmpty) {
       Share.share(
         textToShare,
-        subject: _chapterName.isNotEmpty ? _chapterName : 'مادة من المكتبة الإسلامية',
+        subject: _chapterName.isNotEmpty ? _chapterName : 'Quran Zone Library',
       );
     }
   }
@@ -345,19 +458,19 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                 color: accentColor,
                 size: 21,
               ),
-              tooltip: 'تغيير المظهر (كريمي / فاتح / داكن)',
+              tooltip: _t('theme'),
               onPressed: _cycleReadingTheme,
             ),
             // Actions for single reading mode
             if (!_isBukhariStream) ...[
               IconButton(
                 icon: Icon(Icons.copy_rounded, color: textColor, size: 20),
-                tooltip: 'نسخ النص',
+                tooltip: _t('copy'),
                 onPressed: () => _copyContent(0),
               ),
               IconButton(
                 icon: Icon(Icons.share_rounded, color: textColor, size: 20),
-                tooltip: 'مشاركة',
+                tooltip: _t('share'),
                 onPressed: () => _shareContent(0),
               ),
               if (singleItem is LibraryItem)
@@ -369,7 +482,7 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                     color: isSingleFav ? const Color(0xFFD4AF37) : textColor,
                     size: 22,
                   ),
-                  tooltip: 'المفضلة',
+                  tooltip: _t('fav_tooltip'),
                   onPressed: () => _toggleFav(0),
                 ),
             ],
@@ -413,7 +526,7 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                               Flexible(
                                 child: Text(
                                   _isBukhariStream
-                                      ? '$displayTag (${_currentIndex + 1} من ${_itemList.length})'
+                                      ? '$displayTag (${_currentIndex + 1} / ${_itemList.length})'
                                       : displayTag,
                                   style: TextStyle(
                                     color: accentColor,
@@ -440,7 +553,7 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                         icon: Icon(Icons.text_decrease_rounded,
                             color: textColor, size: 20),
                         onPressed: _decreaseFontSize,
-                        tooltip: 'تصغير الخط',
+                        tooltip: _t('font_dec'),
                         padding: EdgeInsets.zero,
                         constraints:
                             const BoxConstraints(minWidth: 32, minHeight: 32),
@@ -460,7 +573,7 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                         icon: Icon(Icons.text_increase_rounded,
                             color: textColor, size: 20),
                         onPressed: _increaseFontSize,
-                        tooltip: 'تكبير الخط',
+                        tooltip: _t('font_inc'),
                         padding: EdgeInsets.zero,
                         constraints:
                             const BoxConstraints(minWidth: 32, minHeight: 32),
@@ -560,7 +673,7 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                                                   BorderRadius.circular(8),
                                             ),
                                             child: Text(
-                                              'حديث رقم ${index + 1}',
+                                              '${_t('hadith_num')} ${index + 1}',
                                               style: TextStyle(
                                                 color: accentColor,
                                                 fontSize: 12,
@@ -581,7 +694,7 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                                                 ),
                                                 const SizedBox(width: 4),
                                                 Text(
-                                                  '${item.numReadings} قراءة',
+                                                  '${item.numReadings} ${_t('reads')}',
                                                   style: TextStyle(
                                                     color: textColor
                                                         .withValues(alpha: 0.55),
@@ -635,7 +748,7 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                                         children: [
                                           _buildActionBtn(
                                             icon: Icons.copy_rounded,
-                                            label: 'نسخ',
+                                            label: _t('copy'),
                                             onTap: () => _copyContent(index),
                                             textColor: textColor,
                                             accentColor: accentColor,
@@ -646,7 +759,7 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                                               icon: isFav
                                                   ? Icons.bookmark_added_rounded
                                                   : Icons.bookmark_border_rounded,
-                                              label: isFav ? 'المفضلة' : 'حفظ',
+                                              label: isFav ? _t('saved') : _t('save'),
                                               onTap: () => _toggleFav(index),
                                               textColor: isFav
                                                   ? const Color(0xFFB8860B)
@@ -658,7 +771,7 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                                             ),
                                           _buildActionBtn(
                                             icon: Icons.share_rounded,
-                                            label: 'مشاركة',
+                                            label: _t('share'),
                                             onTap: () => _shareContent(index),
                                             textColor: textColor,
                                             accentColor: accentColor,
@@ -695,6 +808,16 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                       future: _loadContentForIndex(0),
                       builder: (context, snapshot) {
                         final content = snapshot.data ?? _contentCache[0] ?? '';
+                        final cleanTitle = mainTitle
+                            .replaceAll('{', '')
+                            .replaceAll('}', '')
+                            .replaceAll(RegExp(r'\s+'), ' ')
+                            .trim();
+
+                        final bool isTitleRepeatedInBody = content.isNotEmpty &&
+                            cleanTitle.isNotEmpty &&
+                            (content.trim().startsWith(cleanTitle) ||
+                             content.contains(cleanTitle));
 
                         return SingleChildScrollView(
                           physics: const BouncingScrollPhysics(),
@@ -722,20 +845,21 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                                 ),
                               ),
 
-                              // Article / Book Title
-                              Text(
-                                mainTitle,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: 'Amiri',
-                                  fontSize: _fontSize + 3,
-                                  fontWeight: FontWeight.bold,
-                                  color: textColor,
-                                  height: 1.35,
+                              // Article / Book Title (Shown only once if not already first line of content)
+                              if (!isTitleRepeatedInBody && cleanTitle.isNotEmpty) ...[
+                                Text(
+                                  cleanTitle,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: 'Amiri',
+                                    fontSize: _fontSize + 3,
+                                    fontWeight: FontWeight.bold,
+                                    color: textColor,
+                                    height: 1.35,
+                                  ),
                                 ),
-                              ),
-
-                              const SizedBox(height: 16),
+                                const SizedBox(height: 16),
+                              ],
 
                               // Main Text Body
                               if (content.isEmpty)

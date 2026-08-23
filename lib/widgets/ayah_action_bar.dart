@@ -23,7 +23,6 @@ class AyahActionBar extends StatefulWidget {
   final bool isBookmarked;
   final VoidCallback? onBookmarkChanged;
   final VoidCallback onGoToBookmark;
-  final VoidCallback onChangeTheme;
   final VoidCallback onOpenIndex;
   final VoidCallback onOpenSearch;
 
@@ -34,7 +33,6 @@ class AyahActionBar extends StatefulWidget {
     required this.onClose,
     required this.isBookmarked,
     required this.onGoToBookmark,
-    required this.onChangeTheme,
     required this.onOpenIndex,
     required this.onOpenSearch,
     this.onDownloadPage,
@@ -257,19 +255,21 @@ class _AyahActionBarState extends State<AyahActionBar>
                 ? filteredReciters
                 : filteredReciters.where((reciter) => reciter.searchText.contains(lowerQuery)).toList();
 
-            return Container(
-              height: MediaQuery.of(context).size.height * 0.78,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: _bg,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                border: Border.all(color: _border.withValues(alpha: 0.4)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Container(
+            return SafeArea(
+              top: false,
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.78,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: _bg,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                  border: Border.all(color: _border.withValues(alpha: 0.4)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
                       width: 40,
                       height: 4,
                       margin: const EdgeInsets.only(bottom: 16),
@@ -371,7 +371,7 @@ class _AyahActionBarState extends State<AyahActionBar>
                   ),
                 ],
               ),
-            );
+            ));
           },
         );
       },
@@ -512,14 +512,6 @@ class _AyahActionBarState extends State<AyahActionBar>
                           label: l10n.actionSaveBookmark,
                           color: widget.isBookmarked ? _gold : _text,
                           onTap: _toggleBookmark,
-                        ),
-                        _sep(),
-                        // Theme
-                        _ActionIcon(
-                          icon: Icons.palette_outlined,
-                          label: l10n.actionTheme,
-                          color: _text,
-                          onTap: widget.onChangeTheme,
                         ),
                         _sep(),
                         // Close

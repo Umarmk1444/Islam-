@@ -1,7 +1,7 @@
 [
   {
     "id": "takbir_mishary_alafasy",
-    "name": "Takbir Mishary Alafasy",
+    "name": "Takbir - Mishary Alafasy (Default)",
     "country": "Kuwait",
     "mosque": "Grand Mosque",
     "duration": "0:04",
@@ -9,8 +9,17 @@
     "url": "android.resource://com.umer.quranzone/raw/takbir_mishary_alafasy"
   },
   {
+    "id": "adhan_mecca_ali_mulla",
+    "name": "Makkah - Ali Ahmed Mulla",
+    "country": "Saudi Arabia",
+    "mosque": "Masjid Al-Haram",
+    "duration": "3:30",
+    "type": "remote",
+    "url": "https://raw.githubusercontent.com/Umarmk1444/quran_zone_audio/main/adhan_mecca_ali_mulla.mp3"
+  },
+  {
     "id": "adhan_mishary_alafasy",
-    "name": "Mishary Alafasy",
+    "name": "Mishary Rashid Alafasy",
     "country": "Kuwait",
     "mosque": "Grand Mosque of Kuwait",
     "duration": "3:15",
@@ -19,21 +28,12 @@
   },
   {
     "id": "adhan_abdulbasit",
-    "name": "Abdul Basit",
+    "name": "Abdul Basit Abdus Samad",
     "country": "Egypt",
-    "mosque": "Imam Muhammad ibn Abd al-Wahhab",
+    "mosque": "Cairo Mosque",
     "duration": "3:45",
     "type": "remote",
     "url": "https://raw.githubusercontent.com/Umarmk1444/quran_zone_audio/main/adhan_abdulbasit.mp3"
-  },
-  {
-    "id": "adhan_mecca_ali_mulla",
-    "name": "Ali Ahmed Mulla",
-    "country": "Saudi Arabia",
-    "mosque": "Masjid Al-Haram",
-    "duration": "3:30",
-    "type": "remote",
-    "url": "https://raw.githubusercontent.com/Umarmk1444/quran_zone_audio/main/adhan_mecca_ali_mulla.mp3"
   },
   {
     "id": "adhan_yasser_al_dosari",
@@ -46,11 +46,20 @@
   },
   {
     "id": "adhan_nasser_al_qatami",
-    "name": "Nasser Al Qatami",
+    "name": "Nasser Al-Qatami",
     "country": "Saudi Arabia",
-    "mosque": "Princess Latifa Bint Sultan",
+    "mosque": "Princess Latifa Mosque",
     "duration": "3:10",
     "type": "remote",
     "url": "https://raw.githubusercontent.com/Umarmk1444/quran_zone_audio/main/adhan_nasser_al_qatami.mp3"
+  },
+  {
+    "id": "adhan_mansour_zahrani",
+    "name": "Mansour Al-Zahrani",
+    "country": "Saudi Arabia",
+    "mosque": "Jeddah Mosque",
+    "duration": "3:18",
+    "type": "remote",
+    "url": "https://raw.githubusercontent.com/Umarmk1444/quran_zone_audio/main/adhan_mansour_zahrani.mp3"
   }
 ]

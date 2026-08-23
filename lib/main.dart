@@ -1,5 +1,9 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'l10n/app_localizations.dart';
 import 'theme_notifier.dart';
 import 'language_notifier.dart';
@@ -41,6 +45,24 @@ bool kMainNavigationReady = false;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize SQLite FFI databaseFactory on desktop platforms (Windows / Linux / macOS)
+  if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
+
+  // Edge-to-edge support for Android 15 (API 35+) and seamless system bars
+  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarDividerColor: Colors.transparent,
+      ),
+    );
+  }
+
   // ── Fast prefs reads: must happen before runApp to avoid theme/language
   //    flash. SharedPreferences is cached after the first call, so all three
   //    run against the same in-memory instance (~2 ms each).
@@ -50,11 +72,13 @@ void main() async {
     DashboardScale.init(),
   ]);
 
-  // Initialize AdMob Banner Ads
-  try {
-    MobileAds.instance.initialize();
-  } catch (e) {
-    debugPrint('AdMob initialization error: $e');
+  // Initialize AdMob Banner Ads (Android & iOS only)
+  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    try {
+      MobileAds.instance.initialize();
+    } catch (e) {
+      debugPrint('AdMob initialization error: $e');
+    }
   }
 
   runApp(const QuranDawahApp());
@@ -63,48 +87,63 @@ void main() async {
 // ── Heavy services — called after the first frame is on screen ───────────────
 //    Registered via WidgetsBinding.addPostFrameCallback inside QuranDawahApp.
 Future<void> _initHeavyServices() async {
-  // 1. Workmanager + AndroidAlarmManager registration.
-  await BackgroundEngine().init();
+  // 1. Workmanager + AndroidAlarmManager registration (Android only).
+  if (!kIsWeb && Platform.isAndroid) {
+    try {
+      await BackgroundEngine().init();
+    } catch (e) {
+      debugPrint('[_initHeavyServices] BackgroundEngine init failed: $e');
+    }
+  }
 
-
-  // 2. Audio background service (required before any audio playback).
+  // 2. Audio background service (Android & iOS only).
   //    The Quran screen is several taps away, so this has plenty of time.
-  await JustAudioBackground.init(
-    androidNotificationChannelId: 'com.umer.quranzone.channel.audio',
-    androidNotificationChannelName: 'Audio Playback',
-    androidNotificationOngoing: true,
-  );
+  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    try {
+      await JustAudioBackground.init(
+        androidNotificationChannelId: 'com.umer.quranzone.channel.audio',
+        androidNotificationChannelName: 'Audio Playback',
+        androidNotificationOngoing: true,
+      );
+    } catch (e) {
+      debugPrint('[_initHeavyServices] JustAudioBackground init failed: $e');
+    }
+  }
 
   // 3. Local notifications — channels + Islamic reminders scheduling.
   //    Wrapped in try/catch: non-fatal if permissions aren't granted yet.
-  try {
-    await NotificationService().init();
-  } catch (_) {}
+  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    try {
+      await NotificationService().init();
+    } catch (_) {}
+  }
 
   // 4. Init MinbarPlayer listeners
   MinbarPlayer.init();
 
-  // 5. Cancel old Workmanager overlay task and register new tasks
-  try {
-    await Workmanager().cancelByUniqueName("auto_zekr_overlay");
+  // 5. Cancel old Workmanager overlay task and register new tasks (Android only)
+  if (!kIsWeb && Platform.isAndroid) {
+    try {
+      await Workmanager().cancelByUniqueName("auto_zekr_overlay");
 
-    // Register background sync task for alarms
-    await Workmanager().registerPeriodicTask(
-      "sync_alarms_task",
-      "sync_alarms",
-      frequency: const Duration(hours: 12),
-      existingWorkPolicy: ExistingWorkPolicy.keep,
-    );
+      // Register background sync task for alarms
+      await Workmanager().registerPeriodicTask(
+        "sync_alarms_task",
+        "sync_alarms",
+        frequency: const Duration(hours: 12),
+        existingWorkPolicy: ExistingWorkPolicy.keep,
+      );
 
-    final prefs = await SharedPreferences.getInstance();
+      final prefs = await SharedPreferences.getInstance();
 
-    final bool notifEnabled = prefs.getBool('notifications_enabled') ?? true;
-    final int notifInterval = prefs.getInt('notification_interval') ?? 60;
-    if (notifEnabled) {
-      await BackgroundEngine().scheduleZekrNotification(notifInterval);
+      final bool notifEnabled = prefs.getBool('notifications_enabled') ?? true;
+      final int notifInterval = prefs.getInt('notification_interval') ?? 60;
+      if (notifEnabled) {
+        await BackgroundEngine().scheduleZekrNotification(notifInterval);
+      }
+    } catch (e) {
+      debugPrint('[_initHeavyServices] Workmanager/Zekr registration failed: $e');
     }
-  } catch (e) {
-    debugPrint('[_initHeavyServices] Workmanager/Zekr registration failed: $e');
   }
 }
 
@@ -128,11 +167,13 @@ class _QuranDawahAppState extends State<QuranDawahApp> {
       _initHeavyServices();
     });
 
-    // Listen for widget clicks when app is already running
-    HomeWidget.widgetClicked.listen(_handleWidgetAction);
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+      // Listen for widget clicks when app is already running
+      HomeWidget.widgetClicked.listen(_handleWidgetAction);
 
-    // Check if app was launched from a widget click
-    HomeWidget.initiallyLaunchedFromHomeWidget().then(_handleWidgetAction);
+      // Check if app was launched from a widget click
+      HomeWidget.initiallyLaunchedFromHomeWidget().then(_handleWidgetAction);
+    }
   }
 
   void _handleWidgetAction(Uri? uri) {

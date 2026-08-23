@@ -240,6 +240,11 @@ class MainActivity : AudioServiceActivity() {
         super.onCreate(savedInstanceState)
         volumeControlStream = android.media.AudioManager.STREAM_ALARM
 
+        // Edge-to-edge support for Android 15 (SDK 35+) and backward compatibility
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(false)
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)

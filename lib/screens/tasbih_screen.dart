@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 import '../theme_notifier.dart';
+import '../widgets/liquid_pressable.dart';
+import '../widgets/custom_banner_ad.dart';
 
 // ============================================
 // نموذج بيانات الذكر
@@ -341,14 +343,29 @@ class _TasbihScreenState extends State<TasbihScreen>
       valueListenable: AppTheme.notifier,
       builder: (context, theme, _) {
         final isDark = theme == QuranTheme.dark;
+        final isCream = theme == QuranTheme.cream;
         
-        final bgColor = isDark ? const Color(0xFF0D1F17) : const Color(0xFFF5F7F4);
-        final cardBgColor = isDark ? const Color(0xFF142912) : Colors.white;
-        final textColor = isDark ? const Color(0xFFE8DCC8) : const Color(0xFF0D3D2E);
-        final secondaryTextColor = isDark ? const Color(0xFFB0B0B0) : const Color(0xFF666666);
-        final borderColor = isDark ? const Color(0xFF2D8A6E).withValues(alpha: 0.3) : const Color(0xFFE0E6DC);
-        final activeCardColor = isDark ? const Color(0xFF1A5F4A).withValues(alpha: 0.3) : const Color(0xFFF0F7F4);
-        final inputBgColor = isDark ? const Color(0xFF06100A) : const Color(0xFFF5F7F4);
+        final bgColor = isDark
+            ? const Color(0xFF0D1F17)
+            : (isCream ? const Color(0xFFFBF8F0) : const Color(0xFFF5F7F4));
+        final cardBgColor = isDark
+            ? const Color(0xFF142912)
+            : (isCream ? const Color(0xFFFFFDF8) : Colors.white);
+        final textColor = isDark
+            ? const Color(0xFFE8DCC8)
+            : (isCream ? const Color(0xFF2C1C11) : const Color(0xFF0D3D2E));
+        final secondaryTextColor = isDark
+            ? const Color(0xFFB0B0B0)
+            : (isCream ? const Color(0xFF8B6E4E) : const Color(0xFF666666));
+        final borderColor = isDark
+            ? const Color(0xFF2D8A6E).withValues(alpha: 0.3)
+            : (isCream ? const Color(0xFFE2D5BE) : const Color(0xFFE0E6DC));
+        final activeCardColor = isDark
+            ? const Color(0xFF1A5F4A).withValues(alpha: 0.3)
+            : (isCream ? const Color(0xFFF7EED9) : const Color(0xFFF0F7F4));
+        final inputBgColor = isDark
+            ? const Color(0xFF06100A)
+            : (isCream ? const Color(0xFFF5EEDA) : const Color(0xFFF5F7F4));
 
         return Scaffold(
           backgroundColor: bgColor,
@@ -362,28 +379,33 @@ class _TasbihScreenState extends State<TasbihScreen>
             elevation: 0,
           ),
           body: SafeArea(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    _buildHeader(textColor),
-                    const SizedBox(height: 24),
-                    _buildCounterCard(progress, isComplete, cardBgColor, textColor, secondaryTextColor, borderColor),
-                    const SizedBox(height: 24),
-                    _buildDhikrGrid(cardBgColor, textColor, secondaryTextColor, borderColor, activeCardColor),
-                    const SizedBox(height: 24),
-                    _buildAddSection(cardBgColor, textColor, secondaryTextColor, borderColor, inputBgColor),
-                    // Manage List
-                    if (dhikrs.any((d) => d.category != 'default')) ...[
-                      _buildManageList(cardBgColor, textColor, secondaryTextColor, borderColor, inputBgColor),
-                      const SizedBox(height: 24),
-                    ],
-                    _buildStats(cardBgColor, textColor, secondaryTextColor, borderColor),
-                    const SizedBox(height: 30),
-                  ],
-                ),
-              ),
+            child: ValueListenableBuilder<bool>(
+              valueListenable: kAdVisibleNotifier,
+              builder: (context, isAdVisible, _) {
+                return SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(20, 16, 20, isAdVisible ? 70 : 24),
+                    child: Column(
+                      children: [
+                        _buildHeader(textColor),
+                        const SizedBox(height: 20),
+                        _buildCounterCard(progress, isComplete, cardBgColor, textColor, secondaryTextColor, borderColor),
+                        const SizedBox(height: 20),
+                        _buildDhikrGrid(cardBgColor, textColor, secondaryTextColor, borderColor, activeCardColor),
+                        const SizedBox(height: 20),
+                        _buildAddSection(cardBgColor, textColor, secondaryTextColor, borderColor, inputBgColor),
+                        // Manage List
+                        if (dhikrs.any((d) => d.category != 'default')) ...[
+                          _buildManageList(cardBgColor, textColor, secondaryTextColor, borderColor, inputBgColor),
+                          const SizedBox(height: 20),
+                        ],
+                        _buildStats(cardBgColor, textColor, secondaryTextColor, borderColor),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         );
@@ -395,20 +417,20 @@ class _TasbihScreenState extends State<TasbihScreen>
     return Column(
       children: [
         const Text('🕌', style: TextStyle(fontSize: 36)),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Text(
           _t(context, 'title'),
           style: TextStyle(
-            fontSize: 24,
+            fontSize: 22,
             fontWeight: FontWeight.bold,
             color: textColor,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         Text(
           _t(context, 'sub'),
           style: const TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.w600,
             color: Color(0xFF2D8A6E),
           ),
@@ -422,12 +444,12 @@ class _TasbihScreenState extends State<TasbihScreen>
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: borderColor, width: 1),
+        border: Border.all(color: borderColor, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1A5F4A).withValues(alpha: 0.15),
-            blurRadius: 30,
-            offset: const Offset(0, 8),
+            color: const Color(0xFF1A5F4A).withValues(alpha: 0.12),
+            blurRadius: 24,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -443,11 +465,12 @@ class _TasbihScreenState extends State<TasbihScreen>
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(22),
             child: Column(
               children: [
+                // Goal Pill
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 5),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [Color(0xFF1A5F4A), Color(0xFF2D8A6E)],
@@ -459,78 +482,96 @@ class _TasbihScreenState extends State<TasbihScreen>
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
-                      fontSize: 14,
+                      fontSize: 13.5,
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
-                SizedBox(
-                  width: 150,
-                  height: 150,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      CustomPaint(
-                        size: const Size(150, 150),
-                        painter: ProgressRingPainter(
-                          progress: progress,
-                          isComplete: isComplete,
-                          bgStrokeColor: borderColor,
+                // ── Tap-to-Count Interactive Sphere (Large Circular Area) ──
+                LiquidPressable(
+                  onTap: increment,
+                  scaleFactor: 0.94,
+                  child: Container(
+                    width: 160,
+                    height: 160,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: (isComplete ? const Color(0xFFD4A843) : const Color(0xFF1A5F4A))
+                              .withValues(alpha: 0.12),
+                          blurRadius: 20,
+                          spreadRadius: 2,
                         ),
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ScaleTransition(
-                            scale: _pulseAnimation,
-                            child: Text(
-                              '$count',
-                              style: TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
-                                color: isComplete
-                                    ? const Color(0xFFD4A843)
-                                    : textColor,
-                                height: 1.1,
+                      ],
+                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CustomPaint(
+                          size: const Size(160, 160),
+                          painter: ProgressRingPainter(
+                            progress: progress,
+                            isComplete: isComplete,
+                            bgStrokeColor: borderColor,
+                          ),
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ScaleTransition(
+                              scale: _pulseAnimation,
+                              child: Text(
+                                '$count',
+                                style: TextStyle(
+                                  fontSize: 38,
+                                  fontWeight: FontWeight.bold,
+                                  color: isComplete
+                                      ? const Color(0xFFD4A843)
+                                      : textColor,
+                                  height: 1.1,
+                                ),
                               ),
                             ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
-                            child: Text(
-                              currentDhikr.text,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: secColor,
-                                fontWeight: FontWeight.w600,
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                              child: Text(
+                                currentDhikr.text,
+                                style: TextStyle(
+                                  fontSize: 13.5,
+                                  color: secColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          ScaleTransition(
-                            scale: _bounceAnimation,
-                            child: Text(
-                              currentDhikr.icon,
-                              style: const TextStyle(fontSize: 20),
+                            const SizedBox(height: 2),
+                            ScaleTransition(
+                              scale: _bounceAnimation,
+                              child: Text(
+                                currentDhikr.icon,
+                                style: const TextStyle(fontSize: 19),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
+                // Buttons Row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _buildIconButton('↺', resetCounter, cardBg, secColor, borderColor),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: GestureDetector(
+                      child: LiquidPressable(
                         onTap: increment,
+                        scaleFactor: 0.96,
                         child: Container(
                           height: 50,
                           decoration: BoxDecoration(
@@ -545,20 +586,31 @@ class _TasbihScreenState extends State<TasbihScreen>
                                 color: (isComplete
                                         ? const Color(0xFFD4A843)
                                         : const Color(0xFF1A5F4A))
-                                    .withValues(alpha: 0.3),
-                                blurRadius: 15,
+                                    .withValues(alpha: 0.28),
+                                blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
                             ],
                           ),
                           child: Center(
-                            child: Text(
-                              _t(context, 'tasbih_btn'),
-                              style: TextStyle(
-                                color: isComplete ? const Color(0xFF0D3D2E) : Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.touch_app_rounded,
+                                  color: isComplete ? const Color(0xFF0D3D2E) : Colors.white,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  _t(context, 'tasbih_btn'),
+                                  style: TextStyle(
+                                    color: isComplete ? const Color(0xFF0D3D2E) : Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),

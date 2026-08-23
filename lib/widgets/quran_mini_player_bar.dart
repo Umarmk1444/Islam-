@@ -290,7 +290,7 @@ class _ReciterSelectionHeader extends StatelessWidget {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 420),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                  padding: EdgeInsets.fromLTRB(16, 0, 16, 20 + MediaQuery.of(context).padding.bottom),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: BackdropFilter(
@@ -519,7 +519,7 @@ class _AudioControlsSheet extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+              padding: EdgeInsets.fromLTRB(16, 0, 16, 20 + MediaQuery.of(context).padding.bottom),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: BackdropFilter(

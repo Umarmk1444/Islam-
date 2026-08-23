@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:qcf_quran/qcf_quran.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import '../theme_notifier.dart';
 import '../widgets/strict_qcf_page.dart';
 import '../widgets/quran_mini_player_bar.dart';
@@ -51,6 +52,7 @@ class _QuranScreenState extends State<QuranScreen> {
   int _reminderIndex = 0;
   bool _reminderForceArabic = false;
   Timer? _sleepTimer;
+  Timer? _inactivityWakelockTimer;
 
   /// Selected Verse for Dashboard
   Map<String, dynamic>? _selectedVerseData;
@@ -100,11 +102,20 @@ class _QuranScreenState extends State<QuranScreen> {
     );
   }
 
+  void _resetInactivityWakelock() {
+    WakelockPlus.enable();
+    _inactivityWakelockTimer?.cancel();
+    _inactivityWakelockTimer = Timer(const Duration(minutes: 10), () {
+      WakelockPlus.disable();
+    });
+  }
+
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
   @override
   void initState() {
     super.initState();
+    _resetInactivityWakelock();
     // Signal to persistent banner: hide ads on the Holy Quran screen.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       kQuranScreenActive.value = true;
@@ -118,6 +129,8 @@ class _QuranScreenState extends State<QuranScreen> {
 
   @override
   void dispose() {
+    _inactivityWakelockTimer?.cancel();
+    WakelockPlus.disable();
     // Signal to persistent banner: show ads again.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       kQuranScreenActive.value = false;
@@ -268,65 +281,68 @@ class _QuranScreenState extends State<QuranScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: _pageBgColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'اختر المظهر (Reading Theme)',
-              style: TextStyle(
-                fontFamily: 'Amiri',
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: _mainTextColor,
+      builder: (ctx) => SafeArea(
+        top: false,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+          decoration: BoxDecoration(
+            color: _pageBgColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'اختر المظهر (Reading Theme)',
+                style: TextStyle(
+                  fontFamily: 'Amiri',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: _mainTextColor,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _ThemeOption(
-                  label: 'Classic Cream',
-                  bgColor: const Color(0xFFFDFBF0),
-                  borderColor: const Color(0xFFC9A84C),
-                  textColor: Colors.black,
-                  isSelected: _selectedTheme == QuranTheme.cream,
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    _changeTheme(QuranTheme.cream);
-                  },
-                ),
-                _ThemeOption(
-                  label: 'Dark Mode',
-                  bgColor: const Color(0xFF0D1F17),
-                  borderColor: const Color(0xFFE8C77A),
-                  textColor: Colors.white,
-                  isSelected: _selectedTheme == QuranTheme.dark,
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    _changeTheme(QuranTheme.dark);
-                  },
-                ),
-                _ThemeOption(
-                  label: 'Crisp White',
-                  bgColor: Colors.white,
-                  borderColor: const Color(0xFFC9A84C),
-                  textColor: Colors.black,
-                  isSelected: _selectedTheme == QuranTheme.white,
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    _changeTheme(QuranTheme.white);
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-          ],
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _ThemeOption(
+                    label: 'Classic Cream',
+                    bgColor: const Color(0xFFFDFBF0),
+                    borderColor: const Color(0xFFC9A84C),
+                    textColor: Colors.black,
+                    isSelected: _selectedTheme == QuranTheme.cream,
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _changeTheme(QuranTheme.cream);
+                    },
+                  ),
+                  _ThemeOption(
+                    label: 'Dark Mode',
+                    bgColor: const Color(0xFF0D1F17),
+                    borderColor: const Color(0xFFE8C77A),
+                    textColor: Colors.white,
+                    isSelected: _selectedTheme == QuranTheme.dark,
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _changeTheme(QuranTheme.dark);
+                    },
+                  ),
+                  _ThemeOption(
+                    label: 'Crisp White',
+                    bgColor: Colors.white,
+                    borderColor: const Color(0xFFC9A84C),
+                    textColor: Colors.black,
+                    isSelected: _selectedTheme == QuranTheme.white,
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _changeTheme(QuranTheme.white);
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
         ),
       ),
     );
@@ -480,163 +496,166 @@ class _QuranScreenState extends State<QuranScreen> {
           );
         }
 
-        return Padding(
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: Container(
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: bg,
-              borderRadius: BorderRadius.circular(28),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10)),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.nights_stay_rounded,
-                    size: 42, color: primary.withValues(alpha: 0.8)),
-                const SizedBox(height: 12),
-                Text(l10n.sleepTimer,
-                    style: TextStyle(
-                        fontFamily: 'Amiri',
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: txtColor)),
-                const SizedBox(height: 4),
-                Text(l10n.stopAudioAfter,
-                    style: TextStyle(
-                        fontFamily: 'Amiri',
-                        fontSize: 16,
-                        color: txtColor.withValues(alpha: 0.6))),
-                const SizedBox(height: 24),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  alignment: WrapAlignment.center,
-                  children: [15, 30, 45, 60]
-                      .map((mins) => Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () => startTimer(mins),
-                              borderRadius: BorderRadius.circular(16),
-                              child: Ink(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 24, vertical: 12),
-                                decoration: BoxDecoration(
-                                  color: primary.withValues(alpha: 0.1),
-                                  border: Border.all(
-                                      color: primary.withValues(alpha: 0.3),
-                                      width: 1.5),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Text(
-                                  '$mins\n${l10n.minutesLabel}',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontFamily: 'Inter',
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: primary,
-                                      height: 1.2),
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding:
+                EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: bg,
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10)),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.nights_stay_rounded,
+                      size: 42, color: primary.withValues(alpha: 0.8)),
+                  const SizedBox(height: 12),
+                  Text(l10n.sleepTimer,
+                      style: TextStyle(
+                          fontFamily: 'Amiri',
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: txtColor)),
+                  const SizedBox(height: 4),
+                  Text(l10n.stopAudioAfter,
+                      style: TextStyle(
+                          fontFamily: 'Amiri',
+                          fontSize: 16,
+                          color: txtColor.withValues(alpha: 0.6))),
+                  const SizedBox(height: 24),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    alignment: WrapAlignment.center,
+                    children: [15, 30, 45, 60]
+                        .map((mins) => Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () => startTimer(mins),
+                                borderRadius: BorderRadius.circular(16),
+                                child: Ink(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 24, vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color: primary.withValues(alpha: 0.1),
+                                    border: Border.all(
+                                        color: primary.withValues(alpha: 0.3),
+                                        width: 1.5),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Text(
+                                    '$mins\n${l10n.minutesLabel}',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontFamily: 'Inter',
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: primary,
+                                        height: 1.2),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ))
-                      .toList(),
-                ),
-                const SizedBox(height: 24),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: txtColor.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: txtColor.withValues(alpha: 0.1)),
+                            ))
+                        .toList(),
                   ),
-                  child: Row(
-                    textDirection: TextDirection.rtl,
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: customTimeCtrl,
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: txtColor,
-                              fontFamily: 'Inter',
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold),
-                          decoration: InputDecoration(
-                            hintText: l10n.customMinHint,
-                            hintStyle: TextStyle(
-                                color: txtColor.withValues(alpha: 0.4),
-                                fontFamily: 'Amiri',
-                                fontSize: 16,
-                                fontWeight: FontWeight.normal),
-                            border: InputBorder.none,
+                  const SizedBox(height: 24),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: txtColor.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: txtColor.withValues(alpha: 0.1)),
+                    ),
+                    child: Row(
+                      textDirection: TextDirection.rtl,
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: customTimeCtrl,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: txtColor,
+                                fontFamily: 'Inter',
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold),
+                            decoration: InputDecoration(
+                              hintText: l10n.customMinHint,
+                              hintStyle: TextStyle(
+                                  color: txtColor.withValues(alpha: 0.4),
+                                  fontFamily: 'Amiri',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal),
+                              border: InputBorder.none,
+                            ),
                           ),
                         ),
-                      ),
-                      Container(
-                          width: 1,
-                          height: 24,
-                          color: txtColor.withValues(alpha: 0.2)),
-                      TextButton(
-                        onPressed: () {
-                          final mins = int.tryParse(customTimeCtrl.text);
-                          if (mins != null && mins > 0) startTimer(mins);
-                        },
-                        child: Text(l10n.start,
-                            style: TextStyle(
-                                fontFamily: 'Amiri',
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: primary)),
-                      )
-                    ],
-                  ),
-                ),
-                if (_sleepTimer != null && _sleepTimer!.isActive) ...[
-                  const SizedBox(height: 24),
-                  TextButton.icon(
-                    onPressed: () {
-                      _sleepTimer?.cancel();
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(l10n.timerCanceled,
-                              style: const TextStyle(
-                                  fontFamily: 'Amiri', fontSize: 16),
-                              textAlign: TextAlign.center),
-                          backgroundColor: txtColor.withValues(alpha: 0.8),
-                          behavior: SnackBarBehavior.floating,
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.timer_off_outlined,
-                        color: Colors.redAccent),
-                    label: Text(l10n.cancelCurrentTimer,
-                        style: const TextStyle(
-                            fontFamily: 'Amiri',
-                            fontSize: 16,
-                            color: Colors.redAccent)),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
+                        Container(
+                            width: 1,
+                            height: 24,
+                            color: txtColor.withValues(alpha: 0.2)),
+                        TextButton(
+                          onPressed: () {
+                            final mins = int.tryParse(customTimeCtrl.text);
+                            if (mins != null && mins > 0) startTimer(mins);
+                          },
+                          child: Text(l10n.start,
+                              style: TextStyle(
+                                  fontFamily: 'Amiri',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: primary)),
+                        )
+                      ],
                     ),
-                  )
-                ]
-              ],
+                  ),
+                  if (_sleepTimer != null && _sleepTimer!.isActive) ...[
+                    const SizedBox(height: 24),
+                    TextButton.icon(
+                      onPressed: () {
+                        _sleepTimer?.cancel();
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(l10n.timerCanceled,
+                                style: const TextStyle(
+                                    fontFamily: 'Amiri', fontSize: 16),
+                                textAlign: TextAlign.center),
+                            backgroundColor: txtColor.withValues(alpha: 0.8),
+                            behavior: SnackBarBehavior.floating,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.timer_off_outlined,
+                          color: Colors.redAccent),
+                      label: Text(l10n.cancelCurrentTimer,
+                          style: const TextStyle(
+                              fontFamily: 'Amiri',
+                              fontSize: 16,
+                              color: Colors.redAccent)),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
+                      ),
+                    )
+                  ]
+                ],
+              ),
             ),
           ),
         );
@@ -736,6 +755,20 @@ class _QuranScreenState extends State<QuranScreen> {
         return Scaffold(
           backgroundColor: _screenBgColor,
           appBar: AppBar(
+            leadingWidth: 100,
+            leading: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const BackButton(),
+                IconButton(
+                  icon: const Icon(Icons.palette_outlined),
+                  onPressed: _showThemeSelector,
+                  tooltip: 'المظهر',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                ),
+              ],
+            ),
             title: GestureDetector(
               onTap: () => _openNavigationPanel(0),
               behavior: HitTestBehavior.opaque,
@@ -767,41 +800,102 @@ class _QuranScreenState extends State<QuranScreen> {
           ),
           body: _isLoading
               ? Center(child: CircularProgressIndicator(color: _borderColor))
-              : ListenableBuilder(
-                  listenable: QuranAudioController.instance,
-                  builder: (context, _) {
-                    final hasOverlay = QuranAudioController.instance.isActive ||
-                        _selectedVerseData != null;
+              : CallbackShortcuts(
+                  bindings: <ShortcutActivator, VoidCallback>{
+                    const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
+                      if (_currentPageIndex < 603) {
+                        _pageController?.nextPage(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    },
+                    const SingleActivator(LogicalKeyboardKey.arrowRight): () {
+                      if (_currentPageIndex > 0) {
+                        _pageController?.previousPage(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    },
+                    const SingleActivator(LogicalKeyboardKey.pageDown): () {
+                      if (_currentPageIndex < 603) {
+                        _pageController?.nextPage(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    },
+                    const SingleActivator(LogicalKeyboardKey.pageUp): () {
+                      if (_currentPageIndex > 0) {
+                        _pageController?.previousPage(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    },
+                    const SingleActivator(LogicalKeyboardKey.space): () {
+                      if (_currentPageIndex < 603) {
+                        _pageController?.nextPage(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    },
+                    const SingleActivator(LogicalKeyboardKey.keyF, control: true): _openQuranWordSearch,
+                  },
+                  child: Focus(
+                    autofocus: true,
+                    child: Listener(
+                      behavior: HitTestBehavior.translucent,
+                      onPointerDown: (_) => _resetInactivityWakelock(),
+                      onPointerMove: (_) => _resetInactivityWakelock(),
+                      child: ListenableBuilder(
+                        listenable: QuranAudioController.instance,
+                        builder: (context, _) {
+                          final hasOverlay = QuranAudioController.instance.isActive ||
+                              _selectedVerseData != null;
 
-                    return Stack(
-                      children: [
-                        QuranPageContentWrapper(
-                          hasOverlay: hasOverlay,
-                          child: Directionality(
-                            textDirection: TextDirection.ltr,
-                            child: PageView.builder(
-                              controller: _pageController,
-                              itemCount: 604,
-                              physics: const BouncingScrollPhysics(),
-                              reverse: true,
-                              onPageChanged: _onPageChanged,
-                              itemBuilder: (context, index) {
-                                final pageNum = index + 1;
-                                final header = _pageHeaders[pageNum] ?? {};
-                                final surahName =
-                                    header['surahName'] as String? ?? "";
-                                final juzNumber = _toArabicNumerals(
-                                    header['juz'] as int? ?? 1);
+                          return Stack(
+                            children: [
+                              QuranPageContentWrapper(
+                                hasOverlay: hasOverlay,
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.translucent,
+                                  onTap: () {
+                                    if (_selectedVerseData != null &&
+                                        !QuranAudioController.instance.isActive) {
+                                      setState(() {
+                                        _selectedVerseData = null;
+                                        QuranScreen.selectedVerseNotifier.value = null;
+                                      });
+                                    }
+                                  },
+                                  child: Directionality(
+                                    textDirection: TextDirection.ltr,
+                                    child: PageView.builder(
+                                    controller: _pageController,
+                                    itemCount: 604,
+                                    physics: const BouncingScrollPhysics(),
+                                    reverse: true,
+                                    onPageChanged: _onPageChanged,
+                                    itemBuilder: (context, index) {
+                                      final pageNum = index + 1;
+                                      final header = _pageHeaders[pageNum] ?? {};
+                                      final surahName =
+                                          header['surahName'] as String? ?? "";
+                                      final juzNumber = _toArabicNumerals(
+                                          header['juz'] as int? ?? 1);
 
-                                return Center(
-                                  child: AspectRatio(
-                                    aspectRatio: 0.58, // TALL RECTANGLE
-                                    child: FittedBox(
-                                      fit: BoxFit.contain,
-                                      child: Container(
-                                        width: 500,
-                                        height: 860, // Taller height
-                                        color: _screenBgColor,
+                                      return Center(
+                                        child: AspectRatio(
+                                          aspectRatio: 0.58, // TALL RECTANGLE
+                                          child: FittedBox(
+                                            fit: BoxFit.contain,
+                                            child: Container(
+                                              width: 500,
+                                              height: 860, // Taller height
+                                              color: _screenBgColor,
                                         child: Stack(
                                           children: [
                                             // 1. The Border that hugs everything
@@ -928,23 +1022,49 @@ class _QuranScreenState extends State<QuranScreen> {
                                                     // The Quran Text (Expands to push page number to bottom)
                                                     Expanded(
                                                       child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                                horizontal: 10),
+                                                        padding: const EdgeInsets.symmetric(horizontal: 10),
                                                         child: Directionality(
                                                           textDirection:
                                                               TextDirection.rtl,
-                                                          child:
-                                                              ListenableBuilder(
+                                                          child: ListenableBuilder(
                                                             listenable:
-                                                                QuranAudioController
-                                                                    .instance,
+                                                                Listenable.merge([
+                                                              QuranAudioController
+                                                                  .instance,
+                                                              QuranScreen
+                                                                  .selectedVerseNotifier,
+                                                            ]),
                                                             builder:
                                                                 (context, _) {
                                                               final ctrl =
                                                                   QuranAudioController
                                                                       .instance;
+                                                              final selVerse =
+                                                                  QuranScreen
+                                                                          .selectedVerseNotifier
+                                                                          .value ??
+                                                                      _selectedVerseData;
+                                                              final int?
+                                                                  activeSurah =
+                                                                  ctrl.isActive
+                                                                      ? ctrl
+                                                                          .currentSurah
+                                                                      : (selVerse !=
+                                                                              null
+                                                                          ? selVerse['surahNumber']
+                                                                              as int?
+                                                                          : null);
+                                                              final int?
+                                                                  activeAyah =
+                                                                  ctrl.isActive
+                                                                      ? ctrl
+                                                                          .currentAyah
+                                                                      : (selVerse !=
+                                                                              null
+                                                                          ? selVerse['ayahNumber']
+                                                                              as int?
+                                                                          : null);
+
                                                               return StrictQcfPage(
                                                                 pageNumber:
                                                                     pageNum,
@@ -958,15 +1078,9 @@ class _QuranScreenState extends State<QuranScreen> {
                                                                         a,
                                                                         pageNum),
                                                                 highlightedSurah:
-                                                                    ctrl.isActive
-                                                                        ? ctrl
-                                                                            .currentSurah
-                                                                        : null,
+                                                                    activeSurah,
                                                                 highlightedAyah:
-                                                                    ctrl.isActive
-                                                                        ? ctrl
-                                                                            .currentAyah
-                                                                        : null,
+                                                                    activeAyah,
                                                                 activeWordIndex:
                                                                     ctrl.isActive
                                                                         ? ctrl
@@ -1034,8 +1148,61 @@ class _QuranScreenState extends State<QuranScreen> {
                             ),
                           ),
                         ),
+                      ),
+                        if (MediaQuery.of(context).size.width > 650) ...[
+                          if (_currentPageIndex < 603)
+                            Positioned(
+                              left: 24,
+                              top: 0,
+                              bottom: 0,
+                              child: Center(
+                                child: Material(
+                                  color: _pageBgColor.withValues(alpha: 0.9),
+                                  shape: const CircleBorder(),
+                                  elevation: 4,
+                                  shadowColor: Colors.black26,
+                                  child: IconButton(
+                                    iconSize: 28,
+                                    icon: Icon(Icons.arrow_back_ios_new_rounded, color: _goldTextColor),
+                                    tooltip: 'الصفحة التالية (Next Page)',
+                                    onPressed: () {
+                                      _pageController?.nextPage(
+                                        duration: const Duration(milliseconds: 250),
+                                        curve: Curves.easeInOut,
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          if (_currentPageIndex > 0)
+                            Positioned(
+                              right: 24,
+                              top: 0,
+                              bottom: 0,
+                              child: Center(
+                                child: Material(
+                                  color: _pageBgColor.withValues(alpha: 0.9),
+                                  shape: const CircleBorder(),
+                                  elevation: 4,
+                                  shadowColor: Colors.black26,
+                                  child: IconButton(
+                                    iconSize: 28,
+                                    icon: Icon(Icons.arrow_forward_ios_rounded, color: _goldTextColor),
+                                    tooltip: 'الصفحة السابقة (Previous Page)',
+                                    onPressed: () {
+                                      _pageController?.previousPage(
+                                        duration: const Duration(milliseconds: 250),
+                                        curve: Curves.easeInOut,
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                         Positioned(
-                          bottom: 14.0,
+                          bottom: 14.0 + MediaQuery.of(context).padding.bottom,
                           left: 0,
                           right: 0,
                           child: Center(
@@ -1072,7 +1239,6 @@ class _QuranScreenState extends State<QuranScreen> {
                                     isBookmarked: isVerseBookmarked,
                                     onBookmarkChanged: _loadBookmark,
                                     onGoToBookmark: _goToBookmark,
-                                    onChangeTheme: _showThemeSelector,
                                     onOpenIndex: () => _openNavigationPanel(0),
                                     onOpenSearch: _openQuranWordSearch,
                                     onDownloadPage: _downloadPageAudio,
@@ -1104,6 +1270,9 @@ class _QuranScreenState extends State<QuranScreen> {
                     );
                   },
                 ),
+              ),
+            ),
+          ),
         );
       },
     );
@@ -1225,23 +1394,25 @@ class _NavigationPanelState extends State<_NavigationPanel>
   Widget build(BuildContext context) {
     final double screenH = MediaQuery.of(context).size.height;
 
-    return Container(
-      height: screenH * 0.8,
-      decoration: BoxDecoration(
-        color: widget.pageBgColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        children: [
-          const SizedBox(height: 10),
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: widget.mainTextColor.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(2),
+    return SafeArea(
+      top: false,
+      child: Container(
+        height: screenH * 0.8,
+        decoration: BoxDecoration(
+          color: widget.pageBgColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: widget.mainTextColor.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-          ),
           const SizedBox(height: 10),
           TabBar(
             controller: _tabController,
@@ -1295,7 +1466,7 @@ class _NavigationPanelState extends State<_NavigationPanel>
           ),
         ],
       ),
-    );
+    ));
   }
 }
 
@@ -2849,7 +3020,7 @@ class _QuranWordSearchModalState extends State<_QuranWordSearchModal> {
         top: 20,
         left: 20,
         right: 20,
-        bottom: mediaQuery.viewInsets.bottom + 20,
+        bottom: mediaQuery.viewInsets.bottom + mediaQuery.padding.bottom + 20,
       ),
       height: mediaQuery.size.height * 0.75,
       decoration: BoxDecoration(

@@ -578,6 +578,7 @@ class BackgroundEngine {
   bool _initialized = false;
 
   Future<void> init() async {
+    if (!Platform.isAndroid) return;
     if (_initialized) return;
 
     await AndroidAlarmManager.initialize();
@@ -588,6 +589,7 @@ class BackgroundEngine {
 
   /// Schedules a Zekr Notification alarm
   Future<void> scheduleZekrNotification(int minutes) async {
+    if (!Platform.isAndroid) return;
     await AndroidAlarmManager.cancel(888);
     if (minutes <= 0) return;
     await AndroidAlarmManager.oneShot(
@@ -603,11 +605,13 @@ class BackgroundEngine {
 
   /// Cancels Zekr Notification alarm
   Future<void> cancelZekrNotification() async {
+    if (!Platform.isAndroid) return;
     await AndroidAlarmManager.cancel(888);
   }
 
   /// Cancels a specific alarm by ID (both native and backup AlarmManager alarms)
   Future<void> cancelAlarm(int id) async {
+    if (!Platform.isAndroid) return;
     // Cancel native alarm via MethodChannel
     try {
       await _kAthanAlarmChannel.invokeMethod('cancelAthanAlarm', {'id': id});
@@ -624,6 +628,7 @@ class BackgroundEngine {
 
   /// Stops the AthanForegroundService if it is currently playing.
   Future<void> stopAthanService() async {
+    if (!Platform.isAndroid) return;
     try {
       await _kAthanAlarmChannel.invokeMethod('stopAthanService');
     } catch (e) {
@@ -696,6 +701,7 @@ class BackgroundEngine {
     required String body,
     required PrayerConfig config,
   }) async {
+    if (!Platform.isAndroid) return;
     final localTime = time.toLocal();
     if (localTime.isBefore(DateTime.now())) return;
 
@@ -756,6 +762,7 @@ class BackgroundEngine {
   /// Replaces existing alarm scheduling logic. Cancels old ones, sets new ones.
   Future<void> scheduleAllAlarms(
       List<PrayerTimeEntry> entries, PrayerConfig config) async {
+    if (!Platform.isAndroid) return;
     if (!_initialized) {
       debugPrint('[BackgroundEngine] scheduleAllAlarms: initializing first.');
       await init();

@@ -12,6 +12,8 @@
 //                              Asr=103, Maghrib=104, Isha=105
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -34,6 +36,8 @@ class NotificationService {
   // ── Initialization ─────────────────────────────────────────────────────────
 
   Future<void> init() async {
+    if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) return;
+
     tz.initializeTimeZones();
 
     const androidSettings =

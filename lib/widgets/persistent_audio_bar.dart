@@ -30,6 +30,8 @@ class PersistentAudioBar extends StatelessWidget {
               return const SizedBox.shrink();
             }
 
+            final isLive = currentItem.id.startsWith('radio_');
+
             return Container(
               decoration: BoxDecoration(
                 color: bg,
@@ -130,42 +132,49 @@ class PersistentAudioBar extends StatelessWidget {
                         textDirection:
                             TextDirection.ltr, // Player controls usually LTR
                         children: [
-                          // Loop Mode
-                          StreamBuilder<LoopMode>(
-                            stream: MinbarPlayer.player.loopModeStream,
-                            builder: (context, loopSnap) {
-                              final mode = loopSnap.data ?? LoopMode.off;
-                              IconData icon;
-                              Color color;
-                              if (mode == LoopMode.all) {
-                                icon = Icons.repeat_rounded;
-                                color = primaryColor;
-                              } else if (mode == LoopMode.one) {
-                                icon = Icons.repeat_one_rounded;
-                                color = primaryColor;
-                              } else {
-                                icon = Icons.repeat_rounded;
-                                color = textColor.withValues(alpha: 0.3);
-                              }
+                          // Loop Mode or Live Radio Icon
+                          if (isLive)
+                            Icon(
+                              Icons.sensors_rounded,
+                              color: primaryColor,
+                              size: 22,
+                            )
+                          else
+                            StreamBuilder<LoopMode>(
+                              stream: MinbarPlayer.player.loopModeStream,
+                              builder: (context, loopSnap) {
+                                final mode = loopSnap.data ?? LoopMode.off;
+                                IconData icon;
+                                Color color;
+                                if (mode == LoopMode.all) {
+                                  icon = Icons.repeat_rounded;
+                                  color = primaryColor;
+                                } else if (mode == LoopMode.one) {
+                                  icon = Icons.repeat_one_rounded;
+                                  color = primaryColor;
+                                } else {
+                                  icon = Icons.repeat_rounded;
+                                  color = textColor.withValues(alpha: 0.3);
+                                }
 
-                              return IconButton(
-                                icon: Icon(icon),
-                                color: color,
-                                iconSize: 22,
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                                onPressed: () {
-                                  if (mode == LoopMode.off) {
-                                    MinbarPlayer.setLoopMode(LoopMode.all);
-                                  } else if (mode == LoopMode.all) {
-                                    MinbarPlayer.setLoopMode(LoopMode.one);
-                                  } else {
-                                    MinbarPlayer.setLoopMode(LoopMode.off);
-                                  }
-                                },
-                              );
-                            },
-                          ),
+                                return IconButton(
+                                  icon: Icon(icon),
+                                  color: color,
+                                  iconSize: 22,
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  onPressed: () {
+                                    if (mode == LoopMode.off) {
+                                      MinbarPlayer.setLoopMode(LoopMode.all);
+                                    } else if (mode == LoopMode.all) {
+                                      MinbarPlayer.setLoopMode(LoopMode.one);
+                                    } else {
+                                      MinbarPlayer.setLoopMode(LoopMode.off);
+                                    }
+                                  },
+                                );
+                              },
+                            ),
 
                           // Main Controls (Prev, Play, Next)
                           Row(
@@ -451,6 +460,38 @@ class _AudioProgressBarState extends State<_AudioProgressBar> {
 
   @override
   Widget build(BuildContext context) {
+    final currentItem = MinbarPlayer.currentItemNotifier.value;
+    final isLive = currentItem?.id.startsWith('radio_') ?? false;
+
+    if (isLive) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 7,
+              height: 7,
+              decoration: const BoxDecoration(
+                color: Color(0xFFE53935),
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              'بث إذاعي مباشر • LIVE BROADCAST',
+              style: TextStyle(
+                color: widget.primaryColor,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return StreamBuilder<Duration>(
       stream: MinbarPlayer.player.positionStream,
       builder: (context, positionSnap) {

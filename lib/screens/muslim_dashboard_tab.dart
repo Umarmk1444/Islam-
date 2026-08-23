@@ -37,7 +37,7 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
     with SingleTickerProviderStateMixin {
   static const _localizedTitle = {
     'en': 'Quran Zone',
-    'ar': 'قرآن زون',
+    'ar': 'Quran Zone',
     'am': 'Quran Zone',
     'om': 'Quran Zone',
   };
@@ -47,6 +47,13 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
     'ar': 'أدوات إسلامية',
     'am': 'ኢስላማዊ መሣሪያዎች',
     'om': 'Meeshaalee Islaamaa',
+  };
+
+  static const _taglineMap = {
+    'en': 'Your daily companion for Quran & Worship',
+    'ar': 'رفيقك اليومي للقرآن الكريم والعبادة',
+    'am': 'ለቁርአንና ለዒባዳ ዕለታዊ ጓደኛዎ',
+    'om': 'Hiriyaa kee guyyaa guyyaa Quraanaaf',
   };
 
   late final AnimationController _pulseCtrl;
@@ -79,113 +86,175 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = AppTheme.notifier.value == QuranTheme.dark;
-    final bg = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
     final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
     final title = _localizedTitle[locale] ?? _localizedTitle['ar']!;
     final secTitle = _sectionTitle[locale] ?? _sectionTitle['ar']!;
+    final tagline = _taglineMap[locale] ?? _taglineMap['ar']!;
 
-    return Scaffold(
-      backgroundColor: bg,
-      body: SafeArea(
-        child: ValueListenableBuilder<bool>(
-          valueListenable: kAdVisibleNotifier,
-          builder: (context, isAdVisible, _) {
-            // Clean dynamic layout spacing
-            const double space8 = 8;
-            const double space10 = 10;
-            const double space6 = 6;
-            const double space12 = 12;
-            final double gridRatio = isAdVisible ? 1.34 : 1.27; // Increased ratio to shrink height
-            const double paddingBottom = 40; // Extra padding at the bottom to leave room for ad pushed content
+    return ValueListenableBuilder<QuranTheme>(
+      valueListenable: AppTheme.notifier,
+      builder: (context, theme, _) {
+        final isDark = theme == QuranTheme.dark;
+        final isCream = theme == QuranTheme.cream;
 
-            return SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // ── Header ─────────────────────────────────────────────────────────
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                    child: Row(
-                      children: [
-                        ClipOval(
-                          child: Image.asset(
-                            'assets/images/app_icon.png',
-                            width: 26,
-                            height: 26,
-                            fit: BoxFit.cover,
-                          ),
+        final Color bg = isDark
+            ? const Color(0xFF09110D)
+            : (isCream ? const Color(0xFFFBF8F0) : const Color(0xFFF7F8F9));
+        final Color headerTextColor = isDark
+            ? AppColors.textPrimary
+            : (isCream ? const Color(0xFF2C1E07) : AppColors.emeraldDeep);
+        final Color headerSubtextColor = isDark
+            ? Colors.white60
+            : (isCream ? const Color(0xFF8B6B38) : const Color(0xFF4B6358));
+        final Color secTitleColor = isDark
+            ? Colors.white
+            : (isCream ? const Color(0xFF3D2A08) : const Color(0xFF032616));
+
+        return Scaffold(
+          backgroundColor: bg,
+          body: SafeArea(
+            child: ValueListenableBuilder<bool>(
+              valueListenable: kAdVisibleNotifier,
+              builder: (context, isAdVisible, _) {
+                // Clean dynamic layout spacing
+                const double space8 = 8;
+                const double space10 = 10;
+                const double space6 = 6;
+                const double space12 = 12;
+                final double gridRatio = isAdVisible
+                    ? 1.34
+                    : 1.27; // Increased ratio to shrink height
+                const double paddingBottom =
+                    40; // Extra padding at the bottom to leave room for ad pushed content
+
+                return SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // ── Header with Brand Icon & Tagline ──────────────────
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: (isDark
+                                            ? const Color(0xFFD4AF37)
+                                            : const Color(0xFF0D5D44))
+                                        .withValues(alpha: 0.25),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: ClipOval(
+                                child: Image.asset(
+                                  'assets/images/app_icon.png',
+                                  width: 36,
+                                  height: 36,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    title,
+                                    style:
+                                        AppTextStyles.headlineMedium.copyWith(
+                                      color: headerTextColor,
+                                      fontSize: 16.5,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 1),
+                                  Text(
+                                    tagline,
+                                    style: TextStyle(
+                                      color: headerSubtextColor,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily:
+                                          locale == 'ar' ? 'Amiri' : null,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          title,
-                          style: AppTextStyles.headlineMedium.copyWith(
-                            color: isDark
-                                ? AppColors.textPrimary
-                                : AppColors.emeraldDeep,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // ── 1. Miqat / Prayer Times Card ───────────────────────────────────
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: _MiqatCard(isAdVisible: isAdVisible),
-                  ),
-                  const SizedBox(height: space8),
-
-                  // ── 2. Quran Gateway Card ───────────────────────────────────────────
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: _ResumeReadingCard(isAdVisible: isAdVisible),
-                  ),
-                  const SizedBox(height: space10),
-
-                  // ── Section Title ───────────────────────────────────────────────────
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      secTitle,
-                      style: AppTextStyles.headlineMedium.copyWith(
-                        fontSize: 13,
-                        color: isDark ? Colors.white : const Color(0xFF032616),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: space6),
 
-                  // ── 3. Tools Grid — Fills list scroll view ─────────────────────────
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(12, 0, 12, paddingBottom),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: space12,
-                      crossAxisSpacing: space12,
-                      childAspectRatio: gridRatio,
-                    ),
-                    itemCount: _tools.length,
-                    itemBuilder: (context, index) {
-                      return _ToolGridCell(
-                        item: _tools[index],
-                        pulseAnim: _pulseAnim,
-                        phaseOffset: index * 0.15,
-                        entranceDelay: Duration(milliseconds: index * 80),
-                        isAdVisible: isAdVisible,
-                      );
-                    },
+                      // ── 1. Miqat / Prayer Times Card ───────────────────────
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: _MiqatCard(isAdVisible: isAdVisible),
+                      ),
+                      const SizedBox(height: space8),
+
+                      // ── 2. Quran Gateway Card ───────────────────────────────
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: _ResumeReadingCard(isAdVisible: isAdVisible),
+                      ),
+                      const SizedBox(height: space10),
+
+                      // ── Section Title ───────────────────────────────────────
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          secTitle,
+                          style: AppTextStyles.headlineMedium.copyWith(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.bold,
+                            color: secTitleColor,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: space6),
+
+                      // ── 3. Tools Grid — Fills list scroll view ─────────────
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding:
+                            const EdgeInsets.fromLTRB(12, 0, 12, paddingBottom),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: space12,
+                          crossAxisSpacing: space12,
+                          childAspectRatio: gridRatio,
+                        ),
+                        itemCount: _tools.length,
+                        itemBuilder: (context, index) {
+                          return _ToolGridCell(
+                            item: _tools[index],
+                            pulseAnim: _pulseAnim,
+                            phaseOffset: index * 0.15,
+                            entranceDelay: Duration(milliseconds: index * 80),
+                            isAdVisible: isAdVisible,
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          },
-        ),
-      ),
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -233,6 +302,13 @@ class _MiqatCard extends StatelessWidget {
     },
   };
 
+  static const _qiblaLabels = {
+    'en': 'Qibla',
+    'ar': 'القبلة',
+    'am': 'ቂብላ',
+    'om': 'Qiblaa',
+  };
+
   @override
   Widget build(BuildContext context) {
     final ctrl = PrayerController();
@@ -270,7 +346,8 @@ class _MiqatCard extends StatelessWidget {
                       color: Colors.white.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.location_on_rounded, color: Colors.white, size: 28),
+                    child: const Icon(Icons.location_on_rounded,
+                        color: Colors.white, size: 28),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -473,7 +550,7 @@ class _MiqatCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                         clipBehavior: Clip.antiAlias,
                         child: InkWell(
-                           onTap: () {
+                          onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -481,18 +558,18 @@ class _MiqatCard extends StatelessWidget {
                               ),
                             );
                           },
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 8),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.explore_outlined,
+                                const Icon(Icons.explore_outlined,
                                     color: AppColors.goldLight, size: 24),
-                                SizedBox(height: 4),
+                                const SizedBox(height: 4),
                                 Text(
-                                  'القبلة',
-                                  style: TextStyle(
+                                  _qiblaLabels[locale] ?? _qiblaLabels['ar']!,
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
@@ -600,331 +677,385 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = AppTheme.notifier.value == QuranTheme.dark;
     final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
     final pctStr = (_progressPct * 100).toStringAsFixed(0);
 
-    // Premium Color Palette
-    const Color goldColor = Color(0xFFFFD700);
-    const Color goldDark = Color(0xFFD4AF37);
-    const Color midnightBlue = Color(0xFF071120);
-    const Color deepEmerald = Color(0xFF032616);
-    
-    // Cream Mood Palette
-    const Color creamLight = Color(0xFFFFFDF7);
-    const Color creamDark = Color(0xFFF3EAC6);
-    const Color darkGold = Color(0xFFB8860B);
+    return ValueListenableBuilder<QuranTheme>(
+      valueListenable: AppTheme.notifier,
+      builder: (context, theme, _) {
+        final isDark = theme == QuranTheme.dark;
+        final isCream = theme == QuranTheme.cream;
 
-    final String title, action, progress, ayah;
-    if (locale == 'ar') {
-      title = 'القرآن الكريم';
-      action = 'استمر في القراءة ←';
-      progress = 'صفحة $_lastPage · $pctStr٪';
-      ayah = _ayahNameAr;
-    } else if (locale == 'am') {
-      title = 'ቅዱስ ቁርአን';
-      action = 'ማንበብ ይቀጥሉ →';
-      progress = 'ገጽ $_lastPage · $pctStr%';
-      ayah = _ayahNameEn;
-    } else if (locale == 'om') {
-      title = 'Quraana Qulqulluu';
-      action = 'Dubbisuu Itti Fufi →';
-      progress = 'Fuula $_lastPage · $pctStr%';
-      ayah = _ayahNameEn;
-    } else {
-      title = 'The Holy Quran';
-      action = 'Resume Reading →';
-      progress = 'Page $_lastPage · $pctStr%';
-      ayah = _ayahNameEn;
-    }
+        // Theme-tailored Color Palettes
+        final Color cardBg1 = isDark
+            ? const Color(0xFF071120)
+            : (isCream ? const Color(0xFFFFFDF8) : Colors.white);
+        final Color cardBg2 = isDark
+            ? const Color(0xFF032616)
+            : (isCream ? const Color(0xFFF5EEDB) : const Color(0xFFF0F7F3));
+        final Color cardBorder = isDark
+            ? const Color(0xFFD4AF37).withValues(alpha: 0.35)
+            : (isCream
+                ? const Color(0xFFD4AF37).withValues(alpha: 0.32)
+                : const Color(0xFF0D5D44).withValues(alpha: 0.20));
+        final Color titleColor = isDark
+            ? Colors.white
+            : (isCream ? const Color(0xFF2C1E07) : const Color(0xFF032616));
+        final Color goldAccent = isDark
+            ? const Color(0xFFFFD700)
+            : (isCream ? const Color(0xFFB8860B) : const Color(0xFF0D5D44));
+        final Color progressTrack = isDark
+            ? Colors.white.withValues(alpha: 0.12)
+            : (isCream
+                ? const Color(0xFFD4AF37).withValues(alpha: 0.16)
+                : const Color(0xFF0D5D44).withValues(alpha: 0.10));
+        final Color ayahColor = isDark
+            ? const Color(0xFFFFD700).withValues(alpha: 0.90)
+            : (isCream ? const Color(0xFF8B5E14) : const Color(0xFF0D5D44));
+        final Color progressTextColor = isDark
+            ? Colors.white70
+            : (isCream ? const Color(0xFF6E5630) : const Color(0xFF4A6B5D));
 
-    return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 0.85, end: 1.0),
-      duration: const Duration(milliseconds: 800),
-      curve: Curves.easeOutBack,
-      builder: (context, scaleVal, child) {
-        return Transform.scale(
-          scale: scaleVal,
-          child: child,
-        );
-      },
-      child: LiquidPressable(
-        onTap: () => _navigateToQuran(context),
-        scaleFactor: 0.96,
-        child: AnimatedBuilder(
-          animation: _pulseAnim,
-          builder: (context, child) {
-          final t = _pulseAnim.value;
-          final scale = 1.0 + 0.015 * t;
-          final double shadowSpread = 1.0 + 2.0 * t;
-          final double glowOpacity = isDark ? (0.15 + 0.15 * t) : (0.05 + 0.10 * t);
+        final String title, action, progress, ayah;
+        if (locale == 'ar') {
+          title = 'القرآن الكريم';
+          action = 'استمر في القراءة ←';
+          progress = 'صفحة $_lastPage · $pctStr٪';
+          ayah = _ayahNameAr;
+        } else if (locale == 'am') {
+          title = 'ቅዱስ ቁርአን';
+          action = 'ማንበብ ይቀጥሉ →';
+          progress = 'ገጽ $_lastPage · $pctStr%';
+          ayah = _ayahNameEn;
+        } else if (locale == 'om') {
+          title = 'Quraana Qulqulluu';
+          action = 'Dubbisuu Itti Fufi →';
+          progress = 'Fuula $_lastPage · $pctStr%';
+          ayah = _ayahNameEn;
+        } else {
+          title = 'The Holy Quran';
+          action = 'Resume Reading →';
+          progress = 'Page $_lastPage · $pctStr%';
+          ayah = _ayahNameEn;
+        }
 
-          return Transform.scale(
-            scale: scale,
-            child: Container(
-              height: 95, // Increased height for elegance
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: isDark 
-                      ? [midnightBlue, deepEmerald]
-                      : [creamLight, creamDark],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(22),
-                border: Border.all(
-                  color: isDark 
-                      ? goldDark.withValues(alpha: 0.3 + (0.2 * t))
-                      : darkGold.withValues(alpha: 0.2 + (0.15 * t)),
-                  width: 1.2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: isDark ? Colors.black.withValues(alpha: 0.4) : Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
-                  ),
-                  BoxShadow(
-                    color: (isDark ? goldDark : darkGold).withValues(alpha: glowOpacity),
-                    blurRadius: 20,
-                    spreadRadius: shadowSpread,
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(22),
-                child: Stack(
-                  children: [
-                    // --- Subtle Islamic Geometric Background Pattern Overlay ---
-                    Positioned.fill(
-                      child: CustomPaint(
-                        painter: _IslamicPatternPainter(
-                          color: isDark ? goldColor.withValues(alpha: 0.06) : darkGold.withValues(alpha: 0.05),
-                        ),
+        return TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0.85, end: 1.0),
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.easeOutBack,
+          builder: (context, scaleVal, child) {
+            return Transform.scale(
+              scale: scaleVal,
+              child: child,
+            );
+          },
+          child: LiquidPressable(
+            onTap: () => _navigateToQuran(context),
+            scaleFactor: 0.96,
+            child: AnimatedBuilder(
+              animation: _pulseAnim,
+              builder: (context, child) {
+                final t = _pulseAnim.value;
+                final scale = 1.0 + 0.012 * t;
+                final double shadowSpread = 1.0 + 1.5 * t;
+                final double glowOpacity =
+                    isDark ? (0.12 + 0.12 * t) : (0.04 + 0.08 * t);
+
+                return Transform.scale(
+                  scale: scale,
+                  child: Container(
+                    height: 100,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [cardBg1, cardBg2],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                    ),
-                    // --- Golden Orbs for Sacred Lighting Effect ---
-                    Positioned(
-                      top: -30,
-                      right: locale == 'ar' ? null : -20,
-                      left: locale == 'ar' ? -20 : null,
-                      child: Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [
-                              (isDark ? goldColor : Colors.white).withValues(alpha: 0.2 + (0.1 * t)),
-                              Colors.transparent,
-                            ],
-                          ),
-                        ),
+                      borderRadius: BorderRadius.circular(22),
+                      border: Border.all(
+                        color: cardBorder,
+                        width: 1.2,
                       ),
-                    ),
-                    Positioned(
-                      bottom: -40,
-                      left: locale == 'ar' ? null : -20,
-                      right: locale == 'ar' ? -20 : null,
-                      child: Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [
-                              (isDark ? const Color(0xFF00FF88) : darkGold).withValues(alpha: 0.1),
-                              Colors.transparent,
-                            ],
-                          ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: isDark
+                              ? Colors.black.withValues(alpha: 0.4)
+                              : Colors.black.withValues(alpha: 0.06),
+                          blurRadius: 14,
+                          offset: const Offset(0, 6),
                         ),
-                      ),
+                        BoxShadow(
+                          color: (isDark
+                                  ? const Color(0xFFD4AF37)
+                                  : const Color(0xFFB8860B))
+                              .withValues(alpha: glowOpacity),
+                          blurRadius: 18,
+                          spreadRadius: shadowSpread,
+                        ),
+                      ],
                     ),
-                    // --- Main Content ---
-                    Positioned.fill(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                        child: Row(
-                          children: [
-                            // Majestic Layered Iconography
-                            SizedBox(
-                              width: 54,
-                              height: 54,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  // Outer pulse
-                                  Container(
-                                    width: 54,
-                                    height: 54,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: (isDark ? goldColor : darkGold).withValues(alpha: 0.3 * t),
-                                        width: 1,
-                                      ),
-                                    ),
-                                  ),
-                                  // Inner premium container
-                                  Container(
-                                    width: 44,
-                                    height: 44,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      gradient: LinearGradient(
-                                        colors: isDark 
-                                            ? [goldDark.withValues(alpha: 0.2), goldColor.withValues(alpha: 0.05)]
-                                            : [Colors.white, creamLight],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      border: Border.all(
-                                        color: (isDark ? goldColor : darkGold).withValues(alpha: 0.5),
-                                        width: 1.5,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: (isDark ? goldColor : darkGold).withValues(alpha: 0.2),
-                                          blurRadius: 8,
-                                        ),
-                                      ],
-                                    ),
-                                    child: Icon(
-                                      Icons.auto_stories_rounded,
-                                      color: isDark ? goldColor.withValues(alpha: 0.9) : darkGold,
-                                      size: 24,
-                                    ),
-                                  ),
-                                ],
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(22),
+                      child: Stack(
+                        children: [
+                          // --- Subtle Islamic Geometric Background Pattern ---
+                          Positioned.fill(
+                            child: CustomPaint(
+                              painter: _IslamicPatternPainter(
+                                color: (isDark
+                                        ? const Color(0xFFFFD700)
+                                        : const Color(0xFFB8860B))
+                                    .withValues(alpha: 0.04),
                               ),
                             ),
-                            const SizedBox(width: 16),
-                            // Text & Progress Content
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
+                          ),
+                          // --- Soft Glowing Lighting Effect ---
+                          Positioned(
+                            top: -25,
+                            right: locale == 'ar' ? null : -20,
+                            left: locale == 'ar' ? -20 : null,
+                            child: Container(
+                              width: 110,
+                              height: 110,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: RadialGradient(
+                                  colors: [
+                                    (isDark
+                                            ? const Color(0xFFFFD700)
+                                            : Colors.white)
+                                        .withValues(alpha: 0.18 + (0.08 * t)),
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          // --- Main Content ---
+                          Positioned.fill(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 10),
+                              child: Row(
                                 children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                                    textBaseline: TextBaseline.alphabetic,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          title,
-                                          style: TextStyle(
-                                            color: isDark ? Colors.white : deepEmerald,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            letterSpacing: 0.5,
-                                            shadows: isDark ? const [
-                                              Shadow(
-                                                color: Colors.black54,
-                                                blurRadius: 4,
-                                                offset: Offset(0, 1),
-                                              ),
-                                            ] : null,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        action,
-                                        style: TextStyle(
-                                          color: isDark ? goldColor : darkGold,
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w700,
-                                          letterSpacing: 0.3,
-                                          shadows: isDark ? [
-                                            Shadow(
-                                              color: goldColor.withValues(alpha: 0.4),
-                                              blurRadius: 4,
-                                            ),
-                                          ] : null,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  // Luxurious Progress Bar
-                                  Stack(
-                                    alignment: locale == 'ar'
-                                        ? Alignment.centerRight
-                                        : Alignment.centerLeft,
-                                    children: [
-                                      Container(
-                                        height: 2,
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          color: isDark ? Colors.white.withValues(alpha: 0.15) : deepEmerald.withValues(alpha: 0.1),
-                                          borderRadius: BorderRadius.circular(2),
-                                        ),
-                                      ),
-                                      FractionallySizedBox(
-                                        widthFactor: _progressPct.clamp(0.0, 1.0),
-                                        child: Container(
-                                          height: 2,
+                                  // Layered Quran Iconography
+                                  SizedBox(
+                                    width: 50,
+                                    height: 50,
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        Container(
+                                          width: 50,
+                                          height: 50,
                                           decoration: BoxDecoration(
-                                            color: isDark ? goldColor : darkGold,
-                                            borderRadius: BorderRadius.circular(2),
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: goldAccent.withValues(
+                                                  alpha: 0.25 * t),
+                                              width: 1,
+                                            ),
+                                          ),
+                                        ),
+                                        Container(
+                                          width: 42,
+                                          height: 42,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            gradient: LinearGradient(
+                                              colors: isDark
+                                                  ? [
+                                                      const Color(0xFFD4AF37)
+                                                          .withValues(
+                                                              alpha: 0.22),
+                                                      const Color(0xFFFFD700)
+                                                          .withValues(
+                                                              alpha: 0.06),
+                                                    ]
+                                                  : (isCream
+                                                      ? [
+                                                          Colors.white,
+                                                          const Color(
+                                                              0xFFF8F1E2)
+                                                        ]
+                                                      : [
+                                                          Colors.white,
+                                                          const Color(
+                                                              0xFFEBF6F1)
+                                                        ]),
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                            ),
+                                            border: Border.all(
+                                              color: goldAccent.withValues(
+                                                  alpha: 0.45),
+                                              width: 1.4,
+                                            ),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: isDark ? goldColor : darkGold.withValues(alpha: 0.5),
-                                                blurRadius: 4,
-                                                spreadRadius: 1,
+                                                color: goldAccent.withValues(
+                                                    alpha: 0.2),
+                                                blurRadius: 8,
                                               ),
                                             ],
                                           ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  // Ayah and Progress Info
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          ayah,
-                                          style: TextStyle(
-                                            color: isDark ? goldColor.withValues(alpha: 0.85) : deepEmerald.withValues(alpha: 0.9),
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600,
+                                          child: Icon(
+                                            Icons.auto_stories_rounded,
+                                            color: goldAccent,
+                                            size: 22,
                                           ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        progress,
-                                        style: TextStyle(
-                                          color: isDark ? Colors.white.withValues(alpha: 0.7) : deepEmerald.withValues(alpha: 0.7),
-                                          fontSize: 11,
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  // Text & Progress Content
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                title,
+                                                style: TextStyle(
+                                                  color: titleColor,
+                                                  fontSize: 15.5,
+                                                  fontWeight: FontWeight.bold,
+                                                  letterSpacing: 0.3,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            // Action Link
+                                            Text(
+                                              action,
+                                              style: TextStyle(
+                                                color: goldAccent,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w700,
+                                                letterSpacing: 0.2,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ),
-                                    ],
+                                        const SizedBox(height: 6),
+                                        // ── Upgraded Luxurious Progress Bar (Height: 4px) ──
+                                        Stack(
+                                          alignment: locale == 'ar'
+                                              ? Alignment.centerRight
+                                              : Alignment.centerLeft,
+                                          children: [
+                                            Container(
+                                              height: 4,
+                                              width: double.infinity,
+                                              decoration: BoxDecoration(
+                                                color: progressTrack,
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ),
+                                            ),
+                                            FractionallySizedBox(
+                                              widthFactor:
+                                                  _progressPct.clamp(0.01, 1.0),
+                                              child: Container(
+                                                height: 4,
+                                                decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                    colors: isDark
+                                                        ? [
+                                                            const Color(
+                                                                0xFFFFD700),
+                                                            const Color(
+                                                                0xFF00E676),
+                                                          ]
+                                                        : (isCream
+                                                            ? [
+                                                                const Color(
+                                                                    0xFFD4AF37),
+                                                                const Color(
+                                                                    0xFF9E7D23),
+                                                              ]
+                                                            : [
+                                                                const Color(
+                                                                    0xFF0D5D44),
+                                                                const Color(
+                                                                    0xFF2E7D32),
+                                                              ]),
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color:
+                                                          goldAccent.withValues(
+                                                              alpha: 0.4),
+                                                      blurRadius: 4,
+                                                      spreadRadius: 0.5,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 6),
+                                        // Ayah and Progress Info
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                ayah,
+                                                style: TextStyle(
+                                                  color: ayahColor,
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              progress,
+                                              style: TextStyle(
+                                                color: progressTextColor,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
-    ));
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -946,9 +1077,11 @@ class _IslamicPatternPainter extends CustomPainter {
         canvas.save();
         canvas.translate(x, y);
         canvas.rotate(0.785398); // 45 degrees
-        canvas.drawRect(Rect.fromCenter(center: Offset.zero, width: 22, height: 22), paint);
+        canvas.drawRect(
+            Rect.fromCenter(center: Offset.zero, width: 22, height: 22), paint);
         canvas.rotate(-0.785398);
-        canvas.drawRect(Rect.fromCenter(center: Offset.zero, width: 22, height: 22), paint);
+        canvas.drawRect(
+            Rect.fromCenter(center: Offset.zero, width: 22, height: 22), paint);
         canvas.restore();
       }
     }
@@ -1021,7 +1154,7 @@ const _tools = <_ToolItem>[
     svgIconName: 'qaida_noorania',
     color: Color(0xFFF9A825),
     labels: {
-      'en': 'Noorani Qaida',
+      'en': 'Qaidah An-Nooraniyah',
       'ar': 'القاعدة النورانية',
       'am': 'ቃዒዳ ኑራንያ',
       'om': 'Qaa\'idaa Nuuraaniyaa',
@@ -1081,17 +1214,24 @@ class _ToolGridCellState extends State<_ToolGridCell> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = AppTheme.notifier.value == QuranTheme.dark;
     final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
     final label = widget.item.labels[locale] ?? widget.item.labels['ar']!;
 
-    final titleColor = isDark ? Colors.white : Colors.black87;
-    final accent = widget.item.color;
-    final bright = Color.lerp(accent, Colors.white, 0.30)!;
+    return ValueListenableBuilder<QuranTheme>(
+      valueListenable: AppTheme.notifier,
+      builder: (context, theme, _) {
+        final isDark = theme == QuranTheme.dark;
+        final isCream = theme == QuranTheme.cream;
 
-    return LiquidPressable(
-      scaleFactor: 0.94,
-      onTap: () {
+        final titleColor = isDark
+            ? Colors.white
+            : (isCream ? const Color(0xFF2C1E07) : const Color(0xFF0C2417));
+        final accent = widget.item.color;
+        final bright = Color.lerp(accent, Colors.white, 0.35)!;
+
+        return LiquidPressable(
+          scaleFactor: 0.94,
+          onTap: () {
             switch (widget.item.key) {
               case 'moazin':
                 Navigator.push(
@@ -1137,52 +1277,76 @@ class _ToolGridCellState extends State<_ToolGridCell> {
           child: AnimatedBuilder(
             animation: widget.pulseAnim,
             builder: (_, child) {
-              final t = _globalHasAnimatedDashboard ? 0.0 : _phased(widget.pulseAnim.value);
+              final t = _globalHasAnimatedDashboard
+                  ? 0.0
+                  : _phased(widget.pulseAnim.value);
 
-              // Scale: 1.00 -> 1.03
-              final scale = 1.0 + 0.03 * t;
+              // Scale: 1.00 -> 1.025
+              final scale = 1.0 + 0.025 * t;
 
               // Glow breathing
-              final glowAlpha = isDark ? (0.10 + 0.35 * t) : (0.08 + 0.28 * t);
-              final glowBlur = 8.0 + 16.0 * t;
-              final glowSpread = 0.5 + 2.0 * t;
+              final glowAlpha = isDark
+                  ? (0.10 + 0.30 * t)
+                  : (isCream ? (0.06 + 0.18 * t) : (0.05 + 0.15 * t));
+              final glowBlur = 8.0 + 14.0 * t;
+              final glowSpread = 0.5 + 1.5 * t;
 
               // Border breathing
-              final borderAlpha =
-                  isDark ? (0.22 + 0.38 * t) : (0.14 + 0.32 * t);
-              final borderWidth = 1.2 + 0.6 * t;
+              final borderAlpha = isDark
+                  ? (0.22 + 0.35 * t)
+                  : (isCream ? (0.20 + 0.25 * t) : (0.15 + 0.20 * t));
+              final borderWidth = 1.2 + 0.5 * t;
 
-              // Interpolate dynamic accent and create a dynamic deep color matching library's depth
               final currentAccent = Color.lerp(accent, bright, t * 0.5)!;
-              final deep = Color.lerp(accent, const Color(0xFF0C0C14), 0.72)!;
+              final deep = isDark
+                  ? Color.lerp(accent, const Color(0xFF0C0C14), 0.72)!
+                  : (isCream
+                      ? Color.lerp(accent, const Color(0xFFFAF4E6), 0.85)!
+                      : Color.lerp(accent, Colors.white, 0.90)!);
 
               // Fill gradient matching card style
-              final fillA = isDark ? (0.16 + 0.20 * t) : (0.08 + 0.12 * t);
-              final fillB = isDark ? (0.05 + 0.10 * t) : (0.02 + 0.05 * t);
+              final Color bg1 = isDark
+                  ? currentAccent.withValues(alpha: 0.16 + 0.18 * t)
+                  : (isCream
+                      ? Colors.white.withValues(alpha: 0.85)
+                      : Colors.white);
+              final Color bg2 = isDark
+                  ? deep.withValues(alpha: 0.05 + 0.08 * t)
+                  : (isCream
+                      ? const Color(0xFFF7EED9).withValues(alpha: 0.75)
+                      : const Color(0xFFF4FAF6));
 
               return Transform.scale(
                 scale: scale,
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [
-                        currentAccent.withValues(alpha: fillA),
-                        deep.withValues(alpha: fillB),
-                      ],
+                      colors: [bg1, bg2],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: currentAccent.withValues(alpha: borderAlpha),
+                      color: isDark
+                          ? currentAccent.withValues(alpha: borderAlpha)
+                          : (isCream
+                              ? const Color(0xFFD4AF37)
+                                  .withValues(alpha: borderAlpha)
+                              : currentAccent.withValues(alpha: borderAlpha)),
                       width: borderWidth,
                     ),
                     boxShadow: [
                       BoxShadow(
+                        color: isDark
+                            ? Colors.black.withValues(alpha: 0.35)
+                            : Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                      BoxShadow(
                         color: currentAccent.withValues(alpha: glowAlpha),
                         blurRadius: glowBlur,
                         spreadRadius: glowSpread,
-                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
@@ -1190,29 +1354,10 @@ class _ToolGridCellState extends State<_ToolGridCell> {
                     borderRadius: BorderRadius.circular(20),
                     child: Stack(
                       children: [
-                        // Accent color internal glowing orb
+                        // Subtle Accent glow orb
                         Positioned(
-                          top: -25,
-                          left: -25,
-                          child: Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: RadialGradient(
-                                colors: [
-                                  currentAccent.withValues(
-                                      alpha: isDark ? 0.35 * t : 0.28 * t),
-                                  currentAccent.withValues(alpha: 0.0),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        // Deep color internal glowing orb
-                        Positioned(
-                          bottom: -20,
-                          right: -20,
+                          top: -20,
+                          left: -20,
                           child: Container(
                             width: 100,
                             height: 100,
@@ -1220,15 +1365,17 @@ class _ToolGridCellState extends State<_ToolGridCell> {
                               shape: BoxShape.circle,
                               gradient: RadialGradient(
                                 colors: [
-                                  deep.withValues(
-                                      alpha: isDark ? 0.28 * t : 0.20 * t),
-                                  deep.withValues(alpha: 0.0),
+                                  currentAccent.withValues(
+                                      alpha: isDark
+                                          ? 0.30 * t
+                                          : (isCream ? 0.15 * t : 0.12 * t)),
+                                  currentAccent.withValues(alpha: 0.0),
                                 ],
                               ),
                             ),
                           ),
                         ),
-                        // Main cell contents (centered correctly using Positioned.fill)
+                        // Main cell contents
                         Positioned.fill(child: child!),
                       ],
                     ),
@@ -1237,9 +1384,7 @@ class _ToolGridCellState extends State<_ToolGridCell> {
               );
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -1247,14 +1392,19 @@ class _ToolGridCellState extends State<_ToolGridCell> {
                     animation: widget.pulseAnim,
                     builder: (_, __) {
                       final t = _phased(widget.pulseAnim.value);
-                      final bright = Color.lerp(accent, Colors.white, 0.30)!;
                       final currentAccent =
                           Color.lerp(accent, bright, t * 0.5)!;
-                      final deep =
-                          Color.lerp(accent, const Color(0xFF0C0C14), 0.72)!;
+                      final deep = isDark
+                          ? Color.lerp(accent, const Color(0xFF0C0C14), 0.72)!
+                          : (isCream
+                              ? Color.lerp(
+                                  accent, const Color(0xFFE8DAC0), 0.5)!
+                              : Color.lerp(
+                                  accent, const Color(0xFF093322), 0.4)!);
+
                       return Container(
-                        width: 54,
-                        height: 54,
+                        width: 50,
+                        height: 50,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [currentAccent, deep],
@@ -1265,17 +1415,17 @@ class _ToolGridCellState extends State<_ToolGridCell> {
                           boxShadow: [
                             BoxShadow(
                               color: currentAccent.withValues(
-                                  alpha: 0.35 + 0.30 * t),
-                              blurRadius: 10 + 14 * t,
-                              offset: const Offset(0, 4),
+                                  alpha: 0.30 + 0.25 * t),
+                              blurRadius: 8 + 10 * t,
+                              offset: const Offset(0, 3),
                             ),
                           ],
                         ),
                         child: Center(
                           child: SvgPicture.asset(
                             'assets/icons/${isDark ? 'dark' : 'light'}/${widget.item.svgIconName}.svg',
-                            width: 28,
-                            height: 28,
+                            width: 26,
+                            height: 26,
                             colorFilter: const ColorFilter.mode(
                                 Colors.white, BlendMode.srcIn),
                           ),
@@ -1283,14 +1433,14 @@ class _ToolGridCellState extends State<_ToolGridCell> {
                       );
                     },
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 7),
                   Text(
                     label,
                     style: TextStyle(
                       color: titleColor,
-                      fontSize: 13,
+                      fontSize: 12.5,
                       fontWeight: FontWeight.bold,
-                      height: 1.2,
+                      height: 1.15,
                     ),
                     textAlign: TextAlign.center,
                     maxLines: 2,
@@ -1301,5 +1451,7 @@ class _ToolGridCellState extends State<_ToolGridCell> {
             ),
           ),
         );
+      },
+    );
   }
 }

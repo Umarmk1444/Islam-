@@ -132,6 +132,8 @@ class _LibraryContentListScreenState extends State<LibraryContentListScreen> {
         final borderColor = isDark
             ? Colors.white.withValues(alpha: 0.08)
             : (isCream ? const Color(0xFFE2D5BE) : const Color(0xFFE2EBE7));
+        final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
+        final isArabic = locale == 'ar';
 
         return Scaffold(
           backgroundColor: bgColor,
@@ -151,14 +153,14 @@ class _LibraryContentListScreenState extends State<LibraryContentListScreen> {
                 color: textColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
-                fontFamily: 'Amiri',
+                fontFamily: isArabic ? 'Amiri' : null,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
             if (!_isLoading && _items.isNotEmpty)
               Text(
-                '${_items.length} مادة علمية',
+                '${_items.length} ${isArabic ? 'مادة علمية' : 'items'}',
                 style: TextStyle(
                   color: isDark
                       ? const Color(0xFF8A9995)
@@ -193,7 +195,9 @@ class _LibraryContentListScreenState extends State<LibraryContentListScreen> {
                 onChanged: _onSearchChanged,
                 style: TextStyle(color: textColor, fontSize: 14),
                 decoration: InputDecoration(
-                  hintText: 'ابحث في ${widget.categoryTitle}...',
+                  hintText: isArabic
+                      ? 'ابحث في ${widget.categoryTitle}...'
+                      : 'Search in ${widget.categoryTitle}...',
                   hintStyle: TextStyle(
                     color: isDark
                         ? const Color(0xFF6C7C78)
@@ -236,7 +240,9 @@ class _LibraryContentListScreenState extends State<LibraryContentListScreen> {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              'لا توجد محتويات متوفرة حالياً',
+                              isArabic
+                                  ? 'لا توجد محتويات متوفرة حالياً'
+                                  : 'No items available currently',
                               style: TextStyle(
                                 color: isDark
                                     ? const Color(0xFF8A9995)

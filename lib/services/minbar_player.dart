@@ -47,18 +47,21 @@ class MinbarPlayer {
         if (localPath != null) {
           audioSources.add(AudioSource.uri(Uri.file(localPath), tag: mediaItem));
         } else {
-          audioSources.add(AudioSource.uri(Uri.parse(item.url), tag: mediaItem));
+          audioSources.add(AudioSource.uri(Uri.parse(item.url.trim()), tag: mediaItem));
         }
       }
 
-      final concatenatingAudioSource = ConcatenatingAudioSource(
-        children: audioSources,
-      );
-
-      await player.setAudioSource(
-        concatenatingAudioSource,
-        initialIndex: initialIndex,
-      );
+      if (audioSources.length == 1) {
+        await player.setAudioSource(audioSources.first);
+      } else {
+        final concatenatingAudioSource = ConcatenatingAudioSource(
+          children: audioSources,
+        );
+        await player.setAudioSource(
+          concatenatingAudioSource,
+          initialIndex: initialIndex,
+        );
+      }
       
       await player.play();
     } catch (e) {
@@ -91,6 +94,10 @@ class MinbarPlayer {
     try {
       if (player.hasNext) {
         await player.seekToNext();
+      } else if (_currentPlaylist.length > 1) {
+        final currentIndex = player.currentIndex ?? 0;
+        final nextIndex = (currentIndex + 1) % _currentPlaylist.length;
+        await player.seek(Duration.zero, index: nextIndex);
       }
     } catch (e) {
       dev.log("Error playing next: $e", name: 'MinbarPlayer');
@@ -101,6 +108,10 @@ class MinbarPlayer {
     try {
       if (player.hasPrevious) {
         await player.seekToPrevious();
+      } else if (_currentPlaylist.length > 1) {
+        final currentIndex = player.currentIndex ?? 0;
+        final prevIndex = (currentIndex - 1 + _currentPlaylist.length) % _currentPlaylist.length;
+        await player.seek(Duration.zero, index: prevIndex);
       }
     } catch (e) {
       dev.log("Error playing previous: $e", name: 'MinbarPlayer');

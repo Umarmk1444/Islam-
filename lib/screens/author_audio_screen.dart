@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_text_styles.dart';
 import '../models/minbar_models.dart';
@@ -79,38 +78,99 @@ class _AuthorAudioScreenState extends State<AuthorAudioScreen> {
     });
   }
 
+  static const Map<String, Map<String, String>> _l10n = {
+    'en': {
+      'search_hint': 'Search audio track (in Arabic)...',
+      'confirm_delete': 'Confirm Deletion',
+      'confirm_delete_msg': 'Are you sure you want to delete this audio file from your device?',
+      'cancel': 'Cancel',
+      'delete': 'Delete',
+      'deleted_success': 'Audio file deleted successfully',
+      'download_success': 'Downloaded successfully',
+      'download_failed': 'Download failed. Check your internet connection.',
+      'no_internet': 'No internet connection. Please check your network.',
+      'bulk_started': 'Started downloading tracks...',
+      'bulk_stopped': 'Download stopped. Check your internet connection.',
+      'empty': 'No audio files available',
+    },
+    'ar': {
+      'search_hint': 'البحث عن ملف صوتي (بالعربية)...',
+      'confirm_delete': 'تأكيد الحذف',
+      'confirm_delete_msg': 'هل أنت متأكد من حذف هذا الملف من جهازك؟',
+      'cancel': 'إلغاء',
+      'delete': 'حذف',
+      'deleted_success': 'تم حذف الملف بنجاح',
+      'download_success': 'تم التنزيل بنجاح',
+      'download_failed': 'فشل التنزيل. تحقق من الاتصال بالإنترنت.',
+      'no_internet': 'لا يوجد اتصال بالإنترنت. يرجى التحقق من الشبكة.',
+      'bulk_started': 'بدأ تنزيل القائمة بأكملها...',
+      'bulk_stopped': 'توقف التنزيل. تأكد من اتصال الإنترنت.',
+      'empty': 'لا توجد ملفات صوتية متوفرة',
+    },
+    'am': {
+      'search_hint': 'የድምጽ ፋይል ይፈልጉ...',
+      'confirm_delete': 'ስረዛን ያረጋግጡ',
+      'confirm_delete_msg': 'ይህን ፋይል ከመሳሪያዎ መሰረዝ ይፈልጋሉ?',
+      'cancel': 'ይቅር',
+      'delete': 'ሰርዝ',
+      'deleted_success': 'ፋይሉ በተሳካ ሁኔታ ተሰርዟል',
+      'download_success': 'በተሳካ ሁኔታ ወርዷል',
+      'download_failed': 'ማውረድ አልተሳካም። የበይነመረብ ግንኙነትዎን ያረጋግጡ።',
+      'no_internet': 'ምንም የበይነመረብ ግንኙነት የለም። እባክዎን አውታረ መረብዎን ያረጋግጡ።',
+      'bulk_started': 'ሁሉንም ፋይሎች ማውረድ ተጀምሯል...',
+      'bulk_stopped': 'ማውረድ ቆሟል። የበይነመረብ ግንኙነትዎን ያረጋግጡ።',
+      'empty': 'ምንም የድምጽ ፋይሎች የሉም',
+    },
+    'om': {
+      'search_hint': 'Sagalee barbaadi...',
+      'confirm_delete': 'Haqamuu mirkaneessi',
+      'confirm_delete_msg': 'Waraabbata kana meeshaa kee irraa haquu barbaaddaa?',
+      'cancel': 'Dhiisi',
+      'delete': 'Haqi',
+      'deleted_success': 'Sagaleen milkaa\'inaan haqameera',
+      'download_success': 'Milkaa\'inaan bu\'eera',
+      'download_failed': 'Buusuun hin milkoofne. Intarneetii kee ilaali.',
+      'no_internet': 'Konneksiyiniin intarneetii hin jiru.',
+      'bulk_started': 'Hunda buusuun eegalameera...',
+      'bulk_stopped': 'Buusuun dhaabbateera. Intarneetii ilaali.',
+      'empty': 'Sagaleen hin jiru',
+    },
+  };
+
+  String _tr(String key) {
+    final lang = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
+    return _l10n[lang]?[key] ?? _l10n['ar']?[key] ?? _l10n['en']![key]!;
+  }
+
   void _confirmDelete(MinbarAudioItem track) {
     showDialog(
       context: context,
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          title: const Text('تأكيد الحذف'),
-          content: Text('هل أنت متأكد من حذف "${track.title}" من جهازك؟'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('إلغاء'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(ctx);
-                await _downloadService.deleteDownload(track.id);
-                setState(() {
-                  _downloadedItems.remove(track.id);
-                });
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('تم حذف الملف بنجاح',
-                            textAlign: TextAlign.right)),
-                  );
-                }
-              },
-              child: const Text('حذف', style: TextStyle(color: Colors.red)),
-            ),
-          ],
-        ),
+      builder: (ctx) => AlertDialog(
+        title: Text(_tr('confirm_delete')),
+        content: Text('${_tr('confirm_delete_msg')}\n"${track.title}"'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(_tr('cancel')),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await _downloadService.deleteDownload(track.id);
+              setState(() {
+                _downloadedItems.remove(track.id);
+              });
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(_tr('deleted_success'), textAlign: TextAlign.center),
+                  ),
+                );
+              }
+            },
+            child: Text(_tr('delete'), style: const TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }
@@ -129,15 +189,17 @@ class _AuthorAudioScreenState extends State<AuthorAudioScreen> {
       if (!isBulk) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('تم تنزيل "${track.title}" بنجاح',
-                  textAlign: TextAlign.right)),
+            content: Text('${_tr('download_success')}: "${track.title}"',
+                textAlign: TextAlign.center),
+          ),
         );
       }
     } else if (mounted && !isBulk) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('فشل التنزيل. تحقق من الاتصال بالإنترنت.',
-                textAlign: TextAlign.right)),
+        SnackBar(
+          content: Text(_tr('download_failed'),
+              textAlign: TextAlign.center),
+        ),
       );
     }
     return success;
@@ -156,9 +218,10 @@ class _AuthorAudioScreenState extends State<AuthorAudioScreen> {
     if (!hasInternet) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('لا يوجد اتصال بالإنترنت. يرجى التحقق من الشبكة.',
-                  textAlign: TextAlign.right)),
+          SnackBar(
+            content: Text(_tr('no_internet'),
+                textAlign: TextAlign.center),
+          ),
         );
       }
       return;
@@ -167,9 +230,10 @@ class _AuthorAudioScreenState extends State<AuthorAudioScreen> {
     setState(() => _isBulkDownloading = true);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('بدأ تنزيل القائمة بأكملها...',
-                textAlign: TextAlign.right)),
+        SnackBar(
+          content: Text(_tr('bulk_started'),
+              textAlign: TextAlign.center),
+        ),
       );
     }
 
@@ -179,9 +243,10 @@ class _AuthorAudioScreenState extends State<AuthorAudioScreen> {
         final success = await _downloadTrack(track, isBulk: true);
         if (!success && mounted && _isBulkDownloading) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('توقف التنزيل. تأكد من اتصال الإنترنت.',
-                    textAlign: TextAlign.right)),
+            SnackBar(
+              content: Text(_tr('bulk_stopped'),
+                  textAlign: TextAlign.center),
+            ),
           );
           break;
         }
@@ -195,6 +260,9 @@ class _AuthorAudioScreenState extends State<AuthorAudioScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
+    final isArabic = locale == 'ar';
+
     return ValueListenableBuilder<QuranTheme>(
       valueListenable: AppTheme.notifier,
       builder: (context, theme, _) {
@@ -210,6 +278,9 @@ class _AuthorAudioScreenState extends State<AuthorAudioScreen> {
         final titleAndIconColor =
             theme == QuranTheme.cream ? AppColors.emeraldDeep : textColor;
 
+        final highlightColor =
+            theme == QuranTheme.cream ? AppColors.emeraldDeep : primaryColor;
+
         return Scaffold(
           backgroundColor: bg,
           appBar: AppBar(
@@ -223,17 +294,19 @@ class _AuthorAudioScreenState extends State<AuthorAudioScreen> {
                 ? TextField(
                     controller: _searchController,
                     autofocus: true,
-                    style: AppTextStyles.audioTitle.copyWith(
+                    style: TextStyle(
                       color: textColor,
+                      fontSize: 14,
                     ),
                     decoration: InputDecoration(
-                      hintText: 'البحث عن ملف صوتي...',
-                      hintStyle: AppTextStyles.audioSubtitle.copyWith(
+                      hintText: _tr('search_hint'),
+                      hintStyle: TextStyle(
                         color: textColor.withValues(alpha: 0.4),
+                        fontSize: 13,
                       ),
                       border: InputBorder.none,
                     ),
-                    textDirection: TextDirection.rtl,
+                    textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
                   )
                 : Text(
                     widget.authorName,
@@ -316,34 +389,67 @@ class _AuthorAudioScreenState extends State<AuthorAudioScreen> {
 
                     return Column(
                       children: [
-                        // Bulk Download Button
+                        // Dual Hero Action Bar (Play All + Download All)
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 8.0),
-                          child: ElevatedButton.icon(
-                            onPressed: _downloadAll,
-                            icon: Icon(
-                                _isBulkDownloading
-                                    ? Icons.stop_rounded
-                                    : Icons.download_rounded,
-                                color: Colors.white),
-                            label: Text(
-                              _isBulkDownloading
-                                  ? 'إيقاف التنزيل'
-                                  : (widget.categoryId == 'quran'
-                                      ? 'تنزيل المصحف كاملاً'
-                                      : 'تنزيل الكل'),
-                              style: AppTextStyles.audioTitle
-                                  .copyWith(color: Colors.white, fontSize: 16),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _isBulkDownloading
-                                  ? Colors.red
-                                  : primaryColor,
-                              minimumSize: const Size.fromHeight(50),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
-                            ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                          child: Row(
+                            children: [
+                              // Play All Button
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: () {
+                                    if (_filteredTracks.isNotEmpty) {
+                                      MinbarPlayer.playPlaylist(_filteredTracks, 0, widget.authorName);
+                                    }
+                                  },
+                                  icon: const Icon(Icons.play_circle_fill_rounded, color: Colors.white, size: 20),
+                                  label: Text(
+                                    isArabic ? 'تشغيل الكل' : 'Play All',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: highlightColor,
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                    elevation: 2,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              // Download All Button
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: _downloadAll,
+                                  icon: Icon(
+                                    _isBulkDownloading ? Icons.stop_rounded : Icons.download_rounded,
+                                    color: _isBulkDownloading ? Colors.redAccent : highlightColor,
+                                    size: 20,
+                                  ),
+                                  label: Text(
+                                    _isBulkDownloading
+                                        ? (isArabic ? 'إيقاف التحميل' : 'Stop')
+                                        : (isArabic ? 'تحميل الكل' : 'Download All'),
+                                    style: TextStyle(
+                                      color: _isBulkDownloading ? Colors.redAccent : highlightColor,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    side: BorderSide(
+                                      color: _isBulkDownloading ? Colors.redAccent : highlightColor,
+                                      width: 1.5,
+                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
 
@@ -352,150 +458,134 @@ class _AuthorAudioScreenState extends State<AuthorAudioScreen> {
                             valueListenable: _downloadService.downloadProgress,
                             builder: (context, progressMap, _) {
                               return ValueListenableBuilder<MinbarAudioItem?>(
-                                valueListenable:
-                                    MinbarPlayer.currentItemNotifier,
+                                valueListenable: MinbarPlayer.currentItemNotifier,
                                 builder: (context, currentPlayingItem, _) {
                                   return ListView.separated(
-                                    padding: const EdgeInsets.fromLTRB(16, 4,
-                                        16, 16), // Adjusted bottom padding
+                                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                                     physics: const BouncingScrollPhysics(),
                                     itemCount: _filteredTracks.length,
-                                    separatorBuilder: (_, __) =>
-                                        Divider(color: borderColor, height: 1),
+                                    separatorBuilder: (_, __) => Divider(color: borderColor, height: 1),
                                     itemBuilder: (context, index) {
                                       final track = _filteredTracks[index];
-                                      final isPlayingThis =
-                                          currentPlayingItem?.id == track.id;
+                                      final isPlayingThis = currentPlayingItem?.id == track.id;
 
-                                      final isDownloaded =
-                                          _downloadedItems.contains(track.id);
+                                      final isDownloaded = _downloadedItems.contains(track.id);
                                       final progress = progressMap[track.id];
                                       final isDownloading = progress != null;
 
-                                      final highlightColor =
-                                          theme == QuranTheme.cream
-                                              ? AppColors.emeraldDeep
-                                              : primaryColor;
+                                      final surahNum = (index + 1).toString().padLeft(3, '0');
+                                      final isQuran = widget.categoryId == 'quran';
 
                                       return InkWell(
                                         onTap: () {
                                           MinbarPlayer.playPlaylist(
-                                              _filteredTracks,
-                                              index,
-                                              widget.authorName);
+                                              _filteredTracks, index, widget.authorName);
                                         },
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 10, vertical: 14),
+                                        borderRadius: BorderRadius.circular(14),
+                                        child: Container(
+                                          margin: const EdgeInsets.symmetric(vertical: 2),
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                                          decoration: BoxDecoration(
+                                            color: isPlayingThis
+                                                ? highlightColor.withValues(alpha: 0.08)
+                                                : cardBg.withValues(alpha: 0.5),
+                                            borderRadius: BorderRadius.circular(14),
+                                            border: Border.all(
+                                              color: isPlayingThis
+                                                  ? highlightColor.withValues(alpha: 0.35)
+                                                  : Colors.transparent,
+                                              width: 1,
+                                            ),
+                                          ),
                                           child: Row(
-                                            textDirection: TextDirection.rtl,
+                                            textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
                                             children: [
+                                              // Surah Number Badge or Play Icon
                                               Container(
-                                                width: 40,
-                                                height: 40,
+                                                width: 38,
+                                                height: 38,
                                                 decoration: BoxDecoration(
                                                   color: isPlayingThis
-                                                      ? highlightColor
-                                                          .withValues(
-                                                              alpha: 0.15)
-                                                      : cardBg,
+                                                      ? highlightColor.withValues(alpha: 0.2)
+                                                      : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.04)),
                                                   shape: BoxShape.circle,
                                                   border: Border.all(
-                                                      color: borderColor,
-                                                      width: 0.5),
+                                                    color: isPlayingThis ? highlightColor : borderColor,
+                                                    width: 1,
+                                                  ),
                                                 ),
-                                                child: isPlayingThis
-                                                    ? StreamBuilder<
-                                                        PlayerState>(
-                                                        stream: MinbarPlayer
-                                                            .player
-                                                            .playerStateStream,
-                                                        builder: (context,
-                                                            stateSnap) {
-                                                          final playing =
-                                                              stateSnap.data
-                                                                      ?.playing ??
-                                                                  false;
-                                                          return Icon(
-                                                            playing
-                                                                ? Icons
-                                                                    .pause_rounded
-                                                                : Icons
-                                                                    .play_arrow_rounded,
-                                                            color:
-                                                                highlightColor,
-                                                            size: 22,
-                                                          );
-                                                        },
-                                                      )
-                                                    : Icon(
-                                                        Icons
-                                                            .play_arrow_outlined,
-                                                        color: textColor
-                                                            .withValues(
-                                                                alpha: 0.6),
-                                                        size: 20,
-                                                      ),
+                                                child: Center(
+                                                  child: isPlayingThis
+                                                      ? Icon(
+                                                          Icons.equalizer_rounded,
+                                                          color: highlightColor,
+                                                          size: 20,
+                                                        )
+                                                      : Text(
+                                                          surahNum,
+                                                          style: TextStyle(
+                                                            fontSize: 12,
+                                                            fontWeight: FontWeight.bold,
+                                                            color: textColor.withValues(alpha: 0.7),
+                                                          ),
+                                                        ),
+                                                ),
                                               ),
-                                              const SizedBox(width: 16),
+                                              const SizedBox(width: 14),
                                               Expanded(
                                                 child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  textDirection:
-                                                      TextDirection.rtl,
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
                                                   children: [
-                                                    Text(
-                                                      track.title,
-                                                      style: AppTextStyles
-                                                          .audioTitle
-                                                          .copyWith(
-                                                        color: isPlayingThis
-                                                            ? highlightColor
-                                                            : textColor,
-                                                        fontWeight:
-                                                            isPlayingThis
-                                                                ? FontWeight
-                                                                    .bold
-                                                                : FontWeight
-                                                                    .normal,
-                                                      ),
-                                                      maxLines: 2,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
+                                                    Row(
+                                                      children: [
+                                                        Expanded(
+                                                          child: Text(
+                                                            track.title,
+                                                            style: TextStyle(
+                                                              fontFamily: isArabic ? 'Amiri' : null,
+                                                              fontSize: 15,
+                                                              fontWeight: isPlayingThis ? FontWeight.bold : FontWeight.w600,
+                                                              color: isPlayingThis ? highlightColor : textColor,
+                                                            ),
+                                                            maxLines: 1,
+                                                            overflow: TextOverflow.ellipsis,
+                                                          ),
+                                                        ),
+                                                      ],
                                                     ),
+                                                    if (isQuran) ...[
+                                                      const SizedBox(height: 2),
+                                                      Text(
+                                                        isArabic ? 'سورة قرآنية كريمة' : 'Holy Quran Surah',
+                                                        style: TextStyle(
+                                                          fontSize: 11,
+                                                          color: textColor.withValues(alpha: 0.5),
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ],
                                                 ),
                                               ),
                                               if (isDownloading)
                                                 SizedBox(
-                                                  width: 40,
-                                                  height: 40,
+                                                  width: 36,
+                                                  height: 36,
                                                   child: Stack(
                                                     alignment: Alignment.center,
                                                     children: [
                                                       CircularProgressIndicator(
                                                         value: progress,
-                                                        strokeWidth: 3,
-                                                        valueColor:
-                                                            AlwaysStoppedAnimation<
-                                                                    Color>(
-                                                                highlightColor),
+                                                        strokeWidth: 2.5,
+                                                        valueColor: AlwaysStoppedAnimation<Color>(highlightColor),
                                                       ),
                                                       IconButton(
-                                                        icon: const Icon(
-                                                            Icons.close,
-                                                            size: 16),
+                                                        icon: const Icon(Icons.close, size: 14),
                                                         color: textColor,
-                                                        padding:
-                                                            EdgeInsets.zero,
-                                                        constraints:
-                                                            const BoxConstraints(),
+                                                        padding: EdgeInsets.zero,
+                                                        constraints: const BoxConstraints(),
                                                         onPressed: () {
-                                                          _downloadService
-                                                              .cancelDownload(
-                                                                  track.id);
+                                                          _downloadService.cancelDownload(track.id);
                                                         },
                                                       ),
                                                     ],
@@ -503,15 +593,14 @@ class _AuthorAudioScreenState extends State<AuthorAudioScreen> {
                                                 )
                                               else
                                                 IconButton(
-                                                  icon: Icon(isDownloaded
-                                                      ? Icons
-                                                          .delete_outline_rounded
-                                                      : Icons.download_rounded),
+                                                  icon: Icon(
+                                                    isDownloaded
+                                                        ? Icons.check_circle_rounded
+                                                        : Icons.download_rounded,
+                                                  ),
                                                   color: isDownloaded
-                                                      ? Colors
-                                                          .redAccent.shade200
-                                                      : textColor.withValues(
-                                                          alpha: 0.6),
+                                                      ? highlightColor
+                                                      : textColor.withValues(alpha: 0.5),
                                                   iconSize: 22,
                                                   onPressed: () {
                                                     if (isDownloaded) {

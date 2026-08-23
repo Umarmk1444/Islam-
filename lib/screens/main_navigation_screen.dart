@@ -151,33 +151,44 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
     return Scaffold(
       backgroundColor: bgColor,
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          if (_currentIndex != index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          }
-        },
-        physics: const BouncingScrollPhysics(),
-        children: [
-          MuslimDashboardTab(key: _tabKeys[0]),
-          MinbarTab(key: _tabKeys[1]),
-          LibraryScreen(key: _tabKeys[2]),
-          SettingsScreen(key: _tabKeys[3]),
-        ],
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 850),
+          child: PageView(
+            controller: _pageController,
+            onPageChanged: (index) {
+              if (_currentIndex != index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              }
+            },
+            physics: const BouncingScrollPhysics(),
+            children: [
+              MuslimDashboardTab(key: _tabKeys[0]),
+              MinbarTab(key: _tabKeys[1]),
+              LibraryScreen(key: _tabKeys[2]),
+              SettingsScreen(key: _tabKeys[3]),
+            ],
+          ),
+        ),
       ),
-      bottomNavigationBar: _AppBottomNavBar(
-        currentIndex: _currentIndex,
-        pageController: _pageController,
-        navMeta: _navMeta,
-        l10n: l10n,
-        isDark: isDark,
-        barBgColor: barBgColor,
-        selectedColor: selectedColor,
-        unselectedColor: unselectedColor,
-        onTap: _onTabTapped,
+      bottomNavigationBar: Center(
+        heightFactor: 1.0,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 850),
+          child: _AppBottomNavBar(
+            currentIndex: _currentIndex,
+            pageController: _pageController,
+            navMeta: _navMeta,
+            l10n: l10n,
+            isDark: isDark,
+            barBgColor: barBgColor,
+            selectedColor: selectedColor,
+            unselectedColor: unselectedColor,
+            onTap: _onTabTapped,
+          ),
+        ),
       ),
     );
   }
