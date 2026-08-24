@@ -1384,9 +1384,10 @@ class _ToolGridCellState extends State<_ToolGridCell> {
               );
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   AnimatedBuilder(
                     animation: widget.pulseAnim,
@@ -1403,8 +1404,8 @@ class _ToolGridCellState extends State<_ToolGridCell> {
                                   accent, const Color(0xFF093322), 0.4)!);
 
                       return Container(
-                        width: 50,
-                        height: 50,
+                        width: 48,
+                        height: 48,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [currentAccent, deep],
@@ -1424,8 +1425,8 @@ class _ToolGridCellState extends State<_ToolGridCell> {
                         child: Center(
                           child: SvgPicture.asset(
                             'assets/icons/${isDark ? 'dark' : 'light'}/${widget.item.svgIconName}.svg',
-                            width: 26,
-                            height: 26,
+                            width: 24,
+                            height: 24,
                             colorFilter: const ColorFilter.mode(
                                 Colors.white, BlendMode.srcIn),
                           ),
@@ -1433,12 +1434,12 @@ class _ToolGridCellState extends State<_ToolGridCell> {
                       );
                     },
                   ),
-                  const SizedBox(height: 7),
+                  const SizedBox(height: 6),
                   Text(
                     label,
                     style: TextStyle(
                       color: titleColor,
-                      fontSize: 12.5,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                       height: 1.15,
                     ),

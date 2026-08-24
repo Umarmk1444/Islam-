@@ -25,7 +25,7 @@ android {
     // This namespace property links your app ID to your AndroidManifest.xml
     namespace = "com.umer.quranzone"
     compileSdk = 36
-    ndkVersion = "28.2.13676358"
+    ndkVersion = flutter.ndkVersion
 
 
     compileOptions {
@@ -62,7 +62,17 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
+    }
+
+    androidResources {
+        noCompress += listOf("woff", "woff2", "otf", "ttf", "png", "jpg")
     }
 }
 

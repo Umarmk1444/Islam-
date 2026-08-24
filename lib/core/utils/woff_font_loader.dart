@@ -84,6 +84,9 @@ class WoffFontLoader {
       return;
     }
 
+    // Always ensure shared fonts (surah names, Basmala) are loaded
+    await ensureCommonFontsLoaded();
+
     final fontName = "QCF_P${pageNumber.toString().padLeft(3, '0')}";
     if (_loadedFonts.contains(fontName)) return;
     _loadedFonts.add(fontName);
@@ -109,12 +112,73 @@ class WoffFontLoader {
       final ttfBytes = woffToTtf(rawBytes);
 
       if (ttfBytes != null) {
-        final fontLoader = FontLoader(fontName);
-        fontLoader.addFont(Future.value(ByteData.view(ttfBytes.buffer, ttfBytes.offsetInBytes, ttfBytes.lengthInBytes)));
-        await fontLoader.load();
+        // Register under both bare font name and packaged font name
+        for (final name in [fontName, 'packages/qcf_quran/$fontName']) {
+          final fontLoader = FontLoader(name);
+          fontLoader.addFont(Future.value(ByteData.view(ttfBytes.buffer, ttfBytes.offsetInBytes, ttfBytes.lengthInBytes)));
+          await fontLoader.load();
+        }
       }
     } catch (e) {
       debugPrint('[WoffFontLoader] Failed to load font $fontName: $e');
+    }
+  }
+
+  /// Loads common shared fonts like Surah name calligraphy ('surahname') and Basmala ('QCF_BSML')
+  static Future<void> ensureCommonFontsLoaded() async {
+    if (kIsWeb || (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS)) {
+      return;
+    }
+
+    if (_loadedFonts.contains('__common_fonts__')) return;
+    _loadedFonts.add('__common_fonts__');
+
+    // 1. Load Surah Name calligraphy font
+    await _loadCustomWoff(
+      assetPaths: [
+        'packages/qcf_quran/assets/fonts/surah-name-v2.woff',
+        'assets/fonts/surah-name-v2.woff',
+      ],
+      fontFamilies: ['surahname', 'packages/qcf_quran/surahname', 'SurahName', 'packages/qcf_quran/SurahName'],
+    );
+
+    // 2. Load BSML (Basmala) font
+    await _loadCustomWoff(
+      assetPaths: [
+        'packages/qcf_quran/assets/fonts/QCF2BSMLfonts/QCF4_QBSML-Regular.woff',
+        'assets/fonts/QCF2BSMLfonts/QCF4_QBSML-Regular.woff',
+      ],
+      fontFamilies: ['QCF_BSML', 'packages/qcf_quran/QCF_BSML'],
+    );
+  }
+
+  static Future<void> _loadCustomWoff({
+    required List<String> assetPaths,
+    required List<String> fontFamilies,
+  }) async {
+    try {
+      ByteData? byteData;
+      for (final p in assetPaths) {
+        try {
+          byteData = await rootBundle.load(p);
+          break;
+        } catch (_) {}
+      }
+
+      if (byteData == null) return;
+
+      final rawBytes = byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes);
+      final ttfBytes = woffToTtf(rawBytes);
+
+      if (ttfBytes != null) {
+        for (final family in fontFamilies) {
+          final fontLoader = FontLoader(family);
+          fontLoader.addFont(Future.value(ByteData.view(ttfBytes.buffer, ttfBytes.offsetInBytes, ttfBytes.lengthInBytes)));
+          await fontLoader.load();
+        }
+      }
+    } catch (e) {
+      debugPrint('[WoffFontLoader] Failed to load custom font $fontFamilies: $e');
     }
   }
 }

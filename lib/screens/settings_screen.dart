@@ -13,6 +13,7 @@ import '../core/constants/app_colors.dart';
 import '../features/prayer_times/presentation/controllers/prayer_controller.dart';
 import '../features/prayer_times/presentation/screens/prayer_settings_screen.dart';
 import 'minbar_downloads_screen.dart';
+import '../services/app_update_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SETTINGS SCREEN — Professional Islamic Redesign
@@ -58,6 +59,8 @@ class _SettingsScreenState extends State<SettingsScreen>
       'privacy_policy': 'Privacy Policy',
       'privacy_desc': 'Your data security & offline privacy',
       'about_app': 'About Quran Zone',
+      'check_updates': 'Check for Updates',
+      'check_updates_desc': 'Search for new features & updates',
       'theme_dark': 'Dark Mode',
       'theme_cream': 'Warm Cream',
       'theme_white': 'Pure Light',
@@ -83,6 +86,8 @@ class _SettingsScreenState extends State<SettingsScreen>
       'privacy_policy': 'سياسة الخصوصية',
       'privacy_desc': 'حماية البيانات وخصوصية المستخدم',
       'about_app': 'عن تطبيق Quran Zone',
+      'check_updates': 'التحقق من وجود تحديثات',
+      'check_updates_desc': 'البحث عن أحدث المزايا والإصدارات',
       'theme_dark': 'الوضع الداكن',
       'theme_cream': 'كريمي دافئ',
       'theme_white': 'أبيض ناصع',
@@ -108,6 +113,8 @@ class _SettingsScreenState extends State<SettingsScreen>
       'privacy_policy': 'የግላዊነት ፖሊሲ',
       'privacy_desc': 'የውሂብ ደህንነት እና ግላዊነት',
       'about_app': 'ስለ መተግበሪያው',
+      'check_updates': 'አዲስ ዝመናዎችን ይፈልጉ',
+      'check_updates_desc': 'አዲስ ስሪት እና ማሻሻያዎችን ያረጋግጡ',
       'theme_dark': 'ጨለማ ገጽታ',
       'theme_cream': 'ክሬም ገጽታ',
       'theme_white': 'ነጭ ገጽታ',
@@ -133,6 +140,8 @@ class _SettingsScreenState extends State<SettingsScreen>
       'privacy_policy': 'Imaammata Dhuunfaa',
       'privacy_desc': 'Nageenya daataa fi dhuunfaa keessanii',
       'about_app': 'Waa\'ee Appilikeeshinii',
+      'check_updates': 'Fooyya\'iinsa Haaraa Barbaadi',
+      'check_updates_desc': 'Wanta haaraa jiraachuu ilaali',
       'theme_dark': 'Haala Dukkanaa',
       'theme_cream': 'Kiriimii Hoo\'aa',
       'theme_white': 'Adii Qulqulluu',
@@ -635,6 +644,16 @@ class _SettingsScreenState extends State<SettingsScreen>
                       ),
                       _LiquidDivider(borderColor),
                       _LiquidTile(
+                        icon: Icons.system_update_rounded,
+                        iconColor: const Color(0xFF06B6D4),
+                        title: _tr(context, 'check_updates'),
+                        subtitle: _tr(context, 'check_updates_desc'),
+                        onTap: () => AppUpdateService.instance.checkForUpdate(context, isManual: true),
+                        isDark: isDark,
+                        textColor: textMain,
+                      ),
+                      _LiquidDivider(borderColor),
+                      _LiquidTile(
                         icon: Icons.info_outline_rounded,
                         iconColor: const Color(0xFF10B981),
                         title: _tr(context, 'about_app'),
@@ -750,6 +769,14 @@ class _SettingsScreenState extends State<SettingsScreen>
             'desc': isArabic
                 ? 'أذكار الصباح والمساء، أذكار بعد الصلاة والنوم والاستيقاظ، سبحة إلكترونية ذكية، تلاوات صوتية للأذكار، وفضائل كل ذكر من السنة النبوية.'
                 : 'Comprehensive Morning & Evening Adhkar, Post-Salah Dua, interactive digital Tasbih counters, audio recitations, and the virtues of each Dhikr.',
+          },
+          {
+            'icon': Icons.school_rounded,
+            'color': const Color(0xFF0284C7),
+            'title': isArabic ? 'القاعدة النورانية وتعلّم التلاوة' : 'Qaida Nooraniyah & Quran Phonetics',
+            'desc': isArabic
+                ? 'دروس القاعدة النورانية التفاعلية الكاملة لتعليم النطق العربي الفصيح، مخارج الحروف، أحكام التجويد، وإتقان تلاوة القرآن الكريم خطوة بخطوة بالرسم والتلوين المعتمد.'
+                : 'Complete interactive Qaida Nooraniyah curriculum to master correct Arabic pronunciation, Tajweed rules, letter articulation points (Makharij), and Quran recitation with authentic color-coded lessons.',
           },
           {
             'icon': Icons.quiz_rounded,

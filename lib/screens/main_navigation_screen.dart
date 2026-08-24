@@ -10,6 +10,7 @@ import '../main.dart';
 import 'quran_screen.dart';
 import 'package:geolocator/geolocator.dart';
 import '../features/prayer_times/presentation/controllers/prayer_controller.dart';
+import '../services/app_update_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MainNavigationScreen
@@ -63,9 +64,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       });
     }
 
-    // Request location permission on app launch if not determined or denied
+    // Request location permission and check daily updates on app launch
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _requestLocationPermission();
+      AppUpdateService.instance.checkDailyUpdate(context);
     });
   }
 
