@@ -136,10 +136,28 @@ class MinbarRepository {
           throw Exception('Incomplete URL metadata for reciter ID $authorId.');
         }
 
-        final normalizedServer = serverNum.trim().startsWith('server')
-            ? serverNum.trim()
-            : (serverNum.trim().startsWith('http') ? serverNum.trim() : 'server${serverNum.trim()}');
-        final normalizedEngName = engName.trim();
+        var cleanServer = serverNum.trim();
+        if (cleanServer.endsWith('/')) {
+          cleanServer = cleanServer.substring(0, cleanServer.length - 1);
+        }
+        if (cleanServer.startsWith('http://')) {
+          cleanServer = 'https://${cleanServer.substring(7)}';
+        } else if (!cleanServer.startsWith('https://')) {
+          if (cleanServer.contains('.mp3quran.net')) {
+            cleanServer = 'https://$cleanServer';
+          } else if (cleanServer.startsWith('server')) {
+            cleanServer = 'https://$cleanServer.mp3quran.net';
+          } else {
+            cleanServer = 'https://server$cleanServer.mp3quran.net';
+          }
+        }
+        var cleanEngName = engName.trim();
+        while (cleanEngName.startsWith('/')) {
+          cleanEngName = cleanEngName.substring(1);
+        }
+        while (cleanEngName.endsWith('/')) {
+          cleanEngName = cleanEngName.substring(0, cleanEngName.length - 1);
+        }
 
         // Step B: Query the list of 114 Surahs from all_index
         final surahRows = await db.rawQuery(
@@ -151,9 +169,7 @@ class MinbarRepository {
           final rawSurahNum = (row['surah_num'] as String).trim();
           final surahNum = rawSurahNum.padLeft(3, '0');
           final title = row['title'] as String;
-          final url = normalizedServer.startsWith('http')
-              ? '$normalizedServer/$normalizedEngName/$surahNum.mp3'
-              : 'https://$normalizedServer.mp3quran.net/$normalizedEngName/$surahNum.mp3';
+          final url = '$cleanServer/$cleanEngName/$surahNum.mp3';
 
           return MinbarAudioItem(
             id: '${authorId}_$surahNum',
@@ -180,10 +196,16 @@ class MinbarRepository {
         );
 
         return audioRows.map((row) {
+          var rawUrl = (row['url'] as String).trim();
+          if (rawUrl.startsWith('http://')) {
+            rawUrl = 'https://${rawUrl.substring(7)}';
+          }
+          final safeUrl = Uri.encodeFull(rawUrl);
+
           return MinbarAudioItem(
             id: row['id'].toString(),
             title: row['title'] as String,
-            url: row['url'] as String,
+            url: safeUrl,
             authorId: authorId,
           );
         }).toList();

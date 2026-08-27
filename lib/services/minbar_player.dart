@@ -47,7 +47,11 @@ class MinbarPlayer {
         if (localPath != null) {
           audioSources.add(AudioSource.uri(Uri.file(localPath), tag: mediaItem));
         } else {
-          audioSources.add(AudioSource.uri(Uri.parse(item.url.trim()), tag: mediaItem));
+          var safeUrl = item.url.trim();
+          if (safeUrl.startsWith('http://')) {
+            safeUrl = 'https://${safeUrl.substring(7)}';
+          }
+          audioSources.add(AudioSource.uri(Uri.parse(Uri.encodeFull(safeUrl)), tag: mediaItem));
         }
       }
 

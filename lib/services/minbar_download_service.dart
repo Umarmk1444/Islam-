@@ -75,17 +75,43 @@ class MinbarDownloadService {
       // Initialize progress at 0.01 so UI shows downloading state immediately
       _updateProgress(item.id, 0.01);
 
-      await _dio.download(
-        item.url,
-        savePath,
-        cancelToken: cancelToken,
-        onReceiveProgress: (received, total) {
-          if (total != -1) {
-            double progress = received / total;
-            _updateProgress(item.id, progress);
+      final candidateUrls = <String>[item.url];
+      if (item.url.contains('.mp3quran.net')) {
+        final qurangoMirror = item.url.replaceFirst(
+            RegExp(r'https?://[^/]+\.mp3quran\.net'),
+            'https://backup.qurango.net');
+        if (!candidateUrls.contains(qurangoMirror)) {
+          candidateUrls.add(qurangoMirror);
+        }
+      }
+
+      bool downloaded = false;
+      for (final downloadUrl in candidateUrls) {
+        try {
+          await _dio.download(
+            downloadUrl,
+            savePath,
+            cancelToken: cancelToken,
+            onReceiveProgress: (received, total) {
+              if (total != -1) {
+                double progress = received / total;
+                _updateProgress(item.id, progress);
+              }
+            },
+          );
+          downloaded = true;
+          break;
+        } on DioException catch (dioErr) {
+          if (CancelToken.isCancel(dioErr)) {
+            rethrow;
           }
-        },
-      );
+          dev.log('Mirror $downloadUrl failed: $dioErr. Trying next candidate...', name: 'MinbarDownloadService');
+        }
+      }
+
+      if (!downloaded) {
+        throw Exception('All download mirror candidates failed for ${item.id}');
+      }
 
       // Save to Database
       await _db.saveDownloadRecord(
@@ -103,6 +129,13 @@ class MinbarDownloadService {
         dev.log('Download failed for ${item.id}: $e', name: 'MinbarDownloadService');
       }
       // Cleanup partial file if exists
+      final file = File(savePath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+      return false;
+    } catch (e) {
+      dev.log('Download error for ${item.id}: $e', name: 'MinbarDownloadService');
       final file = File(savePath);
       if (await file.exists()) {
         await file.delete();
