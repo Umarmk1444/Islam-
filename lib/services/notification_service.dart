@@ -62,9 +62,6 @@ class NotificationService {
         AndroidFlutterLocalNotificationsPlugin>();
 
     if (androidImplementation != null) {
-      await androidImplementation.requestNotificationsPermission();
-      await androidImplementation.requestExactAlarmsPermission();
-
       // Create the Adhan notification channel on Android 8+.
       await androidImplementation
           .createNotificationChannel(const AndroidNotificationChannel(
@@ -81,6 +78,17 @@ class NotificationService {
     try {
       await scheduleIslamicReminders();
     } catch (_) {}
+  }
+
+  /// Explicitly request notification permissions when called in staged sequence
+  Future<bool> requestPermission() async {
+    final androidImplementation = _plugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    if (androidImplementation != null) {
+      final granted = await androidImplementation.requestNotificationsPermission();
+      return granted ?? false;
+    }
+    return true;
   }
 
   // ── Reminders (Islamic & Daily) ──────────────────────────────────────────

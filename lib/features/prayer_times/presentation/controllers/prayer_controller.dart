@@ -124,85 +124,100 @@ class PrayerController extends ChangeNotifier {
   // ── GPS / location resolution ──────────────────────────────────────────────
 
   /// Requests location permission and fetches a fresh GPS fix.
-  /// Automatically reverse-geocodes city and country name.
-  /// If permission is denied or an error occurs, retains stored coordinates.
+  /// Uses getLastKnownPosition for instant (<10ms) coordinates, with fallback to low-accuracy GPS.
+  /// Reverse-geocoding occurs asynchronously in the background so the prayer times UI updates immediately.
   Future<void> _resolveLocation() async {
     if (config.isManualLocation) {
       isLocationMissing = false;
       return;
     }
     if (!config.useGps) return;
+
     try {
-      await Future.microtask(() async {
-        LocationPermission permission = await Geolocator.checkPermission();
-        if (permission == LocationPermission.denied) {
-          permission = await Geolocator.requestPermission();
-        }
-        if (permission == LocationPermission.denied ||
-            permission == LocationPermission.deniedForever) {
-          if (config.latitude == 0.0 && config.longitude == 0.0) {
-            isLocationMissing = true;
-            notifyListeners();
-          }
-          return; // Abort silently, preserving any existing cached location
-        }
-
-        bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-        if (!serviceEnabled) {
-          if (config.latitude == 0.0 && config.longitude == 0.0) {
-            isLocationMissing = true;
-            notifyListeners();
-          }
-          return; // Abort silently, preserving any existing cached location
-        }
-
-        final pos = await Geolocator.getCurrentPosition(
-          locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.medium,
-            timeLimit: Duration(seconds: 3),
-          ),
-        );
-
-        final label = await _fetchCityName(pos.latitude, pos.longitude);
-
-        String newLabel;
-        if (label != null && label.isNotEmpty) {
-          newLabel = label;
-        } else {
-          // If geocoding fails, check if the cached/existing label is already a valid city (i.e. does not contain coordinates degree character °)
-          final existingLabel = config.locationLabel;
-          if (existingLabel.isNotEmpty && !existingLabel.contains('°')) {
-            newLabel = existingLabel;
-          } else {
-            // Coordinates as a last resort
-            newLabel = _coordsToLabel(pos.latitude, pos.longitude);
-          }
-        }
-
-        config = config.copyWith(
-          latitude:      pos.latitude,
-          longitude:     pos.longitude,
-          locationLabel: newLabel,
-          isManualLocation: false, // Ensure it's marked as GPS
-        );
-
-        isLocationMissing = false;
-        _applySmartDefaults(pos.latitude, pos.longitude, null);
-        await _saveConfig();
-
-        // Immediately refresh prayer times and notify UI
-        _compute();
-        notifyListeners();
-
-        // Immediately reschedule alarms on background engine to apply updated coordinates/label
-        await _scheduleNotifications();
-      }).timeout(const Duration(seconds: 5), onTimeout: () {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
         if (config.latitude == 0.0 && config.longitude == 0.0) {
           isLocationMissing = true;
           notifyListeners();
         }
+        return;
+      }
+
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (config.latitude == 0.0 && config.longitude == 0.0) {
+          isLocationMissing = true;
+          notifyListeners();
+        }
+        return;
+      }
+
+      // 1. Try instant cached position first (< 10ms response)
+      Position? pos;
+      try {
+        pos = await Geolocator.getLastKnownPosition();
+      } catch (_) {}
+
+      // 2. Fallback to low-accuracy GPS if no cached position exists
+      if (pos == null) {
+        try {
+          pos = await Geolocator.getCurrentPosition(
+            locationSettings: const LocationSettings(
+              accuracy: LocationAccuracy.low,
+              timeLimit: Duration(seconds: 10),
+            ),
+          );
+        } catch (e) {
+          debugPrint('[PrayerController] getCurrentPosition timeout/error: $e');
+        }
+      }
+
+      if (pos == null) {
+        if (config.latitude == 0.0 && config.longitude == 0.0) {
+          isLocationMissing = true;
+          notifyListeners();
+        }
+        return;
+      }
+
+      // 3. Immediately apply coordinates & compute prayer times so UI updates with ZERO delay
+      final existingLabel = config.locationLabel;
+      final initialLabel = (existingLabel.isNotEmpty && !existingLabel.contains('°'))
+          ? existingLabel
+          : _coordsToLabel(pos.latitude, pos.longitude);
+
+      config = config.copyWith(
+        latitude: pos.latitude,
+        longitude: pos.longitude,
+        locationLabel: initialLabel,
+        isManualLocation: false,
+      );
+
+      isLocationMissing = false;
+      _applySmartDefaults(pos.latitude, pos.longitude, null);
+      await _saveConfig();
+
+      // Refresh prayer times and notify UI immediately!
+      _compute();
+      notifyListeners();
+
+      // 4. Reverse geocode city name in background without delaying prayer times
+      _fetchCityName(pos.latitude, pos.longitude).then((cityName) async {
+        if (cityName != null && cityName.isNotEmpty) {
+          config = config.copyWith(locationLabel: cityName);
+          await _saveConfig();
+          _compute();
+          notifyListeners();
+        }
       });
-    } catch (_) {
+
+      await _scheduleNotifications();
+    } catch (e) {
+      debugPrint('[_resolveLocation] unexpected error: $e');
       if (config.latitude == 0.0 && config.longitude == 0.0) {
         isLocationMissing = true;
         notifyListeners();

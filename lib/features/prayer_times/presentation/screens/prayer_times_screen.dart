@@ -51,104 +51,51 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
       await Permission.notification.request();
     }
 
-    // 1.5. Location Permission (Ask when entering Moazin place)
-    var locPermission = await Geolocator.checkPermission();
-    if (locPermission == LocationPermission.denied) {
-      locPermission = await Geolocator.requestPermission();
-    }
-    if (locPermission == LocationPermission.deniedForever) {
-      // If permanently denied, prompt to open settings
-      if (mounted) {
-        final prefs = await SharedPreferences.getInstance();
-        final locPromptCount = prefs.getInt('location_prompt_count') ?? 0;
-        // Limit prompts so it doesn't harass them every single time
-        if (locPromptCount < 2) {
-          await showDialog(
-            // ignore: use_build_context_synchronously
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: const Text('Location Required'),
-              content: const Text(
-                  'Location permission is permanently denied. Please enable it in Settings to get accurate prayer times.'),
-              actions: [
-                TextButton(
-                  onPressed: () async {
-                    await prefs.setInt(
-                        'location_prompt_count', locPromptCount + 1);
-                    // ignore: use_build_context_synchronously
-                    if (mounted) Navigator.pop(ctx);
-                  },
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    await prefs.setInt(
-                        'location_prompt_count', locPromptCount + 1);
-                    // ignore: use_build_context_synchronously
-                    if (mounted) Navigator.pop(ctx);
-                    await Geolocator.openAppSettings();
-                  },
-                  child: const Text('Open Settings'),
-                ),
-              ],
-            ),
-          );
-        }
+    // 1.5. Location Permission (Only if not using manual offline location)
+    if (!widget.controller.config.isManualLocation && widget.controller.config.useGps) {
+      var locPermission = await Geolocator.checkPermission();
+      if (locPermission == LocationPermission.denied) {
+        locPermission = await Geolocator.requestPermission();
       }
-    }
-
-    // 1.6. Auto-Silent DND Prompt
-    if (!await Permission.accessNotificationPolicy.isGranted) {
-      final prefs = await SharedPreferences.getInstance();
-      final dndPromptCount = prefs.getInt('dnd_prompt_count') ?? 0;
-      final dndSnoozeTime = prefs.getInt('dnd_snooze_timestamp') ?? 0;
-
-      bool shouldPrompt = true;
-      if (dndPromptCount >= 3) {
-        final snoozeDate = DateTime.fromMillisecondsSinceEpoch(dndSnoozeTime);
-        final now = DateTime.now();
-        if (now.difference(snoozeDate).inDays >= 3) {
-          // Reset count and ask again
-          await prefs.setInt('dnd_prompt_count', 0);
-        } else {
-          shouldPrompt = false;
+      if (locPermission == LocationPermission.deniedForever) {
+        // If permanently denied, prompt to open settings
+        if (mounted) {
+          final prefs = await SharedPreferences.getInstance();
+          final locPromptCount = prefs.getInt('location_prompt_count') ?? 0;
+          // Limit prompts so it doesn't harass them every single time
+          if (locPromptCount < 2) {
+            await showDialog(
+              // ignore: use_build_context_synchronously
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: const Text('Location Required'),
+                content: const Text(
+                    'Location permission is permanently denied. Please enable it in Settings to get accurate prayer times.'),
+                actions: [
+                  TextButton(
+                    onPressed: () async {
+                      await prefs.setInt(
+                          'location_prompt_count', locPromptCount + 1);
+                      // ignore: use_build_context_synchronously
+                      if (mounted) Navigator.pop(ctx);
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      await prefs.setInt(
+                          'location_prompt_count', locPromptCount + 1);
+                      // ignore: use_build_context_synchronously
+                      if (mounted) Navigator.pop(ctx);
+                      await Geolocator.openAppSettings();
+                    },
+                    child: const Text('Open Settings'),
+                  ),
+                ],
+              ),
+            );
+          }
         }
-      }
-
-      if (shouldPrompt && mounted) {
-        await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Auto-Silent Mode'),
-            content: const Text(
-              'To automatically silence your phone during prayers in the mosque, please grant Do Not Disturb access on the next screen.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () async {
-                  final newCount = (prefs.getInt('dnd_prompt_count') ?? 0) + 1;
-                  await prefs.setInt('dnd_prompt_count', newCount);
-                  if (newCount >= 3) {
-                    await prefs.setInt('dnd_snooze_timestamp',
-                        DateTime.now().millisecondsSinceEpoch);
-                  }
-                  // ignore: use_build_context_synchronously
-                  if (mounted) Navigator.pop(ctx);
-                },
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  if (mounted) Navigator.pop(ctx);
-                  // The controller handles the permission request and enabling the feature
-                  await widget.controller.toggleAutoSilent(true);
-                },
-                child: const Text('Proceed'),
-              ),
-            ],
-          ),
-        );
       }
     }
 

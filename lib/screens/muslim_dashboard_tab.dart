@@ -8,6 +8,7 @@ import 'quran_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import '../features/prayer_times/presentation/screens/prayer_times_screen.dart';
+import '../features/prayer_times/presentation/screens/location_selection_screen.dart';
 import '../features/prayer_times/presentation/controllers/prayer_controller.dart';
 import '../features/calendar/presentation/screens/hijri_calendar_screen.dart';
 import '../features/qibla/presentation/screens/qibla_screen.dart';
@@ -319,64 +320,124 @@ class _MiqatCard extends StatelessWidget {
       builder: (context, _) {
         final model = ctrl.model;
         if (ctrl.isLocationMissing && !ctrl.isLoading) {
-          return LiquidPressable(
-            onTap: () => ctrl.syncLocation(),
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF0D4F3C), Color(0xFF1A7A5E)],
+          final String title = locale == 'ar' ? 'مواقيت الصلاة' : 'Prayer Times';
+          final String subtitle = locale == 'ar'
+              ? 'يرجى تحديد الموقع لعرض أوقات الصلاة بدقة'
+              : 'Please set your location to view accurate prayer times';
+          final String autoGps = locale == 'ar' ? 'تحديد تلقائي (GPS)' : 'Auto-detect (GPS)';
+          final String manualCity = locale == 'ar' ? 'اختيار المدينة (أوفلاين)' : 'Select City (Offline)';
+
+          return Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF0D4F3C), Color(0xFF1A7A5E)],
+              ),
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF0D4F3C).withValues(alpha: 0.45),
+                  blurRadius: 14,
+                  offset: const Offset(0, 6),
                 ),
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF0D4F3C).withValues(alpha: 0.45),
-                    blurRadius: 14,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.location_on_rounded,
+                          color: Colors.white, size: 24),
                     ),
-                    child: const Icon(Icons.location_on_rounded,
-                        color: Colors.white, size: 28),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          locale == 'ar' ? 'مواقيت الصلاة' : 'Prayer Times',
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            subtitle,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontSize: 11.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: const Color(0xFF0D4F3C),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () => ctrl.syncLocation(),
+                        icon: const Icon(Icons.my_location_rounded, size: 16),
+                        label: Text(
+                          autoGps,
                           style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+                              fontSize: 12, fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          locale == 'ar'
-                              ? 'اضغط هنا لتحديد موقعك وعرض أوقات الصلاة'
-                              : 'Tap here to enable location & see prayer times',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.8),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: BorderSide(
+                              color: Colors.white.withValues(alpha: 0.6)),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  LocationSelectionScreen(controller: ctrl),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.location_city_rounded, size: 16),
+                        label: Text(
+                          manualCity,
+                          style: const TextStyle(
+                              fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           );
         }
