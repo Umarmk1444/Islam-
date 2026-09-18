@@ -249,14 +249,15 @@ class _SettingsScreenState extends State<SettingsScreen>
 
     _baseTheme = AppTheme.notifier.value;
     _targetTheme = AppTheme.notifier.value;
+    AppTheme.notifier.addListener(_onExternalThemeChanged);
     _baseScrollCtrl = ScrollController();
 
     _revealCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 850),
+      duration: const Duration(milliseconds: 400),
     );
     _revealAnim =
-        CurvedAnimation(parent: _revealCtrl, curve: Curves.easeInOutCubic);
+        CurvedAnimation(parent: _revealCtrl, curve: Curves.fastOutSlowIn);
 
     _revealCtrl.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -264,15 +265,27 @@ class _SettingsScreenState extends State<SettingsScreen>
           _baseTheme = _targetTheme;
           _isRevealing = false;
         });
-        AppTheme.changeTheme(_targetTheme);
         _revealScrollCtrl?.dispose();
         _revealScrollCtrl = null;
       }
     });
   }
 
+  void _onExternalThemeChanged() {
+    if (!_isRevealing && mounted) {
+      final currentTheme = AppTheme.notifier.value;
+      if (_baseTheme != currentTheme) {
+        setState(() {
+          _baseTheme = currentTheme;
+          _targetTheme = currentTheme;
+        });
+      }
+    }
+  }
+
   @override
   void dispose() {
+    AppTheme.notifier.removeListener(_onExternalThemeChanged);
     _headerCtrl.dispose();
     _revealCtrl.dispose();
     _baseScrollCtrl.dispose();
@@ -465,6 +478,9 @@ class _SettingsScreenState extends State<SettingsScreen>
     setState(() {
       _isRevealing = true;
     });
+
+    // Synchronously update global AppTheme so floating bottom bar transitions together with the screen ripple
+    AppTheme.changeTheme(newTheme);
 
     _revealCtrl.forward(from: 0.0);
   }

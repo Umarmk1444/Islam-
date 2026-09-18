@@ -37,7 +37,8 @@ class QuranPageContentWrapper extends StatelessWidget {
 
 class QuranScreen extends StatefulWidget {
   final int? initialPage;
-  const QuranScreen({Key? key, this.initialPage}) : super(key: key);
+  final bool openIndexOnLaunch;
+  const QuranScreen({Key? key, this.initialPage, this.openIndexOnLaunch = false}) : super(key: key);
 
   static final ValueNotifier<Map<String, dynamic>?> selectedVerseNotifier =
       ValueNotifier<Map<String, dynamic>?>(null);
@@ -264,6 +265,11 @@ class _QuranScreenState extends State<QuranScreen> {
           _bookmarkedAyah = bookmarkedAyah;
           _isLoading = false;
         });
+        if (widget.openIndexOnLaunch) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _openNavigationPanel(0);
+          });
+        }
       }
     } catch (e, st) {
       debugPrint('Error loading Quran: $e\n$st');

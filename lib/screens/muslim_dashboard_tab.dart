@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../core/database/database_helper.dart';
 import '../core/constants/app_colors.dart';
@@ -126,7 +127,7 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
                     ? 1.34
                     : 1.27; // Increased ratio to shrink height
                 const double paddingBottom =
-                    40; // Extra padding at the bottom to leave room for ad pushed content
+                    96; // Extra padding at the bottom to leave room for floating One UI bar
 
                 return SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -677,7 +678,7 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
     _loadLastReadPosition();
     _pulseCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000),
+      duration: const Duration(milliseconds: 2400),
     )..repeat(reverse: true);
     _pulseAnim = CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut);
   }
@@ -711,13 +712,13 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
             DatabaseHelper.surahTransliterations[surahNum - 1];
 
         foundAr = 'سورة $surahArabic';
-        foundEn = '$translit $ayahNum';
+        foundEn = '$translit 1:$ayahNum';
       }
 
       if (mounted) {
         setState(() {
           _lastPage = lastPage;
-          _progressPct = lastPage / 604.0;
+          _progressPct = (lastPage / 604.0).clamp(0.0016, 1.0);
           _ayahNameAr = foundAr;
           _ayahNameEn = foundEn;
         });
@@ -727,11 +728,15 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
     }
   }
 
-  void _navigateToQuran(BuildContext context) {
+  void _navigateToQuran(BuildContext context, {bool openIndex = false}) {
+    HapticFeedback.lightImpact();
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => QuranScreen(initialPage: _lastPage),
+        builder: (_) => QuranScreen(
+          initialPage: _lastPage,
+          openIndexOnLaunch: openIndex,
+        ),
       ),
     ).then((_) => _loadLastReadPosition());
   }
@@ -747,18 +752,18 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
         final isDark = theme == QuranTheme.dark;
         final isCream = theme == QuranTheme.cream;
 
-        // Theme-tailored Color Palettes
+        // Rich Imperial Islamic Palettes
         final Color cardBg1 = isDark
-            ? const Color(0xFF071120)
-            : (isCream ? const Color(0xFFFFFDF8) : Colors.white);
+            ? const Color(0xFF032617) // Deep Royal Mosque Emerald
+            : (isCream ? const Color(0xFFFFFDF7) : const Color(0xFFF9FCFA));
         final Color cardBg2 = isDark
-            ? const Color(0xFF032616)
-            : (isCream ? const Color(0xFFF5EEDB) : const Color(0xFFF0F7F3));
+            ? const Color(0xFF01140D) // Midnight Forest Green
+            : (isCream ? const Color(0xFFF6EED9) : const Color(0xFFEDF7F1));
         final Color cardBorder = isDark
-            ? const Color(0xFFD4AF37).withValues(alpha: 0.35)
+            ? const Color(0xFFE5C05B).withValues(alpha: 0.45)
             : (isCream
-                ? const Color(0xFFD4AF37).withValues(alpha: 0.32)
-                : const Color(0xFF0D5D44).withValues(alpha: 0.20));
+                ? const Color(0xFFC9A84C).withValues(alpha: 0.40)
+                : const Color(0xFF0D5D44).withValues(alpha: 0.28));
         final Color titleColor = isDark
             ? Colors.white
             : (isCream ? const Color(0xFF2C1E07) : const Color(0xFF032616));
@@ -768,352 +773,376 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
         final Color progressTrack = isDark
             ? Colors.white.withValues(alpha: 0.12)
             : (isCream
-                ? const Color(0xFFD4AF37).withValues(alpha: 0.16)
-                : const Color(0xFF0D5D44).withValues(alpha: 0.10));
+                ? const Color(0xFFD4AF37).withValues(alpha: 0.18)
+                : const Color(0xFF0D5D44).withValues(alpha: 0.12));
         final Color ayahColor = isDark
-            ? const Color(0xFFFFD700).withValues(alpha: 0.90)
+            ? const Color(0xFFFFE082)
             : (isCream ? const Color(0xFF8B5E14) : const Color(0xFF0D5D44));
         final Color progressTextColor = isDark
-            ? Colors.white70
-            : (isCream ? const Color(0xFF6E5630) : const Color(0xFF4A6B5D));
+            ? Colors.white.withValues(alpha: 0.75)
+            : (isCream ? const Color(0xFF7A5C28) : const Color(0xFF4A6B5D));
 
-        final String title, action, progress, ayah;
+        // Localized Labels
+        final String continueBtnLabel, indexBtnLabel, pageLabel;
         if (locale == 'ar') {
-          title = 'القرآن الكريم';
-          action = 'استمر في القراءة ←';
-          progress = 'صفحة $_lastPage · $pctStr٪';
-          ayah = _ayahNameAr;
+          continueBtnLabel = 'استمر في القراءة';
+          indexBtnLabel = 'فهرس السور';
+          pageLabel = 'صفحة';
         } else if (locale == 'am') {
-          title = 'ቅዱስ ቁርአን';
-          action = 'ማንበብ ይቀጥሉ →';
-          progress = 'ገጽ $_lastPage · $pctStr%';
-          ayah = _ayahNameEn;
+          continueBtnLabel = 'ማንበብ ይቀጥሉ';
+          indexBtnLabel = 'የምዕራፎች ማውጫ';
+          pageLabel = 'ገጽ';
         } else if (locale == 'om') {
-          title = 'Quraana Qulqulluu';
-          action = 'Dubbisuu Itti Fufi →';
-          progress = 'Fuula $_lastPage · $pctStr%';
-          ayah = _ayahNameEn;
+          continueBtnLabel = 'Dubbisuu Fufaa';
+          indexBtnLabel = 'Baafata Suuraa';
+          pageLabel = 'Fuula';
         } else {
-          title = 'The Holy Quran';
-          action = 'Resume Reading →';
-          progress = 'Page $_lastPage · $pctStr%';
-          ayah = _ayahNameEn;
+          continueBtnLabel = 'Continue Reading';
+          indexBtnLabel = 'Surah Index';
+          pageLabel = 'Page';
         }
 
-        return TweenAnimationBuilder<double>(
-          tween: Tween<double>(begin: 0.85, end: 1.0),
-          duration: const Duration(milliseconds: 800),
-          curve: Curves.easeOutBack,
-          builder: (context, scaleVal, child) {
-            return Transform.scale(
-              scale: scaleVal,
-              child: child,
-            );
-          },
-          child: LiquidPressable(
-            onTap: () => _navigateToQuran(context),
-            scaleFactor: 0.96,
-            child: AnimatedBuilder(
-              animation: _pulseAnim,
-              builder: (context, child) {
-                final t = _pulseAnim.value;
-                final scale = 1.0 + 0.012 * t;
-                final double shadowSpread = 1.0 + 1.5 * t;
-                final double glowOpacity =
-                    isDark ? (0.12 + 0.12 * t) : (0.04 + 0.08 * t);
+        return AnimatedBuilder(
+          animation: _pulseAnim,
+          builder: (context, _) {
+            final t = _pulseAnim.value;
+            final double glowSpread = 1.0 + (1.5 * t);
+            final double glowAlpha =
+                isDark ? (0.16 + 0.12 * t) : (0.06 + 0.08 * t);
 
-                return Transform.scale(
-                  scale: scale,
-                  child: Container(
-                    height: 100,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [cardBg1, cardBg2],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(22),
-                      border: Border.all(
-                        color: cardBorder,
-                        width: 1.2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: isDark
-                              ? Colors.black.withValues(alpha: 0.4)
-                              : Colors.black.withValues(alpha: 0.06),
-                          blurRadius: 14,
-                          offset: const Offset(0, 6),
+            return Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [cardBg1, cardBg2],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: cardBorder,
+                  width: 1.4,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.07),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                  BoxShadow(
+                    color: goldAccent.withValues(alpha: glowAlpha),
+                    blurRadius: 18,
+                    spreadRadius: glowSpread,
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(22),
+                child: Stack(
+                  children: [
+                    // --- Subtle Islamic Geometric Background Pattern ---
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: _IslamicPatternPainter(
+                          color:
+                              goldAccent.withValues(alpha: isDark ? 0.05 : 0.04),
                         ),
-                        BoxShadow(
-                          color: (isDark
-                                  ? const Color(0xFFD4AF37)
-                                  : const Color(0xFFB8860B))
-                              .withValues(alpha: glowOpacity),
-                          blurRadius: 18,
-                          spreadRadius: shadowSpread,
-                        ),
-                      ],
+                      ),
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(22),
-                      child: Stack(
-                        children: [
-                          // --- Subtle Islamic Geometric Background Pattern ---
-                          Positioned.fill(
-                            child: CustomPaint(
-                              painter: _IslamicPatternPainter(
-                                color: (isDark
-                                        ? const Color(0xFFFFD700)
-                                        : const Color(0xFFB8860B))
-                                    .withValues(alpha: 0.04),
-                              ),
-                            ),
+                    // --- Soft Glowing Corner Radiance ---
+                    Positioned(
+                      top: -20,
+                      right: locale == 'ar' ? null : -20,
+                      left: locale == 'ar' ? -20 : null,
+                      child: Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              goldAccent
+                                  .withValues(alpha: isDark ? 0.22 : 0.12),
+                              Colors.transparent,
+                            ],
                           ),
-                          // --- Soft Glowing Lighting Effect ---
-                          Positioned(
-                            top: -25,
-                            right: locale == 'ar' ? null : -20,
-                            left: locale == 'ar' ? -20 : null,
-                            child: Container(
-                              width: 110,
-                              height: 110,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: RadialGradient(
-                                  colors: [
-                                    (isDark
-                                            ? const Color(0xFFFFD700)
-                                            : Colors.white)
-                                        .withValues(alpha: 0.18 + (0.08 * t)),
-                                    Colors.transparent,
+                        ),
+                      ),
+                    ),
+                    // --- Main Majestic Content ---
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // ── ROW 1: Calligraphy Badge + Reading Progress Pill ──
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // Royal Calligraphy Badge
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 9, vertical: 3.5),
+                                decoration: BoxDecoration(
+                                  color: goldAccent
+                                      .withValues(alpha: isDark ? 0.18 : 0.12),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: goldAccent.withValues(alpha: 0.40),
+                                    width: 0.9,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.menu_book_rounded,
+                                      size: 14,
+                                      color: goldAccent,
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      'القرآن الكريم',
+                                      style: TextStyle(
+                                        fontFamily: 'Amiri',
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: goldAccent,
+                                        letterSpacing: 0.2,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
-                            ),
-                          ),
-                          // --- Main Content ---
-                          Positioned.fill(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 10),
-                              child: Row(
-                                children: [
-                                  // Layered Quran Iconography
-                                  SizedBox(
-                                    width: 50,
-                                    height: 50,
-                                    child: Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        Container(
-                                          width: 50,
-                                          height: 50,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: goldAccent.withValues(
-                                                  alpha: 0.25 * t),
-                                              width: 1,
-                                            ),
-                                          ),
-                                        ),
-                                        Container(
-                                          width: 42,
-                                          height: 42,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            gradient: LinearGradient(
-                                              colors: isDark
-                                                  ? [
-                                                      const Color(0xFFD4AF37)
-                                                          .withValues(
-                                                              alpha: 0.22),
-                                                      const Color(0xFFFFD700)
-                                                          .withValues(
-                                                              alpha: 0.06),
-                                                    ]
-                                                  : (isCream
-                                                      ? [
-                                                          Colors.white,
-                                                          const Color(
-                                                              0xFFF8F1E2)
-                                                        ]
-                                                      : [
-                                                          Colors.white,
-                                                          const Color(
-                                                              0xFFEBF6F1)
-                                                        ]),
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                            ),
-                                            border: Border.all(
-                                              color: goldAccent.withValues(
-                                                  alpha: 0.45),
-                                              width: 1.4,
-                                            ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: goldAccent.withValues(
-                                                    alpha: 0.2),
-                                                blurRadius: 8,
-                                              ),
-                                            ],
-                                          ),
-                                          child: Icon(
-                                            Icons.auto_stories_rounded,
-                                            color: goldAccent,
-                                            size: 22,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                              // Page & Completion Badge
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.08)
+                                      : Colors.black.withValues(alpha: 0.04),
+                                  borderRadius: BorderRadius.circular(7),
+                                ),
+                                child: Text(
+                                  '$pageLabel $_lastPage · $pctStr%',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: progressTextColor,
                                   ),
-                                  const SizedBox(width: 12),
-                                  // Text & Progress Content
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 9),
+
+                          // ── ROW 2: Surah Names & Last Read Ayah ──────────────
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _ayahNameAr,
+                                      style: TextStyle(
+                                        color: titleColor,
+                                        fontSize: 15.5,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Amiri',
+                                        height: 1.2,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 1),
+                                    Text(
+                                      _ayahNameEn,
+                                      style: TextStyle(
+                                        color: ayahColor,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+
+                          // ── ROW 3: Jewel-cut Glowing Progress Bar (5px) ─────
+                          Stack(
+                            alignment: locale == 'ar'
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                            children: [
+                              Container(
+                                height: 4.5,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: progressTrack,
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                              ),
+                              FractionallySizedBox(
+                                widthFactor: _progressPct.clamp(0.01, 1.0),
+                                child: Container(
+                                  height: 4.5,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: isDark
+                                          ? [
+                                              const Color(0xFFFFD700),
+                                              const Color(0xFF00E676),
+                                            ]
+                                          : (isCream
+                                              ? [
+                                                  const Color(0xFFD4AF37),
+                                                  const Color(0xFF9E7D23),
+                                                ]
+                                              : [
+                                                  const Color(0xFF0D5D44),
+                                                  const Color(0xFF2E7D32),
+                                                ]),
+                                    ),
+                                    borderRadius: BorderRadius.circular(5),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: goldAccent.withValues(alpha: 0.45),
+                                        blurRadius: 4,
+                                        spreadRadius: 0.5,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+
+                          // ── ROW 4: Dual Quick Action Buttons ────────────────
+                          Row(
+                            children: [
+                              // Button 1: Continue Reading (Primary)
+                              Expanded(
+                                flex: 6,
+                                child: SizedBox(
+                                  height: 36,
+                                  child: ElevatedButton(
+                                    onPressed: () => _navigateToQuran(context,
+                                        openIndex: false),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: isDark
+                                          ? const Color(0xFF0D5D44)
+                                          : (isCream
+                                              ? const Color(0xFF1B4332)
+                                              : const Color(0xFF0D5D44)),
+                                      foregroundColor: Colors.white,
+                                      elevation: 2,
+                                      shadowColor: const Color(0xFF0D5D44)
+                                          .withValues(alpha: 0.4),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10),
+                                    ),
+                                    child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                title,
-                                                style: TextStyle(
-                                                  color: titleColor,
-                                                  fontSize: 15.5,
-                                                  fontWeight: FontWeight.bold,
-                                                  letterSpacing: 0.3,
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
+                                        const Icon(Icons.auto_stories_rounded,
+                                            size: 14, color: Colors.white),
+                                        const SizedBox(width: 6),
+                                        Flexible(
+                                          child: Text(
+                                            continueBtnLabel,
+                                            style: const TextStyle(
+                                              fontSize: 11.5,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 0.2,
                                             ),
-                                            const SizedBox(width: 6),
-                                            // Action Link
-                                            Text(
-                                              action,
-                                              style: TextStyle(
-                                                color: goldAccent,
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w700,
-                                                letterSpacing: 0.2,
-                                              ),
-                                            ),
-                                          ],
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ),
-                                        const SizedBox(height: 6),
-                                        // ── Upgraded Luxurious Progress Bar (Height: 4px) ──
-                                        Stack(
-                                          alignment: locale == 'ar'
-                                              ? Alignment.centerRight
-                                              : Alignment.centerLeft,
-                                          children: [
-                                            Container(
-                                              height: 4,
-                                              width: double.infinity,
-                                              decoration: BoxDecoration(
-                                                color: progressTrack,
-                                                borderRadius:
-                                                    BorderRadius.circular(4),
-                                              ),
-                                            ),
-                                            FractionallySizedBox(
-                                              widthFactor:
-                                                  _progressPct.clamp(0.01, 1.0),
-                                              child: Container(
-                                                height: 4,
-                                                decoration: BoxDecoration(
-                                                  gradient: LinearGradient(
-                                                    colors: isDark
-                                                        ? [
-                                                            const Color(
-                                                                0xFFFFD700),
-                                                            const Color(
-                                                                0xFF00E676),
-                                                          ]
-                                                        : (isCream
-                                                            ? [
-                                                                const Color(
-                                                                    0xFFD4AF37),
-                                                                const Color(
-                                                                    0xFF9E7D23),
-                                                              ]
-                                                            : [
-                                                                const Color(
-                                                                    0xFF0D5D44),
-                                                                const Color(
-                                                                    0xFF2E7D32),
-                                                              ]),
-                                                  ),
-                                                  borderRadius:
-                                                      BorderRadius.circular(4),
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color:
-                                                          goldAccent.withValues(
-                                                              alpha: 0.4),
-                                                      blurRadius: 4,
-                                                      spreadRadius: 0.5,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 6),
-                                        // Ayah and Progress Info
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                ayah,
-                                                style: TextStyle(
-                                                  color: ayahColor,
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              progress,
-                                              style: TextStyle(
-                                                color: progressTextColor,
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
+                                        const SizedBox(width: 4),
+                                        Icon(
+                                          locale == 'ar'
+                                              ? Icons.arrow_back_rounded
+                                              : Icons.arrow_forward_rounded,
+                                          size: 13,
+                                          color: Colors.white70,
                                         ),
                                       ],
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
+                              const SizedBox(width: 8),
+
+                              // Button 2: Surah Index (Secondary Outlined)
+                              Expanded(
+                                flex: 5,
+                                child: SizedBox(
+                                  height: 36,
+                                  child: OutlinedButton(
+                                    onPressed: () => _navigateToQuran(context,
+                                        openIndex: true),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: goldAccent,
+                                      side: BorderSide(
+                                        color: goldAccent.withValues(alpha: 0.50),
+                                        width: 1.2,
+                                      ),
+                                      backgroundColor: goldAccent.withValues(
+                                          alpha: isDark ? 0.12 : 0.08),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.format_list_bulleted_rounded,
+                                            size: 14, color: goldAccent),
+                                        const SizedBox(width: 5),
+                                        Flexible(
+                                          child: Text(
+                                            indexBtnLabel,
+                                            style: TextStyle(
+                                              fontSize: 11.5,
+                                              fontWeight: FontWeight.bold,
+                                              color: goldAccent,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-          ),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
     );

@@ -1,6 +1,8 @@
 import 'dart:io' show Platform;
+import 'dart:ui' show ImageFilter;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart' as ph;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
@@ -21,10 +23,10 @@ import '../services/app_update_service.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 //
 // 4-tab bottom navigator:
-//   Tab 0 → MuslimDashboardTab  ("لوحة المسلم" / "Dashboard")
-//   Tab 1 → LibraryScreen       ("المكتبة" / "Library")
-//   Tab 2 → MinbarTab           ("المنبر" / "Minbar")
-//   Tab 3 → SettingsScreen      ("الإعدادات" / "Settings")
+//   Tab 0 → MuslimDashboardTab  ("Home" / "الرئيسية")
+//   Tab 1 → LibraryScreen       ("Library" / "المكتبة")
+//   Tab 2 → MinbarTab           ("Minbar" / "المنبر")
+//   Tab 3 → SettingsScreen      ("Settings" / "الإعدادات")
 //
 // Uses PageView + AutomaticKeepAliveClientMixin so swiping works left/right
 // and each tab's scroll/state is preserved across switches.
@@ -43,8 +45,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   final List<GlobalKey> _tabKeys = [
     GlobalKey(debugLabel: 'dashboard_tab'),
-    GlobalKey(debugLabel: 'minbar_tab'),
     GlobalKey(debugLabel: 'library_tab'),
+    GlobalKey(debugLabel: 'minbar_tab'),
     GlobalKey(debugLabel: 'settings_tab'),
   ];
 
@@ -347,26 +349,26 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   // Nav-bar items are built in [build] so they can access localised strings.
   static const List<_NavItem> _navMeta = [
     _NavItem(
-      icon: Icons.home_outlined,
-      activeIcon: Icons.home_rounded,
+      icon: Icons.mosque_outlined,
+      activeIcon: Icons.mosque_rounded,
       labelKey: 'navDashboard',
-      fallback: 'Dashboard',
-    ),
-    _NavItem(
-      icon: Icons.podcasts_outlined,
-      activeIcon: Icons.podcasts_rounded,
-      labelKey: 'navMinbar',
-      fallback: 'المنبر',
+      fallback: 'Home',
     ),
     _NavItem(
       icon: Icons.auto_stories_outlined,
       activeIcon: Icons.auto_stories_rounded,
       labelKey: 'navLibrary',
-      fallback: 'المكتبة',
+      fallback: 'Library',
     ),
     _NavItem(
-      icon: Icons.tune_outlined,
-      activeIcon: Icons.tune_rounded,
+      icon: Icons.graphic_eq_rounded,
+      activeIcon: Icons.graphic_eq_rounded,
+      labelKey: 'navMinbar',
+      fallback: 'Minbar',
+    ),
+    _NavItem(
+      icon: Icons.settings_outlined,
+      activeIcon: Icons.settings_suggest_rounded,
       labelKey: 'navSettings',
       fallback: 'Settings',
     ),
@@ -374,6 +376,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   void _onTabTapped(int index) {
     if (index == _currentIndex) return;
+    HapticFeedback.lightImpact();
     setState(() => _currentIndex = index);
     _pageController.animateToPage(
       index,
@@ -388,14 +391,39 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       valueListenable: AppTheme.notifier,
       builder: (context, theme, _) {
         final isDark = theme == QuranTheme.dark;
+        final isCream = theme == QuranTheme.cream;
         final l10n = AppLocalizations.of(context);
 
-        final Color bgColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-        final Color barBgColor = isDark ? AppColors.surfaceCard : Colors.white;
-        const Color selectedColor = AppColors.emeraldLight;
-        final Color unselectedColor = isDark ? AppColors.textMuted : Colors.grey.shade500;
+        final Color bgColor = AppTheme.getScreenBgColor(theme);
+
+        // One UI 8.5 Translucent Glass Palettes
+        final Color barBgColor = isDark
+            ? const Color(0xFF07120C).withValues(alpha: 0.78)
+            : (isCream
+                ? const Color(0xFFFAF6EB).withValues(alpha: 0.85)
+                : Colors.white.withValues(alpha: 0.86));
+
+        final Color borderColor = isDark
+            ? Colors.white.withValues(alpha: 0.13)
+            : (isCream
+                ? const Color(0xFFC9A84C).withValues(alpha: 0.35)
+                : Colors.black.withValues(alpha: 0.08));
+
+        final Color selectedColor = isDark
+            ? const Color(0xFF00E676)
+            : (isCream ? const Color(0xFF1B4332) : const Color(0xFF0D5D44));
+
+        final Color unselectedColor = isDark
+            ? Colors.white.withValues(alpha: 0.45)
+            : (isCream
+                ? const Color(0xFF7A5C28).withValues(alpha: 0.65)
+                : Colors.black.withValues(alpha: 0.42));
+
+        final Color activeIndicatorColor = selectedColor.withValues(
+            alpha: isDark ? 0.18 : (isCream ? 0.14 : 0.12));
 
         return Scaffold(
+          extendBody: true,
           backgroundColor: bgColor,
           body: Center(
             child: ConstrainedBox(
@@ -412,8 +440,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 physics: const BouncingScrollPhysics(),
                 children: [
                   MuslimDashboardTab(key: _tabKeys[0]),
-                  MinbarTab(key: _tabKeys[1]),
-                  LibraryScreen(key: _tabKeys[2]),
+                  LibraryScreen(key: _tabKeys[1]),
+                  MinbarTab(key: _tabKeys[2]),
                   SettingsScreen(key: _tabKeys[3]),
                 ],
               ),
@@ -430,8 +458,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 l10n: l10n,
                 isDark: isDark,
                 barBgColor: barBgColor,
+                borderColor: borderColor,
                 selectedColor: selectedColor,
                 unselectedColor: unselectedColor,
+                activeIndicatorColor: activeIndicatorColor,
                 onTap: _onTabTapped,
               ),
             ),
@@ -443,7 +473,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// _AppBottomNavBar — ultra compact styled nav bar with scroll tracking & RTL
+// _AppBottomNavBar — Samsung One UI 8.5 Floating Glassmorphic Dock
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _AppBottomNavBar extends StatelessWidget {
@@ -454,8 +484,10 @@ class _AppBottomNavBar extends StatelessWidget {
     required this.l10n,
     required this.isDark,
     required this.barBgColor,
+    required this.borderColor,
     required this.selectedColor,
     required this.unselectedColor,
+    required this.activeIndicatorColor,
     required this.onTap,
   });
 
@@ -465,8 +497,10 @@ class _AppBottomNavBar extends StatelessWidget {
   final AppLocalizations? l10n;
   final bool isDark;
   final Color barBgColor;
+  final Color borderColor;
   final Color selectedColor;
   final Color unselectedColor;
+  final Color activeIndicatorColor;
   final ValueChanged<int> onTap;
 
   @override
@@ -477,7 +511,11 @@ class _AppBottomNavBar extends StatelessWidget {
       builder: (context, constraints) {
         final double totalWidth = constraints.maxWidth;
         final int count = navMeta.length;
-        final double itemWidth = totalWidth / count;
+
+        // One UI Floating margins: 16px left + 16px right
+        const double horizontalMargin = 16.0;
+        final double availableWidth = totalWidth - (horizontalMargin * 2);
+        final double itemWidth = availableWidth / count;
 
         final double currentPage = (pageController.hasClients &&
                 pageController.position.haveDimensions)
@@ -489,84 +527,90 @@ class _AppBottomNavBar extends StatelessWidget {
             ? ((count - 1) - currentPage)
             : currentPage;
 
-        // Sliding pill parameters
-        final double pillWidth = itemWidth - 4;
-        const double pillHeight = 36;
+        const double barHeight = 60.0;
+        const double pillHeight = 42.0;
+        final double pillWidth = itemWidth - 8.0;
         final double pillLeft = (visualPage * itemWidth) + (itemWidth - pillWidth) / 2;
 
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 320),
-          curve: Curves.easeInOut,
-          decoration: BoxDecoration(
-            color: barBgColor,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
-                blurRadius: 14,
-                offset: const Offset(0, -2),
-              ),
-            ],
-            border: Border(
-              top: BorderSide(
-                color: isDark ? AppColors.divider : Colors.grey.shade200,
-                width: 0.4,
-              ),
-            ),
-          ),
-          child: SafeArea(
-            top: false,
-            child: SizedBox(
-              height: 52,
-              child: Stack(
-                alignment: Alignment.centerLeft,
-                children: [
-                  // ── Floating Sliding Pill Indicator ────────────────────────
-                  Positioned(
-                    left: pillLeft,
-                    top: (52 - pillHeight) / 2,
-                    width: pillWidth,
-                    height: pillHeight,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: selectedColor.withValues(alpha: isDark ? 0.18 : 0.12),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: selectedColor.withValues(alpha: 0.3),
-                          width: 1,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: selectedColor.withValues(alpha: 0.2),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(horizontalMargin, 0, horizontalMargin, 12),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 320),
+                  curve: Curves.easeInOut,
+                  height: barHeight,
+                  decoration: BoxDecoration(
+                    color: barBgColor,
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(
+                      color: borderColor,
+                      width: 1.2,
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.08),
+                        blurRadius: 22,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
-
-                  // ── 4 Nav Bar Item Buttons ──────────────────────────────────
-                  Row(
-                    children: List.generate(count, (i) {
-                      final item = navMeta[i];
-                      final double distance = (currentPage - i).abs();
-                      final double activeWeight = (1.0 - distance).clamp(0.0, 1.0);
-
-                      return SizedBox(
-                        width: itemWidth,
-                        height: 52,
-                        child: _NavBarButton(
-                          item: item,
-                          activeWeight: activeWeight,
-                          selectedColor: selectedColor,
-                          unselectedColor: unselectedColor,
-                          l10n: l10n,
-                          onTap: () => onTap(i),
+                  child: Stack(
+                    alignment: Alignment.centerLeft,
+                    children: [
+                      // ── One UI 8.5 Sliding Squircle / Capsule Indicator ──
+                      Positioned(
+                        left: pillLeft,
+                        top: (barHeight - pillHeight) / 2,
+                        width: pillWidth,
+                        height: pillHeight,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: activeIndicatorColor,
+                            borderRadius: BorderRadius.circular(21),
+                            border: Border.all(
+                              color: selectedColor.withValues(alpha: isDark ? 0.35 : 0.22),
+                              width: 1.0,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: selectedColor.withValues(alpha: isDark ? 0.20 : 0.08),
+                                blurRadius: 10,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
                         ),
-                      );
-                    }),
+                      ),
+
+                      // ── 4 Nav Bar Item Buttons ──
+                      Row(
+                        children: List.generate(count, (i) {
+                          final item = navMeta[i];
+                          final double distance = (currentPage - i).abs();
+                          final double activeWeight = (1.0 - distance).clamp(0.0, 1.0);
+
+                          return SizedBox(
+                            width: itemWidth,
+                            height: barHeight,
+                            child: _NavBarButton(
+                              item: item,
+                              activeWeight: activeWeight,
+                              selectedColor: selectedColor,
+                              unselectedColor: unselectedColor,
+                              l10n: l10n,
+                              onTap: () => onTap(i),
+                            ),
+                          );
+                        }),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -577,7 +621,7 @@ class _AppBottomNavBar extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// _NavBarButton — animated individual tab button
+// _NavBarButton — One UI 8.5 animated individual tab button
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _NavBarButton extends StatefulWidget {
@@ -613,7 +657,7 @@ class _NavBarButtonState extends State<_NavBarButton>
       vsync: this,
       duration: const Duration(milliseconds: 120),
     );
-    _scaleAnim = Tween<double>(begin: 1.0, end: 0.85).animate(
+    _scaleAnim = Tween<double>(begin: 1.0, end: 0.88).animate(
       CurvedAnimation(parent: _tapCtrl, curve: Curves.easeOutCubic),
     );
   }
@@ -626,11 +670,12 @@ class _NavBarButtonState extends State<_NavBarButton>
 
   @override
   Widget build(BuildContext context) {
-    final label = _resolveLabel(widget.l10n);
+    final label = _resolveLabel(context, widget.l10n);
     final weight = widget.activeWeight;
 
     // Smooth color lerp
-    final Color iconColor = Color.lerp(widget.unselectedColor, widget.selectedColor, weight)!;
+    final Color iconColor =
+        Color.lerp(widget.unselectedColor, widget.selectedColor, weight)!;
     final bool isSelected = weight > 0.5;
 
     return GestureDetector(
@@ -645,7 +690,7 @@ class _NavBarButtonState extends State<_NavBarButton>
         child: ScaleTransition(
           scale: _scaleAnim,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 2),
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Row(
@@ -653,14 +698,14 @@ class _NavBarButtonState extends State<_NavBarButton>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 180),
+                    duration: const Duration(milliseconds: 200),
                     transitionBuilder: (child, anim) =>
                         ScaleTransition(scale: anim, child: child),
                     child: Icon(
                       isSelected ? widget.item.activeIcon : widget.item.icon,
                       key: ValueKey('${widget.item.labelKey}_$isSelected'),
                       color: iconColor,
-                      size: 19,
+                      size: isSelected ? 21 : 19.5,
                     ),
                   ),
                   ClipRect(
@@ -670,12 +715,12 @@ class _NavBarButtonState extends State<_NavBarButton>
                       child: Opacity(
                         opacity: weight,
                         child: Padding(
-                          padding: const EdgeInsets.only(left: 4, right: 2),
+                          padding: const EdgeInsets.only(left: 5, right: 3),
                           child: Text(
                             label,
                             maxLines: 1,
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 11.5,
                               fontWeight: FontWeight.bold,
                               color: widget.selectedColor,
                               letterSpacing: 0.1,
@@ -694,18 +739,31 @@ class _NavBarButtonState extends State<_NavBarButton>
     );
   }
 
-  String _resolveLabel(AppLocalizations? l10n) {
-    if (l10n == null) return widget.item.fallback;
-    try {
-      switch (widget.item.labelKey) {
-        case 'navSettings':  return l10n.navSettings;
-        case 'navDashboard': return l10n.navDashboard;
-        case 'navMinbar':    return l10n.navMinbar;
-        case 'navLibrary':   return l10n.navLibrary;
-        default: return widget.item.fallback;
-      }
-    } catch (_) {
-      return widget.item.fallback;
+  String _resolveLabel(BuildContext context, AppLocalizations? l10n) {
+    final lang = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
+    switch (widget.item.labelKey) {
+      case 'navDashboard':
+        if (lang == 'ar') return 'الرئيسية';
+        if (lang == 'am') return 'ዋና ገጽ';
+        if (lang == 'om') return 'Mana';
+        return 'Home';
+      case 'navLibrary':
+        if (lang == 'ar') return 'المكتبة';
+        if (lang == 'am') return 'ቤተ-መጽሐፍት';
+        if (lang == 'om') return 'Man-kuusaa';
+        return 'Library';
+      case 'navMinbar':
+        if (lang == 'ar') return 'المنبر';
+        if (lang == 'am') return 'ሚንበር';
+        if (lang == 'om') return 'Minbara';
+        return 'Minbar';
+      case 'navSettings':
+        if (lang == 'ar') return 'الإعدادات';
+        if (lang == 'am') return 'ቅንብሮች';
+        if (lang == 'om') return 'Qindaa\'ina';
+        return 'Settings';
+      default:
+        return widget.item.fallback;
     }
   }
 }
