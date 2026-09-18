@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../core/constants/app_colors.dart';
 import '../language_notifier.dart';
 import '../theme_notifier.dart';
 import '../widgets/liquid_pressable.dart';
+import '../widgets/circular_theme_reveal.dart';
 
 // Authentic Qaida Color Palette
 const Color _kRed = Color(0xFFC62828);
@@ -4026,9 +4028,45 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen>
 
 
 
+  final CircularThemeRevealController _themeRevealCtrl = CircularThemeRevealController();
+
+  void _cycleQaidaThemeWithReveal(BuildContext btnContext, QuranTheme currentTheme) {
+    if (_themeRevealCtrl.isRevealing) return;
+
+    HapticFeedback.selectionClick();
+
+    final nextTheme = currentTheme == QuranTheme.cream
+        ? QuranTheme.dark
+        : (currentTheme == QuranTheme.dark
+            ? QuranTheme.white
+            : QuranTheme.cream);
+
+    final RenderBox? box = btnContext.findRenderObject() as RenderBox?;
+    final Offset origin = box != null && box.hasSize
+        ? box.localToGlobal(box.size.center(Offset.zero))
+        : const Offset(40, 40);
+
+    final nextOuterBg = nextTheme == QuranTheme.dark
+        ? const Color(0xFF070D0A)
+        : (nextTheme == QuranTheme.cream
+            ? const Color(0xFFECE4D0)
+            : const Color(0xFFF1F5F9));
+
+    _themeRevealCtrl.triggerReveal(
+      origin: origin,
+      ringColor: AppTheme.getBorderColor(nextTheme),
+      targetBgColor: nextOuterBg,
+      onThemeChange: () {
+        AppTheme.changeTheme(nextTheme);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<QuranTheme>(
+    return CircularThemeReveal(
+      controller: _themeRevealCtrl,
+      child: ValueListenableBuilder<QuranTheme>(
       valueListenable: AppTheme.notifier,
       builder: (context, currentTheme, _) {
         final isDark = currentTheme == QuranTheme.dark;
@@ -4060,32 +4098,28 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen>
               ),
             ),
             actions: [
-              // Theme Switcher Toggle (Cream / Dark / White)
-              IconButton(
-                padding: const EdgeInsets.all(6),
-                constraints: const BoxConstraints(),
-                icon: Icon(
-                  currentTheme == QuranTheme.cream
-                      ? Icons.auto_awesome_rounded
-                      : (currentTheme == QuranTheme.dark
-                          ? Icons.dark_mode_rounded
-                          : Icons.light_mode_rounded),
-                  color: topIconColor,
-                  size: 20,
-                ),
-                tooltip: currentTheme == QuranTheme.cream
-                    ? 'المظهر: كريمي أصيل'
-                    : (currentTheme == QuranTheme.dark
-                        ? 'المظهر: ليلي داكن'
-                        : 'المظهر: أبيض ناصع'),
-                onPressed: () {
-                  if (currentTheme == QuranTheme.cream) {
-                    AppTheme.changeTheme(QuranTheme.dark);
-                  } else if (currentTheme == QuranTheme.dark) {
-                    AppTheme.changeTheme(QuranTheme.white);
-                  } else {
-                    AppTheme.changeTheme(QuranTheme.cream);
-                  }
+              // Theme Switcher Toggle (Cream / Dark / White) with 1-pixel radial ripple
+              Builder(
+                builder: (btnContext) {
+                  return IconButton(
+                    padding: const EdgeInsets.all(6),
+                    constraints: const BoxConstraints(),
+                    icon: Icon(
+                      currentTheme == QuranTheme.cream
+                          ? Icons.auto_awesome_rounded
+                          : (currentTheme == QuranTheme.dark
+                              ? Icons.dark_mode_rounded
+                              : Icons.light_mode_rounded),
+                      color: topIconColor,
+                      size: 20,
+                    ),
+                    tooltip: currentTheme == QuranTheme.cream
+                        ? 'المظهر: كريمي أصيل'
+                        : (currentTheme == QuranTheme.dark
+                            ? 'المظهر: ليلي داكن'
+                            : 'المظهر: أبيض ناصع'),
+                    onPressed: () => _cycleQaidaThemeWithReveal(btnContext, currentTheme),
+                  );
                 },
               ),
               const SizedBox(width: 4),
@@ -4165,8 +4199,9 @@ class _QaidaNooraniyahScreenState extends State<QaidaNooraniyahScreen>
           ),
         );
       },
-    );
-  }
+    ),
+  );
+}
 
   // ═══════════════════════════════════════════════════════════════════════════
   // LUXURY NOORANIYAH PAGE CARD (Arched Islamic Canvas Frame)

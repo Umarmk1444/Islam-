@@ -384,56 +384,60 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme    = AppTheme.notifier.value;
-    final isDark   = theme == QuranTheme.dark;
-    final l10n     = AppLocalizations.of(context);
+    return ValueListenableBuilder<QuranTheme>(
+      valueListenable: AppTheme.notifier,
+      builder: (context, theme, _) {
+        final isDark = theme == QuranTheme.dark;
+        final l10n = AppLocalizations.of(context);
 
-    final Color bgColor      = isDark ? AppColors.surfaceDark    : AppColors.surfaceLight;
-    final Color barBgColor   = isDark ? AppColors.surfaceCard    : Colors.white;
-    const Color selectedColor = AppColors.emeraldLight;
-    final Color unselectedColor = isDark ? AppColors.textMuted : Colors.grey.shade500;
+        final Color bgColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+        final Color barBgColor = isDark ? AppColors.surfaceCard : Colors.white;
+        const Color selectedColor = AppColors.emeraldLight;
+        final Color unselectedColor = isDark ? AppColors.textMuted : Colors.grey.shade500;
 
-    return Scaffold(
-      backgroundColor: bgColor,
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 850),
-          child: PageView(
-            controller: _pageController,
-            onPageChanged: (index) {
-              if (_currentIndex != index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              }
-            },
-            physics: const BouncingScrollPhysics(),
-            children: [
-              MuslimDashboardTab(key: _tabKeys[0]),
-              MinbarTab(key: _tabKeys[1]),
-              LibraryScreen(key: _tabKeys[2]),
-              SettingsScreen(key: _tabKeys[3]),
-            ],
+        return Scaffold(
+          backgroundColor: bgColor,
+          body: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 850),
+              child: PageView(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  if (_currentIndex != index) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  }
+                },
+                physics: const BouncingScrollPhysics(),
+                children: [
+                  MuslimDashboardTab(key: _tabKeys[0]),
+                  MinbarTab(key: _tabKeys[1]),
+                  LibraryScreen(key: _tabKeys[2]),
+                  SettingsScreen(key: _tabKeys[3]),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
-      bottomNavigationBar: Center(
-        heightFactor: 1.0,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 850),
-          child: _AppBottomNavBar(
-            currentIndex: _currentIndex,
-            pageController: _pageController,
-            navMeta: _navMeta,
-            l10n: l10n,
-            isDark: isDark,
-            barBgColor: barBgColor,
-            selectedColor: selectedColor,
-            unselectedColor: unselectedColor,
-            onTap: _onTabTapped,
+          bottomNavigationBar: Center(
+            heightFactor: 1.0,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 850),
+              child: _AppBottomNavBar(
+                currentIndex: _currentIndex,
+                pageController: _pageController,
+                navMeta: _navMeta,
+                l10n: l10n,
+                isDark: isDark,
+                barBgColor: barBgColor,
+                selectedColor: selectedColor,
+                unselectedColor: unselectedColor,
+                onTap: _onTabTapped,
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -490,7 +494,9 @@ class _AppBottomNavBar extends StatelessWidget {
         const double pillHeight = 36;
         final double pillLeft = (visualPage * itemWidth) + (itemWidth - pillWidth) / 2;
 
-        return Container(
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 320),
+          curve: Curves.easeInOut,
           decoration: BoxDecoration(
             color: barBgColor,
             boxShadow: [

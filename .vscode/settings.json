@@ -9,5 +9,15 @@
     "python.testing.pytestEnabled": false,
     "python.testing.unittestEnabled": true,
     "java.configuration.updateBuildConfiguration": "automatic",
-    "dart.flutterSdkPath": "C:\\src\\flutter"
+    "dart.flutterSdkPath": "C:\\src\\flutter",
+    "java.jdt.ls.java.home": "C:\\Program Files\\Android\\Android Studio2\\jbr",
+    "java.import.gradle.java.home": "C:\\Program Files\\Android\\Android Studio2\\jbr",
+    "gradle.java.home": "C:\\Program Files\\Android\\Android Studio2\\jbr",
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-21",
+            "path": "C:\\Program Files\\Android\\Android Studio2\\jbr",
+            "default": true
+        }
+    ]
 }

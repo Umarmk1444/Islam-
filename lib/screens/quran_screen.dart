@@ -13,6 +13,7 @@ import '../controllers/quran_audio_controller.dart';
 import '../core/database/database_helper.dart';
 import '../l10n/app_localizations.dart';
 import '../widgets/custom_banner_ad.dart'; // kQuranScreenActive
+import '../widgets/circular_theme_reveal.dart';
 
 // Background processing removed in favor of True Lazy Loading directly from SQLite
 
@@ -271,80 +272,38 @@ class _QuranScreenState extends State<QuranScreen> {
     }
   }
 
-  // ── Theme Changer ─────────────────────────────────────────────────────────
+  // ── Theme Changer & Instant Circular Reveal ───────────────────────────────
+
+  final CircularThemeRevealController _themeRevealCtrl = CircularThemeRevealController();
 
   void _changeTheme(QuranTheme theme) {
     AppTheme.changeTheme(theme);
   }
 
-  void _showThemeSelector() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => SafeArea(
-        top: false,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-          decoration: BoxDecoration(
-            color: _pageBgColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'اختر المظهر (Reading Theme)',
-                style: TextStyle(
-                  fontFamily: 'Amiri',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: _mainTextColor,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _ThemeOption(
-                    label: 'Classic Cream',
-                    bgColor: const Color(0xFFFDFBF0),
-                    borderColor: const Color(0xFFC9A84C),
-                    textColor: Colors.black,
-                    isSelected: _selectedTheme == QuranTheme.cream,
-                    onTap: () {
-                      Navigator.pop(ctx);
-                      _changeTheme(QuranTheme.cream);
-                    },
-                  ),
-                  _ThemeOption(
-                    label: 'Dark Mode',
-                    bgColor: const Color(0xFF0D1F17),
-                    borderColor: const Color(0xFFE8C77A),
-                    textColor: Colors.white,
-                    isSelected: _selectedTheme == QuranTheme.dark,
-                    onTap: () {
-                      Navigator.pop(ctx);
-                      _changeTheme(QuranTheme.dark);
-                    },
-                  ),
-                  _ThemeOption(
-                    label: 'Crisp White',
-                    bgColor: Colors.white,
-                    borderColor: const Color(0xFFC9A84C),
-                    textColor: Colors.black,
-                    isSelected: _selectedTheme == QuranTheme.white,
-                    onTap: () {
-                      Navigator.pop(ctx);
-                      _changeTheme(QuranTheme.white);
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-            ],
-          ),
-        ),
-      ),
+  void _cycleQuranTheme(BuildContext btnContext) {
+    if (_themeRevealCtrl.isRevealing) return;
+
+    HapticFeedback.selectionClick();
+
+    final currentTheme = _selectedTheme;
+    final nextTheme = currentTheme == QuranTheme.cream
+        ? QuranTheme.dark
+        : (currentTheme == QuranTheme.dark
+            ? QuranTheme.white
+            : QuranTheme.cream);
+
+    final RenderBox? box = btnContext.findRenderObject() as RenderBox?;
+    final Offset origin = box != null && box.hasSize
+        ? box.localToGlobal(box.size.center(Offset.zero))
+        : const Offset(60, 45);
+
+    _themeRevealCtrl.triggerReveal(
+      origin: origin,
+      ringColor: AppTheme.getBorderColor(nextTheme),
+      targetBgColor: AppTheme.getScreenBgColor(nextTheme),
+      onThemeChange: () {
+        _changeTheme(nextTheme);
+      },
     );
   }
 
@@ -749,26 +708,32 @@ class _QuranScreenState extends State<QuranScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<QuranTheme>(
-      valueListenable: AppTheme.notifier,
-      builder: (context, theme, _) {
-        return Scaffold(
-          backgroundColor: _screenBgColor,
-          appBar: AppBar(
-            leadingWidth: 100,
-            leading: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const BackButton(),
-                IconButton(
-                  icon: const Icon(Icons.palette_outlined),
-                  onPressed: _showThemeSelector,
-                  tooltip: 'المظهر',
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-                ),
-              ],
-            ),
+    return CircularThemeReveal(
+      controller: _themeRevealCtrl,
+      child: ValueListenableBuilder<QuranTheme>(
+        valueListenable: AppTheme.notifier,
+        builder: (context, theme, _) {
+          return Scaffold(
+            backgroundColor: _screenBgColor,
+            appBar: AppBar(
+              leadingWidth: 100,
+              leading: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const BackButton(),
+                  Builder(
+                    builder: (btnContext) {
+                      return IconButton(
+                        icon: const Icon(Icons.palette_outlined),
+                        onPressed: () => _cycleQuranTheme(btnContext),
+                        tooltip: 'المظهر',
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                      );
+                    },
+                  ),
+                ],
+              ),
             title: GestureDetector(
               onTap: () => _openNavigationPanel(0),
               behavior: HitTestBehavior.opaque,
@@ -1275,65 +1240,9 @@ class _QuranScreenState extends State<QuranScreen> {
           ),
         );
       },
-    );
-  }
+    ),
+  );
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Small stateless sub-widgets (keep the main class clean)
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _ThemeOption extends StatelessWidget {
-  const _ThemeOption({
-    required this.label,
-    required this.bgColor,
-    required this.borderColor,
-    required this.textColor,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final String label;
-  final Color bgColor;
-  final Color borderColor;
-  final Color textColor;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 100,
-        height: 65,
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color:
-                isSelected ? borderColor : textColor.withValues(alpha: 0.3),
-            width: isSelected ? 2.5 : 1,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                      color: borderColor.withValues(alpha: 0.3), blurRadius: 6)
-                ]
-              : null,
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: TextStyle(
-            color: textColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

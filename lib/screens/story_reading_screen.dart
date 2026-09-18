@@ -7,6 +7,7 @@ import '../models/fatwa_item.dart';
 import '../models/roqua_item.dart';
 import '../services/library_service.dart';
 import '../theme_notifier.dart';
+import '../widgets/circular_theme_reveal.dart';
 
 enum ReadingTheme {
   light,
@@ -358,17 +359,56 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
     }
   }
 
-  void _cycleReadingTheme() {
-    setState(() {
-      if (_readingTheme == ReadingTheme.sepia) {
-        _readingTheme = ReadingTheme.light;
-      } else if (_readingTheme == ReadingTheme.light) {
-        _readingTheme = ReadingTheme.dark;
-      } else {
-        _readingTheme = ReadingTheme.sepia;
-      }
-    });
+  final CircularThemeRevealController _themeRevealCtrl = CircularThemeRevealController();
+
+  void _cycleReadingThemeWithReveal(BuildContext btnContext) {
+    if (_themeRevealCtrl.isRevealing) return;
+
+    HapticFeedback.selectionClick();
+
+    final nextReadingTheme = _readingTheme == ReadingTheme.sepia
+        ? ReadingTheme.dark
+        : (_readingTheme == ReadingTheme.dark
+            ? ReadingTheme.light
+            : ReadingTheme.sepia);
+
+    final nextGlobalTheme = nextReadingTheme == ReadingTheme.dark
+        ? QuranTheme.dark
+        : (nextReadingTheme == ReadingTheme.sepia
+            ? QuranTheme.cream
+            : QuranTheme.white);
+
+    final RenderBox? box = btnContext.findRenderObject() as RenderBox?;
+    final Offset origin = box != null && box.hasSize
+        ? box.localToGlobal(box.size.center(Offset.zero))
+        : Offset(MediaQuery.of(context).size.width - 40, 45);
+
+    final Color ringColor = nextReadingTheme == ReadingTheme.dark
+        ? const Color(0xFFE8C77A)
+        : (nextReadingTheme == ReadingTheme.sepia
+            ? const Color(0xFFC9A84C)
+            : const Color(0xFF10B981));
+
+    final Color targetBgColor = nextReadingTheme == ReadingTheme.dark
+        ? const Color(0xFF090E11)
+        : (nextReadingTheme == ReadingTheme.sepia
+            ? const Color(0xFFFBF6ED)
+            : const Color(0xFFFAF8F5));
+
+    _themeRevealCtrl.triggerReveal(
+      origin: origin,
+      ringColor: ringColor,
+      targetBgColor: targetBgColor,
+      onThemeChange: () {
+        setState(() {
+          _readingTheme = nextReadingTheme;
+        });
+        AppTheme.changeTheme(nextGlobalTheme);
+      },
+    );
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -423,9 +463,11 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
     final bool isSingleFav = _favCache[0] ??
         (singleItem is LibraryItem ? singleItem.isFav : false);
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+    return CircularThemeReveal(
+      controller: _themeRevealCtrl,
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Scaffold(
         backgroundColor: pageBg,
         appBar: AppBar(
           backgroundColor: topBarColor,
@@ -447,19 +489,23 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
           ),
           centerTitle: true,
           actions: [
-            // Theme Switcher
-            IconButton(
-              icon: Icon(
-                _readingTheme == ReadingTheme.sepia
-                    ? Icons.palette_outlined
-                    : _readingTheme == ReadingTheme.light
-                        ? Icons.wb_sunny_outlined
-                        : Icons.dark_mode_outlined,
-                color: accentColor,
-                size: 21,
-              ),
-              tooltip: _t('theme'),
-              onPressed: _cycleReadingTheme,
+            // Theme Switcher with 1-pixel radial ripple
+            Builder(
+              builder: (btnContext) {
+                return IconButton(
+                  icon: Icon(
+                    _readingTheme == ReadingTheme.sepia
+                        ? Icons.palette_outlined
+                        : _readingTheme == ReadingTheme.light
+                            ? Icons.wb_sunny_outlined
+                            : Icons.dark_mode_outlined,
+                    color: accentColor,
+                    size: 21,
+                  ),
+                  tooltip: _t('theme'),
+                  onPressed: () => _cycleReadingThemeWithReveal(btnContext),
+                );
+              },
             ),
             // Actions for single reading mode
             if (!_isBukhariStream) ...[
@@ -943,8 +989,9 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildActionBtn({
     required IconData icon,

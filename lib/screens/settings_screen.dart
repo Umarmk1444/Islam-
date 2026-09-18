@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,7 +17,7 @@ import '../services/app_update_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SETTINGS SCREEN — Modern Luxury Islamic Redesign
-// Featuring VIP Creator & Community Showcase (TikTok: @umer.almuktar)
+// Circular Ripple Reveal (Telegram-Style) & VIP TikTok Spotlight Showcase
 // ─────────────────────────────────────────────────────────────────────────────
 
 class SettingsScreen extends StatefulWidget {
@@ -36,8 +37,21 @@ class _SettingsScreenState extends State<SettingsScreen>
   int _notificationInterval = 60;
   String _appVersion = 'Version 1.1.1 (Build 9)';
 
+  // Entrance & Header Animations
   late final AnimationController _headerCtrl;
   late final Animation<double> _headerFade;
+
+  // ── Circular Reveal Animation State ────────────────────────────────────────
+  late QuranTheme _baseTheme;
+  late QuranTheme _targetTheme;
+  late final AnimationController _revealCtrl;
+  late final Animation<double> _revealAnim;
+  bool _isRevealing = false;
+  Offset _revealOrigin = Offset.zero;
+  double _maxRadius = 1000.0;
+
+  late ScrollController _baseScrollCtrl;
+  ScrollController? _revealScrollCtrl;
 
   final List<String> _languages = ['Amharic', 'Oromo', 'English', 'Arabic'];
 
@@ -54,17 +68,18 @@ class _SettingsScreenState extends State<SettingsScreen>
       'storage_section': 'STORAGE & OFFLINE',
       'downloads': 'Downloaded Audio Library',
       'downloads_desc': 'Manage offline surahs, recitations & lectures',
-      'creator_community': 'CREATOR & COMMUNITY SPOTLIGHT',
+      'creator_community': 'CREATOR & COMMUNITY',
       'creator_name': 'Umer Muktar',
       'creator_role': 'Lead Developer & Creator',
       'tiktok_title': 'Official TikTok Channel',
-      'tiktok_desc': 'Follow for Quran recitations, reflections & app updates',
+      'tiktok_desc': 'Quran recitations, reflections & app updates',
       'tiktok_follow': 'Follow on TikTok',
-      'copy_handle': 'Copy @umer.almuktar',
+      'copy_handle': 'Copy',
+      'tap_to_copy': 'Tap anywhere to copy handle',
       'copied_to_clipboard': 'Copied @umer.almuktar to clipboard!',
-      'telegram_btn': 'Telegram (@UMER_jr)',
+      'telegram_btn': 'Telegram',
       'email_btn': 'Email Feedback',
-      'creator_note': 'Your support, prayers and feedback elevate this project for the entire Ummah.',
+      'creator_note': 'Handcrafted for the Ummah • Dua appreciated',
       'share_info': 'SUPPORT, PRIVACY & INFO',
       'share_app': 'Share Quran Zone',
       'rate_us': 'Rate Us on Google Play',
@@ -96,17 +111,18 @@ class _SettingsScreenState extends State<SettingsScreen>
       'storage_section': 'التخزين والمحفوظات',
       'downloads': 'التسجيلات المحملة',
       'downloads_desc': 'إدارة السور والمحاضرات بدون إنترنت',
-      'creator_community': 'المطور ومجتمع التطبيق',
+      'creator_community': 'المطور والمجتمع',
       'creator_name': 'عمر المختار',
       'creator_role': 'مطور ومصمم التطبيق',
       'tiktok_title': 'قناة تيك توك الرسمية',
-      'tiktok_desc': 'تابعنا للتلاوات القرآنية، الخواطر الإيمانية، وآخر التحديثات',
+      'tiktok_desc': 'تلاوات خاشعة، تدبرات قرآنية، وآخر تحديثات التطبيق',
       'tiktok_follow': 'متابعة على تيك توك',
-      'copy_handle': 'نسخ المعرف @umer.almuktar',
+      'copy_handle': 'نسخ',
+      'tap_to_copy': 'اضغط في أي مكان لنسخ الحساب',
       'copied_to_clipboard': 'تم نسخ @umer.almuktar إلى الحافظة!',
-      'telegram_btn': 'تيليجرام (@UMER_jr)',
-      'email_btn': 'إرسال ملاحظة عبر البريد',
-      'creator_note': 'دعاؤكم وملاحظاتكم ومشاركتكم للتطبيق تثري هذا العمل لخدمة الأمة الإسلامية.',
+      'telegram_btn': 'تيليجرام',
+      'email_btn': 'إرسال ملاحظة',
+      'creator_note': 'عمل خالص لوجه الله للأمة الإسلامية • نسألكم صالح الدعاء',
       'share_info': 'الدعم والخصوصية ومعلومات التطبيق',
       'share_app': 'مشاركة تطبيق Quran Zone',
       'rate_us': 'تقييم التطبيق على متجر جوجل',
@@ -142,13 +158,14 @@ class _SettingsScreenState extends State<SettingsScreen>
       'creator_name': 'ኡመር ሙክታር',
       'creator_role': 'ዋና አዘጋጅ እና ፈጣሪ',
       'tiktok_title': 'ኦፊሴላዊ የቲክቶክ ገጽ',
-      'tiktok_desc': 'ለቁርኣን ቲላዋዎች፣ መንፈሳዊ ማስታወሻዎች እና አዳዲስ ዝመናዎች ይከተሉ',
+      'tiktok_desc': 'የቁርኣን ቲላዋዎች፣ መንፈሳዊ ማስታወሻዎች እና አዳዲስ ዝመናዎች',
       'tiktok_follow': 'በቲክቶክ ይከተሉ',
-      'copy_handle': '@umer.almuktar ቅዳ',
+      'copy_handle': 'ቅዳ',
+      'tap_to_copy': 'ለመቅዳት የትም ይጫኑ',
       'copied_to_clipboard': '@umer.almuktar ወደ ቅንጥብ ሰሌዳ ተቀድቷል!',
-      'telegram_btn': 'ቴሌግራም (@UMER_jr)',
-      'email_btn': 'አስተያየት በኢሜይል ይላኩ',
-      'creator_note': 'የእርስዎ ዱዓ እና ድጋፍ ይህ መተግበሪያ ለመላው ኡማህ የተሻለ እንዲሆን ይረዳል::',
+      'telegram_btn': 'ቴሌግራም',
+      'email_btn': 'ኢሜይል',
+      'creator_note': 'ለመላው ኡማህ የተዘጋጀ • የእርስዎ ዱዓ ይደግፈናል',
       'share_info': 'ስለ መተግበሪያው፣ ግላዊነት እና ድጋፍ',
       'share_app': 'መተግበሪያውን ያጋሩ',
       'rate_us': 'በፕሌይ ስቶር ደረጃ ይስጡ',
@@ -184,13 +201,14 @@ class _SettingsScreenState extends State<SettingsScreen>
       'creator_name': 'Umar Muktaar',
       'creator_role': 'Hojjataa fi Qindeessaa App',
       'tiktok_title': 'Marsariitii Tiiktokii Ofiisaalaa',
-      'tiktok_desc': 'Qiraatii Qur\'aanaa, yaadachiisa amantii fi odeeffannoof nu hordofaa',
+      'tiktok_desc': 'Qiraatii Qur\'aanaa fi odeeffannoo haaraa',
       'tiktok_follow': 'Tiiktokii irratti hordofaa',
-      'copy_handle': '@umer.almuktar Kopiisi',
+      'copy_handle': 'Kopiisi',
+      'tap_to_copy': 'Kopiisuuf bakka kamiyyuu tuqaa',
       'copied_to_clipboard': '@umer.almuktar garagalfameera!',
-      'telegram_btn': 'Telegiraamii (@UMER_jr)',
-      'email_btn': 'Yaada Imeeyliin Ergaa',
-      'creator_note': 'Du\'aayin fi deeggarsi keessan hojii kana ummataaf fooyyessuuf gargaara.',
+      'telegram_btn': 'Telegiraamii',
+      'email_btn': 'Imeeylii',
+      'creator_note': 'Ummata hundaaf kan qophaa\'e • Du\'aayiin keessan nuuf qabeenya',
       'share_info': 'Waa\'ee App, Dhuunfaa fi Deeggarsa',
       'share_app': 'Appilikeeshinii Qoodaa',
       'rate_us': 'Play Store irratti sadarkaa kennaa',
@@ -221,15 +239,41 @@ class _SettingsScreenState extends State<SettingsScreen>
   void initState() {
     super.initState();
     _loadSettings();
+
     _headerCtrl = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 600));
     _headerFade = CurvedAnimation(parent: _headerCtrl, curve: Curves.easeOut);
     _headerCtrl.forward();
+
+    _baseTheme = AppTheme.notifier.value;
+    _targetTheme = AppTheme.notifier.value;
+    _baseScrollCtrl = ScrollController();
+
+    _revealCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 850),
+    );
+    _revealAnim = CurvedAnimation(parent: _revealCtrl, curve: Curves.easeInOutCubic);
+
+    _revealCtrl.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() {
+          _baseTheme = _targetTheme;
+          _isRevealing = false;
+        });
+        AppTheme.changeTheme(_targetTheme);
+        _revealScrollCtrl?.dispose();
+        _revealScrollCtrl = null;
+      }
+    });
   }
 
   @override
   void dispose() {
     _headerCtrl.dispose();
+    _revealCtrl.dispose();
+    _baseScrollCtrl.dispose();
+    _revealScrollCtrl?.dispose();
     super.dispose();
   }
 
@@ -284,6 +328,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   void _showSnack(String msg, Color color) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -306,6 +351,36 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
+  // ── Circular Reveal Trigger ────────────────────────────────────────────────
+
+  void _startCircularThemeReveal(QuranTheme newTheme, Offset origin) {
+    if (newTheme == _baseTheme || _isRevealing) return;
+
+    HapticFeedback.selectionClick();
+
+    final mediaQuery = MediaQuery.of(context);
+    final size = mediaQuery.size;
+
+    // Calculate maximum radius to engulf every corner of screen
+    final double dx = math.max(origin.dx, size.width - origin.dx);
+    final double dy = math.max(origin.dy, size.height - origin.dy);
+    _maxRadius = math.sqrt(dx * dx + dy * dy) + 60.0;
+    _revealOrigin = origin;
+    _targetTheme = newTheme;
+
+    // Instantiate synced scroll controller for the reveal layer
+    final double currentOffset =
+        _baseScrollCtrl.hasClients ? _baseScrollCtrl.offset : 0.0;
+    _revealScrollCtrl?.dispose();
+    _revealScrollCtrl = ScrollController(initialScrollOffset: currentOffset);
+
+    setState(() {
+      _isRevealing = true;
+    });
+
+    _revealCtrl.forward(from: 0.0);
+  }
+
   // ── Action Handlers ────────────────────────────────────────────────────────
 
   Future<void> _openTikTok() async {
@@ -324,6 +399,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   void _copyTikTokHandle() {
+    HapticFeedback.lightImpact();
     Clipboard.setData(const ClipboardData(text: '@umer.almuktar')).then((_) {
       if (!mounted) return;
       _showSnack(_tr(context, 'copied_to_clipboard'), const Color(0xFFFE2C55));
@@ -560,484 +636,549 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  // ── Main Build Method ──────────────────────────────────────────────────────
+  // ── Helper Color Resolvers ─────────────────────────────────────────────────
+
+  Color _getScaffoldBg(QuranTheme theme) {
+    switch (theme) {
+      case QuranTheme.dark:
+        return const Color(0xFF070E0B);
+      case QuranTheme.cream:
+        return const Color(0xFFFBF8F0);
+      case QuranTheme.white:
+        return const Color(0xFFF3F6F3);
+    }
+  }
+
+  Color _getHeroBg(QuranTheme theme) {
+    switch (theme) {
+      case QuranTheme.dark:
+        return const Color(0xFF0E1F18);
+      case QuranTheme.cream:
+        return const Color(0xFFF4EDDC);
+      case QuranTheme.white:
+        return const Color(0xFFE8EFE8);
+    }
+  }
+
+  // ── Main Build Method with Circular Reveal Stack ───────────────────────────
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
+    return Stack(
+      children: [
+        // ── 1. Base Layer (Current Theme) ───────────────────────────────────
+        _buildSettingsView(_baseTheme, _baseScrollCtrl),
+
+        // ── 2. Circular Reveal Layer (Expands radially from tapped button) ───
+        if (_isRevealing && _revealScrollCtrl != null)
+          AnimatedBuilder(
+            animation: _revealAnim,
+            builder: (context, _) {
+              final double radius = 1.0 + (_revealAnim.value * (_maxRadius - 1.0));
+
+              return ClipPath(
+                clipper: CircularRevealClipper(
+                  center: _revealOrigin,
+                  radius: radius,
+                ),
+                child: Stack(
+                  children: [
+                    _buildSettingsView(_targetTheme, _revealScrollCtrl!),
+                    // Glowing circular ripple edge starting from 1px
+                    CustomPaint(
+                      painter: _RippleRingPainter(
+                        center: _revealOrigin,
+                        radius: radius,
+                        color: AppTheme.getBorderColor(_targetTheme),
+                        progress: _revealAnim.value,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+      ],
+    );
+  }
+
+  // ── Reusable Settings View Builder for Layering ────────────────────────────
+
+  Widget _buildSettingsView(QuranTheme theme, ScrollController scrollCtrl) {
     final l10n = AppLocalizations.of(context)!;
     final isArabic = Localizations.maybeLocaleOf(context)?.languageCode == 'ar';
 
-    return ValueListenableBuilder<QuranTheme>(
-      valueListenable: AppTheme.notifier,
-      builder: (context, theme, _) {
-        final Color primary = AppTheme.getPrimaryColor(theme);
-        final Color textMain = AppTheme.getMainTextColor(theme);
-        final Color textSub = textMain.withValues(alpha: 0.65);
-        final Color cardBg = AppTheme.getCardBgColor(theme);
-        final Color borderColor = AppTheme.getBorderColor(theme);
-        final bool isDark = theme == QuranTheme.dark;
-        final bool isCream = theme == QuranTheme.cream;
+    final Color primary = AppTheme.getPrimaryColor(theme);
+    final Color textMain = AppTheme.getMainTextColor(theme);
+    final Color textSub = textMain.withValues(alpha: 0.65);
+    final Color cardBg = AppTheme.getCardBgColor(theme);
+    final Color borderColor = AppTheme.getBorderColor(theme);
+    final bool isDark = theme == QuranTheme.dark;
+    final Color scaffoldBg = _getScaffoldBg(theme);
+    final Color heroBannerBg = _getHeroBg(theme);
 
-        final Color scaffoldBg = isDark
-            ? const Color(0xFF070E0B)
-            : (isCream ? const Color(0xFFFBF8F0) : const Color(0xFFF3F6F3));
-
-        final Color heroBannerBg = isDark
-            ? const Color(0xFF0E1F18)
-            : (isCream ? const Color(0xFFF4EDDC) : const Color(0xFFE8EFE8));
-
-        return Scaffold(
-          backgroundColor: scaffoldBg,
-          body: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              // ── 1. Elegant App Bar & Hero Header ───────────────────────────
-              SliverToBoxAdapter(
-                child: SafeArea(
-                  bottom: false,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
-                    child: FadeTransition(
-                      opacity: _headerFade,
-                      child: Container(
-                        padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          color: heroBannerBg,
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                            color: borderColor.withValues(alpha: isDark ? 0.3 : 0.4),
-                            width: 1.2,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
-                              blurRadius: 16,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
+    return Scaffold(
+      backgroundColor: scaffoldBg,
+      body: CustomScrollView(
+        controller: scrollCtrl,
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          // ── 1. Elegant Hero Header ──────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+                child: FadeTransition(
+                  opacity: _headerFade,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: heroBannerBg,
+                      borderRadius: BorderRadius.circular(22),
+                      border: Border.all(
+                        color: borderColor.withValues(alpha: isDark ? 0.3 : 0.4),
+                        width: 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
                         ),
-                        child: Row(
-                          children: [
-                            // Glowing App Emblem
-                            Container(
-                              width: 54,
-                              height: 54,
-                              padding: const EdgeInsets.all(2.5),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: LinearGradient(
-                                  colors: [
-                                    borderColor,
-                                    primary,
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: primary.withValues(alpha: 0.35),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                              child: ClipOval(
-                                child: Image.asset(
-                                  'assets/images/app_icon.png',
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        // Glowing App Emblem
+                        Container(
+                          width: 50,
+                          height: 50,
+                          padding: const EdgeInsets.all(2.5),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              colors: [borderColor, primary],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                            const SizedBox(width: 16),
-                            // Title & Version Badge
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
+                            boxShadow: [
+                              BoxShadow(
+                                color: primary.withValues(alpha: 0.35),
+                                blurRadius: 12,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: ClipOval(
+                            child: Image.asset(
+                              'assets/images/app_icon.png',
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        // Title & Version Badge
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
                                 children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'Quran Zone',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: textMain,
-                                          letterSpacing: 0.3,
-                                          fontFamily: isArabic ? 'Amiri' : null,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 7, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: primary.withValues(alpha: 0.15),
-                                          borderRadius: BorderRadius.circular(8),
-                                          border: Border.all(
-                                            color: primary.withValues(alpha: 0.35),
-                                            width: 1,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          _appVersion,
-                                          style: TextStyle(
-                                            color: primary,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 3),
                                   Text(
-                                    _tr(context, 'settings_subtitle'),
+                                    'Quran Zone',
                                     style: TextStyle(
-                                      fontSize: 12,
-                                      color: textSub,
-                                      height: 1.35,
+                                      fontSize: 17.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: textMain,
+                                      letterSpacing: 0.3,
+                                      fontFamily: isArabic ? 'Amiri' : null,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 7, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: primary.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: primary.withValues(alpha: 0.35),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      _appVersion,
+                                      style: TextStyle(
+                                        color: primary,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 2),
+                              Text(
+                                _tr(context, 'settings_subtitle'),
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: textSub,
+                                  height: 1.3,
+                                ),
+                                maxLines: 2,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
                 ),
               ),
+            ),
+          ),
 
-              // ── 2. Settings Content Body ────────────────────────────────────
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 10, 16, 32),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    // ── SECTION A: APPEARANCE & THEMES ────────────────────────
-                    _sectionHeader(
-                      icon: Icons.palette_outlined,
-                      title: _tr(context, 'appearance'),
-                      color: primary,
-                    ),
-                    _ThemeSwatchSelector(
-                      currentTheme: theme,
-                      primary: primary,
-                      cardBg: cardBg,
-                      borderColor: borderColor,
-                      isDark: isDark,
-                      isArabic: isArabic,
-                      darkLabel: _tr(context, 'theme_dark'),
-                      darkDesc: _tr(context, 'theme_dark_desc'),
-                      creamLabel: _tr(context, 'theme_cream'),
-                      creamDesc: _tr(context, 'theme_cream_desc'),
-                      whiteLabel: _tr(context, 'theme_white'),
-                      whiteDesc: _tr(context, 'theme_white_desc'),
-                    ),
-                    const SizedBox(height: 14),
+          // ── 2. Settings Content Body ────────────────────────────────────────
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                // ── SECTION A: APPEARANCE & THEMES ────────────────────────────
+                _sectionHeader(
+                  icon: Icons.palette_outlined,
+                  title: _tr(context, 'appearance'),
+                  color: primary,
+                ),
+                _ThemeSwatchSelector(
+                  currentTheme: theme,
+                  primary: primary,
+                  cardBg: cardBg,
+                  borderColor: borderColor,
+                  isDark: isDark,
+                  isArabic: isArabic,
+                  darkLabel: _tr(context, 'theme_dark'),
+                  darkDesc: _tr(context, 'theme_dark_desc'),
+                  creamLabel: _tr(context, 'theme_cream'),
+                  creamDesc: _tr(context, 'theme_cream_desc'),
+                  whiteLabel: _tr(context, 'theme_white'),
+                  whiteDesc: _tr(context, 'theme_white_desc'),
+                  onThemeSelected: _startCircularThemeReveal,
+                ),
+                const SizedBox(height: 12),
 
-                    // ── SECTION B: APP LANGUAGE ──────────────────────────────
-                    _sectionHeader(
-                      icon: Icons.translate_rounded,
-                      title: _tr(context, 'language'),
-                      color: const Color(0xFF0284C7),
-                    ),
-                    _ModernCard(
-                      isDark: isDark,
-                      cardBg: cardBg,
-                      borderColor: borderColor,
-                      children: [
-                        _ModernActionTile(
-                          icon: Icons.language_rounded,
-                          iconGradient: const [Color(0xFF0284C7), Color(0xFF0369A1)],
-                          title: l10n.appLanguage,
-                          subtitle: _selectedLanguage,
-                          trailing: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: primary.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: primary.withValues(alpha: 0.3),
-                                width: 1,
+                // ── SECTION B: APP LANGUAGE ──────────────────────────────────
+                _sectionHeader(
+                  icon: Icons.translate_rounded,
+                  title: _tr(context, 'language'),
+                  color: const Color(0xFF0284C7),
+                ),
+                _ModernCard(
+                  isDark: isDark,
+                  cardBg: cardBg,
+                  borderColor: borderColor,
+                  children: [
+                    _ModernActionTile(
+                      icon: Icons.language_rounded,
+                      iconGradient: const [Color(0xFF0284C7), Color(0xFF0369A1)],
+                      title: l10n.appLanguage,
+                      subtitle: _selectedLanguage,
+                      trailing: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                        decoration: BoxDecoration(
+                          color: primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: primary.withValues(alpha: 0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _selectedLanguage,
+                              style: TextStyle(
+                                color: primary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  _selectedLanguage,
-                                  style: TextStyle(
-                                    color: primary,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                Icon(Icons.arrow_drop_down_rounded, color: primary, size: 18),
-                              ],
-                            ),
+                            const SizedBox(width: 3),
+                            Icon(Icons.arrow_drop_down_rounded, color: primary, size: 18),
+                          ],
+                        ),
+                      ),
+                      onTap: () => _showLanguageDialog(primary, textMain, cardBg, l10n),
+                      isDark: isDark,
+                      textColor: textMain,
+                      subtextColor: textSub,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // ── SECTION C: PRAYER & SPIRITUAL REMINDERS ───────────────────
+                _sectionHeader(
+                  icon: Icons.mosque_rounded,
+                  title: _tr(context, 'prayer_section'),
+                  color: const Color(0xFF10B981),
+                ),
+                _ModernCard(
+                  isDark: isDark,
+                  cardBg: cardBg,
+                  borderColor: borderColor,
+                  children: [
+                    _ModernActionTile(
+                      icon: Icons.access_time_filled_rounded,
+                      iconGradient: const [Color(0xFF10B981), Color(0xFF059669)],
+                      title: _tr(context, 'prayer_settings'),
+                      subtitle: _tr(context, 'prayer_desc'),
+                      trailing: const Icon(Icons.chevron_right_rounded, size: 22),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PrayerSettingsScreen(controller: PrayerController()),
                           ),
-                          onTap: () => _showLanguageDialog(primary, textMain, cardBg, l10n),
-                          isDark: isDark,
-                          textColor: textMain,
-                          subtextColor: textSub,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-
-                    // ── SECTION C: PRAYER & SPIRITUAL REMINDERS ───────────────
-                    _sectionHeader(
-                      icon: Icons.mosque_rounded,
-                      title: _tr(context, 'prayer_section'),
-                      color: const Color(0xFF10B981),
-                    ),
-                    _ModernCard(
+                        );
+                      },
                       isDark: isDark,
-                      cardBg: cardBg,
-                      borderColor: borderColor,
-                      children: [
-                        _ModernActionTile(
-                          icon: Icons.access_time_filled_rounded,
-                          iconGradient: const [Color(0xFF10B981), Color(0xFF059669)],
-                          title: _tr(context, 'prayer_settings'),
-                          subtitle: _tr(context, 'prayer_desc'),
-                          trailing: const Icon(Icons.chevron_right_rounded, size: 22),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => PrayerSettingsScreen(controller: PrayerController()),
-                              ),
-                            );
-                          },
-                          isDark: isDark,
-                          textColor: textMain,
-                          subtextColor: textSub,
-                        ),
-                        _divider(isDark, borderColor),
-                        _ModernSwitchTile(
-                          icon: Icons.notifications_active_rounded,
-                          iconGradient: const [Color(0xFFF59E0B), Color(0xFFD97706)],
-                          title: _tr(context, 'daily_notif'),
-                          subtitle: _tr(context, 'daily_notif_desc'),
-                          value: _notificationsEnabled,
-                          activeColor: primary,
-                          onChanged: _toggleNotifications,
-                          isDark: isDark,
-                          textColor: textMain,
-                          subtextColor: textSub,
-                        ),
-                        AnimatedSize(
-                          duration: const Duration(milliseconds: 280),
-                          curve: Curves.easeInOut,
-                          child: _notificationsEnabled
-                              ? _ModernIntervalPicker(
-                                  value: _notificationInterval,
-                                  primary: primary,
-                                  textColor: textMain,
-                                  subtextColor: textSub,
-                                  title: _tr(context, 'freq_title'),
-                                  onChanged: _setNotificationInterval,
-                                  isDark: isDark,
-                                )
-                              : const SizedBox.shrink(),
-                        ),
-                      ],
+                      textColor: textMain,
+                      subtextColor: textSub,
                     ),
-                    const SizedBox(height: 14),
-
-                    // ── SECTION D: STORAGE & OFFLINE ─────────────────────────
-                    _sectionHeader(
-                      icon: Icons.folder_special_rounded,
-                      title: _tr(context, 'storage_section'),
-                      color: const Color(0xFF0D9488),
-                    ),
-                    _ModernCard(
+                    _divider(isDark, borderColor),
+                    _ModernSwitchTile(
+                      icon: Icons.notifications_active_rounded,
+                      iconGradient: const [Color(0xFFF59E0B), Color(0xFFD97706)],
+                      title: _tr(context, 'daily_notif'),
+                      subtitle: _tr(context, 'daily_notif_desc'),
+                      value: _notificationsEnabled,
+                      activeColor: primary,
+                      onChanged: _toggleNotifications,
                       isDark: isDark,
-                      cardBg: cardBg,
-                      borderColor: borderColor,
-                      children: [
-                        _ModernActionTile(
-                          icon: Icons.download_done_rounded,
-                          iconGradient: const [Color(0xFF0D9488), Color(0xFF0F766E)],
-                          title: _tr(context, 'downloads'),
-                          subtitle: _tr(context, 'downloads_desc'),
-                          trailing: const Icon(Icons.chevron_right_rounded, size: 22),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const MinbarDownloadsScreen()),
-                            );
-                          },
-                          isDark: isDark,
-                          textColor: textMain,
-                          subtextColor: textSub,
-                        ),
-                      ],
+                      textColor: textMain,
+                      subtextColor: textSub,
                     ),
-                    const SizedBox(height: 18),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 280),
+                      curve: Curves.easeInOut,
+                      child: _notificationsEnabled
+                          ? _ModernIntervalPicker(
+                              value: _notificationInterval,
+                              primary: primary,
+                              textColor: textMain,
+                              subtextColor: textSub,
+                              title: _tr(context, 'freq_title'),
+                              onChanged: _setNotificationInterval,
+                              isDark: isDark,
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
 
-                    // ── 🌟 SECTION E: VIP CREATOR & COMMUNITY SPOTLIGHT (TIKTOK: @umer.almuktar) ──
-                    _sectionHeader(
-                      icon: Icons.stars_rounded,
-                      title: _tr(context, 'creator_community'),
-                      color: const Color(0xFFFE2C55), // Vibrant TikTok Accent
-                      badgeText: 'VIP SPOTLIGHT',
-                    ),
-                    _TikTokSpotlightCard(
+                // ── SECTION D: STORAGE & OFFLINE ─────────────────────────────
+                _sectionHeader(
+                  icon: Icons.folder_special_rounded,
+                  title: _tr(context, 'storage_section'),
+                  color: const Color(0xFF0D9488),
+                ),
+                _ModernCard(
+                  isDark: isDark,
+                  cardBg: cardBg,
+                  borderColor: borderColor,
+                  children: [
+                    _ModernActionTile(
+                      icon: Icons.download_done_rounded,
+                      iconGradient: const [Color(0xFF0D9488), Color(0xFF0F766E)],
+                      title: _tr(context, 'downloads'),
+                      subtitle: _tr(context, 'downloads_desc'),
+                      trailing: const Icon(Icons.chevron_right_rounded, size: 22),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const MinbarDownloadsScreen()),
+                        );
+                      },
                       isDark: isDark,
-                      cardBg: cardBg,
-                      primary: primary,
-                      goldBorder: borderColor,
-                      creatorName: _tr(context, 'creator_name'),
-                      creatorRole: _tr(context, 'creator_role'),
-                      tiktokTitle: _tr(context, 'tiktok_title'),
-                      tiktokDesc: _tr(context, 'tiktok_desc'),
-                      followLabel: _tr(context, 'tiktok_follow'),
-                      copyLabel: _tr(context, 'copy_handle'),
-                      telegramLabel: _tr(context, 'telegram_btn'),
-                      emailLabel: _tr(context, 'email_btn'),
-                      creatorNote: _tr(context, 'creator_note'),
-                      onFollowTikTok: _openTikTok,
-                      onCopyHandle: _copyTikTokHandle,
-                      onTelegram: _openTelegram,
-                      onEmail: _openEmail,
+                      textColor: textMain,
+                      subtextColor: textSub,
                     ),
-                    const SizedBox(height: 18),
+                  ],
+                ),
+                const SizedBox(height: 14),
 
-                    // ── SECTION F: SUPPORT, PRIVACY & ABOUT ──────────────────
-                    _sectionHeader(
-                      icon: Icons.info_outline_rounded,
-                      title: _tr(context, 'share_info'),
-                      color: const Color(0xFF6366F1),
-                    ),
-                    _ModernCard(
+                // ── 🌟 SECTION E: VIP CREATOR & COMMUNITY (TIKTOK: @umer.almuktar) ──
+                _sectionHeader(
+                  icon: Icons.stars_rounded,
+                  title: _tr(context, 'creator_community'),
+                  color: const Color(0xFFFE2C55),
+                  badgeText: 'VIP CREATOR',
+                ),
+                _TikTokSpotlightCard(
+                  isDark: isDark,
+                  cardBg: cardBg,
+                  primary: primary,
+                  goldBorder: borderColor,
+                  creatorName: _tr(context, 'creator_name'),
+                  creatorRole: _tr(context, 'creator_role'),
+                  tiktokTitle: _tr(context, 'tiktok_title'),
+                  tiktokDesc: _tr(context, 'tiktok_desc'),
+                  tapToCopyLabel: _tr(context, 'tap_to_copy'),
+                  followLabel: _tr(context, 'tiktok_follow'),
+                  copyLabel: _tr(context, 'copy_handle'),
+                  telegramLabel: _tr(context, 'telegram_btn'),
+                  emailLabel: _tr(context, 'email_btn'),
+                  creatorNote: _tr(context, 'creator_note'),
+                  onFollowTikTok: _openTikTok,
+                  onCopyHandle: _copyTikTokHandle,
+                  onTelegram: _openTelegram,
+                  onEmail: _openEmail,
+                ),
+                const SizedBox(height: 14),
+
+                // ── SECTION F: SUPPORT, PRIVACY & ABOUT ──────────────────────
+                _sectionHeader(
+                  icon: Icons.info_outline_rounded,
+                  title: _tr(context, 'share_info'),
+                  color: const Color(0xFF6366F1),
+                ),
+                _ModernCard(
+                  isDark: isDark,
+                  cardBg: cardBg,
+                  borderColor: borderColor,
+                  children: [
+                    _ModernActionTile(
+                      icon: Icons.star_rate_rounded,
+                      iconGradient: const [Color(0xFFF59E0B), Color(0xFFD97706)],
+                      title: _tr(context, 'rate_us'),
+                      subtitle: 'Support Quran Zone with 5 stars',
+                      onTap: () async {
+                        final Uri url = Uri.parse(
+                            'https://play.google.com/store/apps/details?id=com.umer.quranzone');
+                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                      },
                       isDark: isDark,
-                      cardBg: cardBg,
-                      borderColor: borderColor,
-                      children: [
-                        _ModernActionTile(
-                          icon: Icons.star_rate_rounded,
-                          iconGradient: const [Color(0xFFF59E0B), Color(0xFFD97706)],
-                          title: _tr(context, 'rate_us'),
-                          subtitle: 'Support Quran Zone with 5 stars',
-                          onTap: () async {
-                            final Uri url = Uri.parse(
-                                'https://play.google.com/store/apps/details?id=com.umer.quranzone');
-                            await launchUrl(url, mode: LaunchMode.externalApplication);
-                          },
-                          isDark: isDark,
-                          textColor: textMain,
-                          subtextColor: textSub,
-                        ),
-                        _divider(isDark, borderColor),
-                        _ModernActionTile(
-                          icon: Icons.share_rounded,
-                          iconGradient: const [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
-                          title: _tr(context, 'share_app'),
-                          subtitle: 'Guide others to goodness & earn reward',
-                          onTap: () {
-                            Share.share(
-                              'Download Quran Zone for an exquisite Quran & Islamic experience:\nhttps://play.google.com/store/apps/details?id=com.umer.quranzone',
-                            );
-                          },
-                          isDark: isDark,
-                          textColor: textMain,
-                          subtextColor: textSub,
-                        ),
-                        _divider(isDark, borderColor),
-                        _ModernActionTile(
-                          icon: Icons.system_update_rounded,
-                          iconGradient: const [Color(0xFF06B6D4), Color(0xFF0891B2)],
-                          title: _tr(context, 'check_updates'),
-                          subtitle: _tr(context, 'check_updates_desc'),
-                          onTap: () => AppUpdateService.instance.checkForUpdate(context, isManual: true),
-                          isDark: isDark,
-                          textColor: textMain,
-                          subtextColor: textSub,
-                        ),
-                        _divider(isDark, borderColor),
-                        _ModernActionTile(
-                          icon: Icons.security_rounded,
-                          iconGradient: const [Color(0xFF10B981), Color(0xFF047857)],
-                          title: _tr(context, 'privacy_policy'),
-                          subtitle: 'quranzone.com.et • 100% Offline & Private',
-                          onTap: () => _openPrivacyPolicy(context, cardBg, textMain, textSub, primary),
-                          isDark: isDark,
-                          textColor: textMain,
-                          subtextColor: textSub,
-                        ),
-                        _divider(isDark, borderColor),
-                        _ModernActionTile(
-                          icon: Icons.auto_stories_rounded,
-                          iconGradient: const [Color(0xFF8B5CF6), Color(0xFF6D28D9)],
-                          title: _tr(context, 'about_app'),
-                          subtitle: 'Comprehensive overview & Sadaqah Jariyah',
-                          onTap: () => _openAboutQuranZoneDialog(
-                            context,
-                            isDark,
-                            cardBg,
-                            textMain,
-                            textSub,
-                            primary,
-                          ),
-                          isDark: isDark,
-                          textColor: textMain,
-                          subtextColor: textSub,
-                        ),
-                      ],
+                      textColor: textMain,
+                      subtextColor: textSub,
                     ),
+                    _divider(isDark, borderColor),
+                    _ModernActionTile(
+                      icon: Icons.share_rounded,
+                      iconGradient: const [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
+                      title: _tr(context, 'share_app'),
+                      subtitle: 'Guide others to goodness & earn reward',
+                      onTap: () {
+                        Share.share(
+                          'Download Quran Zone for an exquisite Quran & Islamic experience:\nhttps://play.google.com/store/apps/details?id=com.umer.quranzone',
+                        );
+                      },
+                      isDark: isDark,
+                      textColor: textMain,
+                      subtextColor: textSub,
+                    ),
+                    _divider(isDark, borderColor),
+                    _ModernActionTile(
+                      icon: Icons.system_update_rounded,
+                      iconGradient: const [Color(0xFF06B6D4), Color(0xFF0891B2)],
+                      title: _tr(context, 'check_updates'),
+                      subtitle: _tr(context, 'check_updates_desc'),
+                      onTap: () => AppUpdateService.instance.checkForUpdate(context, isManual: true),
+                      isDark: isDark,
+                      textColor: textMain,
+                      subtextColor: textSub,
+                    ),
+                    _divider(isDark, borderColor),
+                    _ModernActionTile(
+                      icon: Icons.security_rounded,
+                      iconGradient: const [Color(0xFF10B981), Color(0xFF047857)],
+                      title: _tr(context, 'privacy_policy'),
+                      subtitle: 'quranzone.com.et • 100% Offline & Private',
+                      onTap: () => _openPrivacyPolicy(context, cardBg, textMain, textSub, primary),
+                      isDark: isDark,
+                      textColor: textMain,
+                      subtextColor: textSub,
+                    ),
+                    _divider(isDark, borderColor),
+                    _ModernActionTile(
+                      icon: Icons.auto_stories_rounded,
+                      iconGradient: const [Color(0xFF8B5CF6), Color(0xFF6D28D9)],
+                      title: _tr(context, 'about_app'),
+                      subtitle: 'Comprehensive overview & Sadaqah Jariyah',
+                      onTap: () => _openAboutQuranZoneDialog(
+                        context,
+                        isDark,
+                        cardBg,
+                        textMain,
+                        textSub,
+                        primary,
+                      ),
+                      isDark: isDark,
+                      textColor: textMain,
+                      subtextColor: textSub,
+                    ),
+                  ],
+                ),
 
-                    // ── FOOTER DEDICATION ─────────────────────────────────────
-                    const SizedBox(height: 24),
-                    Center(
-                      child: Column(
+                // ── FOOTER DEDICATION ─────────────────────────────────────────
+                const SizedBox(height: 20),
+                Center(
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.favorite_rounded,
-                                  size: 14, color: primary.withValues(alpha: 0.6)),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Handcrafted for the Ummah by Umer Muktar',
-                                style: TextStyle(
-                                  color: textSub.withValues(alpha: 0.8),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
+                          Icon(Icons.favorite_rounded,
+                              size: 13, color: primary.withValues(alpha: 0.6)),
+                          const SizedBox(width: 5),
                           Text(
+                            'Handcrafted for the Ummah by Umer Muktar',
+                            style: TextStyle(
+                              color: textSub.withValues(alpha: 0.8),
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      InkWell(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          _copyTikTokHandle();
+                        },
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          child: Text(
                             'TikTok: @umer.almuktar',
                             style: TextStyle(
-                              color: const Color(0xFFFE2C55).withValues(alpha: 0.8),
+                              color: const Color(0xFFFE2C55).withValues(alpha: 0.85),
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.5,
                             ),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                  ]),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 20),
+              ]),
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
-  // ── Helper UI Methods ──────────────────────────────────────────────────────
+  // ── Section Header with Overflow Safety ────────────────────────────────────
 
   Widget _sectionHeader({
     required IconData icon,
@@ -1051,13 +1192,17 @@ class _SettingsScreenState extends State<SettingsScreen>
         children: [
           Icon(icon, size: 16, color: color),
           const SizedBox(width: 8),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 11.5,
-              fontWeight: FontWeight.bold,
-              color: color,
-              letterSpacing: 0.7,
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.bold,
+                color: color,
+                letterSpacing: 0.7,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           if (badgeText != null) ...[
@@ -1547,28 +1692,28 @@ class _ModernActionTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: 38,
+              height: 38,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: iconGradient,
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(11),
                 boxShadow: [
                   BoxShadow(
                     color: iconGradient.first.withValues(alpha: 0.3),
-                    blurRadius: 8,
+                    blurRadius: 7,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: Icon(icon, color: Colors.white, size: 21),
+              child: Icon(icon, color: Colors.white, size: 20),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -1581,7 +1726,7 @@ class _ModernActionTile extends StatelessWidget {
                     style: TextStyle(
                       color: textColor,
                       fontWeight: FontWeight.w600,
-                      fontSize: 14.5,
+                      fontSize: 14,
                     ),
                   ),
                   if (subtitle != null) ...[
@@ -1590,7 +1735,7 @@ class _ModernActionTile extends StatelessWidget {
                       subtitle!,
                       style: TextStyle(
                         color: subtextColor,
-                        fontSize: 12,
+                        fontSize: 11.5,
                         height: 1.3,
                       ),
                     ),
@@ -1645,28 +1790,28 @@ class _ModernSwitchTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: iconGradient,
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(11),
               boxShadow: [
                 BoxShadow(
                   color: iconGradient.first.withValues(alpha: 0.3),
-                  blurRadius: 8,
+                  blurRadius: 7,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
-            child: Icon(icon, color: Colors.white, size: 21),
+            child: Icon(icon, color: Colors.white, size: 20),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -1687,7 +1832,7 @@ class _ModernSwitchTile extends StatelessWidget {
                   subtitle,
                   style: TextStyle(
                     color: subtextColor,
-                    fontSize: 12,
+                    fontSize: 11.5,
                     height: 1.3,
                   ),
                 ),
@@ -1735,13 +1880,13 @@ class _ModernIntervalPicker extends StatelessWidget {
     const labels = ['5m', '15m', '30m', '1h', '2h'];
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: isDark
             ? Colors.white.withValues(alpha: 0.04)
             : Colors.black.withValues(alpha: 0.03),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: primary.withValues(alpha: 0.15),
         ),
@@ -1751,19 +1896,19 @@ class _ModernIntervalPicker extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.timer_outlined, size: 16, color: primary),
+              Icon(Icons.timer_outlined, size: 15, color: primary),
               const SizedBox(width: 6),
               Text(
                 title,
                 style: TextStyle(
                   color: textColor,
-                  fontSize: 12,
+                  fontSize: 11.5,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(intervals.length, (i) {
@@ -1773,11 +1918,11 @@ class _ModernIntervalPicker extends StatelessWidget {
                   onTap: () => onChanged(intervals[i]),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    padding: const EdgeInsets.symmetric(vertical: 7),
+                    margin: const EdgeInsets.symmetric(horizontal: 2.5),
+                    padding: const EdgeInsets.symmetric(vertical: 6),
                     decoration: BoxDecoration(
                       color: selected ? primary : Colors.transparent,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(9),
                       border: Border.all(
                         color: selected
                             ? primary
@@ -1799,7 +1944,7 @@ class _ModernIntervalPicker extends StatelessWidget {
                         labels[i],
                         style: TextStyle(
                           color: selected ? Colors.white : subtextColor,
-                          fontSize: 12,
+                          fontSize: 11.5,
                           fontWeight: selected ? FontWeight.bold : FontWeight.w600,
                         ),
                       ),
@@ -1816,7 +1961,7 @@ class _ModernIntervalPicker extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// COMPONENT 5: Theme Swatch Selector (Interactive Previews)
+// COMPONENT 5: Theme Swatch Selector with Tap Origin Capture
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ThemeSwatchSelector extends StatelessWidget {
@@ -1832,6 +1977,7 @@ class _ThemeSwatchSelector extends StatelessWidget {
   final String creamDesc;
   final String whiteLabel;
   final String whiteDesc;
+  final void Function(QuranTheme theme, Offset origin) onThemeSelected;
 
   const _ThemeSwatchSelector({
     required this.currentTheme,
@@ -1846,6 +1992,7 @@ class _ThemeSwatchSelector extends StatelessWidget {
     required this.creamDesc,
     required this.whiteLabel,
     required this.whiteDesc,
+    required this.onThemeSelected,
   });
 
   @override
@@ -1856,8 +2003,8 @@ class _ThemeSwatchSelector extends StatelessWidget {
         darkLabel,
         darkDesc,
         Icons.nights_stay_rounded,
-        const Color(0xFF0D1F17), // Preview background
-        const Color(0xFFE8C77A), // Preview gold
+        const Color(0xFF0D1F17),
+        const Color(0xFFE8C77A),
         Colors.white,
       ),
       (
@@ -1865,8 +2012,8 @@ class _ThemeSwatchSelector extends StatelessWidget {
         creamLabel,
         creamDesc,
         Icons.wb_sunny_rounded,
-        const Color(0xFFFDFBF0), // Preview parchment
-        const Color(0xFF1B4332), // Preview deep green
+        const Color(0xFFFDFBF0),
+        const Color(0xFF1B4332),
         const Color(0xFF1A120B),
       ),
       (
@@ -1875,7 +2022,7 @@ class _ThemeSwatchSelector extends StatelessWidget {
         whiteDesc,
         Icons.light_mode_rounded,
         Colors.white,
-        const Color(0xFF10B981), // Preview emerald
+        const Color(0xFF10B981),
         const Color(0xFF111827),
       ),
     ];
@@ -1898,93 +2045,119 @@ class _ThemeSwatchSelector extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10),
       child: Row(
         children: themeOptions.map((t) {
           final isSelected = currentTheme == t.$1;
 
           return Expanded(
-            child: GestureDetector(
-              onTap: () => AppTheme.changeTheme(t.$1),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 240),
-                curve: Curves.easeOut,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                padding: const EdgeInsets.fromLTRB(8, 12, 8, 10),
-                decoration: BoxDecoration(
-                  color: t.$5, // Theme preview color
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isSelected
-                        ? borderColor
-                        : (isDark ? Colors.white12 : Colors.black12),
-                    width: isSelected ? 2.5 : 1,
-                  ),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: borderColor.withValues(alpha: 0.45),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ]
-                      : [],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Stack(
-                      alignment: Alignment.center,
+            child: Builder(
+              builder: (swatchContext) {
+                Offset? tapPos;
+
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTapDown: (details) {
+                    tapPos = details.globalPosition;
+                  },
+                  onTap: () {
+                    final RenderBox? box = swatchContext.findRenderObject() as RenderBox?;
+                    Offset origin;
+                    if (box != null && box.hasSize) {
+                      final cardRect = box.localToGlobal(Offset.zero) & box.size;
+                      if (tapPos != null && cardRect.contains(tapPos!)) {
+                        origin = tapPos!;
+                      } else {
+                        origin = box.localToGlobal(box.size.center(Offset.zero));
+                      }
+                    } else if (tapPos != null) {
+                      origin = tapPos!;
+                    } else {
+                      origin = Offset(MediaQuery.of(context).size.width / 2, 250);
+                    }
+                    onThemeSelected(t.$1, origin);
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 240),
+                    curve: Curves.easeOutCubic,
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    padding: const EdgeInsets.fromLTRB(6, 10, 6, 8),
+                    decoration: BoxDecoration(
+                      color: t.$5,
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                        color: isSelected
+                            ? borderColor
+                            : (isDark ? Colors.white12 : Colors.black12),
+                        width: isSelected ? 2.5 : 1,
+                      ),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: borderColor.withValues(alpha: 0.45),
+                                blurRadius: 9,
+                                offset: const Offset(0, 2),
+                              ),
+                            ]
+                          : [],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Container(
-                          width: 38,
-                          height: 38,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: t.$6.withValues(alpha: 0.18),
-                          ),
-                          child: Icon(t.$4, size: 20, color: t.$6),
-                        ),
-                        if (isSelected)
-                          Positioned(
-                            right: 0,
-                            top: 0,
-                            child: Container(
-                              padding: const EdgeInsets.all(2),
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Container(
+                              width: 34,
+                              height: 34,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: borderColor,
+                                color: t.$6.withValues(alpha: 0.18),
                               ),
-                              child: const Icon(Icons.check, size: 11, color: Colors.black),
+                              child: Icon(t.$4, size: 18, color: t.$6),
                             ),
+                            if (isSelected)
+                              Positioned(
+                                right: 0,
+                                top: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: borderColor,
+                                  ),
+                                  child: const Icon(Icons.check, size: 10, color: Colors.black),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          t.$2,
+                          style: TextStyle(
+                            color: t.$7,
+                            fontSize: 11.5,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                            fontFamily: isArabic ? 'Amiri' : null,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 1),
+                        Text(
+                          t.$3,
+                          style: TextStyle(
+                            color: t.$7.withValues(alpha: 0.6),
+                            fontSize: 9,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      t.$2,
-                      style: TextStyle(
-                        color: t.$7,
-                        fontSize: 12,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                        fontFamily: isArabic ? 'Amiri' : null,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      t.$3,
-                      style: TextStyle(
-                        color: t.$7.withValues(alpha: 0.6),
-                        fontSize: 9.5,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
           );
         }).toList(),
@@ -1994,7 +2167,7 @@ class _ThemeSwatchSelector extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 🌟 COMPONENT 6: VIP Creator & Community Showcase Card (TikTok: @umer.almuktar)
+// 🌟 COMPONENT 6: Real VIP Creator & TikTok Card (No Truncation, Pure Prestige!)
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _TikTokSpotlightCard extends StatelessWidget {
@@ -2006,6 +2179,7 @@ class _TikTokSpotlightCard extends StatelessWidget {
   final String creatorRole;
   final String tiktokTitle;
   final String tiktokDesc;
+  final String tapToCopyLabel;
   final String followLabel;
   final String copyLabel;
   final String telegramLabel;
@@ -2025,6 +2199,7 @@ class _TikTokSpotlightCard extends StatelessWidget {
     required this.creatorRole,
     required this.tiktokTitle,
     required this.tiktokDesc,
+    required this.tapToCopyLabel,
     required this.followLabel,
     required this.copyLabel,
     required this.telegramLabel,
@@ -2043,80 +2218,66 @@ class _TikTokSpotlightCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isDark
-              ? [const Color(0xFF0F1E19), const Color(0xFF08120E)]
-              : [const Color(0xFFF9F6EE), const Color(0xFFF2ECE0)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
+        color: cardBg,
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: tiktokPink.withValues(alpha: 0.45),
-          width: 1.5,
+          color: tiktokPink.withValues(alpha: isDark ? 0.4 : 0.3),
+          width: 1.4,
         ),
         boxShadow: [
           BoxShadow(
-            color: tiktokPink.withValues(alpha: isDark ? 0.25 : 0.1),
-            blurRadius: 18,
-            offset: const Offset(0, 5),
+            color: tiktokPink.withValues(alpha: isDark ? 0.2 : 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Header: Creator Profile Badge ──────────────────────────────────
+          // ── Row 1: Creator Identity (Spacious, Never Truncated!) ─────────────
           Row(
             children: [
-              // Glowing Creator Avatar
+              // Glowing Creator Avatar (46px)
               Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
+                width: 46,
+                height: 46,
+                padding: const EdgeInsets.all(2.5),
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     colors: [tiktokCyan, tiktokPink],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: tiktokPink.withValues(alpha: 0.4),
-                      blurRadius: 12,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(2.5),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isDark ? const Color(0xFF09120E) : Colors.white,
-                    ),
-                    child: Center(
-                      child: Icon(
-                        Icons.person_rounded,
-                        size: 28,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isDark ? const Color(0xFF09120E) : Colors.white,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.person_rounded,
+                      size: 26,
+                      color: isDark ? Colors.white : Colors.black87,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Row(
                       children: [
                         Text(
                           creatorName,
                           style: TextStyle(
-                            fontSize: 17,
+                            fontSize: 16.5,
                             fontWeight: FontWeight.bold,
                             color: isDark ? Colors.white : Colors.black87,
                           ),
@@ -2124,7 +2285,7 @@ class _TikTokSpotlightCard extends StatelessWidget {
                         const SizedBox(width: 6),
                         const Icon(
                           Icons.verified_rounded,
-                          size: 18,
+                          size: 17,
                           color: Color(0xFF00B2FF),
                         ),
                       ],
@@ -2133,10 +2294,10 @@ class _TikTokSpotlightCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: goldBorder.withValues(alpha: 0.18),
+                        color: goldBorder.withValues(alpha: 0.16),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                          color: goldBorder.withValues(alpha: 0.4),
+                          color: goldBorder.withValues(alpha: 0.35),
                           width: 1,
                         ),
                       ),
@@ -2154,17 +2315,17 @@ class _TikTokSpotlightCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
-          // ── Spotlight Box: TikTok @umer.almuktar ────────────────────────────
+          // ── Row 2: TikTok VIP Spotlight Container ───────────────────────────
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF060B09) : Colors.white,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isDark
-                    ? Colors.white.withValues(alpha: 0.12)
+                    ? Colors.white.withValues(alpha: 0.1)
                     : Colors.black.withValues(alpha: 0.08),
               ),
               boxShadow: [
@@ -2178,26 +2339,26 @@ class _TikTokSpotlightCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Header: TikTok Badge + Channel Title & Full Visible Description
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // TikTok Badge Icon
                     Container(
-                      width: 44,
-                      height: 44,
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
                         color: Colors.black,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: const [
                           BoxShadow(
-                            color: tiktokCyan.withValues(alpha: 0.45),
-                            blurRadius: 8,
-                            offset: const Offset(-2, 0),
+                            color: tiktokCyan,
+                            blurRadius: 5,
+                            offset: Offset(-1.5, 0),
                           ),
                           BoxShadow(
-                            color: tiktokPink.withValues(alpha: 0.45),
-                            blurRadius: 8,
-                            offset: const Offset(2, 0),
+                            color: tiktokPink,
+                            blurRadius: 5,
+                            offset: Offset(1.5, 0),
                           ),
                         ],
                       ),
@@ -2205,7 +2366,7 @@ class _TikTokSpotlightCard extends StatelessWidget {
                         child: Icon(
                           Icons.music_note_rounded,
                           color: Colors.white,
-                          size: 24,
+                          size: 22,
                         ),
                       ),
                     ),
@@ -2217,76 +2378,145 @@ class _TikTokSpotlightCard extends StatelessWidget {
                           Text(
                             tiktokTitle,
                             style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.white60 : Colors.black54,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.white : Colors.black87,
                             ),
                           ),
                           const SizedBox(height: 2),
-                          const Text(
-                            '@umer.almuktar',
+                          Text(
+                            tiktokDesc,
                             style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
-                              color: tiktokPink,
-                              letterSpacing: 0.4,
+                              fontSize: 11,
+                              color: isDark ? Colors.white60 : Colors.black54,
+                              height: 1.35,
                             ),
+                            maxLines: 2,
                           ),
                         ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  tiktokDesc,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark ? Colors.white70 : Colors.black87,
-                    height: 1.35,
-                  ),
-                ),
                 const SizedBox(height: 14),
 
-                // Primary CTA: Follow on TikTok Button
+                // Full-width Bold Handle Banner with 1-Tap Copy Everywhere!
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: onCopyHandle,
+                    borderRadius: BorderRadius.circular(14),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: tiktokPink.withValues(alpha: isDark ? 0.12 : 0.08),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: tiktokPink.withValues(alpha: 0.38),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: tiktokPink.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.alternate_email_rounded,
+                              size: 16,
+                              color: tiktokPink,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text(
+                                  'umer.almuktar',
+                                  style: TextStyle(
+                                    fontSize: 16.5,
+                                    fontWeight: FontWeight.w900,
+                                    color: tiktokPink,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                Text(
+                                  tapToCopyLabel,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: isDark ? Colors.white54 : Colors.black45,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5.5),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [tiktokPink, Color(0xFFFF4B6E)],
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: tiktokPink.withValues(alpha: 0.35),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.copy_rounded, size: 13, color: Colors.white),
+                                const SizedBox(width: 4),
+                                Text(
+                                  copyLabel,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Full-width Prominent Follow Button
                 SizedBox(
                   width: double.infinity,
-                  height: 46,
+                  height: 42,
                   child: ElevatedButton.icon(
                     onPressed: onFollowTikTok,
-                    icon: const Icon(Icons.open_in_new_rounded, size: 18, color: Colors.white),
+                    icon: const Icon(Icons.open_in_new_rounded, size: 16, color: Colors.white),
                     label: Text(
                       followLabel,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 14,
+                        fontSize: 13.5,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.3,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: tiktokPink,
-                      elevation: 4,
-                      shadowColor: tiktokPink.withValues(alpha: 0.5),
+                      elevation: 3,
+                      shadowColor: tiktokPink.withValues(alpha: 0.4),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // Secondary CTA: Copy Handle
-                Center(
-                  child: TextButton.icon(
-                    onPressed: onCopyHandle,
-                    icon: const Icon(Icons.copy_rounded, size: 14, color: tiktokPink),
-                    label: Text(
-                      copyLabel,
-                      style: const TextStyle(
-                        color: tiktokPink,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                   ),
@@ -2294,31 +2524,32 @@ class _TikTokSpotlightCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 14),
 
-          // ── Multi-channel Connect: Telegram & Email ─────────────────────────
+          const SizedBox(height: 12),
+
+          // ── Row 3: Quick Support Channels (Telegram & Email) ────────────────
           Row(
             children: [
               Expanded(
                 child: SizedBox(
-                  height: 40,
+                  height: 38,
                   child: OutlinedButton.icon(
                     onPressed: onTelegram,
-                    icon: const Icon(Icons.send_rounded, size: 16, color: Color(0xFF0088CC)),
+                    icon: const Icon(Icons.send_rounded, size: 15, color: Color(0xFF0088CC)),
                     label: Text(
                       telegramLabel,
                       style: TextStyle(
                         color: isDark ? Colors.white : Colors.black87,
-                        fontSize: 11.5,
+                        fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(
-                        color: const Color(0xFF0088CC).withValues(alpha: 0.5),
+                        color: const Color(0xFF0088CC).withValues(alpha: 0.4),
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   ),
@@ -2327,24 +2558,24 @@ class _TikTokSpotlightCard extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: SizedBox(
-                  height: 40,
+                  height: 38,
                   child: OutlinedButton.icon(
                     onPressed: onEmail,
-                    icon: Icon(Icons.email_outlined, size: 16, color: primary),
+                    icon: Icon(Icons.email_outlined, size: 15, color: primary),
                     label: Text(
                       emailLabel,
                       style: TextStyle(
                         color: isDark ? Colors.white : Colors.black87,
-                        fontSize: 11.5,
+                        fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(
-                        color: primary.withValues(alpha: 0.5),
+                        color: primary.withValues(alpha: 0.4),
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   ),
@@ -2352,21 +2583,83 @@ class _TikTokSpotlightCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
 
           // Spiritual Note
           Text(
             creatorNote,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 11,
-              color: isDark ? Colors.white54 : Colors.black54,
+              fontSize: 10.5,
+              color: isDark ? Colors.white38 : Colors.black38,
               fontStyle: FontStyle.italic,
-              height: 1.35,
             ),
           ),
         ],
       ),
     );
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CIRCULAR REVEAL CLIPPER & RIPPLE RING PAINTER (Telegram-Style)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class CircularRevealClipper extends CustomClipper<Path> {
+  final Offset center;
+  final double radius;
+
+  const CircularRevealClipper({required this.center, required this.radius});
+
+  @override
+  Path getClip(Size size) {
+    return Path()..addOval(Rect.fromCircle(center: center, radius: radius));
+  }
+
+  @override
+  bool shouldReclip(CircularRevealClipper oldClipper) {
+    return oldClipper.radius != radius || oldClipper.center != center;
+  }
+}
+
+class _RippleRingPainter extends CustomPainter {
+  final Offset center;
+  final double radius;
+  final Color color;
+  final double progress;
+
+  _RippleRingPainter({
+    required this.center,
+    required this.radius,
+    required this.color,
+    required this.progress,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (radius < 1.0) return;
+    final double alpha = (1.0 - progress * 0.65).clamp(0.0, 1.0);
+    final double ringScale = (radius / 25.0).clamp(0.0, 1.0);
+
+    // Glowing outer aura (softly blooms from 1px without an awkward blob)
+    if (radius > 2.0) {
+      final aura = Paint()
+        ..color = color.withValues(alpha: alpha * 0.35 * ringScale)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = (6.0 * ringScale).clamp(1.0, 6.0)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, (3.0 * ringScale).clamp(0.5, 3.0));
+      canvas.drawCircle(center, radius, aura);
+    }
+
+    // Sharp wavefront ring starting right from 1px
+    final core = Paint()
+      ..color = color.withValues(alpha: alpha * 0.85)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = (2.5 * ringScale).clamp(0.8, 2.5);
+    canvas.drawCircle(center, radius, core);
+  }
+
+  @override
+  bool shouldRepaint(_RippleRingPainter old) =>
+      old.radius != radius || old.progress != progress || old.color != color;
 }
