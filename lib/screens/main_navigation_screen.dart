@@ -375,12 +375,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   ];
 
   void _onTabTapped(int index) {
-    if (index == _currentIndex) return;
+    if (index == _currentIndex) {
+      HapticFeedback.selectionClick();
+      return;
+    }
     HapticFeedback.lightImpact();
     setState(() => _currentIndex = index);
     _pageController.animateToPage(
       index,
-      duration: const Duration(milliseconds: 380),
+      duration: const Duration(milliseconds: 350),
       curve: Curves.easeOutCubic,
     );
   }
@@ -539,8 +542,8 @@ class _AppBottomNavBar extends StatelessWidget {
         final double totalWidth = constraints.maxWidth;
         final int count = navMeta.length;
 
-        // Reduced dock width by 30% for an ultra-compact, centered Samsung One UI island
-        final double dockWidth = (totalWidth * 0.70).clamp(250.0, 340.0);
+        // Perfectly proportioned 30% width reduction for Samsung One UI floating island
+        final double dockWidth = (totalWidth * 0.74).clamp(268.0, 335.0);
         final double horizontalMargin = (totalWidth - dockWidth) / 2;
         final double availableWidth = dockWidth;
 
@@ -559,17 +562,25 @@ class _AppBottomNavBar extends StatelessWidget {
             ? ((count - 1) - currentPage)
             : currentPage;
 
-        const double barHeight = 54.0;
-        const double pillHeight = 40.0;
-        final double pillWidth = itemWidth - 2.0;
-        final double pillLeft = (visualPage * itemWidth) + (itemWidth - pillWidth) / 2;
+        const double barHeight = 60.0;
+        const double pillHeight = 48.0;
+        final double pillWidth = itemWidth - 6.0;
+
+        // Organic fluid stretch physics (Samsung One UI 8.5 fluid capsule)
+        final double fractional = (currentPage - currentPage.round()).abs(); // 0.0 to 0.5
+        final double stretch = (fractional * 2.0); // 0.0 at rest, 1.0 halfway
+        final double dynamicPillWidth = pillWidth + (stretch * 6.0);
+        final double dynamicPillHeight = pillHeight - (stretch * 2.0);
+        final double dynamicPillLeft =
+            (visualPage * itemWidth) + (itemWidth - dynamicPillWidth) / 2;
+        final double dynamicPillTop = (barHeight - dynamicPillHeight) / 2;
 
         return SafeArea(
           top: false,
           child: Padding(
             padding: EdgeInsets.fromLTRB(horizontalMargin, 0, horizontalMargin, 22),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(28),
+              borderRadius: BorderRadius.circular(30),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                 child: AnimatedContainer(
@@ -578,7 +589,7 @@ class _AppBottomNavBar extends StatelessWidget {
                   height: barHeight,
                   decoration: BoxDecoration(
                     color: barBgColor,
-                    borderRadius: BorderRadius.circular(28),
+                    borderRadius: BorderRadius.circular(30),
                     border: Border.all(
                       color: borderColor,
                       width: borderWidth,
@@ -589,29 +600,37 @@ class _AppBottomNavBar extends StatelessWidget {
                         blurRadius: 20,
                         offset: const Offset(0, 6),
                       ),
+                      if (isDark)
+                        BoxShadow(
+                          color: selectedColor.withValues(alpha: 0.06),
+                          blurRadius: 16,
+                          offset: const Offset(0, 2),
+                        ),
                     ],
                   ),
                   child: Stack(
                     alignment: Alignment.centerLeft,
                     children: [
-                      // ── One UI 8.5 Sliding Squircle / Capsule Indicator ──
+                      // ── One UI 8.5 Fluid Squircle Capsule Indicator ──────
                       Positioned(
-                        left: pillLeft,
-                        top: (barHeight - pillHeight) / 2,
-                        width: pillWidth,
-                        height: pillHeight,
+                        left: dynamicPillLeft,
+                        top: dynamicPillTop,
+                        width: dynamicPillWidth,
+                        height: dynamicPillHeight,
                         child: Container(
                           decoration: BoxDecoration(
                             color: activeIndicatorColor,
-                            borderRadius: BorderRadius.circular(21),
+                            borderRadius: BorderRadius.circular(24),
                             border: Border.all(
-                              color: selectedColor.withValues(alpha: isDark ? 0.35 : 0.22),
+                              color: selectedColor.withValues(
+                                  alpha: isDark ? 0.35 : 0.22),
                               width: 1.0,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: selectedColor.withValues(alpha: isDark ? 0.20 : 0.08),
-                                blurRadius: 10,
+                                color: selectedColor.withValues(
+                                    alpha: isDark ? 0.22 : 0.08),
+                                blurRadius: 12,
                                 offset: const Offset(0, 2),
                               ),
                             ],
@@ -619,12 +638,13 @@ class _AppBottomNavBar extends StatelessWidget {
                         ),
                       ),
 
-                      // ── 4 Nav Bar Item Buttons (Expanded to guarantee 0 overflow) ──
+                      // ── 4 Nav Bar Item Buttons (Vertical One UI 8.5 Stack) ──
                       Row(
                         children: List.generate(count, (i) {
                           final item = navMeta[i];
                           final double distance = (currentPage - i).abs();
-                          final double activeWeight = (1.0 - distance).clamp(0.0, 1.0);
+                          final double activeWeight =
+                              (1.0 - distance).clamp(0.0, 1.0);
 
                           return Expanded(
                             child: SizedBox(
@@ -688,10 +708,15 @@ class _NavBarButtonState extends State<_NavBarButton>
     super.initState();
     _tapCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 120),
+      duration: const Duration(milliseconds: 100),
+      reverseDuration: const Duration(milliseconds: 180),
     );
-    _scaleAnim = Tween<double>(begin: 1.0, end: 0.88).animate(
-      CurvedAnimation(parent: _tapCtrl, curve: Curves.easeOutCubic),
+    _scaleAnim = Tween<double>(begin: 1.0, end: 0.90).animate(
+      CurvedAnimation(
+        parent: _tapCtrl,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.elasticOut,
+      ),
     );
   }
 
@@ -706,13 +731,18 @@ class _NavBarButtonState extends State<_NavBarButton>
     final label = _resolveLabel(context, widget.l10n);
     final weight = widget.activeWeight;
 
-    // Smooth color lerp
+    // Smooth color & opacity interpolation
     final Color iconColor =
+        Color.lerp(widget.unselectedColor, widget.selectedColor, weight)!;
+    final Color textColor =
         Color.lerp(widget.unselectedColor, widget.selectedColor, weight)!;
     final bool isSelected = weight > 0.5;
 
     return GestureDetector(
-      onTapDown: (_) => _tapCtrl.forward(),
+      onTapDown: (_) {
+        _tapCtrl.forward();
+        HapticFeedback.lightImpact();
+      },
       onTapUp: (_) {
         _tapCtrl.reverse();
         widget.onTap();
@@ -724,47 +754,37 @@ class _NavBarButtonState extends State<_NavBarButton>
           scale: _scaleAnim,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    transitionBuilder: (child, anim) =>
-                        ScaleTransition(scale: anim, child: child),
-                    child: Icon(
-                      isSelected ? widget.item.activeIcon : widget.item.icon,
-                      key: ValueKey('${widget.item.labelKey}_$isSelected'),
-                      color: iconColor,
-                      size: isSelected ? 21 : 19.5,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 220),
+                  transitionBuilder: (child, anim) =>
+                      ScaleTransition(scale: anim, child: child),
+                  child: Icon(
+                    isSelected ? widget.item.activeIcon : widget.item.icon,
+                    key: ValueKey('${widget.item.labelKey}_$isSelected'),
+                    color: iconColor,
+                    size: isSelected ? 21.5 : 20.0,
+                  ),
+                ),
+                const SizedBox(height: 2.5),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight:
+                          isSelected ? FontWeight.w700 : FontWeight.w500,
+                      color: textColor,
+                      letterSpacing: 0.1,
                     ),
                   ),
-                  ClipRect(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      widthFactor: weight,
-                      child: Opacity(
-                        opacity: weight,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 5, right: 3),
-                          child: Text(
-                            label,
-                            maxLines: 1,
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.bold,
-                              color: widget.selectedColor,
-                              letterSpacing: 0.1,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
