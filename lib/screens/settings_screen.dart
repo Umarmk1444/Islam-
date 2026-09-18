@@ -828,15 +828,15 @@ class _SettingsScreenState extends State<SettingsScreen>
             child: SafeArea(
               bottom: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 6, 16, 2),
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
                 child: FadeTransition(
                   opacity: _headerFade,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 10),
+                        horizontal: 12, vertical: 7),
                     decoration: BoxDecoration(
                       color: heroBannerBg,
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color:
                             borderColor.withValues(alpha: isDark ? 0.25 : 0.35),
@@ -846,8 +846,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                         BoxShadow(
                           color: Colors.black
                               .withValues(alpha: isDark ? 0.3 : 0.04),
-                          blurRadius: 12,
-                          offset: const Offset(0, 3),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
@@ -855,8 +855,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                       children: [
                         // Glowing App Emblem
                         Container(
-                          width: 42,
-                          height: 42,
+                          width: 36,
+                          height: 36,
                           padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
@@ -868,7 +868,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                             boxShadow: [
                               BoxShadow(
                                 color: primary.withValues(alpha: 0.3),
-                                blurRadius: 8,
+                                blurRadius: 6,
                                 offset: const Offset(0, 2),
                               ),
                             ],
@@ -880,7 +880,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 10),
                         // Title & Version Badge
                         Expanded(
                           child: Column(
@@ -892,20 +892,20 @@ class _SettingsScreenState extends State<SettingsScreen>
                                   Text(
                                     'Quran Zone',
                                     style: TextStyle(
-                                      fontSize: 16.5,
+                                      fontSize: 15,
                                       fontWeight: FontWeight.bold,
                                       color: textMain,
                                       letterSpacing: 0.3,
                                       fontFamily: isArabic ? 'Amiri' : null,
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
+                                  const SizedBox(width: 6),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 6, vertical: 1.5),
+                                        horizontal: 5, vertical: 1.2),
                                     decoration: BoxDecoration(
                                       color: primary.withValues(alpha: 0.15),
-                                      borderRadius: BorderRadius.circular(6),
+                                      borderRadius: BorderRadius.circular(5),
                                       border: Border.all(
                                         color: primary.withValues(alpha: 0.35),
                                         width: 0.8,
@@ -993,12 +993,12 @@ class _SettingsScreenState extends State<SettingsScreen>
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
 
-                // ── SECTION B: PRAYER & SPIRITUAL REMINDERS ───────────────────
+                // ── SECTION B: DAILY WORSHIP & OFFLINE CONTENT ────────────────
                 _sectionHeader(
                   icon: Icons.mosque_rounded,
-                  title: _tr(context, 'prayer_section'),
+                  title: isArabic ? 'العبادات والمحتوى' : 'DAILY WORSHIP & OFFLINE',
                   color: const Color(0xFF10B981),
                 ),
                 _ModernCard(
@@ -1032,37 +1032,42 @@ class _SettingsScreenState extends State<SettingsScreen>
                       onChanged: _toggleNotifications,
                       isDark: isDark,
                       textColor: textMain,
-                    ),
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeInOut,
-                      child: _notificationsEnabled
-                          ? _ModernIntervalPicker(
-                              value: _notificationInterval,
-                              primary: primary,
-                              textColor: textMain,
-                              subtextColor: textSub,
-                              title: _tr(context, 'freq_title'),
-                              onChanged: _setNotificationInterval,
-                              isDark: isDark,
+                      intervalBadge: _notificationsEnabled
+                          ? GestureDetector(
+                              onTap: () => _showIntervalSheet(
+                                  context, primary, textMain, cardBg),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 7, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: primary.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: primary.withValues(alpha: 0.35),
+                                    width: 0.8,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      _formatInterval(_notificationInterval),
+                                      style: TextStyle(
+                                        color: primary,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 1),
+                                    Icon(Icons.arrow_drop_down_rounded,
+                                        size: 14, color: primary),
+                                  ],
+                                ),
+                              ),
                             )
-                          : const SizedBox.shrink(),
+                          : null,
                     ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                // ── SECTION C: STORAGE & OFFLINE ─────────────────────────────
-                _sectionHeader(
-                  icon: Icons.folder_special_rounded,
-                  title: _tr(context, 'storage_section'),
-                  color: const Color(0xFF0D9488),
-                ),
-                _ModernCard(
-                  isDark: isDark,
-                  cardBg: cardBg,
-                  borderColor: borderColor,
-                  children: [
+                    _divider(isDark, borderColor),
                     _CompactTile(
                       icon: Icons.download_done_rounded,
                       iconColor: const Color(0xFF0D9488),
@@ -1079,7 +1084,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
 
                 // ── 🌟 SECTION D: VIP CREATOR & COMMUNITY (TIKTOK) ────────────
                 _sectionHeader(
@@ -2498,17 +2503,17 @@ class _TikTokSpotlightCard extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(14, 11, 14, 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // ── Row 1: Creator Identity (Spacious, Never Truncated!) ─────────────
           Row(
             children: [
-              // Glowing Creator Avatar (46px)
+              // Glowing Creator Avatar
               Container(
-                width: 38,
-                height: 38,
+                width: 36,
+                height: 36,
                 padding: const EdgeInsets.all(2),
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
@@ -2526,7 +2531,7 @@ class _TikTokSpotlightCard extends StatelessWidget {
                   child: Center(
                     child: Icon(
                       Icons.person_rounded,
-                      size: 20,
+                      size: 19,
                       color: isDark ? Colors.white : Colors.black87,
                     ),
                   ),
@@ -2534,44 +2539,40 @@ class _TikTokSpotlightCard extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
+                    Row(
+                      children: [
+                        Text(
+                          creatorName,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.verified_rounded,
+                          size: 15,
+                          color: Color(0xFF00B2FF),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 1.5),
                     Text(
-                      creatorName,
+                      creatorRole,
                       style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black87,
+                        color: isDark
+                            ? const Color(0xFFE8C77A)
+                            : const Color(0xFF8D6800),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.verified_rounded,
-                      size: 14,
-                      color: Color(0xFF00B2FF),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 1.5),
-                      decoration: BoxDecoration(
-                        color: goldBorder.withValues(alpha: 0.16),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: goldBorder.withValues(alpha: 0.35),
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        creatorRole,
-                        style: TextStyle(
-                          color: isDark
-                              ? const Color(0xFFE8C77A)
-                              : const Color(0xFF7A5900),
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -2640,12 +2641,16 @@ class _TikTokSpotlightCard extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              Text(
-                                tiktokTitle,
-                                style: TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white : Colors.black87,
+                              Expanded(
+                                child: Text(
+                                  tiktokTitle,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : Colors.black87,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               const SizedBox(width: 6),
