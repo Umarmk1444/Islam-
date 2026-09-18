@@ -396,18 +396,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
         final Color bgColor = AppTheme.getScreenBgColor(theme);
 
-        // One UI 8.5 Translucent Glass Palettes
+        // One UI 8.5 Translucent Frosted Glass Palettes
         final Color barBgColor = isDark
-            ? const Color(0xFF07120C).withValues(alpha: 0.78)
+            ? const Color(0xFF1B221E).withValues(alpha: 0.82)
             : (isCream
-                ? const Color(0xFFFAF6EB).withValues(alpha: 0.85)
-                : Colors.white.withValues(alpha: 0.86));
+                ? const Color(0xFFF5EFE3).withValues(alpha: 0.84)
+                : const Color(0xFFEEF3F0).withValues(alpha: 0.82));
 
         final Color borderColor = isDark
-            ? Colors.white.withValues(alpha: 0.13)
+            ? Colors.white.withValues(alpha: 0.14)
             : (isCream
-                ? const Color(0xFFC9A84C).withValues(alpha: 0.35)
-                : Colors.black.withValues(alpha: 0.08));
+                ? const Color(0xFFC9A84C).withValues(alpha: 0.32)
+                : const Color(0xFF0D5D44).withValues(alpha: 0.14));
 
         final Color selectedColor = isDark
             ? const Color(0xFF00E676)
@@ -428,21 +428,48 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           body: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 850),
-              child: PageView(
-                controller: _pageController,
-                onPageChanged: (index) {
-                  if (_currentIndex != index) {
-                    setState(() {
-                      _currentIndex = index;
-                    });
-                  }
-                },
-                physics: const BouncingScrollPhysics(),
+              child: Stack(
                 children: [
-                  MuslimDashboardTab(key: _tabKeys[0]),
-                  LibraryScreen(key: _tabKeys[1]),
-                  MinbarTab(key: _tabKeys[2]),
-                  SettingsScreen(key: _tabKeys[3]),
+                  PageView(
+                    controller: _pageController,
+                    onPageChanged: (index) {
+                      if (_currentIndex != index) {
+                        setState(() {
+                          _currentIndex = index;
+                        });
+                      }
+                    },
+                    physics: const BouncingScrollPhysics(),
+                    children: [
+                      MuslimDashboardTab(key: _tabKeys[0]),
+                      LibraryScreen(key: _tabKeys[1]),
+                      MinbarTab(key: _tabKeys[2]),
+                      SettingsScreen(key: _tabKeys[3]),
+                    ],
+                  ),
+                  // ── Samsung One UI 8.5 Bottom Soft Fade-out Scrim ───────────
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: 100,
+                    child: IgnorePointer(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              bgColor.withValues(alpha: 0.0),
+                              bgColor.withValues(alpha: isDark ? 0.45 : 0.35),
+                              bgColor.withValues(alpha: isDark ? 0.85 : 0.80),
+                            ],
+                            stops: const [0.0, 0.45, 1.0],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -512,10 +539,15 @@ class _AppBottomNavBar extends StatelessWidget {
         final double totalWidth = constraints.maxWidth;
         final int count = navMeta.length;
 
-        // One UI Floating margins: 16px left + 16px right
-        const double horizontalMargin = 16.0;
-        final double availableWidth = totalWidth - (horizontalMargin * 2);
-        final double itemWidth = availableWidth / count;
+        // Reduced dock width by 25% for a compact, centered Samsung One UI island
+        final double dockWidth = (totalWidth * 0.75).clamp(260.0, 350.0);
+        final double horizontalMargin = (totalWidth - dockWidth) / 2;
+        final double availableWidth = dockWidth;
+
+        // Account for container border width: 1.2px on each side = 2.4px total
+        const double borderWidth = 1.2;
+        final double innerContentWidth = availableWidth - (borderWidth * 2);
+        final double itemWidth = innerContentWidth / count;
 
         final double currentPage = (pageController.hasClients &&
                 pageController.position.haveDimensions)
@@ -527,35 +559,35 @@ class _AppBottomNavBar extends StatelessWidget {
             ? ((count - 1) - currentPage)
             : currentPage;
 
-        const double barHeight = 60.0;
-        const double pillHeight = 42.0;
-        final double pillWidth = itemWidth - 8.0;
+        const double barHeight = 54.0;
+        const double pillHeight = 38.0;
+        final double pillWidth = itemWidth - 6.0;
         final double pillLeft = (visualPage * itemWidth) + (itemWidth - pillWidth) / 2;
 
         return SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(horizontalMargin, 0, horizontalMargin, 12),
+            padding: EdgeInsets.fromLTRB(horizontalMargin, 0, horizontalMargin, 10),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(28),
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 320),
                   curve: Curves.easeInOut,
                   height: barHeight,
                   decoration: BoxDecoration(
                     color: barBgColor,
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(28),
                     border: Border.all(
                       color: borderColor,
-                      width: 1.2,
+                      width: borderWidth,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.08),
-                        blurRadius: 22,
-                        offset: const Offset(0, 8),
+                        color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+                        blurRadius: 20,
+                        offset: const Offset(0, 6),
                       ),
                     ],
                   ),
@@ -587,23 +619,24 @@ class _AppBottomNavBar extends StatelessWidget {
                         ),
                       ),
 
-                      // ── 4 Nav Bar Item Buttons ──
+                      // ── 4 Nav Bar Item Buttons (Expanded to guarantee 0 overflow) ──
                       Row(
                         children: List.generate(count, (i) {
                           final item = navMeta[i];
                           final double distance = (currentPage - i).abs();
                           final double activeWeight = (1.0 - distance).clamp(0.0, 1.0);
 
-                          return SizedBox(
-                            width: itemWidth,
-                            height: barHeight,
-                            child: _NavBarButton(
-                              item: item,
-                              activeWeight: activeWeight,
-                              selectedColor: selectedColor,
-                              unselectedColor: unselectedColor,
-                              l10n: l10n,
-                              onTap: () => onTap(i),
+                          return Expanded(
+                            child: SizedBox(
+                              height: barHeight,
+                              child: _NavBarButton(
+                                item: item,
+                                activeWeight: activeWeight,
+                                selectedColor: selectedColor,
+                                unselectedColor: unselectedColor,
+                                l10n: l10n,
+                                onTap: () => onTap(i),
+                              ),
                             ),
                           );
                         }),
@@ -743,25 +776,13 @@ class _NavBarButtonState extends State<_NavBarButton>
     final lang = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
     switch (widget.item.labelKey) {
       case 'navDashboard':
-        if (lang == 'ar') return 'الرئيسية';
-        if (lang == 'am') return 'ዋና ገጽ';
-        if (lang == 'om') return 'Mana';
-        return 'Home';
+        return lang == 'ar' ? 'الرئيسية' : 'Home';
       case 'navLibrary':
-        if (lang == 'ar') return 'المكتبة';
-        if (lang == 'am') return 'ቤተ-መጽሐፍት';
-        if (lang == 'om') return 'Man-kuusaa';
-        return 'Library';
+        return lang == 'ar' ? 'المكتبة' : 'Library';
       case 'navMinbar':
-        if (lang == 'ar') return 'المنبر';
-        if (lang == 'am') return 'ሚንበር';
-        if (lang == 'om') return 'Minbara';
-        return 'Minbar';
+        return lang == 'ar' ? 'المنبر' : 'Minbar';
       case 'navSettings':
-        if (lang == 'ar') return 'الإعدادات';
-        if (lang == 'am') return 'ቅንብሮች';
-        if (lang == 'om') return 'Qindaa\'ina';
-        return 'Settings';
+        return lang == 'ar' ? 'الإعدادات' : 'Settings';
       default:
         return widget.item.fallback;
     }

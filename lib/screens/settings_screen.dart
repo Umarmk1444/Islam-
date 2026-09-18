@@ -254,10 +254,10 @@ class _SettingsScreenState extends State<SettingsScreen>
 
     _revealCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 850),
     );
     _revealAnim =
-        CurvedAnimation(parent: _revealCtrl, curve: Curves.fastOutSlowIn);
+        CurvedAnimation(parent: _revealCtrl, curve: Curves.easeInOutCubic);
 
     _revealCtrl.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -267,6 +267,8 @@ class _SettingsScreenState extends State<SettingsScreen>
         });
         _revealScrollCtrl?.dispose();
         _revealScrollCtrl = null;
+        // Synchronize global theme so top status bar and bottom tabs transition in harmony with the reveal
+        AppTheme.changeTheme(_targetTheme);
       }
     });
   }
@@ -478,9 +480,6 @@ class _SettingsScreenState extends State<SettingsScreen>
     setState(() {
       _isRevealing = true;
     });
-
-    // Synchronously update global AppTheme so floating bottom bar transitions together with the screen ripple
-    AppTheme.changeTheme(newTheme);
 
     _revealCtrl.forward(from: 0.0);
   }

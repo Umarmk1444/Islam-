@@ -106,7 +106,6 @@ class MinbarTab extends StatelessWidget {
         final isDark = theme == QuranTheme.dark;
         final isCream = theme == QuranTheme.cream;
 
-        final bg = AppTheme.getScreenBgColor(theme);
         final textColor = AppTheme.getMainTextColor(theme);
         final l10n = AppLocalizations.of(context)!;
         final isArabic = Localizations.maybeLocaleOf(context)?.languageCode == 'ar';
@@ -122,7 +121,7 @@ class MinbarTab extends StatelessWidget {
             : (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06));
 
         return Scaffold(
-          backgroundColor: bg,
+          backgroundColor: Colors.transparent,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -144,7 +143,7 @@ class MinbarTab extends StatelessWidget {
                 children: [
                   Expanded(
                     child: SingleChildScrollView(
-                      padding: EdgeInsets.fromLTRB(16.0, 4.0, 16.0, isAdVisible ? 90 : 24),
+                      padding: EdgeInsets.fromLTRB(16.0, 4.0, 16.0, isAdVisible ? 94 : 84),
                       physics: const BouncingScrollPhysics(),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,

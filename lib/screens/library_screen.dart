@@ -287,10 +287,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
         final bool isDark = currentTheme == QuranTheme.dark;
         final bool isCream = currentTheme == QuranTheme.cream;
 
-        final Color bgColor = isDark
-            ? const Color(0xFF090E11)
-            : (isCream ? const Color(0xFFF6F0E2) : const Color(0xFFF3F7F5));
-
         final Color textColor = isDark
             ? const Color(0xFFF0F4F0)
             : (isCream ? const Color(0xFF2C1C11) : const Color(0xFF0F382C));
@@ -304,8 +300,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
             : (isCream ? const Color(0xFFE2D5BE) : const Color(0xFFE2EBE7));
 
         return Scaffold(
-          backgroundColor: bgColor,
+          backgroundColor: Colors.transparent,
           body: SafeArea(
+            bottom: false,
             child: ValueListenableBuilder<bool>(
               valueListenable: kAdVisibleNotifier,
               builder: (context, isAdVisible, _) {
@@ -358,9 +355,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                   ),
                                 ),
                                 _buildDomainGrid(isDark, isCream, cardBg, borderColor, isAdVisible, locale),
-                                SliverToBoxAdapter(
-                                  child: SizedBox(height: isAdVisible ? 70 : 28),
-                                ),
+                                 SliverToBoxAdapter(
+                                   child: SizedBox(height: isAdVisible ? 90 : 80),
+                                 ),
                               ],
                             ),
                     ),

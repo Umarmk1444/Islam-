@@ -99,9 +99,6 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
         final isDark = theme == QuranTheme.dark;
         final isCream = theme == QuranTheme.cream;
 
-        final Color bg = isDark
-            ? const Color(0xFF09110D)
-            : (isCream ? const Color(0xFFFBF8F0) : const Color(0xFFF7F8F9));
         final Color headerTextColor = isDark
             ? AppColors.textPrimary
             : (isCream ? const Color(0xFF2C1E07) : AppColors.emeraldDeep);
@@ -113,21 +110,22 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
             : (isCream ? const Color(0xFF3D2A08) : const Color(0xFF032616));
 
         return Scaffold(
-          backgroundColor: bg,
+          backgroundColor: Colors.transparent,
           body: SafeArea(
+            bottom: false,
             child: ValueListenableBuilder<bool>(
               valueListenable: kAdVisibleNotifier,
               builder: (context, isAdVisible, _) {
                 // Clean dynamic layout spacing
-                const double space8 = 8;
-                const double space10 = 10;
-                const double space6 = 6;
-                const double space12 = 12;
+                final double space8 = isAdVisible ? 5 : 7;
+                final double space10 = isAdVisible ? 5 : 7;
+                final double space6 = isAdVisible ? 4 : 5;
+                final double space12 = isAdVisible ? 8 : 10;
                 final double gridRatio = isAdVisible
-                    ? 1.34
-                    : 1.27; // Increased ratio to shrink height
-                const double paddingBottom =
-                    96; // Extra padding at the bottom to leave room for floating One UI bar
+                    ? 1.35
+                    : 1.28; // Optimized ratio to fit tools grid
+                final double paddingBottom =
+                    MediaQuery.paddingOf(context).bottom + 68; // Space for One UI floating bar
 
                 return SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -136,7 +134,7 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
                     children: [
                       // ── Header with Brand Icon & Tagline ──────────────────
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+                        padding: const EdgeInsets.fromLTRB(16, 6, 16, 4),
                         child: Row(
                           children: [
                             Container(
@@ -203,14 +201,14 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: _MiqatCard(isAdVisible: isAdVisible),
                       ),
-                      const SizedBox(height: space8),
+                      SizedBox(height: space8),
 
                       // ── 2. Quran Gateway Card ───────────────────────────────
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: _ResumeReadingCard(isAdVisible: isAdVisible),
                       ),
-                      const SizedBox(height: space10),
+                      SizedBox(height: space10),
 
                       // ── Section Title ───────────────────────────────────────
                       Padding(
@@ -224,14 +222,14 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
                           ),
                         ),
                       ),
-                      const SizedBox(height: space6),
+                      SizedBox(height: space6),
 
                       // ── 3. Tools Grid — Fills list scroll view ─────────────
                       GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         padding:
-                            const EdgeInsets.fromLTRB(12, 0, 12, paddingBottom),
+                            EdgeInsets.fromLTRB(12, 0, 12, paddingBottom),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           mainAxisSpacing: space12,
@@ -817,26 +815,26 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(18),
                 border: Border.all(
                   color: cardBorder,
-                  width: 1.4,
+                  width: 1.2,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.07),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
+                    color: Colors.black.withValues(alpha: isDark ? 0.40 : 0.06),
+                    blurRadius: 14,
+                    offset: const Offset(0, 4),
                   ),
                   BoxShadow(
                     color: goldAccent.withValues(alpha: glowAlpha),
-                    blurRadius: 18,
+                    blurRadius: 14,
                     spreadRadius: glowSpread,
                   ),
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(18),
                 child: Stack(
                   children: [
                     // --- Subtle Islamic Geometric Background Pattern ---
@@ -850,44 +848,43 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                     ),
                     // --- Soft Glowing Corner Radiance ---
                     Positioned(
-                      top: -20,
-                      right: locale == 'ar' ? null : -20,
-                      left: locale == 'ar' ? -20 : null,
+                      top: -15,
+                      right: locale == 'ar' ? null : -15,
+                      left: locale == 'ar' ? -15 : null,
                       child: Container(
-                        width: 120,
-                        height: 120,
+                        width: 100,
+                        height: 100,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: RadialGradient(
                             colors: [
                               goldAccent
-                                  .withValues(alpha: isDark ? 0.22 : 0.12),
+                                  .withValues(alpha: isDark ? 0.20 : 0.10),
                               Colors.transparent,
                             ],
                           ),
                         ),
                       ),
                     ),
-                    // --- Main Majestic Content ---
+                    // --- Main Majestic Content (Ultra-Compact 3-Row Layout) ---
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // ── ROW 1: Calligraphy Badge + Reading Progress Pill ──
+                          // ── ROW 1: Calligraphy Badge + Surah/Ayah Stack + Reading Progress Pill ──
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               // Royal Calligraphy Badge
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 9, vertical: 3.5),
+                                    horizontal: 8, vertical: 3.5),
                                 decoration: BoxDecoration(
                                   color: goldAccent
                                       .withValues(alpha: isDark ? 0.18 : 0.12),
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(7),
                                   border: Border.all(
                                     color: goldAccent.withValues(alpha: 0.40),
                                     width: 0.9,
@@ -898,62 +895,39 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                                   children: [
                                     Icon(
                                       Icons.menu_book_rounded,
-                                      size: 14,
+                                      size: 13,
                                       color: goldAccent,
                                     ),
-                                    const SizedBox(width: 5),
+                                    const SizedBox(width: 4.5),
                                     Text(
                                       'القرآن الكريم',
                                       style: TextStyle(
                                         fontFamily: 'Amiri',
-                                        fontSize: 13,
+                                        fontSize: 12,
                                         fontWeight: FontWeight.bold,
                                         color: goldAccent,
-                                        letterSpacing: 0.2,
+                                        letterSpacing: 0.1,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              // Page & Completion Badge
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? Colors.white.withValues(alpha: 0.08)
-                                      : Colors.black.withValues(alpha: 0.04),
-                                  borderRadius: BorderRadius.circular(7),
-                                ),
-                                child: Text(
-                                  '$pageLabel $_lastPage · $pctStr%',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: progressTextColor,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 9),
+                              const SizedBox(width: 8),
 
-                          // ── ROW 2: Surah Names & Last Read Ayah ──────────────
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
+                              // Surah Arabic Name & English Ayah Transliteration in Compact Stack
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
                                       _ayahNameAr,
                                       style: TextStyle(
                                         color: titleColor,
-                                        fontSize: 15.5,
+                                        fontSize: 13.5,
                                         fontWeight: FontWeight.bold,
                                         fontFamily: 'Amiri',
-                                        height: 1.2,
+                                        height: 1.15,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -963,8 +937,9 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                                       _ayahNameEn,
                                       style: TextStyle(
                                         color: ayahColor,
-                                        fontSize: 11,
+                                        fontSize: 10,
                                         fontWeight: FontWeight.w600,
+                                        height: 1.1,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -972,28 +947,49 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                                   ],
                                 ),
                               ),
+                              const SizedBox(width: 6),
+
+                              // Page & Completion Badge
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 7, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.08)
+                                      : Colors.black.withValues(alpha: 0.04),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  '$pageLabel $_lastPage · $pctStr%',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: progressTextColor,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 6),
 
-                          // ── ROW 3: Jewel-cut Glowing Progress Bar (5px) ─────
+                          // ── ROW 2: Jewel-cut Glowing Progress Bar (3.5px) ─────
                           Stack(
                             alignment: locale == 'ar'
                                 ? Alignment.centerRight
                                 : Alignment.centerLeft,
                             children: [
                               Container(
-                                height: 4.5,
+                                height: 3.5,
                                 width: double.infinity,
                                 decoration: BoxDecoration(
                                   color: progressTrack,
-                                  borderRadius: BorderRadius.circular(5),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
                               FractionallySizedBox(
                                 widthFactor: _progressPct.clamp(0.01, 1.0),
                                 child: Container(
-                                  height: 4.5,
+                                  height: 3.5,
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: isDark
@@ -1011,7 +1007,7 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                                                   const Color(0xFF2E7D32),
                                                 ]),
                                     ),
-                                    borderRadius: BorderRadius.circular(5),
+                                    borderRadius: BorderRadius.circular(4),
                                     boxShadow: [
                                       BoxShadow(
                                         color: goldAccent.withValues(alpha: 0.45),
@@ -1024,16 +1020,16 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                               ),
                             ],
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 7),
 
-                          // ── ROW 4: Dual Quick Action Buttons ────────────────
+                          // ── ROW 3: Dual Quick Action Buttons (Height 32px) ─────
                           Row(
                             children: [
                               // Button 1: Continue Reading (Primary)
                               Expanded(
                                 flex: 6,
                                 child: SizedBox(
-                                  height: 36,
+                                  height: 32,
                                   child: ElevatedButton(
                                     onPressed: () => _navigateToQuran(context,
                                         openIndex: false),
@@ -1044,40 +1040,40 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                                               ? const Color(0xFF1B4332)
                                               : const Color(0xFF0D5D44)),
                                       foregroundColor: Colors.white,
-                                      elevation: 2,
+                                      elevation: 1.5,
                                       shadowColor: const Color(0xFF0D5D44)
-                                          .withValues(alpha: 0.4),
+                                          .withValues(alpha: 0.35),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
+                                        borderRadius: BorderRadius.circular(9),
                                       ),
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 10),
+                                          horizontal: 8),
                                     ),
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
                                         const Icon(Icons.auto_stories_rounded,
-                                            size: 14, color: Colors.white),
-                                        const SizedBox(width: 6),
+                                            size: 13, color: Colors.white),
+                                        const SizedBox(width: 5),
                                         Flexible(
                                           child: Text(
                                             continueBtnLabel,
                                             style: const TextStyle(
-                                              fontSize: 11.5,
+                                              fontSize: 11,
                                               fontWeight: FontWeight.bold,
-                                              letterSpacing: 0.2,
+                                              letterSpacing: 0.1,
                                             ),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
-                                        const SizedBox(width: 4),
+                                        const SizedBox(width: 3),
                                         Icon(
                                           locale == 'ar'
                                               ? Icons.arrow_back_rounded
                                               : Icons.arrow_forward_rounded,
-                                          size: 13,
+                                          size: 12,
                                           color: Colors.white70,
                                         ),
                                       ],
@@ -1091,36 +1087,36 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                               Expanded(
                                 flex: 5,
                                 child: SizedBox(
-                                  height: 36,
+                                  height: 32,
                                   child: OutlinedButton(
                                     onPressed: () => _navigateToQuran(context,
                                         openIndex: true),
                                     style: OutlinedButton.styleFrom(
                                       foregroundColor: goldAccent,
                                       side: BorderSide(
-                                        color: goldAccent.withValues(alpha: 0.50),
-                                        width: 1.2,
+                                        color: goldAccent.withValues(alpha: 0.45),
+                                        width: 1.1,
                                       ),
                                       backgroundColor: goldAccent.withValues(
                                           alpha: isDark ? 0.12 : 0.08),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
+                                        borderRadius: BorderRadius.circular(9),
                                       ),
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 8),
+                                          horizontal: 6),
                                     ),
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
                                         Icon(Icons.format_list_bulleted_rounded,
-                                            size: 14, color: goldAccent),
-                                        const SizedBox(width: 5),
+                                            size: 13, color: goldAccent),
+                                        const SizedBox(width: 4.5),
                                         Flexible(
                                           child: Text(
                                             indexBtnLabel,
                                             style: TextStyle(
-                                              fontSize: 11.5,
+                                              fontSize: 11,
                                               fontWeight: FontWeight.bold,
                                               color: goldAccent,
                                             ),
