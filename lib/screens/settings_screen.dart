@@ -832,8 +832,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                 child: FadeTransition(
                   opacity: _headerFade,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 7),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                     decoration: BoxDecoration(
                       color: heroBannerBg,
                       borderRadius: BorderRadius.circular(16),
@@ -998,7 +998,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                 // ── SECTION B: DAILY WORSHIP & OFFLINE CONTENT ────────────────
                 _sectionHeader(
                   icon: Icons.mosque_rounded,
-                  title: isArabic ? 'العبادات والمحتوى' : 'DAILY WORSHIP & OFFLINE',
+                  title: isArabic
+                      ? 'العبادات والمحتوى'
+                      : 'DAILY WORSHIP & OFFLINE',
                   color: const Color(0xFF10B981),
                 ),
                 _ModernCard(
@@ -1032,7 +1034,6 @@ class _SettingsScreenState extends State<SettingsScreen>
                       onChanged: _toggleNotifications,
                       isDark: isDark,
                       textColor: textMain,
-<<<<<<< HEAD
                       intervalBadge: _notificationsEnabled
                           ? GestureDetector(
                               onTap: () => _showIntervalSheet(
@@ -1065,43 +1066,10 @@ class _SettingsScreenState extends State<SettingsScreen>
                                   ],
                                 ),
                               ),
-=======
-                    ),
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeInOut,
-                      child: _notificationsEnabled
-                          ? _ModernIntervalPicker(
-                              value: _notificationInterval,
-                              primary: primary,
-                              textColor: textMain,
-                              subtextColor: textSub,
-                              title: _tr(context, 'freq_title'),
-                              onChanged: _setNotificationInterval,
-                              isDark: isDark,
->>>>>>> d0982b206eae5512118f57e84718b81bd52e4813
                             )
                           : null,
                     ),
-<<<<<<< HEAD
                     _divider(isDark, borderColor),
-=======
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                // ── SECTION C: STORAGE & OFFLINE ─────────────────────────────
-                _sectionHeader(
-                  icon: Icons.folder_special_rounded,
-                  title: _tr(context, 'storage_section'),
-                  color: const Color(0xFF0D9488),
-                ),
-                _ModernCard(
-                  isDark: isDark,
-                  cardBg: cardBg,
-                  borderColor: borderColor,
-                  children: [
->>>>>>> d0982b206eae5512118f57e84718b81bd52e4813
                     _CompactTile(
                       icon: Icons.download_done_rounded,
                       iconColor: const Color(0xFF0D9488),
@@ -1780,7 +1748,6 @@ class _CompactTile extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final String title;
-  final Widget? trailing;
   final VoidCallback onTap;
   final bool isDark;
   final Color textColor;
@@ -1792,7 +1759,6 @@ class _CompactTile extends StatelessWidget {
     required this.onTap,
     required this.isDark,
     required this.textColor,
-    this.trailing,
   });
 
   @override
@@ -1823,12 +1789,11 @@ class _CompactTile extends StatelessWidget {
                 ),
               ),
             ),
-            trailing ??
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: isDark ? Colors.white38 : Colors.black38,
-                  size: 18,
-                ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: isDark ? Colors.white38 : Colors.black38,
+              size: 18,
+            ),
           ],
         ),
       ),
@@ -1965,7 +1930,6 @@ class _ModernActionTile extends StatelessWidget {
   final List<Color> iconGradient;
   final String title;
   final String? subtitle;
-  final Widget? trailing;
   final VoidCallback onTap;
   final bool isDark;
   final Color textColor;
@@ -1976,7 +1940,6 @@ class _ModernActionTile extends StatelessWidget {
     required this.iconGradient,
     required this.title,
     this.subtitle,
-    this.trailing,
     required this.onTap,
     required this.isDark,
     required this.textColor,
@@ -2039,14 +2002,11 @@ class _ModernActionTile extends StatelessWidget {
                 ],
               ),
             ),
-            if (trailing != null)
-              trailing!
-            else
-              Icon(
-                Icons.chevron_right_rounded,
-                color: isDark ? Colors.white38 : Colors.black38,
-                size: 22,
-              ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: isDark ? Colors.white38 : Colors.black38,
+              size: 22,
+            ),
           ],
         ),
       ),
@@ -2547,13 +2507,8 @@ class _TikTokSpotlightCard extends StatelessWidget {
             children: [
               // Glowing Creator Avatar
               Container(
-<<<<<<< HEAD
                 width: 36,
                 height: 36,
-=======
-                width: 38,
-                height: 38,
->>>>>>> d0982b206eae5512118f57e84718b81bd52e4813
                 padding: const EdgeInsets.all(2),
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
@@ -2571,11 +2526,7 @@ class _TikTokSpotlightCard extends StatelessWidget {
                   child: Center(
                     child: Icon(
                       Icons.person_rounded,
-<<<<<<< HEAD
                       size: 19,
-=======
-                      size: 20,
->>>>>>> d0982b206eae5512118f57e84718b81bd52e4813
                       color: isDark ? Colors.white : Colors.black87,
                     ),
                   ),
@@ -2583,9 +2534,10 @@ class _TikTokSpotlightCard extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-<<<<<<< HEAD
                     Row(
                       children: [
                         Text(
@@ -2613,43 +2565,6 @@ class _TikTokSpotlightCard extends StatelessWidget {
                             : const Color(0xFF8D6800),
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-=======
-                    Text(
-                      creatorName,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.verified_rounded,
-                      size: 14,
-                      color: Color(0xFF00B2FF),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 1.5),
-                      decoration: BoxDecoration(
-                        color: goldBorder.withValues(alpha: 0.16),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: goldBorder.withValues(alpha: 0.35),
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        creatorRole,
-                        style: TextStyle(
-                          color: isDark
-                              ? const Color(0xFFE8C77A)
-                              : const Color(0xFF7A5900),
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.bold,
-                        ),
->>>>>>> d0982b206eae5512118f57e84718b81bd52e4813
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -2721,25 +2636,17 @@ class _TikTokSpotlightCard extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-<<<<<<< HEAD
                               Expanded(
                                 child: Text(
                                   tiktokTitle,
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.black87,
+                                    color:
+                                        isDark ? Colors.white : Colors.black87,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-=======
-                              Text(
-                                tiktokTitle,
-                                style: TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white : Colors.black87,
->>>>>>> d0982b206eae5512118f57e84718b81bd52e4813
                                 ),
                               ),
                               const SizedBox(width: 6),
@@ -2835,8 +2742,8 @@ class _TikTokSpotlightCard extends StatelessWidget {
                               color: tiktokPink.withValues(alpha: 0.45),
                               width: 1.2,
                             ),
-                            backgroundColor: tiktokPink
-                                .withValues(alpha: isDark ? 0.12 : 0.07),
+                            backgroundColor: tiktokPink.withValues(
+                                alpha: isDark ? 0.12 : 0.07),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -3091,7 +2998,8 @@ class _CompactThemeCard extends StatelessWidget {
                         duration: const Duration(milliseconds: 240),
                         curve: Curves.easeOutCubic,
                         margin: const EdgeInsets.symmetric(horizontal: 2.5),
-                        padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 4),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 9, horizontal: 4),
                         decoration: BoxDecoration(
                           color: t.$4,
                           borderRadius: BorderRadius.circular(13),
