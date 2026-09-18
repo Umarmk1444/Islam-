@@ -1032,6 +1032,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                       onChanged: _toggleNotifications,
                       isDark: isDark,
                       textColor: textMain,
+<<<<<<< HEAD
                       intervalBadge: _notificationsEnabled
                           ? GestureDetector(
                               onTap: () => _showIntervalSheet(
@@ -1064,10 +1065,43 @@ class _SettingsScreenState extends State<SettingsScreen>
                                   ],
                                 ),
                               ),
+=======
+                    ),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeInOut,
+                      child: _notificationsEnabled
+                          ? _ModernIntervalPicker(
+                              value: _notificationInterval,
+                              primary: primary,
+                              textColor: textMain,
+                              subtextColor: textSub,
+                              title: _tr(context, 'freq_title'),
+                              onChanged: _setNotificationInterval,
+                              isDark: isDark,
+>>>>>>> d0982b206eae5512118f57e84718b81bd52e4813
                             )
                           : null,
                     ),
+<<<<<<< HEAD
                     _divider(isDark, borderColor),
+=======
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+                // ── SECTION C: STORAGE & OFFLINE ─────────────────────────────
+                _sectionHeader(
+                  icon: Icons.folder_special_rounded,
+                  title: _tr(context, 'storage_section'),
+                  color: const Color(0xFF0D9488),
+                ),
+                _ModernCard(
+                  isDark: isDark,
+                  cardBg: cardBg,
+                  borderColor: borderColor,
+                  children: [
+>>>>>>> d0982b206eae5512118f57e84718b81bd52e4813
                     _CompactTile(
                       icon: Icons.download_done_rounded,
                       iconColor: const Color(0xFF0D9488),
@@ -2513,8 +2547,13 @@ class _TikTokSpotlightCard extends StatelessWidget {
             children: [
               // Glowing Creator Avatar
               Container(
+<<<<<<< HEAD
                 width: 36,
                 height: 36,
+=======
+                width: 38,
+                height: 38,
+>>>>>>> d0982b206eae5512118f57e84718b81bd52e4813
                 padding: const EdgeInsets.all(2),
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
@@ -2532,7 +2571,11 @@ class _TikTokSpotlightCard extends StatelessWidget {
                   child: Center(
                     child: Icon(
                       Icons.person_rounded,
+<<<<<<< HEAD
                       size: 19,
+=======
+                      size: 20,
+>>>>>>> d0982b206eae5512118f57e84718b81bd52e4813
                       color: isDark ? Colors.white : Colors.black87,
                     ),
                   ),
@@ -2540,10 +2583,9 @@ class _TikTokSpotlightCard extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+                child: Row(
                   children: [
+<<<<<<< HEAD
                     Row(
                       children: [
                         Text(
@@ -2571,6 +2613,43 @@ class _TikTokSpotlightCard extends StatelessWidget {
                             : const Color(0xFF8D6800),
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
+=======
+                    Text(
+                      creatorName,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.verified_rounded,
+                      size: 14,
+                      color: Color(0xFF00B2FF),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 1.5),
+                      decoration: BoxDecoration(
+                        color: goldBorder.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: goldBorder.withValues(alpha: 0.35),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        creatorRole,
+                        style: TextStyle(
+                          color: isDark
+                              ? const Color(0xFFE8C77A)
+                              : const Color(0xFF7A5900),
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.bold,
+                        ),
+>>>>>>> d0982b206eae5512118f57e84718b81bd52e4813
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -2642,6 +2721,7 @@ class _TikTokSpotlightCard extends StatelessWidget {
                         children: [
                           Row(
                             children: [
+<<<<<<< HEAD
                               Expanded(
                                 child: Text(
                                   tiktokTitle,
@@ -2652,6 +2732,14 @@ class _TikTokSpotlightCard extends StatelessWidget {
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
+=======
+                              Text(
+                                tiktokTitle,
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.white : Colors.black87,
+>>>>>>> d0982b206eae5512118f57e84718b81bd52e4813
                                 ),
                               ),
                               const SizedBox(width: 6),
