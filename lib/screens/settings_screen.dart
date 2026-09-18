@@ -2118,6 +2118,7 @@ class _ModernSwitchTile extends StatelessWidget {
 // COMPONENT 4: Modern Interval Picker
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ignore: unused_element
 class _ModernIntervalPicker extends StatelessWidget {
   final int value;
   final Color primary;
