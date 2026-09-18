@@ -452,7 +452,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    height: 100,
+                    height: 115,
                     child: IgnorePointer(
                       child: DecoratedBox(
                         decoration: BoxDecoration(
@@ -539,8 +539,8 @@ class _AppBottomNavBar extends StatelessWidget {
         final double totalWidth = constraints.maxWidth;
         final int count = navMeta.length;
 
-        // Reduced dock width by 25% for a compact, centered Samsung One UI island
-        final double dockWidth = (totalWidth * 0.75).clamp(260.0, 350.0);
+        // Reduced dock width by 30% for an ultra-compact, centered Samsung One UI island
+        final double dockWidth = (totalWidth * 0.70).clamp(250.0, 340.0);
         final double horizontalMargin = (totalWidth - dockWidth) / 2;
         final double availableWidth = dockWidth;
 
@@ -560,14 +560,14 @@ class _AppBottomNavBar extends StatelessWidget {
             : currentPage;
 
         const double barHeight = 54.0;
-        const double pillHeight = 38.0;
-        final double pillWidth = itemWidth - 6.0;
+        const double pillHeight = 40.0;
+        final double pillWidth = itemWidth - 2.0;
         final double pillLeft = (visualPage * itemWidth) + (itemWidth - pillWidth) / 2;
 
         return SafeArea(
           top: false,
           child: Padding(
-            padding: EdgeInsets.fromLTRB(horizontalMargin, 0, horizontalMargin, 10),
+            padding: EdgeInsets.fromLTRB(horizontalMargin, 0, horizontalMargin, 22),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(28),
               child: BackdropFilter(

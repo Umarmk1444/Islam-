@@ -125,7 +125,8 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
                     ? 1.35
                     : 1.28; // Optimized ratio to fit tools grid
                 final double paddingBottom =
-                    MediaQuery.paddingOf(context).bottom + 68; // Space for One UI floating bar
+                    MediaQuery.paddingOf(context).bottom +
+                        90; // Space for elevated One UI floating bar
 
                 return SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -228,8 +229,7 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
                       GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        padding:
-                            EdgeInsets.fromLTRB(12, 0, 12, paddingBottom),
+                        padding: EdgeInsets.fromLTRB(12, 0, 12, paddingBottom),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           mainAxisSpacing: space12,
@@ -319,12 +319,16 @@ class _MiqatCard extends StatelessWidget {
       builder: (context, _) {
         final model = ctrl.model;
         if (ctrl.isLocationMissing && !ctrl.isLoading) {
-          final String title = locale == 'ar' ? 'مواقيت الصلاة' : 'Prayer Times';
+          final String title =
+              locale == 'ar' ? 'مواقيت الصلاة' : 'Prayer Times';
           final String subtitle = locale == 'ar'
               ? 'يرجى تحديد الموقع لعرض أوقات الصلاة بدقة'
               : 'Please set your location to view accurate prayer times';
-          final String autoGps = locale == 'ar' ? 'تحديد تلقائي (GPS)' : 'Auto-detect (GPS)';
-          final String manualCity = locale == 'ar' ? 'اختيار المدينة (أوفلاين)' : 'Select City (Offline)';
+          final String autoGps =
+              locale == 'ar' ? 'تحديد تلقائي (GPS)' : 'Auto-detect (GPS)';
+          final String manualCity = locale == 'ar'
+              ? 'اختيار المدينة (أوفلاين)'
+              : 'Select City (Offline)';
 
           return Container(
             padding: const EdgeInsets.all(16),
@@ -841,8 +845,8 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                     Positioned.fill(
                       child: CustomPaint(
                         painter: _IslamicPatternPainter(
-                          color:
-                              goldAccent.withValues(alpha: isDark ? 0.05 : 0.04),
+                          color: goldAccent.withValues(
+                              alpha: isDark ? 0.05 : 0.04),
                         ),
                       ),
                     ),
@@ -858,8 +862,8 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                           shape: BoxShape.circle,
                           gradient: RadialGradient(
                             colors: [
-                              goldAccent
-                                  .withValues(alpha: isDark ? 0.20 : 0.10),
+                              goldAccent.withValues(
+                                  alpha: isDark ? 0.20 : 0.10),
                               Colors.transparent,
                             ],
                           ),
@@ -882,8 +886,8 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8, vertical: 3.5),
                                 decoration: BoxDecoration(
-                                  color: goldAccent
-                                      .withValues(alpha: isDark ? 0.18 : 0.12),
+                                  color: goldAccent.withValues(
+                                      alpha: isDark ? 0.18 : 0.12),
                                   borderRadius: BorderRadius.circular(7),
                                   border: Border.all(
                                     color: goldAccent.withValues(alpha: 0.40),
@@ -1010,7 +1014,8 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                                     borderRadius: BorderRadius.circular(4),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: goldAccent.withValues(alpha: 0.45),
+                                        color:
+                                            goldAccent.withValues(alpha: 0.45),
                                         blurRadius: 4,
                                         spreadRadius: 0.5,
                                       ),
@@ -1094,7 +1099,8 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                                     style: OutlinedButton.styleFrom(
                                       foregroundColor: goldAccent,
                                       side: BorderSide(
-                                        color: goldAccent.withValues(alpha: 0.45),
+                                        color:
+                                            goldAccent.withValues(alpha: 0.45),
                                         width: 1.1,
                                       ),
                                       backgroundColor: goldAccent.withValues(
