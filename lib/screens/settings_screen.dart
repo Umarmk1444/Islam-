@@ -187,7 +187,8 @@ class _SettingsScreenState extends State<SettingsScreen>
     },
     'om': {
       'settings_title': 'Qindaa\'ina',
-      'settings_subtitle': 'Haala appilikeeshinii fi sagantaa keessan sirreessaa',
+      'settings_subtitle':
+          'Haala appilikeeshinii fi sagantaa keessan sirreessaa',
       'appearance': 'Bifaa fi Haala',
       'language': 'Afaan Appilikeeshinii',
       'prayer_section': 'Yeroo Salaataa fi Azaana',
@@ -208,7 +209,8 @@ class _SettingsScreenState extends State<SettingsScreen>
       'copied_to_clipboard': '@umer.almuktar garagalfameera!',
       'telegram_btn': 'Telegiraamii',
       'email_btn': 'Imeeylii',
-      'creator_note': 'Ummata hundaaf kan qophaa\'e • Du\'aayiin keessan nuuf qabeenya',
+      'creator_note':
+          'Ummata hundaaf kan qophaa\'e • Du\'aayiin keessan nuuf qabeenya',
       'share_info': 'Waa\'ee App, Dhuunfaa fi Deeggarsa',
       'share_app': 'Appilikeeshinii Qoodaa',
       'rate_us': 'Play Store irratti sadarkaa kennaa',
@@ -253,7 +255,8 @@ class _SettingsScreenState extends State<SettingsScreen>
       vsync: this,
       duration: const Duration(milliseconds: 850),
     );
-    _revealAnim = CurvedAnimation(parent: _revealCtrl, curve: Curves.easeInOutCubic);
+    _revealAnim =
+        CurvedAnimation(parent: _revealCtrl, curve: Curves.easeInOutCubic);
 
     _revealCtrl.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -290,7 +293,8 @@ class _SettingsScreenState extends State<SettingsScreen>
       final packageInfo = await PackageInfo.fromPlatform();
       if (!mounted) return;
       setState(() {
-        _appVersion = 'v${packageInfo.version} (Build ${packageInfo.buildNumber})';
+        _appVersion =
+            'v${packageInfo.version} (Build ${packageInfo.buildNumber})';
       });
     } catch (_) {
       // Fallback already set
@@ -333,12 +337,16 @@ class _SettingsScreenState extends State<SettingsScreen>
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+            const Icon(Icons.check_circle_rounded,
+                color: Colors.white, size: 20),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
                 msg,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13),
               ),
             ),
           ],
@@ -386,7 +394,8 @@ class _SettingsScreenState extends State<SettingsScreen>
   Future<void> _openTikTok() async {
     final Uri url = Uri.parse('https://www.tiktok.com/@umer.almuktar');
     try {
-      final launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+      final launched =
+          await launchUrl(url, mode: LaunchMode.externalApplication);
       if (!launched) {
         await launchUrl(url, mode: LaunchMode.platformDefault);
       }
@@ -409,7 +418,8 @@ class _SettingsScreenState extends State<SettingsScreen>
   Future<void> _openTelegram() async {
     final Uri url = Uri.parse('https://t.me/UMER_jr');
     try {
-      final launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+      final launched =
+          await launchUrl(url, mode: LaunchMode.externalApplication);
       if (!launched) {
         await launchUrl(url, mode: LaunchMode.platformDefault);
       }
@@ -449,7 +459,8 @@ class _SettingsScreenState extends State<SettingsScreen>
       builder: (ctx) {
         return AlertDialog(
           backgroundColor: cardColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           title: Row(
             children: [
               Container(
@@ -458,7 +469,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                   color: primaryColor.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(Icons.translate_rounded, color: primaryColor, size: 20),
+                child: Icon(Icons.translate_rounded,
+                    color: primaryColor, size: 20),
               ),
               const SizedBox(width: 12),
               Text(
@@ -486,7 +498,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   margin: const EdgeInsets.symmetric(vertical: 4),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? primaryColor.withValues(alpha: 0.12)
@@ -517,7 +530,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                               native,
                               style: TextStyle(
                                 color: mainTextColor,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.w600,
                                 fontSize: 15,
                               ),
                             ),
@@ -551,7 +566,8 @@ class _SettingsScreenState extends State<SettingsScreen>
   ) async {
     final Uri url = Uri.parse('http://quranzone.com.et/');
     try {
-      final launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+      final launched =
+          await launchUrl(url, mode: LaunchMode.externalApplication);
       if (!launched && context.mounted) {
         _showPrivacyPolicyDialog(context, cardBg, textMain, textSub, primary);
       }
@@ -576,7 +592,8 @@ class _SettingsScreenState extends State<SettingsScreen>
       builder: (ctx) {
         return AlertDialog(
           backgroundColor: cardBg,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
           title: Row(
             children: [
               Icon(Icons.security_rounded, color: primary, size: 24),
@@ -598,17 +615,17 @@ class _SettingsScreenState extends State<SettingsScreen>
             child: Text(
               isArabic
                   ? 'تطبيق Quran Zone يلتزم بأعلى معايير الخصوصية والأمان:\n\n'
-                    '• الموقع الرسمي للسياسة: quranzone.com.et\n'
-                    '• لا نقوم بجمع أو بيع أي بيانات شخصية للمستخدمين.\n'
-                    '• يتم تخزين إعداداتك ومفضلتك محلياً 100% داخل جهازك.\n'
-                    '• إذن الموقع الجغرافي (GPS) يُستخدم حصراً لحساب مواقيت الصلاة واتجاه القبلة محلياً.\n'
-                    '• قد تستخدم خدمات Google Play وAdMob معرفات إعلانية مجهولة الهوية لعرض إعلانات غير مخصصة.'
+                      '• الموقع الرسمي للسياسة: quranzone.com.et\n'
+                      '• لا نقوم بجمع أو بيع أي بيانات شخصية للمستخدمين.\n'
+                      '• يتم تخزين إعداداتك ومفضلتك محلياً 100% داخل جهازك.\n'
+                      '• إذن الموقع الجغرافي (GPS) يُستخدم حصراً لحساب مواقيت الصلاة واتجاه القبلة محلياً.\n'
+                      '• قد تستخدم خدمات Google Play وAdMob معرفات إعلانية مجهولة الهوية لعرض إعلانات غير مخصصة.'
                   : 'Quran Zone is committed to total user privacy and data security:\n\n'
-                    '• Official Website: quranzone.com.et\n'
-                    '• We do not collect, sell, or track any personal user information.\n'
-                    '• All bookmarks, preferences, and favorites are stored 100% locally on your device.\n'
-                    '• Location permission (GPS) is solely used for accurate prayer calculations and Qibla direction.\n'
-                    '• Google Play Services and AdMob may process non-personalized diagnostic data.',
+                      '• Official Website: quranzone.com.et\n'
+                      '• We do not collect, sell, or track any personal user information.\n'
+                      '• All bookmarks, preferences, and favorites are stored 100% locally on your device.\n'
+                      '• Location permission (GPS) is solely used for accurate prayer calculations and Qibla direction.\n'
+                      '• Google Play Services and AdMob may process non-personalized diagnostic data.',
               style: TextStyle(color: textSub, fontSize: 13, height: 1.55),
             ),
           ),
@@ -676,7 +693,8 @@ class _SettingsScreenState extends State<SettingsScreen>
           AnimatedBuilder(
             animation: _revealAnim,
             builder: (context, _) {
-              final double radius = 1.0 + (_revealAnim.value * (_maxRadius - 1.0));
+              final double radius =
+                  1.0 + (_revealAnim.value * (_maxRadius - 1.0));
 
               return ClipPath(
                 clipper: CircularRevealClipper(
@@ -725,28 +743,31 @@ class _SettingsScreenState extends State<SettingsScreen>
         controller: scrollCtrl,
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // ── 1. Elegant Hero Header ──────────────────────────────────────────
+          // ── 1. Elegant Compact Hero Header (One UI / iOS 18) ───────────────
           SliverToBoxAdapter(
             child: SafeArea(
               bottom: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 2),
                 child: FadeTransition(
                   opacity: _headerFade,
                   child: Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
                       color: heroBannerBg,
-                      borderRadius: BorderRadius.circular(22),
+                      borderRadius: BorderRadius.circular(18),
                       border: Border.all(
-                        color: borderColor.withValues(alpha: isDark ? 0.3 : 0.4),
-                        width: 1.2,
+                        color:
+                            borderColor.withValues(alpha: isDark ? 0.25 : 0.35),
+                        width: 1.1,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
+                          color: Colors.black
+                              .withValues(alpha: isDark ? 0.3 : 0.04),
+                          blurRadius: 12,
+                          offset: const Offset(0, 3),
                         ),
                       ],
                     ),
@@ -754,9 +775,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                       children: [
                         // Glowing App Emblem
                         Container(
-                          width: 50,
-                          height: 50,
-                          padding: const EdgeInsets.all(2.5),
+                          width: 42,
+                          height: 42,
+                          padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: LinearGradient(
@@ -766,9 +787,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: primary.withValues(alpha: 0.35),
-                                blurRadius: 12,
-                                offset: const Offset(0, 3),
+                                color: primary.withValues(alpha: 0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
                               ),
                             ],
                           ),
@@ -779,7 +800,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                             ),
                           ),
                         ),
-                        const SizedBox(width: 14),
+                        const SizedBox(width: 12),
                         // Title & Version Badge
                         Expanded(
                           child: Column(
@@ -791,7 +812,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                                   Text(
                                     'Quran Zone',
                                     style: TextStyle(
-                                      fontSize: 17.5,
+                                      fontSize: 16.5,
                                       fontWeight: FontWeight.bold,
                                       color: textMain,
                                       letterSpacing: 0.3,
@@ -801,20 +822,20 @@ class _SettingsScreenState extends State<SettingsScreen>
                                   const SizedBox(width: 8),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 7, vertical: 2),
+                                        horizontal: 6, vertical: 1.5),
                                     decoration: BoxDecoration(
                                       color: primary.withValues(alpha: 0.15),
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(6),
                                       border: Border.all(
                                         color: primary.withValues(alpha: 0.35),
-                                        width: 1,
+                                        width: 0.8,
                                       ),
                                     ),
                                     child: Text(
                                       _appVersion,
                                       style: TextStyle(
                                         color: primary,
-                                        fontSize: 10,
+                                        fontSize: 9.5,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -825,11 +846,12 @@ class _SettingsScreenState extends State<SettingsScreen>
                               Text(
                                 _tr(context, 'settings_subtitle'),
                                 style: TextStyle(
-                                  fontSize: 11.5,
+                                  fontSize: 11,
                                   color: textSub,
-                                  height: 1.3,
+                                  height: 1.2,
                                 ),
-                                maxLines: 2,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
@@ -844,84 +866,56 @@ class _SettingsScreenState extends State<SettingsScreen>
 
           // ── 2. Settings Content Body ────────────────────────────────────────
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                // ── SECTION A: APPEARANCE & THEMES ────────────────────────────
+                // ── SECTION A: PREFERENCES (THEME & LANGUAGE SIDE-BY-SIDE) ───
                 _sectionHeader(
-                  icon: Icons.palette_outlined,
-                  title: _tr(context, 'appearance'),
+                  icon: Icons.tune_rounded,
+                  title: isArabic ? 'التخصيص واللغة' : 'PREFERENCES & LANGUAGE',
                   color: primary,
                 ),
-                _ThemeSwatchSelector(
-                  currentTheme: theme,
-                  primary: primary,
-                  cardBg: cardBg,
-                  borderColor: borderColor,
-                  isDark: isDark,
-                  isArabic: isArabic,
-                  darkLabel: _tr(context, 'theme_dark'),
-                  darkDesc: _tr(context, 'theme_dark_desc'),
-                  creamLabel: _tr(context, 'theme_cream'),
-                  creamDesc: _tr(context, 'theme_cream_desc'),
-                  whiteLabel: _tr(context, 'theme_white'),
-                  whiteDesc: _tr(context, 'theme_white_desc'),
-                  onThemeSelected: _startCircularThemeReveal,
-                ),
-                const SizedBox(height: 12),
-
-                // ── SECTION B: APP LANGUAGE ──────────────────────────────────
-                _sectionHeader(
-                  icon: Icons.translate_rounded,
-                  title: _tr(context, 'language'),
-                  color: const Color(0xFF0284C7),
-                ),
-                _ModernCard(
-                  isDark: isDark,
-                  cardBg: cardBg,
-                  borderColor: borderColor,
+                Row(
                   children: [
-                    _ModernActionTile(
-                      icon: Icons.language_rounded,
-                      iconGradient: const [Color(0xFF0284C7), Color(0xFF0369A1)],
-                      title: l10n.appLanguage,
-                      subtitle: _selectedLanguage,
-                      trailing: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
-                        decoration: BoxDecoration(
-                          color: primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: primary.withValues(alpha: 0.3),
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              _selectedLanguage,
-                              style: TextStyle(
-                                color: primary,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(width: 3),
-                            Icon(Icons.arrow_drop_down_rounded, color: primary, size: 18),
-                          ],
-                        ),
+                    // Theme Bento Card
+                    Expanded(
+                      flex: 11,
+                      child: _CompactThemeCard(
+                        currentTheme: theme,
+                        primary: primary,
+                        cardBg: cardBg,
+                        borderColor: borderColor,
+                        isDark: isDark,
+                        isArabic: isArabic,
+                        darkLabel: _tr(context, 'theme_dark'),
+                        creamLabel: _tr(context, 'theme_cream'),
+                        whiteLabel: _tr(context, 'theme_white'),
+                        onThemeSelected: _startCircularThemeReveal,
                       ),
-                      onTap: () => _showLanguageDialog(primary, textMain, cardBg, l10n),
-                      isDark: isDark,
-                      textColor: textMain,
-                      subtextColor: textSub,
+                    ),
+                    const SizedBox(width: 10),
+                    // Language Bento Card
+                    Expanded(
+                      flex: 9,
+                      child: _CompactLanguageCard(
+                        selectedLanguage: _selectedLanguage,
+                        primary: primary,
+                        cardBg: cardBg,
+                        borderColor: borderColor,
+                        isDark: isDark,
+                        isArabic: isArabic,
+                        title: 'Language',
+                        onTap: () => _showLanguageDialog(
+                            primary, textMain, cardBg, l10n),
+                        textColor: textMain,
+                        subtextColor: textSub,
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
 
-                // ── SECTION C: PRAYER & SPIRITUAL REMINDERS ───────────────────
+                // ── SECTION B: PRAYER & SPIRITUAL REMINDERS ───────────────────
                 _sectionHeader(
                   icon: Icons.mosque_rounded,
                   title: _tr(context, 'prayer_section'),
@@ -934,15 +928,20 @@ class _SettingsScreenState extends State<SettingsScreen>
                   children: [
                     _ModernActionTile(
                       icon: Icons.access_time_filled_rounded,
-                      iconGradient: const [Color(0xFF10B981), Color(0xFF059669)],
+                      iconGradient: const [
+                        Color(0xFF10B981),
+                        Color(0xFF059669)
+                      ],
                       title: _tr(context, 'prayer_settings'),
                       subtitle: _tr(context, 'prayer_desc'),
-                      trailing: const Icon(Icons.chevron_right_rounded, size: 22),
+                      trailing:
+                          const Icon(Icons.chevron_right_rounded, size: 20),
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => PrayerSettingsScreen(controller: PrayerController()),
+                            builder: (_) => PrayerSettingsScreen(
+                                controller: PrayerController()),
                           ),
                         );
                       },
@@ -953,7 +952,10 @@ class _SettingsScreenState extends State<SettingsScreen>
                     _divider(isDark, borderColor),
                     _ModernSwitchTile(
                       icon: Icons.notifications_active_rounded,
-                      iconGradient: const [Color(0xFFF59E0B), Color(0xFFD97706)],
+                      iconGradient: const [
+                        Color(0xFFF59E0B),
+                        Color(0xFFD97706)
+                      ],
                       title: _tr(context, 'daily_notif'),
                       subtitle: _tr(context, 'daily_notif_desc'),
                       value: _notificationsEnabled,
@@ -964,7 +966,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                       subtextColor: textSub,
                     ),
                     AnimatedSize(
-                      duration: const Duration(milliseconds: 280),
+                      duration: const Duration(milliseconds: 250),
                       curve: Curves.easeInOut,
                       child: _notificationsEnabled
                           ? _ModernIntervalPicker(
@@ -980,9 +982,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
 
-                // ── SECTION D: STORAGE & OFFLINE ─────────────────────────────
+                // ── SECTION C: STORAGE & OFFLINE ─────────────────────────────
                 _sectionHeader(
                   icon: Icons.folder_special_rounded,
                   title: _tr(context, 'storage_section'),
@@ -995,14 +997,19 @@ class _SettingsScreenState extends State<SettingsScreen>
                   children: [
                     _ModernActionTile(
                       icon: Icons.download_done_rounded,
-                      iconGradient: const [Color(0xFF0D9488), Color(0xFF0F766E)],
+                      iconGradient: const [
+                        Color(0xFF0D9488),
+                        Color(0xFF0F766E)
+                      ],
                       title: _tr(context, 'downloads'),
                       subtitle: _tr(context, 'downloads_desc'),
-                      trailing: const Icon(Icons.chevron_right_rounded, size: 22),
+                      trailing:
+                          const Icon(Icons.chevron_right_rounded, size: 20),
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const MinbarDownloadsScreen()),
+                          MaterialPageRoute(
+                              builder: (_) => const MinbarDownloadsScreen()),
                         );
                       },
                       isDark: isDark,
@@ -1011,9 +1018,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                     ),
                   ],
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 8),
 
-                // ── 🌟 SECTION E: VIP CREATOR & COMMUNITY (TIKTOK: @umer.almuktar) ──
+                // ── 🌟 SECTION D: VIP CREATOR & COMMUNITY (TIKTOK) ────────────
                 _sectionHeader(
                   icon: Icons.stars_rounded,
                   title: _tr(context, 'creator_community'),
@@ -1040,9 +1047,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                   onTelegram: _openTelegram,
                   onEmail: _openEmail,
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 8),
 
-                // ── SECTION F: SUPPORT, PRIVACY & ABOUT ──────────────────────
+                // ── SECTION E: SUPPORT, PRIVACY & ABOUT ───────────────────────
                 _sectionHeader(
                   icon: Icons.info_outline_rounded,
                   title: _tr(context, 'share_info'),
@@ -1055,13 +1062,17 @@ class _SettingsScreenState extends State<SettingsScreen>
                   children: [
                     _ModernActionTile(
                       icon: Icons.star_rate_rounded,
-                      iconGradient: const [Color(0xFFF59E0B), Color(0xFFD97706)],
+                      iconGradient: const [
+                        Color(0xFFF59E0B),
+                        Color(0xFFD97706)
+                      ],
                       title: _tr(context, 'rate_us'),
                       subtitle: 'Support Quran Zone with 5 stars',
                       onTap: () async {
                         final Uri url = Uri.parse(
                             'https://play.google.com/store/apps/details?id=com.umer.quranzone');
-                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                        await launchUrl(url,
+                            mode: LaunchMode.externalApplication);
                       },
                       isDark: isDark,
                       textColor: textMain,
@@ -1070,7 +1081,10 @@ class _SettingsScreenState extends State<SettingsScreen>
                     _divider(isDark, borderColor),
                     _ModernActionTile(
                       icon: Icons.share_rounded,
-                      iconGradient: const [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
+                      iconGradient: const [
+                        Color(0xFF3B82F6),
+                        Color(0xFF1D4ED8)
+                      ],
                       title: _tr(context, 'share_app'),
                       subtitle: 'Guide others to goodness & earn reward',
                       onTap: () {
@@ -1085,10 +1099,14 @@ class _SettingsScreenState extends State<SettingsScreen>
                     _divider(isDark, borderColor),
                     _ModernActionTile(
                       icon: Icons.system_update_rounded,
-                      iconGradient: const [Color(0xFF06B6D4), Color(0xFF0891B2)],
+                      iconGradient: const [
+                        Color(0xFF06B6D4),
+                        Color(0xFF0891B2)
+                      ],
                       title: _tr(context, 'check_updates'),
                       subtitle: _tr(context, 'check_updates_desc'),
-                      onTap: () => AppUpdateService.instance.checkForUpdate(context, isManual: true),
+                      onTap: () => AppUpdateService.instance
+                          .checkForUpdate(context, isManual: true),
                       isDark: isDark,
                       textColor: textMain,
                       subtextColor: textSub,
@@ -1096,10 +1114,14 @@ class _SettingsScreenState extends State<SettingsScreen>
                     _divider(isDark, borderColor),
                     _ModernActionTile(
                       icon: Icons.security_rounded,
-                      iconGradient: const [Color(0xFF10B981), Color(0xFF047857)],
+                      iconGradient: const [
+                        Color(0xFF10B981),
+                        Color(0xFF047857)
+                      ],
                       title: _tr(context, 'privacy_policy'),
                       subtitle: 'quranzone.com.et • 100% Offline & Private',
-                      onTap: () => _openPrivacyPolicy(context, cardBg, textMain, textSub, primary),
+                      onTap: () => _openPrivacyPolicy(
+                          context, cardBg, textMain, textSub, primary),
                       isDark: isDark,
                       textColor: textMain,
                       subtextColor: textSub,
@@ -1107,7 +1129,10 @@ class _SettingsScreenState extends State<SettingsScreen>
                     _divider(isDark, borderColor),
                     _ModernActionTile(
                       icon: Icons.auto_stories_rounded,
-                      iconGradient: const [Color(0xFF8B5CF6), Color(0xFF6D28D9)],
+                      iconGradient: const [
+                        Color(0xFF8B5CF6),
+                        Color(0xFF6D28D9)
+                      ],
                       title: _tr(context, 'about_app'),
                       subtitle: 'Comprehensive overview & Sadaqah Jariyah',
                       onTap: () => _openAboutQuranZoneDialog(
@@ -1126,7 +1151,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                 ),
 
                 // ── FOOTER DEDICATION ─────────────────────────────────────────
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 Center(
                   child: Column(
                     children: [
@@ -1134,34 +1159,36 @@ class _SettingsScreenState extends State<SettingsScreen>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(Icons.favorite_rounded,
-                              size: 13, color: primary.withValues(alpha: 0.6)),
+                              size: 12, color: primary.withValues(alpha: 0.6)),
                           const SizedBox(width: 5),
                           Text(
                             'Handcrafted for the Ummah by Umer Muktar',
                             style: TextStyle(
                               color: textSub.withValues(alpha: 0.8),
-                              fontSize: 11.5,
+                              fontSize: 11,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 2),
                       InkWell(
                         onTap: () {
                           HapticFeedback.lightImpact();
                           _copyTikTokHandle();
                         },
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(6),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
                           child: Text(
                             'TikTok: @umer.almuktar',
                             style: TextStyle(
-                              color: const Color(0xFFFE2C55).withValues(alpha: 0.85),
-                              fontSize: 11,
+                              color: const Color(0xFFFE2C55)
+                                  .withValues(alpha: 0.85),
+                              fontSize: 10.5,
                               fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
+                              letterSpacing: 0.4,
                             ),
                           ),
                         ),
@@ -1169,7 +1196,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
               ]),
             ),
           ),
@@ -1187,39 +1214,39 @@ class _SettingsScreenState extends State<SettingsScreen>
     String? badgeText,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4, right: 4, bottom: 8, top: 12),
+      padding: const EdgeInsets.only(left: 4, right: 4, bottom: 5, top: 9),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 8),
+          Icon(icon, size: 15, color: color),
+          const SizedBox(width: 7),
           Expanded(
             child: Text(
               title,
               style: TextStyle(
-                fontSize: 11.5,
+                fontSize: 11,
                 fontWeight: FontWeight.bold,
                 color: color,
-                letterSpacing: 0.7,
+                letterSpacing: 0.6,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ),
           if (badgeText != null) ...[
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [Color(0xFFFE2C55), Color(0xFF25F4EE)],
                 ),
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(5),
               ),
               child: Text(
                 badgeText,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 9,
+                  fontSize: 8.5,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0.5,
                 ),
@@ -1238,7 +1265,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       color: isDark
           ? Colors.white.withValues(alpha: 0.06)
           : Colors.black.withValues(alpha: 0.05),
-      indent: 58,
+      indent: 54,
       endIndent: 14,
     );
   }
@@ -1291,7 +1318,9 @@ class _SettingsScreenState extends State<SettingsScreen>
           {
             'icon': Icons.menu_book_rounded,
             'color': const Color(0xFF10B981),
-            'title': isArabic ? 'القرآن الكريم والتفاسير' : 'The Noble Quran & Tafsir',
+            'title': isArabic
+                ? 'القرآن الكريم والتفاسير'
+                : 'The Noble Quran & Tafsir',
             'desc': isArabic
                 ? 'مصحف المدينة النبوية بالخط العثماني، تلاوة متزامنة آية بآية مع تلوين الكلمات، ٤ تفاسير معتمدة (ابن كثير، الميسر، البغوي، السعدي)، معاني الكلمات، وإعراب القرآن كاملاً.'
                 : 'Authentic Madinah Mushaf (Uthmani script) with synced ayah & word highlights, 4 Tafsir books, word meanings & Quranic syntax (I\'rab).',
@@ -1299,7 +1328,9 @@ class _SettingsScreenState extends State<SettingsScreen>
           {
             'icon': Icons.podcasts_rounded,
             'color': const Color(0xFF6366F1),
-            'title': isArabic ? 'المنبر والصوتيات والبث الحي' : 'Minbar Audios & 24/7 Live Media',
+            'title': isArabic
+                ? 'المنبر والصوتيات والبث الحي'
+                : 'Minbar Audios & 24/7 Live Media',
             'desc': isArabic
                 ? 'مكتبة صوتية لأكثر من ١٠٠ قارئ، أكثر من ١٧٥ إذاعة إسلامية مباشرة على مدار الساعة، وبث حي عالي الدقة من الحرمين الشريفين.'
                 : '100+ Renowned Quran Reciters, 175+ Live Islamic radio stations 24/7, and HD direct live video streams from Makkah & Madinah.',
@@ -1307,7 +1338,9 @@ class _SettingsScreenState extends State<SettingsScreen>
           {
             'icon': Icons.access_time_filled_rounded,
             'color': const Color(0xFFF59E0B),
-            'title': isArabic ? 'مواقيت الصلاة، الأذان والقبلة 3D' : 'Prayer Times, Athan & 3D Qibla',
+            'title': isArabic
+                ? 'مواقيت الصلاة، الأذان والقبلة 3D'
+                : 'Prayer Times, Athan & 3D Qibla',
             'desc': isArabic
                 ? 'حسابات فلكية بالغة الدقة لمواقيت الصلاة عالمياً، تنبيهات الأذان بأصوات كبار المؤذنين، وبوصلة القبلة ثلاثية الأبعاد.'
                 : 'Precision astronomical prayer schedules, background Athan notifications with various Muezzin voices, 3D compass Qibla finder.',
@@ -1315,7 +1348,9 @@ class _SettingsScreenState extends State<SettingsScreen>
           {
             'icon': Icons.library_books_rounded,
             'color': const Color(0xFF0D9488),
-            'title': isArabic ? 'المكتبة الإسلامية وصحيح البخاري' : 'Islamic Library & Sahih Al-Bukhari',
+            'title': isArabic
+                ? 'المكتبة الإسلامية وصحيح البخاري'
+                : 'Islamic Library & Sahih Al-Bukhari',
             'desc': isArabic
                 ? 'صحيح البخاري كاملاً بالأسانيد والأبواب، قصص الأنبياء، السيرة النبوية، سير الصحابة، والفتاوى الشرعية الموثوقة.'
                 : 'Complete Sahih Al-Bukhari with hadith chains, Stories of the Prophets, Seerah, Companions, and Authentic Ruqyah.',
@@ -1323,7 +1358,9 @@ class _SettingsScreenState extends State<SettingsScreen>
           {
             'icon': Icons.auto_stories_rounded,
             'color': const Color(0xFFEC4899),
-            'title': isArabic ? 'حصن المسلم والأذكار التفاعلية' : 'Hisn Al-Muslim & Daily Remembrance',
+            'title': isArabic
+                ? 'حصن المسلم والأذكار التفاعلية'
+                : 'Hisn Al-Muslim & Daily Remembrance',
             'desc': isArabic
                 ? 'أذكار الصباح والمساء، أذكار بعد الصلاة، سبحة إلكترونية ذكية، تلاوات صوتية للأذكار، وفضائل كل ذكر.'
                 : 'Comprehensive Morning & Evening Adhkar, Post-Salah Dua, interactive digital Tasbih counters, and authentic virtues.',
@@ -1341,7 +1378,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                 child: Container(
                   decoration: BoxDecoration(
                     color: surfaceBg,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(28)),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.35),
@@ -1419,7 +1457,8 @@ class _SettingsScreenState extends State<SettingsScreen>
 
                             // Noble Ayah
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 14),
                               decoration: BoxDecoration(
                                 color: itemCardBg,
                                 borderRadius: BorderRadius.circular(16),
@@ -1472,7 +1511,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                             const SizedBox(height: 6),
                             Text(
                               getMissionText(),
-                              style: TextStyle(fontSize: 13, color: textSub, height: 1.55),
+                              style: TextStyle(
+                                  fontSize: 13, color: textSub, height: 1.55),
                             ),
                             const SizedBox(height: 16),
 
@@ -1485,7 +1525,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                                   color: itemCardBg,
                                   borderRadius: BorderRadius.circular(14),
                                   border: Border.all(
-                                    color: isDark ? Colors.white10 : Colors.black12,
+                                    color: isDark
+                                        ? Colors.white10
+                                        : Colors.black12,
                                   ),
                                 ),
                                 child: Row(
@@ -1494,7 +1536,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                                     Container(
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: (ticket['color'] as Color).withValues(alpha: 0.14),
+                                        color: (ticket['color'] as Color)
+                                            .withValues(alpha: 0.14),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Icon(
@@ -1506,7 +1549,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             ticket['title'] as String,
@@ -1540,16 +1584,19 @@ class _SettingsScreenState extends State<SettingsScreen>
                               decoration: BoxDecoration(
                                 color: goldColor.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: goldColor.withValues(alpha: 0.4)),
+                                border: Border.all(
+                                    color: goldColor.withValues(alpha: 0.4)),
                               ),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(Icons.favorite_rounded, color: goldColor, size: 22),
+                                  const Icon(Icons.favorite_rounded,
+                                      color: goldColor, size: 22),
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           isArabic
@@ -1558,7 +1605,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                                           style: TextStyle(
                                             fontSize: 13,
                                             fontWeight: FontWeight.bold,
-                                            color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
+                                            color: isDark
+                                                ? const Color(0xFFFDE68A)
+                                                : const Color(0xFF92400E),
                                           ),
                                         ),
                                         const SizedBox(height: 4),
@@ -1568,7 +1617,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                                               : 'Built purely for the pleasure of Allah ﷻ without barrier. We pray Allah accepts it as a continuous charity for all believers.',
                                           style: TextStyle(
                                             fontSize: 11.5,
-                                            color: isDark ? const Color(0xFFE5D5B8) : const Color(0xFF78350F),
+                                            color: isDark
+                                                ? const Color(0xFFE5D5B8)
+                                                : const Color(0xFF78350F),
                                             height: 1.4,
                                           ),
                                         ),
@@ -1589,14 +1640,20 @@ class _SettingsScreenState extends State<SettingsScreen>
                                     'Download Quran Zone for an exquisite Quran & Islamic experience:\nhttps://play.google.com/store/apps/details?id=com.umer.quranzone',
                                   );
                                 },
-                                icon: const Icon(Icons.share_rounded, size: 18, color: Colors.white),
+                                icon: const Icon(Icons.share_rounded,
+                                    size: 18, color: Colors.white),
                                 label: Text(
-                                  isArabic ? 'شارك التطبيق واكسب الأجر' : 'Share Quran Zone',
-                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                  isArabic
+                                      ? 'شارك التطبيق واكسب الأجر'
+                                      : 'Share Quran Zone',
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
                                 ),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: emeraldColor,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14)),
                                 ),
                               ),
                             ),
@@ -1611,6 +1668,135 @@ class _SettingsScreenState extends State<SettingsScreen>
           },
         );
       },
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMPONENT 0a: Compact Action Tile (no subtitle, reduced height)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _CompactTile extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final Widget? trailing;
+  final VoidCallback onTap;
+  final bool isDark;
+  final Color textColor;
+
+  const _CompactTile({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.onTap,
+    required this.isDark,
+    required this.textColor,
+  }) : trailing = null;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: Icon(icon, color: iconColor, size: 17),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontW ight.w600,
+                  fontSize: 13.5,
+                ),
+              ),
+            ),
+            trailing ??
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: isDark ? Colors.white38 : Colors.black38,
+                  size: 20,
+                ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMPONENT 0b: Compact Switch Tile (no subtitle, reduced height)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _CompactSwitchTile extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final bool value;
+  final Color activeColor;
+  final ValueChanged<bool> onChanged;
+  final bool isDark;
+  final Color textColor;
+
+  const _CompactSwitchTile({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.value,
+    required this.activeColor,
+    required this.onChanged,
+    required this.isDark,
+    required this.textColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Icon(icon, color: iconColor, size: 17),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                color: textColor,
+                fontWeight: FontWeight.w600,
+                fontSize: 13.5,
+              ),
+            ),
+          ),
+          Transform.scale(
+            scale: 0.85,
+            child: Switch.adaptive(
+              value: value,
+              activeTrackColor: activeColor.withValues(alpha: 0.5),
+              activeThumbColor: activeColor,
+              onChanged: onChanged,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1945,7 +2131,8 @@ class _ModernIntervalPicker extends StatelessWidget {
                         style: TextStyle(
                           color: selected ? Colors.white : subtextColor,
                           fontSize: 11.5,
-                          fontWeight: selected ? FontWeight.bold : FontWeight.w600,
+                          fontWeight:
+                              selected ? FontWeight.bold : FontWeight.w600,
                         ),
                       ),
                     ),
@@ -1964,6 +2151,7 @@ class _ModernIntervalPicker extends StatelessWidget {
 // COMPONENT 5: Theme Swatch Selector with Tap Origin Capture
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ignore: unused_element
 class _ThemeSwatchSelector extends StatelessWidget {
   final QuranTheme currentTheme;
   final Color primary;
@@ -2061,19 +2249,23 @@ class _ThemeSwatchSelector extends StatelessWidget {
                     tapPos = details.globalPosition;
                   },
                   onTap: () {
-                    final RenderBox? box = swatchContext.findRenderObject() as RenderBox?;
+                    final RenderBox? box =
+                        swatchContext.findRenderObject() as RenderBox?;
                     Offset origin;
                     if (box != null && box.hasSize) {
-                      final cardRect = box.localToGlobal(Offset.zero) & box.size;
+                      final cardRect =
+                          box.localToGlobal(Offset.zero) & box.size;
                       if (tapPos != null && cardRect.contains(tapPos!)) {
                         origin = tapPos!;
                       } else {
-                        origin = box.localToGlobal(box.size.center(Offset.zero));
+                        origin =
+                            box.localToGlobal(box.size.center(Offset.zero));
                       }
                     } else if (tapPos != null) {
                       origin = tapPos!;
                     } else {
-                      origin = Offset(MediaQuery.of(context).size.width / 2, 250);
+                      origin =
+                          Offset(MediaQuery.of(context).size.width / 2, 250);
                     }
                     onThemeSelected(t.$1, origin);
                   },
@@ -2126,7 +2318,8 @@ class _ThemeSwatchSelector extends StatelessWidget {
                                     shape: BoxShape.circle,
                                     color: borderColor,
                                   ),
-                                  child: const Icon(Icons.check, size: 10, color: Colors.black),
+                                  child: const Icon(Icons.check,
+                                      size: 10, color: Colors.black),
                                 ),
                               ),
                           ],
@@ -2137,7 +2330,8 @@ class _ThemeSwatchSelector extends StatelessWidget {
                           style: TextStyle(
                             color: t.$7,
                             fontSize: 11.5,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                            fontWeight:
+                                isSelected ? FontWeight.bold : FontWeight.w600,
                             fontFamily: isArabic ? 'Amiri' : null,
                           ),
                           maxLines: 1,
@@ -2292,7 +2486,8 @@ class _TikTokSpotlightCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
                         color: goldBorder.withValues(alpha: 0.16),
                         borderRadius: BorderRadius.circular(6),
@@ -2304,7 +2499,9 @@ class _TikTokSpotlightCard extends StatelessWidget {
                       child: Text(
                         creatorRole,
                         style: TextStyle(
-                          color: isDark ? const Color(0xFFE8C77A) : const Color(0xFF7A5900),
+                          color: isDark
+                              ? const Color(0xFFE8C77A)
+                              : const Color(0xFF7A5900),
                           fontSize: 10.5,
                           fontWeight: FontWeight.bold,
                         ),
@@ -2408,9 +2605,11 @@ class _TikTokSpotlightCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14),
                     child: Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
                       decoration: BoxDecoration(
-                        color: tiktokPink.withValues(alpha: isDark ? 0.12 : 0.08),
+                        color:
+                            tiktokPink.withValues(alpha: isDark ? 0.12 : 0.08),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
                           color: tiktokPink.withValues(alpha: 0.38),
@@ -2450,7 +2649,9 @@ class _TikTokSpotlightCard extends StatelessWidget {
                                   tapToCopyLabel,
                                   style: TextStyle(
                                     fontSize: 10,
-                                    color: isDark ? Colors.white54 : Colors.black45,
+                                    color: isDark
+                                        ? Colors.white54
+                                        : Colors.black45,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -2458,7 +2659,8 @@ class _TikTokSpotlightCard extends StatelessWidget {
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5.5),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5.5),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
                                 colors: [tiktokPink, Color(0xFFFF4B6E)],
@@ -2475,7 +2677,8 @@ class _TikTokSpotlightCard extends StatelessWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.copy_rounded, size: 13, color: Colors.white),
+                                const Icon(Icons.copy_rounded,
+                                    size: 13, color: Colors.white),
                                 const SizedBox(width: 4),
                                 Text(
                                   copyLabel,
@@ -2501,10 +2704,11 @@ class _TikTokSpotlightCard extends StatelessWidget {
                   height: 42,
                   child: ElevatedButton.icon(
                     onPressed: onFollowTikTok,
-                    icon: const Icon(Icons.open_in_new_rounded, size: 16, color: Colors.white),
-                    label: Text(
-                      followLabel,
-                      style: const TextStyle(
+                    icon: const Icon(Icons.open_in_new_rounded,
+                        size: 16, color: Colors.white),
+                    label: const Text(
+                      'Follow on TikTok',
+                      style: TextStyle(
                         color: Colors.white,
                         fontSize: 13.5,
                         fontWeight: FontWeight.bold,
@@ -2533,24 +2737,43 @@ class _TikTokSpotlightCard extends StatelessWidget {
               Expanded(
                 child: SizedBox(
                   height: 38,
-                  child: OutlinedButton.icon(
+                  child: OutlinedButton(
                     onPressed: onTelegram,
-                    icon: const Icon(Icons.send_rounded, size: 15, color: Color(0xFF0088CC)),
-                    label: Text(
-                      telegramLabel,
-                      style: TextStyle(
-                        color: isDark ? Colors.white : Colors.black87,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                        color: const Color(0xFF0088CC).withValues(alpha: 0.4),
+                      side: const BorderSide(
+                        color: Color(0xFF0088CC),
+                        width: 1.4,
                       ),
+                      backgroundColor:
+                          const Color(0xFF0088CC).withValues(alpha: 0.08),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Telegram paper-plane icon with brand colours
+                        SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CustomPaint(
+                            painter: _TelegramIconPainter(),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Telegram',
+                          style: TextStyle(
+                            color: isDark
+                                ? const Color(0xFF54C5F8)
+                                : const Color(0xFF0088CC),
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -2602,6 +2825,386 @@ class _TikTokSpotlightCard extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// COMPONENT 7: Compact Theme Card (Bento-style, 3 theme swatches in a row)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _CompactThemeCard extends StatelessWidget {
+  final QuranTheme currentTheme;
+  final Color primary;
+  final Color cardBg;
+  final Color borderColor;
+  final bool isDark;
+  final bool isArabic;
+  final String darkLabel;
+  final String creamLabel;
+  final String whiteLabel;
+  final void Function(QuranTheme theme, Offset origin) onThemeSelected;
+
+  const _CompactThemeCard({
+    required this.currentTheme,
+    required this.primary,
+    required this.cardBg,
+    required this.borderColor,
+    required this.isDark,
+    required this.isArabic,
+    required this.darkLabel,
+    required this.creamLabel,
+    required this.whiteLabel,
+    required this.onThemeSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final themeOptions = [
+      (
+        QuranTheme.dark,
+        darkLabel,
+        Icons.nights_stay_rounded,
+        const Color(0xFF0D1F17),
+        const Color(0xFFE8C77A),
+        Colors.white,
+      ),
+      (
+        QuranTheme.cream,
+        creamLabel,
+        Icons.wb_sunny_rounded,
+        const Color(0xFFFDFBF0),
+        const Color(0xFF1B4332),
+        const Color(0xFF1A120B),
+      ),
+      (
+        QuranTheme.white,
+        whiteLabel,
+        Icons.light_mode_rounded,
+        Colors.white,
+        const Color(0xFF10B981),
+        const Color(0xFF111827),
+      ),
+    ];
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.07),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.28 : 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.fromLTRB(8, 10, 8, 10),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 8),
+            child: Row(
+              children: [
+                Icon(Icons.palette_rounded, size: 13, color: primary),
+                const SizedBox(width: 5),
+                Text(
+                  isArabic ? 'المظهر' : 'Theme',
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.bold,
+                    color: primary,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: themeOptions.map((t) {
+              final isSelected = currentTheme == t.$1;
+              return Expanded(
+                child: Builder(
+                  builder: (ctx) {
+                    Offset? tapPos;
+                    return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTapDown: (d) => tapPos = d.globalPosition,
+                      onTap: () {
+                        final box = ctx.findRenderObject() as RenderBox?;
+                        Offset origin;
+                        if (box != null && box.hasSize) {
+                          final r = box.localToGlobal(Offset.zero) & box.size;
+                          origin = (tapPos != null && r.contains(tapPos!))
+                              ? tapPos!
+                              : box.localToGlobal(box.size.center(Offset.zero));
+                        } else {
+                          origin = tapPos ??
+                              Offset(
+                                  MediaQuery.of(context).size.width / 2, 250);
+                        }
+                        onThemeSelected(t.$1, origin);
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 240),
+                        curve: Curves.easeOutCubic,
+                        margin: const EdgeInsets.symmetric(horizontal: 2.5),
+                        padding: const EdgeInsets.fromLTRB(4, 8, 4, 6),
+                        decoration: BoxDecoration(
+                          color: t.$4,
+                          borderRadius: BorderRadius.circular(13),
+                          border: Border.all(
+                            color: isSelected
+                                ? borderColor
+                                : (isDark ? Colors.white12 : Colors.black12),
+                            width: isSelected ? 2 : 1,
+                          ),
+                          boxShadow: isSelected
+                              ? [
+                                  BoxShadow(
+                                    color: borderColor.withValues(alpha: 0.4),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  )
+                                ]
+                              : [],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: 28,
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: t.$5.withValues(alpha: 0.18),
+                                  ),
+                                  child: Icon(t.$3, size: 15, color: t.$5),
+                                ),
+                                if (isSelected)
+                                  Positioned(
+                                    right: 0,
+                                    top: 0,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(1.5),
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: borderColor,
+                                      ),
+                                      child: const Icon(Icons.check,
+                                          size: 8, color: Colors.black),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              t.$2,
+                              style: TextStyle(
+                                color: t.$6,
+                                fontSize: 10,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMPONENT 8: Compact Language Card (Bento-style)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _CompactLanguageCard extends StatelessWidget {
+  final String selectedLanguage;
+  final Color primary;
+  final Color cardBg;
+  final Color borderColor;
+  final bool isDark;
+  final bool isArabic;
+  final String title;
+  final VoidCallback onTap;
+  final Color textColor;
+  final Color subtextColor;
+
+  const _CompactLanguageCard({
+    required this.selectedLanguage,
+    required this.primary,
+    required this.cardBg,
+    required this.borderColor,
+    required this.isDark,
+    required this.isArabic,
+    required this.title,
+    required this.onTap,
+    required this.textColor,
+    required this.subtextColor,
+  });
+
+  static const Map<String, String> _flagEmoji = {
+    'Arabic': '🇸🇦',
+    'English': '🇬🇧',
+    'Amharic': '🇪🇹',
+    'Oromo': '🇪🇹',
+  };
+
+  static const Map<String, String> _nativeNames = {
+    'Arabic': 'العربية',
+    'English': 'English',
+    'Amharic': 'አማርኛ',
+    'Oromo': 'Oromoo',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final flag = _flagEmoji[selectedLanguage] ?? '🌐';
+    final nativeName = _nativeNames[selectedLanguage] ?? selectedLanguage;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : Colors.black.withValues(alpha: 0.07),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.28 : 0.04),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.translate_rounded, size: 13, color: primary),
+                const SizedBox(width: 5),
+                Text(
+                  'Language',
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.bold,
+                    color: primary,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+                const Spacer(),
+                Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  size: 16,
+                  color: subtextColor,
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Text(
+                  flag,
+                  style: const TextStyle(fontSize: 22),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        nativeName,
+                        style: TextStyle(
+                          color: textColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        selectedLanguage,
+                        style: TextStyle(
+                          color: subtextColor,
+                          fontSize: 10.5,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMPONENT 9: Telegram Icon Painter (real Telegram paper-plane logo)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _TelegramIconPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+
+    final paint = Paint()
+      ..color = const Color(0xFF0088CC)
+      ..style = PaintingStyle.fill;
+
+    // Telegram paper-plane path (simplified, proportional to size)
+    final path = Path();
+    // Main body arrow
+    path.moveTo(w * 0.05, h * 0.45);
+    path.lineTo(w * 0.95, h * 0.1);
+    path.lineTo(w * 0.65, h * 0.9);
+    path.lineTo(w * 0.42, h * 0.67);
+    path.close();
+    canvas.drawPath(path, paint);
+
+    // Tail fold
+    final tail = Path();
+    tail.moveTo(w * 0.42, h * 0.67);
+    tail.lineTo(w * 0.38, h * 0.52);
+    tail.lineTo(w * 0.95, h * 0.1);
+    tail.close();
+    canvas.drawPath(tail, paint..color = const Color(0xFF54C5F8));
+  }
+
+  @override
+  bool shouldRepaint(_TelegramIconPainter _) => false;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // CIRCULAR REVEAL CLIPPER & RIPPLE RING PAINTER (Telegram-Style)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -2647,7 +3250,8 @@ class _RippleRingPainter extends CustomPainter {
         ..color = color.withValues(alpha: alpha * 0.35 * ringScale)
         ..style = PaintingStyle.stroke
         ..strokeWidth = (6.0 * ringScale).clamp(1.0, 6.0)
-        ..maskFilter = MaskFilter.blur(BlurStyle.normal, (3.0 * ringScale).clamp(0.5, 3.0));
+        ..maskFilter = MaskFilter.blur(
+            BlurStyle.normal, (3.0 * ringScale).clamp(0.5, 3.0));
       canvas.drawCircle(center, radius, aura);
     }
 
