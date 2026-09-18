@@ -78,7 +78,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       'tap_to_copy': 'Tap anywhere to copy handle',
       'copied_to_clipboard': 'Copied @umer.almuktar to clipboard!',
       'telegram_btn': 'Telegram',
-      'email_btn': 'Email Feedback',
+      'email_btn': 'Email',
       'creator_note': 'Handcrafted for the Ummah • Dua appreciated',
       'share_info': 'SUPPORT, PRIVACY & INFO',
       'share_app': 'Share Quran Zone',
@@ -157,10 +157,10 @@ class _SettingsScreenState extends State<SettingsScreen>
       'creator_community': 'አዘጋጅ እና ማህበረሰብ',
       'creator_name': 'ኡመር ሙክታር',
       'creator_role': 'ዋና አዘጋጅ እና ፈጣሪ',
-      'tiktok_title': 'ኦፊሴላዊ የቲክቶክ ገጽ',
-      'tiktok_desc': 'የቁርኣን ቲላዋዎች፣ መንፈሳዊ ማስታወሻዎች እና አዳዲስ ዝመናዎች',
-      'tiktok_follow': 'በቲክቶክ ይከተሉ',
-      'copy_handle': 'ቅዳ',
+      'tiktok_title': 'Official TikTok Channel',
+      'tiktok_desc': 'የቁርኣን ቲላዋዎችና ዝመናዎች',
+      'tiktok_follow': 'Follow on TikTok',
+      'copy_handle': 'Copy',
       'tap_to_copy': 'ለመቅዳት የትም ይጫኑ',
       'copied_to_clipboard': '@umer.almuktar ወደ ቅንጥብ ሰሌዳ ተቀድቷል!',
       'telegram_btn': 'ቴሌግራም',
@@ -201,10 +201,10 @@ class _SettingsScreenState extends State<SettingsScreen>
       'creator_community': 'Hojjataa fi Hawaasa',
       'creator_name': 'Umar Muktaar',
       'creator_role': 'Hojjataa fi Qindeessaa App',
-      'tiktok_title': 'Marsariitii Tiiktokii Ofiisaalaa',
-      'tiktok_desc': 'Qiraatii Qur\'aanaa fi odeeffannoo haaraa',
-      'tiktok_follow': 'Tiiktokii irratti hordofaa',
-      'copy_handle': 'Kopiisi',
+      'tiktok_title': 'Official TikTok Channel',
+      'tiktok_desc': 'Qiraatii Qur\'aanaa fi odeeffannoo',
+      'tiktok_follow': 'Follow on TikTok',
+      'copy_handle': 'Copy',
       'tap_to_copy': 'Kopiisuuf bakka kamiyyuu tuqaa',
       'copied_to_clipboard': '@umer.almuktar garagalfameera!',
       'telegram_btn': 'Telegiraamii',
@@ -926,16 +926,10 @@ class _SettingsScreenState extends State<SettingsScreen>
                   cardBg: cardBg,
                   borderColor: borderColor,
                   children: [
-                    _ModernActionTile(
+                    _CompactTile(
                       icon: Icons.access_time_filled_rounded,
-                      iconGradient: const [
-                        Color(0xFF10B981),
-                        Color(0xFF059669)
-                      ],
+                      iconColor: const Color(0xFF10B981),
                       title: _tr(context, 'prayer_settings'),
-                      subtitle: _tr(context, 'prayer_desc'),
-                      trailing:
-                          const Icon(Icons.chevron_right_rounded, size: 20),
                       onTap: () {
                         Navigator.push(
                           context,
@@ -947,23 +941,17 @@ class _SettingsScreenState extends State<SettingsScreen>
                       },
                       isDark: isDark,
                       textColor: textMain,
-                      subtextColor: textSub,
                     ),
                     _divider(isDark, borderColor),
-                    _ModernSwitchTile(
+                    _CompactSwitchTile(
                       icon: Icons.notifications_active_rounded,
-                      iconGradient: const [
-                        Color(0xFFF59E0B),
-                        Color(0xFFD97706)
-                      ],
+                      iconColor: const Color(0xFFF59E0B),
                       title: _tr(context, 'daily_notif'),
-                      subtitle: _tr(context, 'daily_notif_desc'),
                       value: _notificationsEnabled,
                       activeColor: primary,
                       onChanged: _toggleNotifications,
                       isDark: isDark,
                       textColor: textMain,
-                      subtextColor: textSub,
                     ),
                     AnimatedSize(
                       duration: const Duration(milliseconds: 250),
@@ -995,16 +983,10 @@ class _SettingsScreenState extends State<SettingsScreen>
                   cardBg: cardBg,
                   borderColor: borderColor,
                   children: [
-                    _ModernActionTile(
+                    _CompactTile(
                       icon: Icons.download_done_rounded,
-                      iconGradient: const [
-                        Color(0xFF0D9488),
-                        Color(0xFF0F766E)
-                      ],
+                      iconColor: const Color(0xFF0D9488),
                       title: _tr(context, 'downloads'),
-                      subtitle: _tr(context, 'downloads_desc'),
-                      trailing:
-                          const Icon(Icons.chevron_right_rounded, size: 20),
                       onTap: () {
                         Navigator.push(
                           context,
@@ -1014,7 +996,6 @@ class _SettingsScreenState extends State<SettingsScreen>
                       },
                       isDark: isDark,
                       textColor: textMain,
-                      subtextColor: textSub,
                     ),
                   ],
                 ),
@@ -1692,33 +1673,34 @@ class _CompactTile extends StatelessWidget {
     required this.onTap,
     required this.isDark,
     required this.textColor,
-  }) : trailing = null;
+    this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         child: Row(
           children: [
             Container(
-              width: 32,
-              height: 32,
+              width: 28,
+              height: 28,
               decoration: BoxDecoration(
                 color: iconColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(9),
+                borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: iconColor, size: 17),
+              child: Icon(icon, color: iconColor, size: 15.5),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Expanded(
               child: Text(
                 title,
                 style: TextStyle(
                   color: textColor,
-                  fontWeight: FontW ight.w600,
-                  fontSize: 13.5,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
                 ),
               ),
             ),
@@ -1726,7 +1708,7 @@ class _CompactTile extends StatelessWidget {
                 Icon(
                   Icons.chevron_right_rounded,
                   color: isDark ? Colors.white38 : Colors.black38,
-                  size: 20,
+                  size: 18,
                 ),
           ],
         ),
@@ -1763,31 +1745,31 @@ class _CompactSwitchTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
       child: Row(
         children: [
           Container(
-            width: 32,
-            height: 32,
+            width: 28,
+            height: 28,
             decoration: BoxDecoration(
               color: iconColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(9),
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: iconColor, size: 17),
+            child: Icon(icon, color: iconColor, size: 15.5),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               title,
               style: TextStyle(
                 color: textColor,
                 fontWeight: FontWeight.w600,
-                fontSize: 13.5,
+                fontSize: 13,
               ),
             ),
           ),
           Transform.scale(
-            scale: 0.85,
+            scale: 0.8,
             child: Switch.adaptive(
               value: value,
               activeTrackColor: activeColor.withValues(alpha: 0.5),
@@ -1948,6 +1930,7 @@ class _ModernActionTile extends StatelessWidget {
 // COMPONENT 3: Modern Switch Tile
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ignore: unused_element
 class _ModernSwitchTile extends StatelessWidget {
   final IconData icon;
   final List<Color> iconGradient;
@@ -2435,9 +2418,9 @@ class _TikTokSpotlightCard extends StatelessWidget {
             children: [
               // Glowing Creator Avatar (46px)
               Container(
-                width: 46,
-                height: 46,
-                padding: const EdgeInsets.all(2.5),
+                width: 38,
+                height: 38,
+                padding: const EdgeInsets.all(2),
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
@@ -2454,40 +2437,34 @@ class _TikTokSpotlightCard extends StatelessWidget {
                   child: Center(
                     child: Icon(
                       Icons.person_rounded,
-                      size: 26,
+                      size: 20,
                       color: isDark ? Colors.white : Colors.black87,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+                child: Row(
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          creatorName,
-                          style: TextStyle(
-                            fontSize: 16.5,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        const Icon(
-                          Icons.verified_rounded,
-                          size: 17,
-                          color: Color(0xFF00B2FF),
-                        ),
-                      ],
+                    Text(
+                      creatorName,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.verified_rounded,
+                      size: 14,
+                      color: Color(0xFF00B2FF),
+                    ),
+                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
+                          horizontal: 6, vertical: 1.5),
                       decoration: BoxDecoration(
                         color: goldBorder.withValues(alpha: 0.16),
                         borderRadius: BorderRadius.circular(6),
@@ -2502,7 +2479,7 @@ class _TikTokSpotlightCard extends StatelessWidget {
                           color: isDark
                               ? const Color(0xFFE8C77A)
                               : const Color(0xFF7A5900),
-                          fontSize: 10.5,
+                          fontSize: 9.5,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -2512,14 +2489,14 @@ class _TikTokSpotlightCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
 
           // ── Row 2: TikTok VIP Spotlight Container ───────────────────────────
           Container(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF060B09) : Colors.white,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: isDark
                     ? Colors.white.withValues(alpha: 0.1)
@@ -2527,35 +2504,35 @@ class _TikTokSpotlightCard extends StatelessWidget {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
+                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header: TikTok Badge + Channel Title & Full Visible Description
+                // Header: TikTok Badge + Channel Title & Tag
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: 34,
+                      height: 34,
                       decoration: BoxDecoration(
                         color: Colors.black,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                         boxShadow: const [
                           BoxShadow(
                             color: tiktokCyan,
-                            blurRadius: 5,
-                            offset: Offset(-1.5, 0),
+                            blurRadius: 4,
+                            offset: Offset(-1, 0),
                           ),
                           BoxShadow(
                             color: tiktokPink,
-                            blurRadius: 5,
-                            offset: Offset(1.5, 0),
+                            blurRadius: 4,
+                            offset: Offset(1, 0),
                           ),
                         ],
                       ),
@@ -2563,180 +2540,142 @@ class _TikTokSpotlightCard extends StatelessWidget {
                         child: Icon(
                           Icons.music_note_rounded,
                           color: Colors.white,
-                          size: 22,
+                          size: 19,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            tiktokTitle,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : Colors.black87,
-                            ),
+                          Row(
+                            children: [
+                              Text(
+                                tiktokTitle,
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 5, vertical: 1),
+                                decoration: BoxDecoration(
+                                  color: tiktokPink.withValues(alpha: 0.14),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Text(
+                                  '@umer.almuktar',
+                                  style: TextStyle(
+                                    color: tiktokPink,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 2),
                           Text(
                             tiktokDesc,
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 10.5,
                               color: isDark ? Colors.white60 : Colors.black54,
-                              height: 1.35,
+                              height: 1.25,
                             ),
-                            maxLines: 2,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 10),
 
-                // Full-width Bold Handle Banner with 1-Tap Copy Everywhere!
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: onCopyHandle,
-                    borderRadius: BorderRadius.circular(14),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 10),
-                      decoration: BoxDecoration(
-                        color:
-                            tiktokPink.withValues(alpha: isDark ? 0.12 : 0.08),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: tiktokPink.withValues(alpha: 0.38),
-                          width: 1.2,
+                // Side-by-Side Action Buttons: Follow on TikTok + Copy Handle
+                Row(
+                  children: [
+                    // Follow on TikTok Button
+                    Expanded(
+                      flex: 6,
+                      child: SizedBox(
+                        height: 36,
+                        child: ElevatedButton.icon(
+                          onPressed: onFollowTikTok,
+                          icon: const Icon(Icons.open_in_new_rounded,
+                              size: 14, color: Colors.white),
+                          label: const Text(
+                            'Follow on TikTok',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: tiktokPink,
+                            elevation: 2,
+                            shadowColor: tiktokPink.withValues(alpha: 0.35),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                          ),
                         ),
                       ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                              color: tiktokPink.withValues(alpha: 0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.alternate_email_rounded,
-                              size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    // Copy Handle Button
+                    Expanded(
+                      flex: 4,
+                      child: SizedBox(
+                        height: 36,
+                        child: OutlinedButton.icon(
+                          onPressed: onCopyHandle,
+                          icon: const Icon(Icons.copy_rounded,
+                              size: 13, color: tiktokPink),
+                          label: const Text(
+                            'Copy',
+                            style: TextStyle(
                               color: tiktokPink,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Text(
-                                  'umer.almuktar',
-                                  style: TextStyle(
-                                    fontSize: 16.5,
-                                    fontWeight: FontWeight.w900,
-                                    color: tiktokPink,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                Text(
-                                  tapToCopyLabel,
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: isDark
-                                        ? Colors.white54
-                                        : Colors.black45,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                              color: tiktokPink.withValues(alpha: 0.45),
+                              width: 1.2,
                             ),
+                            backgroundColor: tiktokPink
+                                .withValues(alpha: isDark ? 0.12 : 0.07),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5.5),
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [tiktokPink, Color(0xFFFF4B6E)],
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: tiktokPink.withValues(alpha: 0.35),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.copy_rounded,
-                                    size: 13, color: Colors.white),
-                                const SizedBox(width: 4),
-                                Text(
-                                  copyLabel,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Full-width Prominent Follow Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 42,
-                  child: ElevatedButton.icon(
-                    onPressed: onFollowTikTok,
-                    icon: const Icon(Icons.open_in_new_rounded,
-                        size: 16, color: Colors.white),
-                    label: const Text(
-                      'Follow on TikTok',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.3,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: tiktokPink,
-                      elevation: 3,
-                      shadowColor: tiktokPink.withValues(alpha: 0.4),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
+                  ],
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 9),
 
           // ── Row 3: Quick Support Channels (Telegram & Email) ────────────────
           Row(
             children: [
               Expanded(
                 child: SizedBox(
-                  height: 38,
+                  height: 36,
                   child: OutlinedButton(
                     onPressed: onTelegram,
                     style: OutlinedButton.styleFrom(
@@ -2781,12 +2720,12 @@ class _TikTokSpotlightCard extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: SizedBox(
-                  height: 38,
+                  height: 36,
                   child: OutlinedButton.icon(
                     onPressed: onEmail,
                     icon: Icon(Icons.email_outlined, size: 15, color: primary),
                     label: Text(
-                      emailLabel,
+                      'Email',
                       style: TextStyle(
                         color: isDark ? Colors.white : Colors.black87,
                         fontSize: 12,
@@ -2905,7 +2844,7 @@ class _CompactThemeCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 4, bottom: 8),
+            padding: const EdgeInsets.only(left: 4, right: 4, bottom: 8),
             child: Row(
               children: [
                 Icon(Icons.palette_rounded, size: 13, color: primary),
@@ -2917,6 +2856,24 @@ class _CompactThemeCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: primary,
                     letterSpacing: 0.4,
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Expanded(
+                  child: Text(
+                    currentTheme == QuranTheme.dark
+                        ? darkLabel
+                        : (currentTheme == QuranTheme.cream
+                            ? creamLabel
+                            : whiteLabel),
+                    textAlign: TextAlign.end,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: primary.withValues(alpha: 0.85),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -2951,7 +2908,7 @@ class _CompactThemeCard extends StatelessWidget {
                         duration: const Duration(milliseconds: 240),
                         curve: Curves.easeOutCubic,
                         margin: const EdgeInsets.symmetric(horizontal: 2.5),
-                        padding: const EdgeInsets.fromLTRB(4, 8, 4, 6),
+                        padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 4),
                         decoration: BoxDecoration(
                           color: t.$4,
                           borderRadius: BorderRadius.circular(13),
@@ -2971,51 +2928,35 @@ class _CompactThemeCard extends StatelessWidget {
                                 ]
                               : [],
                         ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Container(
-                                  width: 28,
-                                  height: 28,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: t.$5.withValues(alpha: 0.18),
-                                  ),
-                                  child: Icon(t.$3, size: 15, color: t.$5),
+                        child: Center(
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Container(
+                                width: 28,
+                                height: 28,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: t.$5.withValues(alpha: 0.18),
                                 ),
-                                if (isSelected)
-                                  Positioned(
-                                    right: 0,
-                                    top: 0,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(1.5),
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: borderColor,
-                                      ),
-                                      child: const Icon(Icons.check,
-                                          size: 8, color: Colors.black),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              t.$2,
-                              style: TextStyle(
-                                color: t.$6,
-                                fontSize: 10,
-                                fontWeight: isSelected
-                                    ? FontWeight.bold
-                                    : FontWeight.w600,
+                                child: Icon(t.$3, size: 15, color: t.$5),
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+                              if (isSelected)
+                                Positioned(
+                                  right: 0,
+                                  top: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(1.5),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: borderColor,
+                                    ),
+                                    child: const Icon(Icons.check,
+                                        size: 8, color: Colors.black),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                     );
