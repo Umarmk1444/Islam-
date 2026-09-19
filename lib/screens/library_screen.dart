@@ -16,141 +16,30 @@ import '../widgets/liquid_pressable.dart';
 import '../widgets/custom_banner_ad.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Domain Configuration with Curated Luxury Islamic Palettes & Localization
+// Core Islamic Pillar Definition (Zen Bento Grid)
 // ─────────────────────────────────────────────────────────────────────────────
-class _DomainInfo {
-  final String part;
+class _IslamicPillar {
+  final String id;
   final Map<String, String> titles;
   final Map<String, String> subtitles;
   final IconData icon;
   final List<Color> gradient;
   final Color accentColor;
+  final VoidCallback Function(BuildContext context) onSelect;
 
-  const _DomainInfo({
-    required this.part,
+  const _IslamicPillar({
+    required this.id,
     required this.titles,
     required this.subtitles,
     required this.icon,
     required this.gradient,
     required this.accentColor,
+    required this.onSelect,
   });
 
   String title(String locale) => titles[locale] ?? titles['ar'] ?? titles['en']!;
   String subtitle(String locale) => subtitles[locale] ?? subtitles['ar'] ?? subtitles['en']!;
 }
-
-const _DomainInfo _kBukhariDomain = _DomainInfo(
-  part: 'صحيح البخارى',
-  titles: {
-    'ar': 'صحيح البخاري',
-    'en': 'Sahih Al-Bukhari',
-    'am': 'ሶሂህ አል-ቡኻሪ',
-    'om': 'Sahiih Al-Bukhaarii',
-  },
-  subtitles: {
-    'ar': 'الجامع الصحيح المسند من أمور رسول الله ﷺ وسننه وأيامه',
-    'en': 'Authentic Hadith collection of Prophet Muhammad ﷺ',
-    'am': 'ትክክለኛ የነቢዩ ሙሐመድ ﷺ የሐዲስ ስብስብ',
-    'om': 'Kilaasika hadiisota sahiiha Ergamaa Rabbii ﷺ',
-  },
-  icon: Icons.menu_book_rounded,
-  gradient: [Color(0xFF8D5B18), Color(0xFFC68A2E)],
-  accentColor: Color(0xFFE5A93C),
-);
-
-const _DomainInfo _kLibraryDomain = _DomainInfo(
-  part: 'المكتبة',
-  titles: {
-    'ar': 'المكتبة الإسلامية',
-    'en': 'Islamic Library',
-    'am': 'ኢስላማዊ ቤተ-መጽሐፍት',
-    'om': 'Mana Kitaaba Islaamaa',
-  },
-  subtitles: {
-    'ar': 'موسوعة الكتب، الرسائل، والمطويات الدعوية المصنفة',
-    'en': 'Books, treatises & Islamic guidance booklets',
-    'am': 'መጽሐፍት እና የዳዕዋ ጽሑፎች ስብስብ',
-    'om': 'Kitaabota fi barruulee da\'waa',
-  },
-  icon: Icons.local_library_rounded,
-  gradient: [Color(0xFF0F5A47), Color(0xFF1B8A6B)],
-  accentColor: Color(0xFF2ECC9A),
-);
-
-const List<_DomainInfo> _kSecondaryDomains = [
-  _DomainInfo(
-    part: 'فقه وفتاوى',
-    titles: {
-      'ar': 'فقه وفتاوى',
-      'en': 'Fiqh & Fatawa',
-      'am': 'ፊቅህ እና ፈትዋ',
-      'om': 'Fiqhii fi Fatwaa',
-    },
-    subtitles: {
-      'ar': 'أحكام العبادات والمعاملات',
-      'en': 'Islamic rulings & guidance',
-      'am': 'የኢባዳ እና የሙዓመላት ህጎች',
-      'om': 'Murteewwan amantii fi seera',
-    },
-    icon: Icons.balance_rounded,
-    gradient: [Color(0xFF4A154B), Color(0xFF7A257C)],
-    accentColor: Color(0xFFAB47BC),
-  ),
-  _DomainInfo(
-    part: 'الرقية الشرعية',
-    titles: {
-      'ar': 'الرقية الشرعية',
-      'en': 'Ruqyah Shariyyah',
-      'am': 'ሩቅያህ ሸርዒያህ',
-      'om': 'Ruqiyaa Shar\'iyyaa',
-    },
-    subtitles: {
-      'ar': 'تحصينات وأدعية الشفاء',
-      'en': 'Healing & protection',
-      'am': 'የፈውስ እና የጥበቃ ዱዓዎች',
-      'om': 'Dawaa fi du\'aa\'ii eegumsaa',
-    },
-    icon: Icons.healing_rounded,
-    gradient: [Color(0xFF702459), Color(0xFF97266D)],
-    accentColor: Color(0xFFED64A6),
-  ),
-  _DomainInfo(
-    part: 'تفسير أحلام',
-    titles: {
-      'ar': 'تفسير الأحلام',
-      'en': 'Dream Interpretation',
-      'am': 'የሕልም ፍቺ',
-      'om': 'Hiika Abjuu',
-    },
-    subtitles: {
-      'ar': 'جامع تفاسير الرؤى والأحلام',
-      'en': 'Meanings of dreams & visions',
-      'am': 'የሕልሞች እና ራእዮች ማብራሪያ',
-      'om': 'Hiikkaa abjuu fi mul\'ataa',
-    },
-    icon: Icons.nightlight_round,
-    gradient: [Color(0xFF1A365D), Color(0xFF2B6CB0)],
-    accentColor: Color(0xFF4299E1),
-  ),
-  _DomainInfo(
-    part: 'مسابقات',
-    titles: {
-      'ar': 'المسابقات الإسلامية',
-      'en': 'Islamic Quizzes',
-      'am': 'ኢስላማዊ ውድድሮች',
-      'om': 'Dorgommii Islaamaa',
-    },
-    subtitles: {
-      'ar': 'اختبر معلوماتك وثقافتك',
-      'en': 'Test knowledge & culture',
-      'am': 'እውቀትዎን ይፈትሹ',
-      'om': 'Beekumsa kee qori',
-    },
-    icon: Icons.emoji_events_rounded,
-    gradient: [Color(0xFF744210), Color(0xFFB7791F)],
-    accentColor: Color(0xFFECC94B),
-  ),
-];
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -169,21 +58,21 @@ class _LibraryScreenState extends State<LibraryScreen> {
   bool _isSearching = false;
   int _favCount = 0;
 
-  List<LibraryItem> _featuredPamphlets = [];
-  bool _isLoadingPamphlets = true;
-
   // Local PDF Books & Resume Reading States
   List<UserPdfBook> _userPdfBooks = [];
   bool _isLoadingPdfBooks = true;
   bool _isImportingPdf = false;
   Map<String, dynamic>? _latestResumeItem;
-  int _selectedFilterIndex = 0; // 0: All, 1: Bukhari, 2: Library, 3: Fiqh, 4: My Shelf
+
+  // Zen 2-Tab Navigation:
+  // 0: المكتبة الإسلامية (Islamic Heritage & 6 Reference Pillars)
+  // 1: كتبي الخاصة (My Personal Bookshelf & PDF Reader)
+  int _activeTabIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _loadFavCount();
-    _loadFeaturedPamphlets();
     _loadUserPdfBooks();
     _loadResumeItem();
   }
@@ -201,16 +90,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
     if (mounted) {
       setState(() {
         _favCount = favs.length;
-      });
-    }
-  }
-
-  Future<void> _loadFeaturedPamphlets() async {
-    final pamphlets = await _libraryService.getFeaturedPamphlets();
-    if (mounted) {
-      setState(() {
-        _featuredPamphlets = pamphlets;
-        _isLoadingPamphlets = false;
       });
     }
   }
@@ -245,29 +124,49 @@ class _LibraryScreenState extends State<LibraryScreen> {
         await _loadResumeItem();
 
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
+        final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
+        final messenger = ScaffoldMessenger.of(context);
+        messenger.hideCurrentSnackBar();
+        messenger.showSnackBar(
           SnackBar(
-            content: Text(
-              'تمت إضافة "${imported.title}" إلى كتبي الخاصة بنجاح',
-              style: const TextStyle(fontFamily: 'Amiri'),
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    locale == 'ar'
+                        ? 'تمت إضافة "${imported.title}" إلى كتبي'
+                        : 'Added "${imported.title}" to bookshelf',
+                    style: const TextStyle(fontFamily: 'Amiri', fontSize: 13),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
             backgroundColor: const Color(0xFF1B8A6B),
             behavior: SnackBarBehavior.floating,
-            action: SnackBarAction(
-              label: 'اقرأ الآن',
-              textColor: const Color(0xFFECC94B),
-              onPressed: () => _openPdfReader(imported),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            duration: const Duration(milliseconds: 1800),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
+        final messenger = ScaffoldMessenger.of(context);
+        messenger.hideCurrentSnackBar();
+        messenger.showSnackBar(
           SnackBar(
-            content: Text('تعذر استيراد ملف PDF: $e'),
+            content: Text(
+              locale == 'ar' ? 'تعذر استيراد ملف PDF' : 'Failed to import PDF file',
+              style: const TextStyle(fontFamily: 'Amiri'),
+            ),
             backgroundColor: Colors.red.shade700,
             behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -288,34 +187,46 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   void _confirmDeletePdfBook(UserPdfBook book) {
+    final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.delete_outline_rounded, color: Colors.red),
-            SizedBox(width: 8),
+            const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 22),
+            const SizedBox(width: 8),
             Text(
-              'حذف الكتاب',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              locale == 'ar' ? 'حذف الكتاب' : 'Delete Book',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 17,
+                fontFamily: locale == 'ar' ? 'Amiri' : null,
+              ),
             ),
           ],
         ),
         content: Text(
-          'هل أنت متأكد من حذف "${book.title}" من مكتبتك الخاصة؟\nسيتم حذف الملف والتقدم المحفوظ نهائياً.',
-          style: const TextStyle(fontSize: 14, height: 1.4),
+          locale == 'ar'
+              ? 'هل أنت متأكد من حذف "${book.title}" من رف كتبك؟\nسيتم حذف الملف والتقدم المحفوظ نهائياً.'
+              : 'Are you sure you want to delete "${book.title}" from your bookshelf?\nThe file and reading progress will be permanently removed.',
+          style: TextStyle(
+            fontSize: 13.5,
+            height: 1.45,
+            fontFamily: locale == 'ar' ? 'Amiri' : null,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('إلغاء'),
+            child: Text(locale == 'ar' ? 'إلغاء' : 'Cancel'),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red.shade700,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              elevation: 0,
             ),
             onPressed: () async {
               Navigator.pop(ctx);
@@ -324,16 +235,23 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 await _loadUserPdfBooks();
                 await _loadResumeItem();
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('تم حذف الكتاب بنجاح'),
+                  final messenger = ScaffoldMessenger.of(context);
+                  messenger.hideCurrentSnackBar();
+                  messenger.showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        locale == 'ar' ? 'تم حذف الكتاب بنجاح' : 'Book deleted successfully',
+                        style: const TextStyle(fontFamily: 'Amiri'),
+                      ),
                       behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      duration: const Duration(milliseconds: 1800),
                     ),
                   );
                 }
               }
             },
-            child: const Text('حذف'),
+            child: Text(locale == 'ar' ? 'حذف' : 'Delete'),
           ),
         ],
       ),
@@ -377,33 +295,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
     _loadResumeItem();
   }
 
-  void _navigateToDomain(_DomainInfo domain) {
-    final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
-    if (domain.part == 'الرقية الشرعية') {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const RuqyahScreen()));
-      return;
-    }
-    if (domain.part == 'فقه وفتاوى') {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const FiqhAndFatawaScreen()));
-      return;
-    }
-    if (domain.part == 'مسابقات') {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizIntroScreen()));
-      return;
-    }
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => LibraryCategoryScreen(
-          domainPart: domain.part,
-          domainTitle: domain.title(locale),
-        ),
-      ),
-    ).then((_) {
-      _loadResumeItem();
-    });
-  }
-
   void _openStory(LibraryItem item) async {
     await Navigator.push(
       context,
@@ -412,6 +303,169 @@ class _LibraryScreenState extends State<LibraryScreen> {
     _loadFavCount();
     _loadResumeItem();
   }
+
+  // 6 Core Islamic Reference Pillars
+  List<_IslamicPillar> _getPillars(String locale) => [
+        _IslamicPillar(
+          id: 'bukhari',
+          titles: {
+            'ar': 'صحيح البخاري',
+            'en': 'Sahih Al-Bukhari',
+            'am': 'ሶሂህ አል-ቡኻሪ',
+            'om': 'Sahiih Al-Bukhaarii',
+          },
+          subtitles: {
+            'ar': 'الجامع المسند الصحيح',
+            'en': 'Authentic Hadith collection',
+            'am': 'ትክክለኛ የሐዲስ ስብስብ',
+            'om': 'Kilaasika hadiisota sahiiha',
+          },
+          icon: Icons.menu_book_rounded,
+          gradient: const [Color(0xFF8D5B18), Color(0xFFC68A2E)],
+          accentColor: const Color(0xFFE5A93C),
+          onSelect: (ctx) => () {
+            Navigator.push(
+              ctx,
+              MaterialPageRoute(
+                builder: (_) => LibraryCategoryScreen(
+                  domainPart: 'صحيح البخارى',
+                  domainTitle: locale == 'ar' ? 'صحيح البخاري' : 'Sahih Al-Bukhari',
+                ),
+              ),
+            ).then((_) => _loadResumeItem());
+          },
+        ),
+        _IslamicPillar(
+          id: 'library',
+          titles: {
+            'ar': 'المكتبة الإسلامية',
+            'en': 'Islamic Library',
+            'am': 'ኢስላማዊ ቤተ-መጽሐፍት',
+            'om': 'Mana Kitaaba Islaamaa',
+          },
+          subtitles: {
+            'ar': 'موسوعة الكتب والرسائل',
+            'en': 'Books & Islamic treatises',
+            'am': 'መጽሐፍት እና የዳዕዋ ጽሑፎች',
+            'om': 'Kitaabota fi barruulee',
+          },
+          icon: Icons.local_library_rounded,
+          gradient: const [Color(0xFF0F5A47), Color(0xFF1B8A6B)],
+          accentColor: const Color(0xFF2ECC9A),
+          onSelect: (ctx) => () {
+            Navigator.push(
+              ctx,
+              MaterialPageRoute(
+                builder: (_) => LibraryCategoryScreen(
+                  domainPart: 'المكتبة',
+                  domainTitle: locale == 'ar' ? 'المكتبة الإسلامية' : 'Islamic Library',
+                ),
+              ),
+            ).then((_) => _loadResumeItem());
+          },
+        ),
+        _IslamicPillar(
+          id: 'fiqh',
+          titles: {
+            'ar': 'فقه وفتاوى',
+            'en': 'Fiqh & Fatawa',
+            'am': 'ፊቅህ እና ፈትዋ',
+            'om': 'Fiqhii fi Fatwaa',
+          },
+          subtitles: {
+            'ar': 'أحكام العبادات والمعاملات',
+            'en': 'Rulings & Islamic guidance',
+            'am': 'የኢባዳ እና የሙዓመላት ህጎች',
+            'om': 'Murteewwan amantii',
+          },
+          icon: Icons.balance_rounded,
+          gradient: const [Color(0xFF4A154B), Color(0xFF7A257C)],
+          accentColor: const Color(0xFFAB47BC),
+          onSelect: (ctx) => () {
+            Navigator.push(
+              ctx,
+              MaterialPageRoute(builder: (_) => const FiqhAndFatawaScreen()),
+            );
+          },
+        ),
+        _IslamicPillar(
+          id: 'ruqyah',
+          titles: {
+            'ar': 'الرقية الشرعية',
+            'en': 'Ruqyah Shariyyah',
+            'am': 'ሩቅያህ ሸርዒያህ',
+            'om': 'Ruqiyaa Shar\'iyyaa',
+          },
+          subtitles: {
+            'ar': 'تحصينات وأدعية الشفاء',
+            'en': 'Healing & protection prayers',
+            'am': 'የፈውስ እና የጥበቃ ዱዓዎች',
+            'om': 'Dawaa fi du\'aa\'ii eegumsaa',
+          },
+          icon: Icons.healing_rounded,
+          gradient: const [Color(0xFF702459), Color(0xFF97266D)],
+          accentColor: const Color(0xFFED64A6),
+          onSelect: (ctx) => () {
+            Navigator.push(
+              ctx,
+              MaterialPageRoute(builder: (_) => const RuqyahScreen()),
+            );
+          },
+        ),
+        _IslamicPillar(
+          id: 'dreams',
+          titles: {
+            'ar': 'تفسير الأحلام',
+            'en': 'Dream Interpretation',
+            'am': 'የሕልም ፍቺ',
+            'om': 'Hiika Abjuu',
+          },
+          subtitles: {
+            'ar': 'جامع تفاسير الرؤى والأحلام',
+            'en': 'Visions & dream meanings',
+            'am': 'የሕልሞች እና ራእዮች ማብራሪያ',
+            'om': 'Hiikkaa abjuu fi mul\'ataa',
+          },
+          icon: Icons.nightlight_round,
+          gradient: const [Color(0xFF1A365D), Color(0xFF2B6CB0)],
+          accentColor: const Color(0xFF4299E1),
+          onSelect: (ctx) => () {
+            Navigator.push(
+              ctx,
+              MaterialPageRoute(
+                builder: (_) => LibraryCategoryScreen(
+                  domainPart: 'تفسير أحلام',
+                  domainTitle: locale == 'ar' ? 'تفسير الأحلام' : 'Dream Interpretation',
+                ),
+              ),
+            );
+          },
+        ),
+        _IslamicPillar(
+          id: 'quizzes',
+          titles: {
+            'ar': 'المسابقات الإسلامية',
+            'en': 'Islamic Quizzes',
+            'am': 'ኢስላማዊ ውድድሮች',
+            'om': 'Dorgommii Islaamaa',
+          },
+          subtitles: {
+            'ar': 'اختبر معلوماتك وثقافتك الدينية',
+            'en': 'Test knowledge & Islamic facts',
+            'am': 'እውቀትዎን ይፈትሹ',
+            'om': 'Beekumsa kee qori',
+          },
+          icon: Icons.emoji_events_rounded,
+          gradient: const [Color(0xFF744210), Color(0xFFB7791F)],
+          accentColor: const Color(0xFFECC94B),
+          onSelect: (ctx) => () {
+            Navigator.push(
+              ctx,
+              MaterialPageRoute(builder: (_) => const QuizIntroScreen()),
+            );
+          },
+        ),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -443,73 +497,46 @@ class _LibraryScreenState extends State<LibraryScreen> {
             child: ValueListenableBuilder<bool>(
               valueListenable: kAdVisibleNotifier,
               builder: (context, isAdVisible, _) {
+                // Generous bottom clearance ensuring Samsung One UI dock & ad never obscure content
                 final double bottomClearance =
-                    MediaQuery.paddingOf(context).bottom + (isAdVisible ? 120 : 100);
+                    MediaQuery.paddingOf(context).bottom + (isAdVisible ? 165 : 125);
 
                 return Column(
                   children: [
-                    // Top Header Bar (Zero overflow guaranteed with Expanded)
+                    // 1. Serene Header Bar
                     _buildHeader(isDark, isCream, textColor, cardBg, borderColor, l10n, locale),
 
-                    // Elegant Search Input Bar
+                    // 2. Focused Search Bar
                     _buildSearchBar(isDark, isCream, textColor, cardBg, borderColor, locale),
 
-                    // Category & Shelf Filter Pills
-                    _buildFilterChips(isDark, isCream, textColor, cardBg, borderColor, locale),
+                    // 3. Calm 2-Segment Zen Navigation (Islamic Library vs My Shelf)
+                    _buildZenSegmentedNav(isDark, isCream, textColor, cardBg, borderColor, locale),
 
+                    // 4. Content Area
                     Expanded(
                       child: _isSearching
                           ? _buildSearchResults(isDark, isCream, textColor, cardBg, borderColor, bottomClearance)
-                          : CustomScrollView(
-                              controller: _scrollController,
-                              physics: const BouncingScrollPhysics(),
-                              slivers: [
-                                // 1. Unified Bookshelf & Reading Hub (Compact & cohesive)
-                                if (_selectedFilterIndex == 0 || _selectedFilterIndex == 4)
-                                  SliverToBoxAdapter(
-                                    child: _buildBookshelfSection(
+                          : AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 200),
+                              child: _activeTabIndex == 0
+                                  ? _buildIslamicLibraryTab(
                                       isDark,
                                       isCream,
                                       textColor,
                                       cardBg,
                                       borderColor,
                                       locale,
-                                    ),
-                                  ),
-
-                                // 2. Main Master Categories (Bukhari, Islamic Library, and 2x2 Grid)
-                                if (_selectedFilterIndex != 4) ...[
-                                  SliverToBoxAdapter(
-                                    child: _buildCategoriesHeader(textColor, locale),
-                                  ),
-                                  _buildMasterDomainGrid(
-                                    isDark,
-                                    isCream,
-                                    textColor,
-                                    cardBg,
-                                    borderColor,
-                                    locale,
-                                  ),
-                                ],
-
-                                // 3. Streamlined Inspiring Quick Reads
-                                if (_selectedFilterIndex == 0)
-                                  SliverToBoxAdapter(
-                                    child: _buildFeaturedPamphletsSection(
+                                      bottomClearance,
+                                    )
+                                  : _buildMyShelfTab(
                                       isDark,
                                       isCream,
                                       textColor,
                                       cardBg,
                                       borderColor,
                                       locale,
+                                      bottomClearance,
                                     ),
-                                  ),
-
-                                // Bottom clearance so dock never obscures content
-                                SliverToBoxAdapter(
-                                  child: SizedBox(height: bottomClearance),
-                                ),
-                              ],
                             ),
                     ),
                   ],
@@ -523,7 +550,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   // ───────────────────────────────────────────────────────────────────────────
-  // 1. Header Bar (Overflow-Free)
+  // 1. Serene Header Bar
   // ───────────────────────────────────────────────────────────────────────────
   Widget _buildHeader(
     bool isDark,
@@ -535,14 +562,14 @@ class _LibraryScreenState extends State<LibraryScreen> {
     String locale,
   ) {
     final String subtitleText = {
-      'ar': 'كنوز المعرفة، كتب PDF والعلوم الشرعية',
-      'en': 'Islamic Treasures, PDF Books & Sciences',
-      'am': 'የእስልምና እውቀት ውድ ሀብቶች እና PDF መጽሐፍት',
-      'om': 'Qabeenya Beekumsa Islaamaa fi Kitaabota PDF',
-    }[locale] ?? 'كنوز المعرفة، كتب PDF والعلوم الشرعية';
+      'ar': 'الموسوعة الإسلامية والمراجع العلمية',
+      'en': 'Islamic Encyclopedia & Reference Works',
+      'am': 'ኢስላማዊ ኢንሳይክሎፔዲያ እና ማጣቀሻዎች',
+      'om': 'Insaayikilooppeediyaa fi Qorannoo',
+    }[locale] ?? 'الموسوعة الإسلامية والمراجع العلمية';
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 6),
       child: Row(
         children: [
           // Islamic Emblem Icon
@@ -558,38 +585,36 @@ class _LibraryScreenState extends State<LibraryScreen> {
               borderRadius: BorderRadius.circular(13),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF1B8A6B).withValues(alpha: 0.35),
+                  color: const Color(0xFF1B8A6B).withValues(alpha: 0.3),
                   blurRadius: 8,
-                  offset: const Offset(0, 3),
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
-            child: const Icon(Icons.auto_stories_rounded, color: Colors.white, size: 22),
+            child: const Icon(Icons.auto_stories_rounded, color: Colors.white, size: 21),
           ),
           const SizedBox(width: 12),
 
-          // Title & Subtitle (Wrapped in Expanded to completely prevent horizontal overflow)
+          // Title & Subtitle
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  l10n?.navLibrary ?? 'المكتبة الإسلامية',
+                  l10n?.navLibrary ?? (locale == 'ar' ? 'المكتبة' : 'Library'),
                   style: TextStyle(
                     color: textColor,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
                     fontFamily: locale == 'ar' ? 'Amiri' : null,
-                    letterSpacing: -0.2,
+                    letterSpacing: -0.3,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   subtitleText,
                   style: TextStyle(
-                    color: isDark ? const Color(0xFF8A9995) : const Color(0xFF5A726A),
+                    color: isDark ? const Color(0xFF8A9995) : const Color(0xFF6B8079),
                     fontSize: 11,
                     fontFamily: locale == 'ar' ? 'Amiri' : null,
                   ),
@@ -599,9 +624,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
               ],
             ),
           ),
-          const SizedBox(width: 8),
 
-          // Favorites Action Button
+          // Favorites Action Pill
           LiquidPressable(
             onTap: _navigateToFavorites,
             child: Stack(
@@ -621,7 +645,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.bookmark_added_rounded, color: Color(0xFFD4AF37), size: 19),
+                  child: const Icon(
+                    Icons.bookmark_outline_rounded,
+                    color: Color(0xFF1B8A6B),
+                    size: 20,
+                  ),
                 ),
                 if (_favCount > 0)
                   Positioned(
@@ -633,13 +661,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         color: Color(0xFFE53935),
                         shape: BoxShape.circle,
                       ),
-                      constraints: const BoxConstraints(minWidth: 15, minHeight: 15),
+                      constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                       child: Center(
                         child: Text(
                           '$_favCount',
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 8.5,
+                            fontSize: 9,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -655,7 +683,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   // ───────────────────────────────────────────────────────────────────────────
-  // 2. Search Bar
+  // 2. Focused Search Bar
   // ───────────────────────────────────────────────────────────────────────────
   Widget _buildSearchBar(
     bool isDark,
@@ -666,11 +694,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
     String locale,
   ) {
     final String hint = {
-      'ar': 'ابحث في الكتب، الأحاديث، والفتاوى...',
-      'en': 'Search in books, hadiths & fatawa...',
-      'am': 'በመጽሐፍት፣ ሐዲሶች እና ፈትዋ ውስጥ ይፈልጉ...',
-      'om': 'Kitaabota, hadiisota fi fatwaa keessatti barbaadi...',
-    }[locale] ?? 'ابحث في الكتب، الأحاديث، والفتاوى...';
+      'ar': 'ابحث في المراجع، الأحاديث، والكتب...',
+      'en': 'Search in references, hadiths & books...',
+      'am': 'በማጣቀሻዎች፣ ሐዲሶች እና መጽሐፍት ውስጥ ይፈልጉ...',
+      'om': 'Kitaabota fi hadiisota keessatti barbaadi...',
+    }[locale] ?? 'ابحث في المراجع، الأحاديث، والكتب...';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
@@ -681,7 +709,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
           border: Border.all(color: borderColor, width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.03),
+              color: Colors.black.withValues(alpha: isDark ? 0.16 : 0.03),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -700,7 +728,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
             prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF1B8A6B), size: 20),
             suffixIcon: _searchController.text.isNotEmpty
                 ? IconButton(
-                    icon: const Icon(Icons.clear_rounded, size: 17),
+                    icon: const Icon(Icons.clear_rounded, size: 18),
                     onPressed: () {
                       _searchController.clear();
                       _onSearchChanged('');
@@ -717,9 +745,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   // ───────────────────────────────────────────────────────────────────────────
-  // 3. Category Filter Chips
+  // 3. Calm 2-Segment Zen Navigation Capsule
   // ───────────────────────────────────────────────────────────────────────────
-  Widget _buildFilterChips(
+  Widget _buildZenSegmentedNav(
     bool isDark,
     bool isCream,
     Color textColor,
@@ -727,292 +755,432 @@ class _LibraryScreenState extends State<LibraryScreen> {
     Color borderColor,
     String locale,
   ) {
-    final List<Map<String, dynamic>> filters = [
+    final List<Map<String, dynamic>> tabs = [
       {
-        'title': {'ar': 'الكل', 'en': 'All', 'am': 'ሁሉም', 'om': 'Hunda'}[locale] ?? 'الكل',
-        'icon': Icons.apps_rounded,
-      },
-      {
-        'title': {'ar': 'صحيح البخاري', 'en': 'Bukhari', 'am': 'ሶሂህ ቡኻሪ', 'om': 'Bukhaarii'}[locale] ?? 'صحيح البخاري',
+        'title': {'ar': 'المكتبة الإسلامية', 'en': 'Islamic Heritage', 'am': 'ዋና ቤተ-መጽሐፍት', 'om': 'Mana Kitaabaa'}[locale] ?? 'المكتبة الإسلامية',
         'icon': Icons.menu_book_rounded,
+        'badge': null,
       },
       {
-        'title': {'ar': 'المكتبة', 'en': 'Library', 'am': 'ቤተ-መጽሐፍት', 'om': 'Mana Kitaabaa'}[locale] ?? 'المكتبة',
-        'icon': Icons.local_library_rounded,
-      },
-      {
-        'title': {'ar': 'فقه وفتاوى', 'en': 'Fatawa', 'am': 'ፈትዋ', 'om': 'Fatwaa'}[locale] ?? 'فقه وفتاوى',
-        'icon': Icons.balance_rounded,
-      },
-      {
-        'title': {'ar': 'كتبي الخاصة', 'en': 'My Shelf', 'am': 'የእኔ መጽሐፍት', 'om': 'Kitaabota Koo'}[locale] ?? 'كتبي الخاصة',
+        'title': {'ar': 'كتبي الخاصة', 'en': 'My Bookshelf', 'am': 'የእኔ መጽሐፍት', 'om': 'Kitaabota Koo'}[locale] ?? 'كتبي الخاصة',
         'icon': Icons.picture_as_pdf_rounded,
+        'badge': _userPdfBooks.isNotEmpty ? '${_userPdfBooks.length}' : null,
       },
     ];
 
-    return SizedBox(
-      height: 44,
-      child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        itemCount: filters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 7),
-        itemBuilder: (context, idx) {
-          final isSelected = _selectedFilterIndex == idx;
-          final item = filters[idx];
-          return LiquidPressable(
-            onTap: () {
-              setState(() {
-                _selectedFilterIndex = idx;
-              });
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-              decoration: BoxDecoration(
-                gradient: isSelected
-                    ? const LinearGradient(
-                        colors: [Color(0xFF0F5A47), Color(0xFF1B8A6B)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      )
-                    : null,
-                color: isSelected ? null : cardBg,
-                borderRadius: BorderRadius.circular(11),
-                border: Border.all(
-                  color: isSelected ? Colors.transparent : borderColor,
-                  width: 1,
-                ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: const Color(0xFF1B8A6B).withValues(alpha: 0.28),
-                          blurRadius: 5,
-                          offset: const Offset(0, 2),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 6),
+      child: Container(
+        padding: const EdgeInsets.all(3.5),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF0C1412) : const Color(0xFFF1F5F3),
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: borderColor, width: 0.8),
+        ),
+        child: Row(
+          children: List.generate(tabs.length, (idx) {
+            final isSelected = _activeTabIndex == idx;
+            final tab = tabs[idx];
+            final String? badgeText = tab['badge'] as String?;
+
+            return Expanded(
+              child: LiquidPressable(
+                onTap: () {
+                  if (_activeTabIndex != idx) {
+                    setState(() {
+                      _activeTabIndex = idx;
+                    });
+                  }
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOutCubic,
+                  padding: const EdgeInsets.symmetric(vertical: 8.5),
+                  decoration: BoxDecoration(
+                    color: isSelected ? cardBg : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        tab['icon'] as IconData,
+                        size: 16,
+                        color: isSelected
+                            ? const Color(0xFF1B8A6B)
+                            : (isDark ? const Color(0xFF7A8B87) : const Color(0xFF6B8079)),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        tab['title'] as String,
+                        style: TextStyle(
+                          color: isSelected
+                              ? textColor
+                              : (isDark ? const Color(0xFF7A8B87) : const Color(0xFF6B8079)),
+                          fontSize: 12.5,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                          fontFamily: locale == 'ar' ? 'Amiri' : null,
                         ),
-                      ]
-                    : null,
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    item['icon'] as IconData,
-                    size: 14,
-                    color: isSelected
-                        ? Colors.white
-                        : (isDark ? const Color(0xFF8A9995) : const Color(0xFF5A726A)),
+                      ),
+                      if (badgeText != null) ...[
+                        const SizedBox(width: 5),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1B8A6B).withValues(alpha: isSelected ? 0.15 : 0.08),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            badgeText,
+                            style: const TextStyle(
+                              color: Color(0xFF1B8A6B),
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                  const SizedBox(width: 5),
-                  Text(
-                    item['title'] as String,
-                    style: TextStyle(
-                      color: isSelected ? Colors.white : textColor,
-                      fontSize: 12,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                      fontFamily: locale == 'ar' ? 'Amiri' : null,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          }),
+        ),
       ),
     );
   }
 
   // ───────────────────────────────────────────────────────────────────────────
-  // 4. Unified Bookshelf & Reading Hub (Resume Item + User PDF Books)
+  // Tab 0: Zen Islamic Heritage & 6 Reference Pillars (المكتبة الإسلامية)
   // ───────────────────────────────────────────────────────────────────────────
-  Widget _buildBookshelfSection(
+  Widget _buildIslamicLibraryTab(
     bool isDark,
     bool isCream,
     Color textColor,
     Color cardBg,
     Color borderColor,
     String locale,
+    double bottomClearance,
   ) {
-    final bool hasResume = _latestResumeItem != null;
-    final bool hasPdfs = _userPdfBooks.isNotEmpty;
-    final bool hasContent = hasResume || hasPdfs;
+    final pillars = _getPillars(locale);
 
-    final String shelfTitle = {
-      'ar': 'رف القراءة وكتبي',
-      'en': 'Reading Shelf & Books',
-      'am': 'የንባብ መደርደሪያ እና መጽሐፍት',
-      'om': 'Kutaa Dubbisaa fi Kitaabota',
-    }[locale] ?? 'رف القراءة وكتبي';
-
-    final String addBtnText = {
-      'ar': '+ كتاب PDF',
-      'en': '+ Add PDF',
-      'am': '+ PDF ጨምር',
-      'om': '+ PDF Dabali',
-    }[locale] ?? '+ كتاب PDF';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Shelf Header Bar
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 10, 20, 6),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 3.5,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD4AF37),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: 7),
-                  Text(
-                    shelfTitle,
-                    style: TextStyle(
-                      color: textColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      fontFamily: locale == 'ar' ? 'Amiri' : null,
-                    ),
-                  ),
-                  if (hasPdfs) ...[
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1B8A6B).withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        '${_userPdfBooks.length}',
-                        style: const TextStyle(
-                          color: Color(0xFF1B8A6B),
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
+    return CustomScrollView(
+      key: const PageStorageKey<String>('zen_islamic_heritage_scroll'),
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        // A. Continue Reading Banner (Clean & Discrete)
+        if (_latestResumeItem != null)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+              child: _HeroResumeCard(
+                resumeItem: _latestResumeItem!,
+                isDark: isDark,
+                cardBg: cardBg,
+                borderColor: borderColor,
+                locale: locale,
+                onOpenPdf: _openPdfReader,
+                onOpenStory: _openStory,
               ),
-              LiquidPressable(
-                onTap: _isImportingPdf ? () {} : _importPdf,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+            ),
+          ),
+
+        // B. Section Header
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+            child: Row(
+              children: [
+                Container(
+                  width: 3.5,
+                  height: 15,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1B8A6B).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: const Color(0xFF1B8A6B).withValues(alpha: 0.25),
-                      width: 0.8,
-                    ),
+                    color: const Color(0xFF1B8A6B),
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                  child: _isImportingPdf
-                      ? const SizedBox(
-                          width: 12,
-                          height: 12,
-                          child: CircularProgressIndicator(strokeWidth: 1.8, color: Color(0xFF1B8A6B)),
-                        )
-                      : Text(
-                          addBtnText,
-                          style: const TextStyle(
-                            color: Color(0xFF1B8A6B),
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 8),
+                Text(
+                  locale == 'ar' ? 'أركان المعرفة الإسلامية' : 'Core Islamic References',
+                  style: TextStyle(
+                    color: textColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    fontFamily: locale == 'ar' ? 'Amiri' : null,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
 
-        // Shelf Content (Horizontal Shelf vs Slim Empty State)
+        // C. Balanced 2x3 Bento Grid of Core Pillars
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              childAspectRatio: 1.18,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, idx) {
+                final pillar = pillars[idx];
+                return _ZenPillarCard(
+                  pillar: pillar,
+                  isDark: isDark,
+                  cardBg: cardBg,
+                  borderColor: borderColor,
+                  locale: locale,
+                  onTap: pillar.onSelect(context),
+                );
+              },
+              childCount: pillars.length,
+            ),
+          ),
+        ),
+
+        // Bottom clearance
+        SliverToBoxAdapter(
+          child: SizedBox(height: bottomClearance),
+        ),
+      ],
+    );
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // Tab 1: My Bookshelf & Personal PDFs (كتبي الخاصة)
+  // ───────────────────────────────────────────────────────────────────────────
+  Widget _buildMyShelfTab(
+    bool isDark,
+    bool isCream,
+    Color textColor,
+    Color cardBg,
+    Color borderColor,
+    String locale,
+    double bottomClearance,
+  ) {
+    final bool hasPdfs = _userPdfBooks.isNotEmpty;
+    final bool isLastReadPdf = _latestResumeItem != null && _latestResumeItem!['type'] == 'pdf';
+
+    return CustomScrollView(
+      key: const PageStorageKey<String>('zen_myshelf_scroll'),
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        // A. Clean Header with Single "+ Add PDF" Action
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 3.5,
+                      height: 15,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD32F2F),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      locale == 'ar' ? 'رف كتبي الشخصية' : 'Personal Bookshelf',
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        fontFamily: locale == 'ar' ? 'Amiri' : null,
+                      ),
+                    ),
+                    if (hasPdfs) ...[
+                      const SizedBox(width: 7),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1.5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1B8A6B).withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '${_userPdfBooks.length}',
+                          style: const TextStyle(
+                            color: Color(0xFF1B8A6B),
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+
+                // Single Unified "+ Add PDF" Action Button
+                LiquidPressable(
+                  onTap: _isImportingPdf ? () {} : _importPdf,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5.5),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF0F5A47), Color(0xFF1B8A6B)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF1B8A6B).withValues(alpha: 0.25),
+                          blurRadius: 5,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: _isImportingPdf
+                        ? const SizedBox(
+                            width: 13,
+                            height: 13,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.note_add_rounded, color: Colors.white, size: 14),
+                              const SizedBox(width: 4),
+                              Text(
+                                locale == 'ar' ? '+ استيراد PDF' : '+ Add PDF',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // B. Active Reading Hero Card (if currently reading a PDF)
+        if (isLastReadPdf)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 2, 20, 8),
+              child: _HeroResumeCard(
+                resumeItem: _latestResumeItem!,
+                isDark: isDark,
+                cardBg: cardBg,
+                borderColor: borderColor,
+                locale: locale,
+                onOpenPdf: _openPdfReader,
+                onOpenStory: _openStory,
+              ),
+            ),
+          ),
+
+        // C. Content: Loading / Empty State / Grid of PDF Books
         if (_isLoadingPdfBooks)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 20),
-            child: Center(
-              child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF1B8A6B)),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 40),
+              child: Center(
+                child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF1B8A6B)),
+              ),
             ),
           )
-        else if (!hasContent)
-          // Slim, elegant empty state banner (~62px height, no wasted vertical space)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
-            child: LiquidPressable(
-              onTap: _importPdf,
+        else if (!hasPdfs)
+          // Zen Empty State
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
                 decoration: BoxDecoration(
                   color: cardBg,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: borderColor, width: 1),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.16 : 0.03),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
-                child: Row(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      width: 38,
-                      height: 38,
+                      width: 54,
+                      height: 54,
                       decoration: BoxDecoration(
                         color: const Color(0xFFD32F2F).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
+                        shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.picture_as_pdf_outlined,
                         color: Color(0xFFD32F2F),
-                        size: 20,
+                        size: 28,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            locale == 'ar' ? 'استيراد كتب PDF شخصية' : 'Import Personal PDF Books',
-                            style: TextStyle(
-                              color: textColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                              fontFamily: locale == 'ar' ? 'Amiri' : null,
-                            ),
-                          ),
-                          Text(
-                            locale == 'ar'
-                                ? 'اقرأ كتبك مع حفظ الصفحة تلقائياً'
-                                : 'Read with automatic page bookmarking',
-                            style: TextStyle(
-                              color: isDark ? const Color(0xFF8A9995) : const Color(0xFF657B74),
-                              fontSize: 10.5,
-                            ),
-                          ),
-                        ],
+                    const SizedBox(height: 14),
+                    Text(
+                      locale == 'ar' ? 'رف كتبك فارغ حالياً' : 'Your Bookshelf is Empty',
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        fontFamily: locale == 'ar' ? 'Amiri' : null,
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1B8A6B),
-                        borderRadius: BorderRadius.circular(8),
+                    const SizedBox(height: 6),
+                    Text(
+                      locale == 'ar'
+                          ? 'استورد كتبك ومذكراتك بصيغة PDF للقراءة وتحديد النصوص والبحث وحفظ التقدم تلقائياً'
+                          : 'Import PDF books to read, highlight, search, and track reading progress.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: isDark ? const Color(0xFF8A9995) : const Color(0xFF6B8079),
+                        fontSize: 12,
+                        height: 1.4,
                       ),
-                      child: Text(
-                        locale == 'ar' ? 'استيراد' : 'Import',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.bold,
+                    ),
+                    const SizedBox(height: 18),
+                    LiquidPressable(
+                      onTap: _importPdf,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1B8A6B),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF1B8A6B).withValues(alpha: 0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          locale == 'ar' ? 'استيراد أول كتاب PDF الآن' : 'Import First PDF Book',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -1022,709 +1190,44 @@ class _LibraryScreenState extends State<LibraryScreen> {
             ),
           )
         else
-          // Rich horizontal bookshelf containing Active Reading Card + User PDF Books + Add Slot
-          SizedBox(
-            height: 148,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: (hasResume ? 1 : 0) + _userPdfBooks.length + 1,
-              itemBuilder: (context, idx) {
-                // Slot 0: If there is a resume item, render the Active Reading Hero Card
-                if (hasResume && idx == 0) {
-                  return _ActiveResumeBookCard(
-                    resumeItem: _latestResumeItem!,
+          // 2-Column Grid of User PDF Books
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.85,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, idx) {
+                  final book = _userPdfBooks[idx];
+                  return _GridPdfBookCard(
+                    book: book,
                     isDark: isDark,
                     cardBg: cardBg,
                     borderColor: borderColor,
                     locale: locale,
-                    onOpenPdf: _openPdfReader,
-                    onOpenStory: _openStory,
-                  );
-                }
-
-                final int bookIdx = hasResume ? idx - 1 : idx;
-
-                // Last Slot: Sleek "+ Add PDF" Import Card
-                if (bookIdx == _userPdfBooks.length) {
-                  return LiquidPressable(
-                    onTap: _isImportingPdf ? () {} : _importPdf,
-                    child: Container(
-                      width: 96,
-                      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: cardBg,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: const Color(0xFF1B8A6B).withValues(alpha: 0.3),
-                          width: 1.1,
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 34,
-                            height: 34,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF1B8A6B).withValues(alpha: 0.12),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.note_add_rounded, color: Color(0xFF1B8A6B), size: 18),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            locale == 'ar' ? 'إضافة PDF' : 'Add PDF',
-                            style: const TextStyle(
-                              color: Color(0xFF1B8A6B),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-
-                // Middle Slots: User's imported PDF Book Cards
-                final book = _userPdfBooks[bookIdx];
-                return _UserPdfBookCard(
-                  book: book,
-                  isDark: isDark,
-                  cardBg: cardBg,
-                  borderColor: borderColor,
-                  locale: locale,
-                  onTap: () => _openPdfReader(book),
-                  onDelete: () => _confirmDeletePdfBook(book),
-                );
-              },
-            ),
-          ),
-      ],
-    );
-  }
-
-  // ───────────────────────────────────────────────────────────────────────────
-  // 5. Master Domain Categories Header & Grid
-  // ───────────────────────────────────────────────────────────────────────────
-  Widget _buildCategoriesHeader(Color textColor, String locale) {
-    final String secTitleMain = {
-      'ar': 'أقسام العلوم والمكتبة',
-      'en': 'Main Library Categories',
-      'am': 'ዋና ዋና የቤተ-መጽሐፍት ክፍሎች',
-      'om': 'Kutaa Mana Kitaabaa Ijoo',
-    }[locale] ?? 'أقسام العلوم والمكتبة';
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
-      child: Row(
-        children: [
-          Container(
-            width: 3.5,
-            height: 16,
-            decoration: BoxDecoration(
-              color: const Color(0xFF1B8A6B),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: 7),
-          Text(
-            secTitleMain,
-            style: TextStyle(
-              color: textColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-              fontFamily: locale == 'ar' ? 'Amiri' : null,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMasterDomainGrid(
-    bool isDark,
-    bool isCream,
-    Color textColor,
-    Color cardBg,
-    Color borderColor,
-    String locale,
-  ) {
-    final bool showAll = _selectedFilterIndex == 0;
-    final bool showBukhariOnly = _selectedFilterIndex == 1;
-    final bool showLibOnly = _selectedFilterIndex == 2;
-    final bool showFiqhOnly = _selectedFilterIndex == 3;
-
-    return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      sliver: SliverList(
-        delegate: SliverChildListDelegate(
-          [
-            // Pillar 1: Sahih Al-Bukhari (Luxury Gold Card - Calibrated spacing to prevent any bottom overflow)
-            if (showAll || showBukhariOnly) ...[
-              _buildBukhariCard(isDark, cardBg, borderColor, locale),
-              const SizedBox(height: 10),
-            ],
-
-            // Pillar 2: Islamic Library (Luxury Emerald Card - Calibrated spacing)
-            if (showAll || showLibOnly) ...[
-              _buildIslamicLibraryCard(isDark, cardBg, borderColor, locale),
-              const SizedBox(height: 10),
-            ],
-
-            // Secondary 2x2 Grid (Fiqh, Ruqyah, Dreams, Quizzes)
-            if (showAll || showFiqhOnly)
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 1.22,
-                ),
-                itemCount: showFiqhOnly ? 1 : _kSecondaryDomains.length,
-                itemBuilder: (context, idx) {
-                  final domain = showFiqhOnly ? _kSecondaryDomains[0] : _kSecondaryDomains[idx];
-                  return _CompactDomainCard(
-                    domain: domain,
-                    isDark: isDark,
-                    cardBg: cardBg,
-                    borderColor: borderColor,
-                    locale: locale,
-                    onTap: () => _navigateToDomain(domain),
+                    onTap: () => _openPdfReader(book),
+                    onDelete: () => _confirmDeletePdfBook(book),
                   );
                 },
+                childCount: _userPdfBooks.length,
               ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Pillar 1: Sahih Al-Bukhari (Overflow-free & Responsive)
-  Widget _buildBukhariCard(
-    bool isDark,
-    Color cardBg,
-    Color borderColor,
-    String locale,
-  ) {
-    final title = _kBukhariDomain.title(locale);
-    final subtitle = _kBukhariDomain.subtitle(locale);
-
-    return LiquidPressable(
-      onTap: () => _navigateToDomain(_kBukhariDomain),
-      child: Container(
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: const Color(0xFFC68A2E).withValues(alpha: isDark ? 0.35 : 0.25),
-            width: 1.1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFC68A2E).withValues(alpha: isDark ? 0.12 : 0.06),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
             ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Stack(
-            children: [
-              Positioned(
-                top: -20,
-                right: -20,
-                child: Container(
-                  width: 90,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        const Color(0xFFE5A93C).withValues(alpha: isDark ? 0.18 : 0.10),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 46,
-                      height: 46,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF8D5B18), Color(0xFFC68A2E)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(13),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFC68A2E).withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(Icons.menu_book_rounded, color: Colors.white, size: 24),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  title,
-                                  style: TextStyle(
-                                    color: isDark ? Colors.white : const Color(0xFF152A24),
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                    fontFamily: locale == 'ar' ? 'Amiri' : null,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFC68A2E).withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                                child: Text(
-                                  locale == 'ar' ? 'أصح كتب الحديث' : 'Authentic',
-                                  style: const TextStyle(
-                                    color: Color(0xFFC68A2E),
-                                    fontSize: 9.5,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            subtitle,
-                            style: TextStyle(
-                              color: isDark ? const Color(0xFF8A9995) : const Color(0xFF657B74),
-                              fontSize: 11,
-                              fontFamily: locale == 'ar' ? 'Amiri' : null,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 5),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  locale == 'ar' ? '97 كتاباً • 7563 حديثاً' : '97 Books • 7563 Hadiths',
-                                  style: const TextStyle(
-                                    color: Color(0xFFC68A2E),
-                                    fontSize: 10.5,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Text(
-                                locale == 'ar' ? 'تصفح الأبواب ←' : 'Browse Chapters →',
-                                style: const TextStyle(
-                                  color: Color(0xFFC68A2E),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
           ),
-        ),
-      ),
-    );
-  }
 
-  // Pillar 2: Islamic Library (Overflow-free & Responsive)
-  Widget _buildIslamicLibraryCard(
-    bool isDark,
-    Color cardBg,
-    Color borderColor,
-    String locale,
-  ) {
-    final title = _kLibraryDomain.title(locale);
-    final subtitle = _kLibraryDomain.subtitle(locale);
-
-    return LiquidPressable(
-      onTap: () => _navigateToDomain(_kLibraryDomain),
-      child: Container(
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: const Color(0xFF1B8A6B).withValues(alpha: isDark ? 0.35 : 0.25),
-            width: 1.1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF1B8A6B).withValues(alpha: isDark ? 0.12 : 0.06),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Stack(
-            children: [
-              Positioned(
-                top: -20,
-                right: -20,
-                child: Container(
-                  width: 90,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        const Color(0xFF2ECC9A).withValues(alpha: isDark ? 0.18 : 0.10),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 46,
-                      height: 46,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF0F5A47), Color(0xFF1B8A6B)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(13),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF1B8A6B).withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(Icons.local_library_rounded, color: Colors.white, size: 24),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  title,
-                                  style: TextStyle(
-                                    color: isDark ? Colors.white : const Color(0xFF152A24),
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                    fontFamily: locale == 'ar' ? 'Amiri' : null,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF1B8A6B).withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                                child: Text(
-                                  locale == 'ar' ? 'تراث وعلوم' : 'Heritage',
-                                  style: const TextStyle(
-                                    color: Color(0xFF1B8A6B),
-                                    fontSize: 9.5,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            subtitle,
-                            style: TextStyle(
-                              color: isDark ? const Color(0xFF8A9995) : const Color(0xFF657B74),
-                              fontSize: 11,
-                              fontFamily: locale == 'ar' ? 'Amiri' : null,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 5),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  locale == 'ar' ? 'كتب ومطويات منوعة' : 'Classified Treatises',
-                                  style: const TextStyle(
-                                    color: Color(0xFF1B8A6B),
-                                    fontSize: 10.5,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Text(
-                                locale == 'ar' ? 'تصفح الأقسام ←' : 'Browse Library →',
-                                style: const TextStyle(
-                                  color: Color(0xFF1B8A6B),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ───────────────────────────────────────────────────────────────────────────
-  // 6. Inspiring Quick Reads ("قبسات وقراءات ملهمة")
-  // ───────────────────────────────────────────────────────────────────────────
-  Widget _buildFeaturedPamphletsSection(
-    bool isDark,
-    bool isCream,
-    Color textColor,
-    Color cardBg,
-    Color borderColor,
-    String locale,
-  ) {
-    if (_isLoadingPamphlets || _featuredPamphlets.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final titleColor = isDark ? Colors.white : textColor;
-
-    final String secTitleInspire = {
-      'ar': 'قبسات وقراءات ملهمة',
-      'en': 'Inspiring Quick Reads',
-      'am': 'አነቃቂ አጫጭር ንባቦች',
-      'om': 'Dubbisa Gabaabduu',
-    }[locale] ?? 'قبسات وقراءات ملهمة';
-
-    final String secSubtitleInspire = {
-      'ar': 'قراءة سريعة متجددة',
-      'en': 'Fresh daily insights',
-      'am': 'ዕለታዊ ፈጣን ንባብ',
-      'om': 'Beekumsa haarawaa',
-    }[locale] ?? 'قراءة سريعة متجددة';
-
-    final String readNowText = {
-      'ar': 'اقرأ الآن ←',
-      'en': 'Read now →',
-      'am': 'አሁን ያንብቡ →',
-      'om': 'Amma dubbisi →',
-    }[locale] ?? 'اقرأ الآن ←';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 14, 20, 6),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 3.5,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD4AF37),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: 7),
-                  Text(
-                    secTitleInspire,
-                    style: TextStyle(
-                      color: isDark ? const Color(0xFFF0F4F0) : textColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      fontFamily: locale == 'ar' ? 'Amiri' : null,
-                    ),
-                  ),
-                ],
-              ),
-              Text(
-                secSubtitleInspire,
-                style: TextStyle(
-                  color: isDark ? const Color(0xFF8A9995) : const Color(0xFF6B8079),
-                  fontSize: 11,
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: 118,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: _featuredPamphlets.length,
-            itemBuilder: (context, idx) {
-              final item = _featuredPamphlets[idx];
-              final bool isBukhariItem = item.part == 'صحيح البخارى' || item.part == 'البخارى';
-              final Color badgeColor = isBukhariItem ? const Color(0xFFC68A2E) : const Color(0xFF1B8A6B);
-              final String badgeText = isBukhariItem
-                  ? (locale == 'ar' ? 'صحيح البخاري' : 'Sahih Bukhari')
-                  : (locale == 'ar' ? 'المكتبة الإسلامية' : 'Islamic Library');
-
-              final String cleanTitle = item.title
-                  .replaceAll('{', '')
-                  .replaceAll('}', '')
-                  .replaceAll(RegExp(r'\s+'), ' ')
-                  .trim();
-
-              return LiquidPressable(
-                onTap: () => _openStory(item),
-                child: Container(
-                  width: 210,
-                  margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                  padding: const EdgeInsets.all(11),
-                  decoration: BoxDecoration(
-                    color: cardBg,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: borderColor, width: 1),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                            decoration: BoxDecoration(
-                              color: badgeColor.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            child: Text(
-                              badgeText,
-                              style: TextStyle(
-                                color: badgeColor,
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          Icon(
-                            isBukhariItem ? Icons.menu_book_rounded : Icons.auto_stories_rounded,
-                            size: 14,
-                            color: badgeColor,
-                          ),
-                        ],
-                      ),
-                      Text(
-                        cleanTitle,
-                        style: TextStyle(
-                          color: titleColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12.5,
-                          fontFamily: locale == 'ar' ? 'Amiri' : null,
-                          height: 1.2,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Row(
-                        children: [
-                          const Icon(Icons.remove_red_eye_rounded, size: 11, color: Color(0xFFD4AF37)),
-                          const SizedBox(width: 3),
-                          Text(
-                            item.numReadings > 0
-                                ? '${item.numReadings} ${locale == 'ar' ? 'قراءة' : 'reads'}'
-                                : (locale == 'ar' ? 'مستحسن' : 'Featured'),
-                            style: TextStyle(
-                              color: isDark ? const Color(0xFF8A9995) : const Color(0xFF6B8079),
-                              fontSize: 9.5,
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            readNowText,
-                            style: TextStyle(
-                              color: badgeColor,
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
+        // Bottom clearance
+        SliverToBoxAdapter(
+          child: SizedBox(height: bottomClearance),
         ),
       ],
     );
   }
 
   // ───────────────────────────────────────────────────────────────────────────
-  // 7. Search Results View
+  // Search Results View
   // ───────────────────────────────────────────────────────────────────────────
   Widget _buildSearchResults(
     bool isDark,
@@ -1741,7 +1244,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
           children: [
             Icon(
               Icons.search_off_rounded,
-              size: 50,
+              size: 46,
               color: isDark ? Colors.white24 : Colors.black26,
             ),
             const SizedBox(height: 10),
@@ -1779,7 +1282,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: cardBg,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(15),
               border: Border.all(color: borderColor, width: 1),
               boxShadow: [
                 BoxShadow(
@@ -1847,9 +1350,152 @@ class _LibraryScreenState extends State<LibraryScreen> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Compact Active Reading Book Card (Horizontal Shelf Slot 0)
+// Zen Bento Pillar Card Component (Compact, Breathing, Elegant)
 // ─────────────────────────────────────────────────────────────────────────────
-class _ActiveResumeBookCard extends StatelessWidget {
+class _ZenPillarCard extends StatelessWidget {
+  final _IslamicPillar pillar;
+  final bool isDark;
+  final Color cardBg;
+  final Color borderColor;
+  final String locale;
+  final VoidCallback onTap;
+
+  const _ZenPillarCard({
+    required this.pillar,
+    required this.isDark,
+    required this.cardBg,
+    required this.borderColor,
+    required this.locale,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final titleColor = isDark ? Colors.white : const Color(0xFF152A24);
+
+    return LiquidPressable(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: pillar.accentColor.withValues(alpha: isDark ? 0.3 : 0.18),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: pillar.accentColor.withValues(alpha: isDark ? 0.12 : 0.035),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            children: [
+              // Subtle background glow in corner
+              Positioned(
+                top: -16,
+                right: -16,
+                child: Container(
+                  width: 65,
+                  height: 65,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        pillar.accentColor.withValues(alpha: isDark ? 0.15 : 0.07),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Icon + Arrow Indicator
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: pillar.gradient,
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: pillar.accentColor.withValues(alpha: 0.25),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Icon(pillar.icon, color: Colors.white, size: 18),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 11,
+                          color: pillar.accentColor.withValues(alpha: 0.7),
+                        ),
+                      ],
+                    ),
+
+                    // Title & Subtitle
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          pillar.title(locale),
+                          style: TextStyle(
+                            color: titleColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            fontFamily: locale == 'ar' ? 'Amiri' : null,
+                            height: 1.15,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          pillar.subtitle(locale),
+                          style: TextStyle(
+                            color: isDark ? const Color(0xFF8A9995) : const Color(0xFF6B8079),
+                            fontSize: 9.5,
+                            fontFamily: locale == 'ar' ? 'Amiri' : null,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Hero Continue Reading Card (Prominent & Eye-Catching)
+// ─────────────────────────────────────────────────────────────────────────────
+class _HeroResumeCard extends StatelessWidget {
   final Map<String, dynamic> resumeItem;
   final bool isDark;
   final Color cardBg;
@@ -1858,7 +1504,7 @@ class _ActiveResumeBookCard extends StatelessWidget {
   final Function(UserPdfBook) onOpenPdf;
   final Function(LibraryItem) onOpenStory;
 
-  const _ActiveResumeBookCard({
+  const _HeroResumeCard({
     required this.resumeItem,
     required this.isDark,
     required this.cardBg,
@@ -1884,7 +1530,7 @@ class _ActiveResumeBookCard extends StatelessWidget {
       final book = resumeItem['pdfBook'] as UserPdfBook;
       title = book.title;
       subtitle = book.totalPages > 0
-          ? '${locale == 'ar' ? 'صفحة' : 'Page'} ${book.lastPageRead} / ${book.totalPages}'
+          ? '${locale == 'ar' ? 'صفحة' : 'Page'} ${book.lastPageRead} / ${book.totalPages}  •  ${(book.progressPercent * 100).toInt()}%'
           : '${locale == 'ar' ? 'صفحة' : 'Page'} ${book.lastPageRead}';
       progress = book.progressPercent;
       icon = Icons.picture_as_pdf_rounded;
@@ -1912,115 +1558,141 @@ class _ActiveResumeBookCard extends StatelessWidget {
     return LiquidPressable(
       onTap: onTapAction,
       child: Container(
-        width: 170,
-        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
-        padding: const EdgeInsets.all(11),
         decoration: BoxDecoration(
           color: cardBg,
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: accentColor.withValues(alpha: isDark ? 0.4 : 0.3),
-            width: 1.2,
+            color: accentColor.withValues(alpha: isDark ? 0.45 : 0.3),
+            width: 1.1,
           ),
           boxShadow: [
             BoxShadow(
-              color: accentColor.withValues(alpha: isDark ? 0.14 : 0.06),
+              color: accentColor.withValues(alpha: isDark ? 0.16 : 0.08),
               blurRadius: 8,
-              offset: const Offset(0, 3),
+              offset: const Offset(0, 2),
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            children: [
+              Positioned(
+                top: -20,
+                right: -20,
+                child: Container(
+                  width: 90,
+                  height: 90,
                   decoration: BoxDecoration(
-                    color: accentColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 5,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          color: accentColor,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        locale == 'ar' ? 'واصل القراءة' : 'Continue',
-                        style: TextStyle(
-                          color: accentColor,
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        accentColor.withValues(alpha: isDark ? 0.18 : 0.10),
+                        Colors.transparent,
+                      ],
+                    ),
                   ),
                 ),
-                Icon(icon, color: accentColor, size: 15),
-              ],
-            ),
-            Text(
-              title,
-              style: TextStyle(
-                color: titleColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 12.5,
-                fontFamily: locale == 'ar' ? 'Amiri' : null,
-                height: 1.18,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                child: Row(
                   children: [
-                    Expanded(
-                      child: Text(
-                        subtitle,
-                        style: TextStyle(
-                          color: isDark ? const Color(0xFF8A9995) : const Color(0xFF657B74),
-                          fontSize: 10,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: accentColor.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                      child: Icon(icon, color: accentColor, size: 21),
                     ),
-                    Text(
-                      locale == 'ar' ? 'تابع ←' : 'Read →',
-                      style: TextStyle(
-                        color: accentColor,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: BoxDecoration(
+                                      color: accentColor,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    locale == 'ar' ? 'تابع القراءة' : 'Continue Reading',
+                                    style: TextStyle(
+                                      color: accentColor,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                locale == 'ar' ? 'اقرأ الآن ←' : 'Read now →',
+                                style: TextStyle(
+                                  color: accentColor,
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            title,
+                            style: TextStyle(
+                              color: titleColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              fontFamily: locale == 'ar' ? 'Amiri' : null,
+                              height: 1.2,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  subtitle,
+                                  style: TextStyle(
+                                    color: isDark ? const Color(0xFF8A9995) : const Color(0xFF657B74),
+                                    fontSize: 10,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(3),
+                            child: LinearProgressIndicator(
+                              value: progress > 0 ? progress : 0.1,
+                              backgroundColor: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.06),
+                              valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+                              minHeight: 3,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: LinearProgressIndicator(
-                    value: progress > 0 ? progress : 0.1,
-                    backgroundColor: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.06),
-                    valueColor: AlwaysStoppedAnimation<Color>(accentColor),
-                    minHeight: 3,
-                  ),
-                ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -2028,9 +1700,9 @@ class _ActiveResumeBookCard extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// User PDF Book Card Component (Horizontal Shelf)
+// Grid PDF Book Card (for My Shelf 2-Column Grid)
 // ─────────────────────────────────────────────────────────────────────────────
-class _UserPdfBookCard extends StatelessWidget {
+class _GridPdfBookCard extends StatelessWidget {
   final UserPdfBook book;
   final bool isDark;
   final Color cardBg;
@@ -2039,7 +1711,7 @@ class _UserPdfBookCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onDelete;
 
-  const _UserPdfBookCard({
+  const _GridPdfBookCard({
     required this.book,
     required this.isDark,
     required this.cardBg,
@@ -2056,17 +1728,15 @@ class _UserPdfBookCard extends StatelessWidget {
     return LiquidPressable(
       onTap: onTap,
       child: Container(
-        width: 140,
-        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
-        padding: const EdgeInsets.all(11),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: cardBg,
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: borderColor, width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
-              blurRadius: 6,
+              blurRadius: 7,
               offset: const Offset(0, 2),
             ),
           ],
@@ -2075,25 +1745,26 @@ class _UserPdfBookCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            // Top Row: PDF Badge + Delete button
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: const Color(0xFFD32F2F).withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(5),
+                    borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.picture_as_pdf_rounded, color: Color(0xFFD32F2F), size: 11),
-                      SizedBox(width: 2.5),
+                      Icon(Icons.picture_as_pdf_rounded, color: Color(0xFFD32F2F), size: 12),
+                      SizedBox(width: 3),
                       Text(
                         'PDF',
                         style: TextStyle(
                           color: Color(0xFFD32F2F),
-                          fontSize: 9,
+                          fontSize: 9.5,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -2103,32 +1774,36 @@ class _UserPdfBookCard extends StatelessWidget {
                 GestureDetector(
                   onTap: onDelete,
                   child: Container(
-                    padding: const EdgeInsets.all(3),
+                    padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       color: isDark ? Colors.white.withValues(alpha: 0.06) : Colors.black.withValues(alpha: 0.04),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.delete_outline_rounded,
-                      size: 13,
-                      color: isDark ? Colors.white54 : Colors.black45,
+                      size: 14,
+                      color: isDark ? Colors.white60 : Colors.black54,
                     ),
                   ),
                 ),
               ],
             ),
+
+            // Book Title
             Text(
               book.title,
               style: TextStyle(
                 color: titleColor,
                 fontWeight: FontWeight.bold,
-                fontSize: 12,
+                fontSize: 12.5,
                 fontFamily: locale == 'ar' ? 'Amiri' : null,
-                height: 1.18,
+                height: 1.25,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
+
+            // Bottom Progress & Size
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -2141,7 +1816,7 @@ class _UserPdfBookCard extends StatelessWidget {
                           : '${locale == 'ar' ? 'ص' : 'p.'} ${book.lastPageRead}',
                       style: TextStyle(
                         color: isDark ? const Color(0xFF8A9995) : const Color(0xFF657B74),
-                        fontSize: 9.5,
+                        fontSize: 10,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -2149,7 +1824,7 @@ class _UserPdfBookCard extends StatelessWidget {
                       book.formattedSize,
                       style: TextStyle(
                         color: isDark ? const Color(0xFF6C7C78) : const Color(0xFF9AA8A4),
-                        fontSize: 8.5,
+                        fontSize: 9,
                       ),
                     ),
                   ],
@@ -2167,135 +1842,6 @@ class _UserPdfBookCard extends StatelessWidget {
               ],
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Compact Secondary Domain Card (for 2x2 Grid)
-// ─────────────────────────────────────────────────────────────────────────────
-class _CompactDomainCard extends StatelessWidget {
-  final _DomainInfo domain;
-  final bool isDark;
-  final Color cardBg;
-  final Color borderColor;
-  final String locale;
-  final VoidCallback onTap;
-
-  const _CompactDomainCard({
-    required this.domain,
-    required this.isDark,
-    required this.cardBg,
-    required this.borderColor,
-    required this.locale,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final titleColor = isDark ? Colors.white : const Color(0xFF152A24);
-    final title = domain.title(locale);
-    final subtitle = domain.subtitle(locale);
-
-    return LiquidPressable(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: borderColor, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: domain.accentColor.withValues(alpha: isDark ? 0.10 : 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(15),
-          child: Stack(
-            children: [
-              Positioned(
-                top: -14,
-                right: -14,
-                child: Container(
-                  width: 65,
-                  height: 65,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        domain.accentColor.withValues(alpha: isDark ? 0.16 : 0.08),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(11.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: domain.gradient,
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: domain.accentColor.withValues(alpha: 0.25),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Icon(domain.icon, color: Colors.white, size: 18),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            color: titleColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            fontFamily: locale == 'ar' ? 'Amiri' : null,
-                            height: 1.15,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          subtitle,
-                          style: TextStyle(
-                            color: isDark
-                                ? const Color(0xFF8A9995)
-                                : const Color(0xFF657B74),
-                            fontSize: 9.5,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
