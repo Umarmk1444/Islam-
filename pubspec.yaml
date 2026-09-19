@@ -55,6 +55,7 @@ dependencies:
   file_picker: ^11.0.3
   flutter_pdfview: ^1.4.5
   syncfusion_flutter_pdfviewer: ^33.2.13
+  syncfusion_pdfviewer_platform_interface: ^33.2.15
 
 dev_dependencies:
   flutter_test:
