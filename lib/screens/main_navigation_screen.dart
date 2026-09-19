@@ -30,7 +30,9 @@ import '../services/app_update_service.dart';
 //
 // Uses PageView + AutomaticKeepAliveClientMixin so swiping works left/right
 // and each tab's scroll/state is preserved across switches.
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Theme Transition Constant (Identical to Holy Quran circular reveal: 850ms) ──
+const Duration kQuranThemeDuration = Duration(milliseconds: 850);
+const Curve kQuranThemeCurve = Curves.easeInOutCubic;
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -396,6 +398,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         final isDark = theme == QuranTheme.dark;
         final isCream = theme == QuranTheme.cream;
         final l10n = AppLocalizations.of(context);
+        final bool isRtl = Directionality.of(context) == TextDirection.rtl;
 
         final Color bgColor = AppTheme.getScreenBgColor(theme);
 
@@ -427,53 +430,79 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
         return Scaffold(
           extendBody: true,
-          backgroundColor: bgColor,
-          body: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 850),
-              child: Stack(
-                children: [
-                  PageView(
-                    controller: _pageController,
-                    onPageChanged: (index) {
-                      if (_currentIndex != index) {
-                        setState(() {
-                          _currentIndex = index;
-                        });
-                      }
-                    },
-                    physics: const BouncingScrollPhysics(),
-                    children: [
-                      MuslimDashboardTab(key: _tabKeys[0]),
-                      LibraryScreen(key: _tabKeys[1]),
-                      MinbarTab(key: _tabKeys[2]),
-                      SettingsScreen(key: _tabKeys[3]),
-                    ],
-                  ),
-                  // ── Samsung One UI 8.5 Bottom Soft Fade-out Scrim ───────────
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    height: 115,
-                    child: IgnorePointer(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              bgColor.withValues(alpha: 0.0),
-                              bgColor.withValues(alpha: isDark ? 0.45 : 0.35),
-                              bgColor.withValues(alpha: isDark ? 0.85 : 0.80),
-                            ],
-                            stops: const [0.0, 0.45, 1.0],
+          backgroundColor: Colors.transparent,
+          body: AnimatedContainer(
+            duration: kQuranThemeDuration,
+            curve: kQuranThemeCurve,
+            color: bgColor,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 850),
+                child: Stack(
+                  children: [
+                    Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: PageView(
+                        controller: _pageController,
+                        onPageChanged: (index) {
+                          if (_currentIndex != index) {
+                            setState(() {
+                              _currentIndex = index;
+                            });
+                          }
+                        },
+                        physics: const BouncingScrollPhysics(),
+                        children: [
+                          Directionality(
+                            textDirection:
+                                isRtl ? TextDirection.rtl : TextDirection.ltr,
+                            child: MuslimDashboardTab(key: _tabKeys[0]),
+                          ),
+                          Directionality(
+                            textDirection:
+                                isRtl ? TextDirection.rtl : TextDirection.ltr,
+                            child: LibraryScreen(key: _tabKeys[1]),
+                          ),
+                          Directionality(
+                            textDirection:
+                                isRtl ? TextDirection.rtl : TextDirection.ltr,
+                            child: MinbarTab(key: _tabKeys[2]),
+                          ),
+                          Directionality(
+                            textDirection:
+                                isRtl ? TextDirection.rtl : TextDirection.ltr,
+                            child: SettingsScreen(key: _tabKeys[3]),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // ── Samsung One UI 8.5 Bottom Soft Fade-out Scrim ───────────
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      height: 115,
+                      child: IgnorePointer(
+                        child: AnimatedContainer(
+                          duration: kQuranThemeDuration,
+                          curve: kQuranThemeCurve,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                bgColor.withValues(alpha: 0.0),
+                                bgColor.withValues(alpha: isDark ? 0.45 : 0.35),
+                                bgColor.withValues(alpha: isDark ? 0.85 : 0.80),
+                              ],
+                              stops: const [0.0, 0.45, 1.0],
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -535,45 +564,40 @@ class _AppBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isRtl = Directionality.of(context) == TextDirection.rtl;
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final double totalWidth = constraints.maxWidth;
+          final int count = navMeta.length;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final double totalWidth = constraints.maxWidth;
-        final int count = navMeta.length;
+          // Perfectly proportioned 30% width reduction for Samsung One UI floating island
+          final double dockWidth = (totalWidth * 0.74).clamp(268.0, 335.0);
+          final double horizontalMargin = (totalWidth - dockWidth) / 2;
+          final double availableWidth = dockWidth;
 
-        // Perfectly proportioned 30% width reduction for Samsung One UI floating island
-        final double dockWidth = (totalWidth * 0.74).clamp(268.0, 335.0);
-        final double horizontalMargin = (totalWidth - dockWidth) / 2;
-        final double availableWidth = dockWidth;
+          // Account for container border width: 1.2px on each side = 2.4px total
+          const double borderWidth = 1.2;
+          final double innerContentWidth = availableWidth - (borderWidth * 2);
+          final double itemWidth = innerContentWidth / count;
 
-        // Account for container border width: 1.2px on each side = 2.4px total
-        const double borderWidth = 1.2;
-        final double innerContentWidth = availableWidth - (borderWidth * 2);
-        final double itemWidth = innerContentWidth / count;
+          final double currentPage = (pageController.hasClients &&
+                  pageController.position.haveDimensions)
+              ? (pageController.page ?? currentIndex.toDouble())
+              : currentIndex.toDouble();
 
-        final double currentPage = (pageController.hasClients &&
-                pageController.position.haveDimensions)
-            ? (pageController.page ?? currentIndex.toDouble())
-            : currentIndex.toDouble();
+          const double barHeight = 60.0;
+          const double pillHeight = 48.0;
+          final double pillWidth = itemWidth - 6.0;
 
-        // Calculate visual page position supporting RTL (Arabic)
-        final double visualPage = isRtl
-            ? ((count - 1) - currentPage)
-            : currentPage;
-
-        const double barHeight = 60.0;
-        const double pillHeight = 48.0;
-        final double pillWidth = itemWidth - 6.0;
-
-        // Organic fluid stretch physics (Samsung One UI 8.5 fluid capsule)
-        final double fractional = (currentPage - currentPage.round()).abs(); // 0.0 to 0.5
-        final double stretch = (fractional * 2.0); // 0.0 at rest, 1.0 halfway
-        final double dynamicPillWidth = pillWidth + (stretch * 6.0);
-        final double dynamicPillHeight = pillHeight - (stretch * 2.0);
-        final double dynamicPillLeft =
-            (visualPage * itemWidth) + (itemWidth - dynamicPillWidth) / 2;
-        final double dynamicPillTop = (barHeight - dynamicPillHeight) / 2;
+          // Organic fluid stretch physics (Samsung One UI 8.5 fluid capsule)
+          final double fractional = (currentPage - currentPage.round()).abs(); // 0.0 to 0.5
+          final double stretch = (fractional * 2.0); // 0.0 at rest, 1.0 halfway
+          final double dynamicPillWidth = pillWidth + (stretch * 6.0);
+          final double dynamicPillHeight = pillHeight - (stretch * 2.0);
+          final double dynamicPillLeft =
+              (currentPage * itemWidth) + (itemWidth - dynamicPillWidth) / 2;
+          final double dynamicPillTop = (barHeight - dynamicPillHeight) / 2;
 
         return SafeArea(
           top: false,
@@ -584,8 +608,8 @@ class _AppBottomNavBar extends StatelessWidget {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 320),
-                  curve: Curves.easeInOut,
+                  duration: kQuranThemeDuration,
+                  curve: kQuranThemeCurve,
                   height: barHeight,
                   decoration: BoxDecoration(
                     color: barBgColor,
@@ -617,7 +641,9 @@ class _AppBottomNavBar extends StatelessWidget {
                         top: dynamicPillTop,
                         width: dynamicPillWidth,
                         height: dynamicPillHeight,
-                        child: Container(
+                        child: AnimatedContainer(
+                          duration: kQuranThemeDuration,
+                          curve: kQuranThemeCurve,
                           decoration: BoxDecoration(
                             color: activeIndicatorColor,
                             borderRadius: BorderRadius.circular(24),
@@ -667,8 +693,9 @@ class _AppBottomNavBar extends StatelessWidget {
               ),
             ),
           ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
@@ -758,30 +785,44 @@ class _NavBarButtonState extends State<_NavBarButton>
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 220),
-                  transitionBuilder: (child, anim) =>
-                      ScaleTransition(scale: anim, child: child),
-                  child: Icon(
-                    isSelected ? widget.item.activeIcon : widget.item.icon,
-                    key: ValueKey('${widget.item.labelKey}_$isSelected'),
-                    color: iconColor,
-                    size: isSelected ? 21.5 : 20.0,
-                  ),
+                TweenAnimationBuilder<Color?>(
+                  duration: kQuranThemeDuration,
+                  curve: kQuranThemeCurve,
+                  tween: ColorTween(end: iconColor),
+                  builder: (context, animIconColor, _) {
+                    return AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 220),
+                      transitionBuilder: (child, anim) =>
+                          ScaleTransition(scale: anim, child: child),
+                      child: Icon(
+                        isSelected ? widget.item.activeIcon : widget.item.icon,
+                        key: ValueKey('${widget.item.labelKey}_$isSelected'),
+                        color: animIconColor,
+                        size: isSelected ? 21.5 : 20.0,
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 2.5),
                 FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    style: TextStyle(
-                      fontSize: 10.5,
-                      fontWeight:
-                          isSelected ? FontWeight.w700 : FontWeight.w500,
-                      color: textColor,
-                      letterSpacing: 0.1,
-                    ),
+                  child: TweenAnimationBuilder<Color?>(
+                    duration: kQuranThemeDuration,
+                    curve: kQuranThemeCurve,
+                    tween: ColorTween(end: textColor),
+                    builder: (context, animTextColor, _) {
+                      return Text(
+                        label,
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight:
+                              isSelected ? FontWeight.w700 : FontWeight.w500,
+                          color: animTextColor,
+                          letterSpacing: 0.1,
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],

@@ -267,8 +267,6 @@ class _SettingsScreenState extends State<SettingsScreen>
         });
         _revealScrollCtrl?.dispose();
         _revealScrollCtrl = null;
-        // Synchronize global theme so top status bar and bottom tabs transition in harmony with the reveal
-        AppTheme.changeTheme(_targetTheme);
       }
     });
   }
@@ -480,6 +478,9 @@ class _SettingsScreenState extends State<SettingsScreen>
     setState(() {
       _isRevealing = true;
     });
+
+    // Immediately synchronize global theme so bottom tabs, status bar & screen animate simultaneously
+    AppTheme.changeTheme(newTheme);
 
     _revealCtrl.forward(from: 0.0);
   }

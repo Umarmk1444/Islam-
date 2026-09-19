@@ -52,6 +52,8 @@ dependencies:
   home_widget: ^0.9.3
   wakelock_plus: ^1.2.8
   sqflite_common_ffi: ^2.3.3
+  file_picker: ^11.0.3
+  flutter_pdfview: ^1.4.5
 
 dev_dependencies:
   flutter_test:
