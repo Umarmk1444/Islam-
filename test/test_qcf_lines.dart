@@ -1,4 +1,4 @@
-import 'package:qcf_quran/qcf_quran.dart';
+import 'package:quran_zone/qcf/qcf_quran.dart';
 
 void main() {
   int pageNum = 2; // Surah Al-Baqarah, first page

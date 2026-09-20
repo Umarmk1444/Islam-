@@ -1,14 +1,9 @@
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:qcf_quran/qcf_quran.dart';
+import '../qcf/qcf_quran.dart';
 import '../core/database/database_helper.dart';
 import '../core/utils/woff_font_loader.dart';
-
-const Set<int> _localQcfPages = {
-  52, 62, 113, 120, 217, 261, 263, 267, 277, 282, 296,
-  304, 307, 311, 321, 421, 473, 499, 543, 557, 563, 580
-};
 
 class _Word {
   String text;
@@ -119,7 +114,7 @@ class _StrictQcfPageState extends State<StrictQcfPage>
       _isLoading = true;
     });
     try {
-      await WoffFontLoader.ensurePageFontLoaded(widget.pageNumber);
+      final fontLoaded = await WoffFontLoader.ensurePageFontLoaded(widget.pageNumber);
       if (widget.pageNumber > 1) {
         WoffFontLoader.ensurePageFontLoaded(widget.pageNumber - 1);
         WoffFontLoader.ensurePageFontLoaded(widget.pageNumber + 1);
@@ -129,8 +124,15 @@ class _StrictQcfPageState extends State<StrictQcfPage>
       if (mounted) {
         setState(() {
           _verses = verses;
-          _isLoading = false;
+          _isLoading = !fontLoaded;
         });
+        if (!fontLoaded) {
+          Future.delayed(const Duration(milliseconds: 600), () {
+            if (mounted && !WoffFontLoader.isPageFontLoaded(widget.pageNumber)) {
+              _loadPageVerses();
+            }
+          });
+        }
       }
     } catch (e) {
       debugPrint('Error loading verses for page ${widget.pageNumber}: $e');
@@ -440,7 +442,13 @@ class _StrictQcfPageState extends State<StrictQcfPage>
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
+    final bool fontReady = WoffFontLoader.isPageFontLoaded(widget.pageNumber);
+    if (_isLoading || !fontReady) {
+      if (!fontReady && !_isLoading) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _loadPageVerses();
+        });
+      }
       return Container(
         color: widget.theme.pageBackgroundColor,
         child: Center(
@@ -618,9 +626,6 @@ class _StrictQcfPageState extends State<StrictQcfPage>
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: "QCF_P001",
-                package: (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS))
-                    ? null
-                    : 'qcf_quran',
                 fontSize: baseFontSize * 0.9,
                 color: widget.theme.basmalaColor,
               ),
@@ -769,9 +774,6 @@ class _StrictQcfPageState extends State<StrictQcfPage>
           ),
           style: TextStyle(
             fontFamily: pageFont,
-            package: (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS))
-                ? null
-                : (_localQcfPages.contains(widget.pageNumber) ? null : 'qcf_quran'),
             fontSize: baseFontSize,
             color: textColor,
             height: 1.0,

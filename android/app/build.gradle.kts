@@ -25,7 +25,8 @@ android {
     // This namespace property links your app ID to your AndroidManifest.xml
     namespace = "com.umer.quranzone"
     compileSdk = 36
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "28.2.13676358"
+
 
 
     compileOptions {
@@ -72,8 +73,10 @@ android {
     }
 
     androidResources {
-        noCompress += listOf("woff", "woff2", "otf", "ttf", "png", "jpg")
+        noCompress += listOf("woff", "woff2", "otf", "ttf")
     }
+
+    assetPacks += ":quran_fonts"
 }
 
 kotlin {
@@ -88,4 +91,7 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.2")
+    implementation("com.google.android.play:asset-delivery:2.2.2")
+    implementation("com.google.android.play:asset-delivery-ktx:2.2.2")
 }
+

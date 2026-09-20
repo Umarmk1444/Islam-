@@ -1,40 +1,11 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
-import 'package:archive/archive.dart';
 import 'package:path/path.dart' as p;
 
 import '../core/database/database_helper.dart';
 import 'main_navigation_screen.dart';
-
-/// Top-level worker executed in background isolate via compute.
-/// Being top-level ensures it captures no class, BuildContext, or WidgetsBinding state.
-Future<bool> _extractDatabaseZip(Map<String, dynamic> params) async {
-  final Uint8List bytes = params['bytes'] as Uint8List;
-  final String dbFileDest = params['dbFileDest'] as String;
-  final String tempDest = params['tempDest'] as String;
-
-  final archive = ZipDecoder().decodeBytes(bytes);
-  for (final file in archive) {
-    if (file.isFile && file.name.endsWith('.db')) {
-      final extractedData = file.content as List<int>;
-      final tmpFile = File(tempDest);
-      await tmpFile.writeAsBytes(extractedData, flush: true);
-      if (await tmpFile.exists() && await tmpFile.length() > 5 * 1024 * 1024) {
-        final destFile = File(dbFileDest);
-        if (await destFile.exists()) {
-          await destFile.delete();
-        }
-        await tmpFile.rename(dbFileDest);
-        return true;
-      }
-      break;
-    }
-  }
-  return false;
-}
 
 class SetupScreen extends StatefulWidget {
   const SetupScreen({super.key});
@@ -56,45 +27,54 @@ class _SetupScreenState extends State<SetupScreen> {
 
   Future<void> _startSetupProcess() async {
     try {
-      // 1. Load the zip file from assets
-      final assetData = await rootBundle.load('assets/muslim_house.zip');
-      final bytes = assetData.buffer.asUint8List(
-        assetData.offsetInBytes,
-        assetData.lengthInBytes,
-      );
-
-      // 2. Prepare the destination directory
+      // 1. Prepare destination directory using getApplicationDocumentsDirectory
       final docDir = await getApplicationDocumentsDirectory();
       final dbDir = Directory(p.join(docDir.path, 'databases'));
       if (!await dbDir.exists()) {
         await dbDir.create(recursive: true);
       }
+
       final dbFileDest = p.join(dbDir.path, 'muslim_house.db');
-      final tempDest = '$dbFileDest.tmp';
+      final tempDest = p.join(dbDir.path, 'muslim_house_temp.db');
 
-      // 3. Decode the zip in a background isolate so low-end devices do not freeze or ANR
-      final success = await compute(_extractDatabaseZip, {
-        'bytes': bytes,
-        'dbFileDest': dbFileDest,
-        'tempDest': tempDest,
-      });
-
-      if (!success) {
-        throw Exception('Database file was not successfully extracted.');
+      // 2. Protect existing user data: if already valid (> 50 MB), never overwrite!
+      final existingFile = File(dbFileDest);
+      if (await existingFile.exists() && await existingFile.length() > 50 * 1024 * 1024) {
+        _navigateToHome();
+        return;
       }
 
-      // 4. Initialize the Database so it's ready for the app
+      // 3. Clean up any stale temp file
+      final tempFile = File(tempDest);
+      if (await tempFile.exists()) {
+        await tempFile.delete();
+      }
+
+      // 4. Directly load raw asset bytes and stream to temp file (non-blocking, no isolate needed)
+      final byteData = await rootBundle.load('assets/muslim_house.db');
+      await tempFile.writeAsBytes(
+        byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+        flush: true,
+      );
+
+      // 5. Verify integrity (> 50 MB) and atomically rename to final destination
+      if (await tempFile.exists() && await tempFile.length() > 50 * 1024 * 1024) {
+        if (await existingFile.exists()) {
+          await existingFile.delete();
+        }
+        await tempFile.rename(dbFileDest);
+      } else {
+        throw Exception('Database file was incomplete or corrupted.');
+      }
+
+      // 6. Initialize the Database so it's ready for the app
       await DatabaseHelper.instance.init();
 
       // Buffer to allow GC memory to settle before route transition
       await Future.delayed(const Duration(milliseconds: 250));
 
-      // 5. Navigate to Home
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
-        );
+        _navigateToHome();
       }
     } catch (e) {
       debugPrint('Setup error: $e');
@@ -105,6 +85,13 @@ class _SetupScreenState extends State<SetupScreen> {
         });
       }
     }
+  }
+
+  void _navigateToHome() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+    );
   }
 
   @override

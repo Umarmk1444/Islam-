@@ -21,7 +21,9 @@ plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
     // Updated to match Flutter requirements
     id("com.android.application") version "8.11.1" apply false
+    id("com.android.asset-pack") version "8.11.1" apply false
     id("org.jetbrains.kotlin.android") version "2.2.20" apply false
 }
 
 include(":app")
+include(":quran_fonts")

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:qcf_quran/qcf_quran.dart';
+import '../qcf/qcf_quran.dart';
+import '../core/services/play_asset_delivery_service.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../theme_notifier.dart';
 import '../widgets/strict_qcf_page.dart';
@@ -125,8 +126,30 @@ class _QuranScreenState extends State<QuranScreen> {
     _reminderIndex = math.Random().nextInt(quranReminders.length);
     _reminderForceArabic = math.Random().nextInt(100) < 35;
     _loadQuranData();
+    _initFontsCheck();
+    PlayAssetDeliveryService.instance.isFontsReadyNotifier
+        .addListener(_onFontsReadyChanged);
     QuranScreen.selectedVerseNotifier
         .addListener(_handleSelectedVerseNotifierChange);
+  }
+
+  bool _isFontsReady = false;
+
+  Future<void> _initFontsCheck() async {
+    final ready = await PlayAssetDeliveryService.instance.ensureAssetPackReady();
+    if (mounted) {
+      setState(() {
+        _isFontsReady = ready;
+      });
+    }
+  }
+
+  void _onFontsReadyChanged() {
+    if (mounted && PlayAssetDeliveryService.instance.isFontsReadyNotifier.value) {
+      setState(() {
+        _isFontsReady = true;
+      });
+    }
   }
 
   @override
@@ -138,6 +161,8 @@ class _QuranScreenState extends State<QuranScreen> {
       kQuranScreenActive.value = false;
     });
     _sleepTimer?.cancel();
+    PlayAssetDeliveryService.instance.isFontsReadyNotifier
+        .removeListener(_onFontsReadyChanged);
     QuranScreen.selectedVerseNotifier
         .removeListener(_handleSelectedVerseNotifierChange);
     _pageController?.dispose();
@@ -628,6 +653,176 @@ class _QuranScreenState extends State<QuranScreen> {
     );
   }
 
+  // ── Font Downloading Progress View ────────────────────────────────────────
+
+  static const Map<String, Map<String, String>> _kDownloadL10n = {
+    'title': {
+      'ar': 'المصحف الشريف',
+      'en': 'The Holy Quran',
+      'am': 'ቅዱስ ቁርኣን',
+      'om': 'Qur\'aana Qulqulluu',
+    },
+    'downloading': {
+      'ar': 'جاري تجهيز وتنزيل خطوط المصحف الشريف...',
+      'en': 'Downloading Holy Quran calligraphy fonts...',
+      'am': 'የቅዱስ ቁርኣን ቅርጸ-ቁምፊዎች በመውረድ ላይ ናቸው...',
+      'om': 'Barreeffamni Qur\'aanaa bu\'aa jira...',
+    },
+    'connecting': {
+      'ar': 'جاري بدء التنزيل من Google Play...',
+      'en': 'Connecting to Google Play...',
+      'am': 'ከ Google Play ጋር በመገናኘት ላይ...',
+      'om': 'Google Play waliin walqunnamaa jira...',
+    },
+    'explanation': {
+      'ar': 'يتم تنزيل الخطوط تلقائياً لمرة واحدة فقط لتقليل حجم التطبيق على متجر Google Play وضمان وضوح خط المصحف الشريف بدقة متناهية.',
+      'en': 'Calligraphy fonts are downloaded once to keep the initial app size small on Google Play and ensure crystal-clear script.',
+      'am': 'የመተግበሪያውን መጠን በ Google Play ላይ ለመቀነስ እና ግልጽ የቁርኣን ጽሑፍ ለማረጋገጥ ቅርጸ-ቁምፊዎች ለአንድ ጊዜ ይወርዳሉ።',
+      'om': 'Bal\'ina appii Google Play irratti hir\'isuu fi barreeffama qulqulluu argachuuf yeroo tokko qofa bu\'a.',
+    },
+    'back': {
+      'ar': 'العودة واستخدام ميزات أخرى',
+      'en': 'Back to Explore Other Features',
+      'am': 'ወደ ሌሎች አገልግሎቶች ተመለስ',
+      'om': 'Gara Tajaajiloota Birootti Deebi\'i',
+    },
+  };
+
+  Widget _buildFontDownloadingView() {
+    final locale = Localizations.localeOf(context).languageCode;
+    final l10nTitle = _kDownloadL10n['title']?[locale] ?? _kDownloadL10n['title']!['ar']!;
+    final l10nDownloading = _kDownloadL10n['downloading']?[locale] ?? _kDownloadL10n['downloading']!['ar']!;
+    final l10nConnecting = _kDownloadL10n['connecting']?[locale] ?? _kDownloadL10n['connecting']!['ar']!;
+    final l10nExplanation = _kDownloadL10n['explanation']?[locale] ?? _kDownloadL10n['explanation']!['ar']!;
+    final l10nBack = _kDownloadL10n['back']?[locale] ?? _kDownloadL10n['back']!['ar']!;
+
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 420),
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            color: _pageBgColor,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: _borderColor.withValues(alpha: 0.4),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _goldTextColor.withValues(alpha: 0.12),
+                  border: Border.all(
+                    color: _goldTextColor.withValues(alpha: 0.3),
+                    width: 1.5,
+                  ),
+                ),
+                child: Icon(Icons.menu_book_rounded,
+                    size: 38, color: _goldTextColor),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                l10nTitle,
+                style: TextStyle(
+                  fontFamily: locale == 'ar' ? 'Amiri' : null,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: _goldTextColor,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                l10nDownloading,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: locale == 'ar' ? 'Amiri' : null,
+                  fontSize: 16,
+                  color: _mainTextColor.withValues(alpha: 0.85),
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ValueListenableBuilder<double>(
+                valueListenable: PlayAssetDeliveryService
+                    .instance.downloadProgressNotifier,
+                builder: (context, progress, _) {
+                  return Column(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: LinearProgressIndicator(
+                          value: progress > 0 ? progress : null,
+                          minHeight: 8,
+                          backgroundColor: _borderColor.withValues(alpha: 0.15),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(_goldTextColor),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        progress > 0
+                            ? '${(progress * 100).toInt()}%'
+                            : l10nConnecting,
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: _goldTextColor,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+              Text(
+                l10nExplanation,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: locale == 'ar' ? 'Amiri' : null,
+                  fontSize: 13,
+                  color: _mainTextColor.withValues(alpha: 0.6),
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: 20),
+              // NO BYPASS BUTTON: Safe back navigation to protect user from unreadable text!
+              TextButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                icon: Icon(Icons.arrow_back_rounded, size: 18, color: _goldTextColor),
+                label: Text(
+                  l10nBack,
+                  style: TextStyle(
+                    fontFamily: locale == 'ar' ? 'Amiri' : null,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: _goldTextColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   // ── Text formatting ───────────────────────────────────────────────────────
 
   String _getCurrentSurahName() {
@@ -771,7 +966,9 @@ class _QuranScreenState extends State<QuranScreen> {
           ),
           body: _isLoading
               ? Center(child: CircularProgressIndicator(color: _borderColor))
-              : CallbackShortcuts(
+              : (!_isFontsReady && !PlayAssetDeliveryService.instance.isFontsReadyNotifier.value)
+                  ? _buildFontDownloadingView()
+                  : CallbackShortcuts(
                   bindings: <ShortcutActivator, VoidCallback>{
                     const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
                       if (_currentPageIndex < 603) {

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:qcf_quran/qcf_quran.dart';
+import 'package:quran_zone/qcf/qcf_quran.dart';
 
 void main() {
   test('Print QCF codes', () {

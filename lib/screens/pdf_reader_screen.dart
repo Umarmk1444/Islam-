@@ -40,7 +40,7 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
   late final ValueNotifier<int> _pageNotifier;
   Timer? _saveProgressDebounce;
 
-  // Vertical continuous scrolling by default as requested!
+  // Vertical continuous scrolling by default as requested
   bool _isSwipeHorizontal = false;
 
   // Default to Clean Mode: When opened, it displays a 100% clean page (tap anywhere to toggle controls!)
@@ -75,13 +75,6 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
     0.0,  0.0,  0.0,  1.0, 0.0,
   ]);
 
-  // Identity matrix for standard color rendering (ensures zero unmounting/rebuilding)
-  static const ColorFilter _kIdentityColorFilter = ColorFilter.matrix([
-    1.0, 0.0, 0.0, 0.0, 0.0,
-    0.0, 1.0, 0.0, 0.0, 0.0,
-    0.0, 0.0, 1.0, 0.0, 0.0,
-    0.0, 0.0, 0.0, 1.0, 0.0,
-  ]);
 
   @override
   void initState() {
@@ -91,7 +84,7 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
     _pageNotifier = ValueNotifier<int>(_currentPage);
     _currentTheme = AppTheme.notifier.value;
 
-    _loadSavedReaderTheme();
+    _loadSavedReaderPreferences();
     _loadBookmarks();
     try {
       WakelockPlus.enable();
@@ -103,15 +96,21 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
     _searchResult = PdfTextSearchResult();
   }
 
-  Future<void> _loadSavedReaderTheme() async {
+  Future<void> _loadSavedReaderPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString('pdf_reader_theme_mode');
-    if (saved != null && mounted) {
+    final savedTheme = prefs.getString('pdf_reader_theme_mode');
+    final savedHorizontal = prefs.getBool('pdf_reader_swipe_horizontal');
+    if (mounted) {
       setState(() {
-        _currentTheme = QuranTheme.values.firstWhere(
-          (t) => t.name == saved,
-          orElse: () => _currentTheme,
-        );
+        if (savedTheme != null) {
+          _currentTheme = QuranTheme.values.firstWhere(
+            (t) => t.name == savedTheme,
+            orElse: () => _currentTheme,
+          );
+        }
+        if (savedHorizontal != null) {
+          _isSwipeHorizontal = savedHorizontal;
+        }
       });
     }
   }
@@ -120,7 +119,7 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
   void dispose() {
     _hideContextMenu();
     _saveProgressDebounce?.cancel();
-    _saveProgressImmediate();
+    _saveProgressAndGenerateThumbnailOnExit();
     _pageNotifier.dispose();
     _searchFieldController.dispose();
     _searchResult.dispose();
@@ -135,19 +134,30 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
 
   void _saveProgressThrottled() {
     _saveProgressDebounce?.cancel();
-    _saveProgressDebounce = Timer(const Duration(milliseconds: 1200), () {
-      _saveProgressImmediate();
+    _saveProgressDebounce = Timer(const Duration(milliseconds: 1500), () {
+      _saveProgressToDbOnly();
     });
   }
 
-  void _saveProgressImmediate() {
+  /// Lightweight: updates reading progress in SQLite asynchronously in ~1ms without any heavy thumbnail rasterization
+  void _saveProgressToDbOnly() {
     if (widget.book.id != null) {
       _libraryService.updatePdfReadingProgress(
         widget.book.id!,
         _currentPage,
         totalPages: _totalPages > 0 ? _totalPages : null,
       );
-      // Generate preview thumbnail for the exact page stopped at
+    }
+  }
+
+  /// Called only on exit (dispose / back button) to update DB and generate the final cover thumbnail once
+  void _saveProgressAndGenerateThumbnailOnExit() {
+    if (widget.book.id != null) {
+      _libraryService.updatePdfReadingProgress(
+        widget.book.id!,
+        _currentPage,
+        totalPages: _totalPages > 0 ? _totalPages : null,
+      );
       _thumbnailService.generateThumbnail(
         bookId: widget.book.id!,
         filePath: widget.book.filePath,
@@ -188,6 +198,9 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
     setState(() {
       _isSwipeHorizontal = !_isSwipeHorizontal;
       _pdfViewerKey = GlobalKey<SfPdfViewerState>();
+    });
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setBool('pdf_reader_swipe_horizontal', _isSwipeHorizontal);
     });
 
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -1225,7 +1238,7 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) {
           _saveProgressDebounce?.cancel();
-          _saveProgressImmediate();
+          _saveProgressAndGenerateThumbnailOnExit();
         }
       },
       child: Scaffold(
@@ -2877,8 +2890,11 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
       canShowScrollStatus: false, // Replaced with smooth bottom scrubber matching Screenshot 3
       canShowPaginationDialog: false,
       canShowTextSelectionMenu: false, // Disable built-in Syncfusion menu to avoid overlapping
-      enableTextSelection: true,
-      pageSpacing: 4.0,
+      canShowPageLoadingIndicator: false, // Eliminates background 60 FPS repaint loop
+      canShowHyperlinkDialog: false, // Disables continuous hyperlink parsing during scroll
+      enableDoubleTapZooming: false, // Prevents touch buffer delays on fast page flips
+      enableTextSelection: true, // Keeps Ask AI, Translation, Highlights & Underline working 100%!
+      pageSpacing: _isSwipeHorizontal ? 0.0 : 2.0,
       // Tap anywhere on the page to toggle controls (Clean reading mode vs customization)
       onTap: (PdfGestureDetails details) {
         HapticFeedback.lightImpact();
@@ -2928,11 +2944,14 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
       },
     );
 
-    // Instant GPU-accelerated theme filter (0ms delay, zero unmounting/rebuilding)
+    // If standard Day/White theme, return viewer directly with ZERO GPU filters (saves 60fps Impeller compositor passes)
+    if (!isDark && !isCream) {
+      return viewer;
+    }
+
+    // Instant GPU-accelerated theme filter for Dark / Night and Cream / Eye-comfort modes
     return ColorFiltered(
-      colorFilter: isDark
-          ? _kInvertColorFilter
-          : (isCream ? _kCreamColorFilter : _kIdentityColorFilter),
+      colorFilter: isDark ? _kInvertColorFilter : _kCreamColorFilter,
       child: viewer,
     );
   }
@@ -3137,7 +3156,7 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
               padding: EdgeInsets.zero,
               onPressed: () {
                 _saveProgressDebounce?.cancel();
-                _saveProgressImmediate();
+                _saveProgressAndGenerateThumbnailOnExit();
                 Navigator.pop(context);
               },
             ),

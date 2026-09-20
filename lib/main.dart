@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ import 'package:just_audio_background/just_audio_background.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/services/background_engine.dart';
+import 'core/services/play_asset_delivery_service.dart';
 
 import 'services/minbar_player.dart';
 import 'widgets/custom_banner_ad.dart';
@@ -145,6 +147,9 @@ Future<void> _initHeavyServices() async {
       debugPrint('[_initHeavyServices] Workmanager/Zekr registration failed: $e');
     }
   }
+
+  // 6. Pre-fetch Quran calligraphy fonts in background (Google Play Asset Pack / Fast CDN)
+  unawaited(PlayAssetDeliveryService.instance.ensureAssetPackReady());
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

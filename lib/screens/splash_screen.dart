@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'main_navigation_screen.dart';
 import '../core/database/database_helper.dart';
 import '../services/app_update_service.dart';
-import 'setup_screen.dart';
 import '../widgets/custom_banner_ad.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -169,33 +168,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _runInitSequence() async {
-    final isDbPresent = await DatabaseHelper.instance.isDatabaseOnDevice;
-
-    if (!isDbPresent) {
-      await Future.delayed(const Duration(milliseconds: 4800));
-      if (mounted) {
-        kQuranScreenActive.value = false;
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (_, __, ___) => const SetupScreen(),
-            transitionsBuilder: (_, animation, __, child) {
-              return FadeTransition(
-                opacity: CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeOutCubic,
-                ),
-                child: child,
-              );
-            },
-            transitionDuration: const Duration(milliseconds: 450),
-          ),
-        );
-      }
-      return;
-    }
-
-    // Extended 4.8s timing (+1.6s) to comfortably enjoy the full animation & Ayah
+    // Database initialization and cinematic animation run in parallel during the 4.8s splash
     await Future.wait([
       _initDatabase(),
       Future.delayed(const Duration(milliseconds: 4800)),

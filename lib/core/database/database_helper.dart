@@ -17,6 +17,7 @@ import 'dart:developer' as dev;
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -105,8 +106,28 @@ class DatabaseHelper {
       final dbPath = await _resolveDevicePath();
       
       final dbFile = File(dbPath);
-      if (!await dbFile.exists() || await dbFile.length() < 5 * 1024 * 1024) {
-        throw Exception('Database file not found or corrupted at $dbPath. It should be extracted first.');
+      if (!await dbFile.exists() || await dbFile.length() < 50 * 1024 * 1024) {
+        dev.log('Copying bundled database asset to device: $dbPath', name: _kLogName);
+        final tempDest = '$dbPath.tmp';
+        final tempFile = File(tempDest);
+        if (await tempFile.exists()) {
+          await tempFile.delete();
+        }
+
+        final byteData = await rootBundle.load('assets/muslim_house.db');
+        await tempFile.writeAsBytes(
+          byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+          flush: true,
+        );
+
+        if (await tempFile.exists() && await tempFile.length() > 50 * 1024 * 1024) {
+          if (await dbFile.exists()) {
+            await dbFile.delete();
+          }
+          await tempFile.rename(dbPath);
+        } else {
+          throw Exception('Failed to copy database asset: file was incomplete or corrupt.');
+        }
       }
 
       _db = await _openDatabase(dbPath);

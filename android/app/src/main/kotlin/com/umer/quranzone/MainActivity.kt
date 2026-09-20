@@ -11,16 +11,20 @@ import android.view.WindowManager
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import com.google.android.play.core.assetpacks.AssetPackManagerFactory
+import com.google.android.play.core.assetpacks.model.AssetPackStatus
 
 class MainActivity : AudioServiceActivity() {
 
     private val DEVICE_CHANNEL = "com.umer.quranzone/device"
     private val ATHAN_ALARM_CHANNEL = "com.umer.quranzone/athan_alarm"
     private val SYSTEM_ACTIONS_CHANNEL = "com.umer.quranzone/system_actions"
+    private val PLAY_ASSET_DELIVERY_CHANNEL = "com.umer.quranzone/play_asset_delivery"
 
     private var deviceChannel: MethodChannel? = null
     private var athanAlarmChannel: MethodChannel? = null
     private var systemActionsChannel: MethodChannel? = null
+    private var playAssetChannel: MethodChannel? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -177,7 +181,118 @@ class MainActivity : AudioServiceActivity() {
                 else -> result.notImplemented()
             }
         }
+
+        // ── Google Play Asset Delivery Channel ──
+        try {
+            val assetPackManager = AssetPackManagerFactory.getInstance(this)
+            playAssetChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, PLAY_ASSET_DELIVERY_CHANNEL)
+            playAssetChannel?.setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "getAssetPackPath" -> {
+                        val packName = call.argument<String>("packName") ?: "quran_fonts"
+                        try {
+                            val location = assetPackManager.getPackLocation(packName)
+                            if (location != null) {
+                                result.success(location.assetsPath())
+                            } else {
+                                result.success(null)
+                            }
+                        } catch (e: Exception) {
+                            Log.e("MainActivity", "getAssetPackPath error: ${e.message}", e)
+                            result.success(null)
+                        }
+                    }
+                    "getAssetPackStatus" -> {
+                        val packName = call.argument<String>("packName") ?: "quran_fonts"
+                        try {
+                            val location = assetPackManager.getPackLocation(packName)
+                            if (location != null) {
+                                result.success(mapOf(
+                                    "status" to "COMPLETED",
+                                    "bytesDownloaded" to 100L,
+                                    "totalBytes" to 100L,
+                                    "path" to location.assetsPath()
+                                ))
+                            } else {
+                                assetPackManager.getPackStates(listOf(packName))
+                                    .addOnSuccessListener { packStates ->
+                                        val state = packStates.packStates()[packName]
+                                        val statusStr = when (state?.status()) {
+                                            AssetPackStatus.COMPLETED -> "COMPLETED"
+                                            AssetPackStatus.DOWNLOADING -> "DOWNLOADING"
+                                            AssetPackStatus.PENDING -> "PENDING"
+                                            AssetPackStatus.TRANSFERRING -> "TRANSFERRING"
+                                            AssetPackStatus.FAILED -> "FAILED"
+                                            AssetPackStatus.CANCELED -> "CANCELED"
+                                            AssetPackStatus.NOT_INSTALLED -> "NOT_INSTALLED"
+                                            AssetPackStatus.WAITING_FOR_WIFI -> "WAITING_FOR_WIFI"
+                                            else -> "UNKNOWN"
+                                        }
+                                        result.success(mapOf(
+                                            "status" to statusStr,
+                                            "bytesDownloaded" to (state?.bytesDownloaded() ?: 0L),
+                                            "totalBytes" to (state?.totalBytesToDownload() ?: 0L),
+                                            "path" to null
+                                        ))
+                                    }
+                                    .addOnFailureListener { e ->
+                                        result.success(mapOf(
+                                            "status" to "UNKNOWN",
+                                            "bytesDownloaded" to 0L,
+                                            "totalBytes" to 0L,
+                                            "error" to e.message
+                                        ))
+                                    }
+                            }
+                        } catch (e: Exception) {
+                            Log.e("MainActivity", "getAssetPackStatus error: ${e.message}", e)
+                            result.success(mapOf("status" to "UNKNOWN", "error" to e.message))
+                        }
+                    }
+                    "fetchAssetPack" -> {
+                        val packName = call.argument<String>("packName") ?: "quran_fonts"
+                        try {
+                            assetPackManager.fetch(listOf(packName))
+                                .addOnSuccessListener {
+                                    result.success(true)
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.e("MainActivity", "fetchAssetPack error: ${e.message}", e)
+                                    result.success(false)
+                                }
+                        } catch (e: Exception) {
+                            Log.e("MainActivity", "fetchAssetPack error: ${e.message}", e)
+                            result.success(false)
+                        }
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+
+            assetPackManager.registerListener { state ->
+                val statusStr = when (state.status()) {
+                    AssetPackStatus.COMPLETED -> "COMPLETED"
+                    AssetPackStatus.DOWNLOADING -> "DOWNLOADING"
+                    AssetPackStatus.PENDING -> "PENDING"
+                    AssetPackStatus.TRANSFERRING -> "TRANSFERRING"
+                    AssetPackStatus.FAILED -> "FAILED"
+                    else -> "UNKNOWN"
+                }
+                val payload = mapOf(
+                    "packName" to state.name(),
+                    "status" to statusStr,
+                    "bytesDownloaded" to state.bytesDownloaded(),
+                    "totalBytes" to state.totalBytesToDownload()
+                )
+                runOnUiThread {
+                    playAssetChannel?.invokeMethod("onAssetPackStateUpdate", payload)
+                }
+            }
+        } catch (e: Exception) {
+            Log.w("MainActivity", "AssetPackManager warning: ${e.message}")
+        }
     }
+
 
     // ─────────────────────────────────────────────────────────────────────────
     // Native AlarmManager scheduling

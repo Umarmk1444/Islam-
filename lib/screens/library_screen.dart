@@ -139,7 +139,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   child: Text(
                     locale == 'ar'
                         ? 'تمت إضافة "${imported.title}" إلى كتبي'
-                        : 'Added "${imported.title}" to bookshelf',
+                        : 'Added "${imported.title}" to PDF Reader',
                     style: const TextStyle(fontFamily: 'Amiri', fontSize: 13),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -211,7 +211,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
         content: Text(
           locale == 'ar'
               ? 'هل أنت متأكد من حذف "${book.title}" من رف كتبك؟\nسيتم حذف الملف والتقدم المحفوظ نهائياً.'
-              : 'Are you sure you want to delete "${book.title}" from your bookshelf?\nThe file and reading progress will be permanently removed.',
+              : 'Are you sure you want to delete "${book.title}" from your PDF Reader?\nThe file and reading progress will be permanently removed.',
           style: TextStyle(
             fontSize: 13.5,
             height: 1.45,
@@ -764,7 +764,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
         'badge': null,
       },
       {
-        'title': {'ar': 'كتبي الخاصة', 'en': 'My Bookshelf', 'am': 'የእኔ መጽሐፍት', 'om': 'Kitaabota Koo'}[locale] ?? 'كتبي الخاصة',
+        'title': {'ar': 'كتبي الخاصة', 'en': 'PDF Reader', 'am': 'PDF Reader', 'om': 'PDF Reader'}[locale] ?? 'كتبي الخاصة',
         'icon': Icons.picture_as_pdf_rounded,
         'badge': _userPdfBooks.isNotEmpty ? '${_userPdfBooks.length}' : null,
       },
@@ -999,7 +999,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      locale == 'ar' ? 'رف كتبي الشخصية' : 'Personal Bookshelf',
+                      locale == 'ar' ? 'رف كتبي الشخصية' : 'PDF Reader',
                       style: TextStyle(
                         color: textColor,
                         fontWeight: FontWeight.bold,
@@ -1140,7 +1140,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     ),
                     const SizedBox(height: 14),
                     Text(
-                      locale == 'ar' ? 'رف كتبك فارغ حالياً' : 'Your Bookshelf is Empty',
+                      locale == 'ar' ? 'رف كتبك فارغ حالياً' : 'Your PDF Reader is Empty',
                       style: TextStyle(
                         color: textColor,
                         fontWeight: FontWeight.bold,

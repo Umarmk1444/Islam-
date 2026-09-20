@@ -1,9 +1,21 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import '../services/play_asset_delivery_service.dart';
 
 class WoffFontLoader {
   static final Set<String> _loadedFonts = {};
+  static final Map<int, Future<bool>> _loadingFutures = {};
+
+  static bool isPageFontLoaded(int pageNumber) {
+    final fontName = "QCF_P${pageNumber.toString().padLeft(3, '0')}";
+    return _loadedFonts.contains(fontName);
+  }
+
+  static const Set<int> localQcfPages = {
+    52, 62, 113, 120, 217, 261, 263, 267, 277, 282, 296,
+    304, 307, 311, 321, 421, 473, 499, 543, 557, 563, 580
+  };
 
   /// Decodes a WOFF 1.0 font binary into a standard TrueType / OpenType (TTF) binary.
   static Uint8List? woffToTtf(Uint8List woffBytes) {
@@ -77,105 +89,151 @@ class WoffFontLoader {
     return ttfData;
   }
 
-  /// Dynamically converts and registers the WOFF font for a specific Quran page
-  /// on platforms that do not natively decode WOFF in DirectWrite (such as Windows).
-  static Future<void> ensurePageFontLoaded(int pageNumber) async {
-    if (kIsWeb || (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS)) {
-      return;
-    }
+  /// Dynamically converts and registers the font for a specific Quran page.
+  static Future<bool> ensurePageFontLoaded(int pageNumber) async {
+    if (kIsWeb) return true;
 
     // Always ensure shared fonts (surah names, Basmala) are loaded
     await ensureCommonFontsLoaded();
 
     final fontName = "QCF_P${pageNumber.toString().padLeft(3, '0')}";
-    if (_loadedFonts.contains(fontName)) return;
-    _loadedFonts.add(fontName);
+    if (_loadedFonts.contains(fontName)) return true;
 
+    if (_loadingFutures.containsKey(pageNumber)) {
+      return await _loadingFutures[pageNumber]!;
+    }
+
+    final future = _loadFontInternal(pageNumber, fontName);
+    _loadingFutures[pageNumber] = future;
+    try {
+      return await future;
+    } finally {
+      _loadingFutures.remove(pageNumber);
+    }
+  }
+
+  static Future<bool> _loadFontInternal(int pageNumber, String fontName) async {
     try {
       final woffNum = pageNumber.toString().padLeft(3, '0');
-      final possiblePaths = [
-        'packages/qcf_quran/assets/fonts/qcf4/QCF4${woffNum}_X-Regular.woff',
-        'assets/fonts/QCF4${woffNum}_X-Regular.woff',
-      ];
+      Uint8List? rawBytes;
 
-      ByteData? byteData;
-      for (final p in possiblePaths) {
+      // 1. If it's one of the preserved offline fonts in assets/fonts/
+      if (localQcfPages.contains(pageNumber)) {
         try {
-          byteData = await rootBundle.load(p);
-          break;
+          final bd = await rootBundle.load('assets/fonts/QCF4${woffNum}_X-Regular.woff');
+          rawBytes = bd.buffer.asUint8List(bd.offsetInBytes, bd.lengthInBytes);
         } catch (_) {}
       }
 
-      if (byteData == null) return;
-
-      final rawBytes = byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes);
-      final ttfBytes = woffToTtf(rawBytes);
-
-      if (ttfBytes != null) {
-        // Register under both bare font name and packaged font name
-        for (final name in [fontName, 'packages/qcf_quran/$fontName']) {
-          final fontLoader = FontLoader(name);
-          fontLoader.addFont(Future.value(ByteData.view(ttfBytes.buffer, ttfBytes.offsetInBytes, ttfBytes.lengthInBytes)));
-          await fontLoader.load();
+      // 2. Load from Google Play Asset Pack directory
+      if (rawBytes == null) {
+        final fontsDir = await PlayAssetDeliveryService.instance.getFontsDirectoryPath();
+        if (fontsDir != null) {
+          final candidateFiles = [
+            File('$fontsDir/qcf4/QCF4${woffNum}_X-Regular.woff'),
+            File('$fontsDir/QCF4${woffNum}_X-Regular.woff'),
+          ];
+          for (final f in candidateFiles) {
+            if (await f.exists()) {
+              rawBytes = await f.readAsBytes();
+              break;
+            }
+          }
         }
       }
+
+      // 3. Load from local documents cache or download on-demand (28 KB)
+      rawBytes ??= await PlayAssetDeliveryService.instance.downloadSinglePageFont(pageNumber);
+
+      // 4. Last fallback: rootBundle
+      if (rawBytes == null) {
+        try {
+          final bd = await rootBundle.load('assets/fonts/QCF4${woffNum}_X-Regular.woff');
+          rawBytes = bd.buffer.asUint8List(bd.offsetInBytes, bd.lengthInBytes);
+        } catch (_) {}
+      }
+
+      if (rawBytes == null) return false;
+
+      // Convert WOFF to TTF if needed
+      final ttfBytes = woffToTtf(rawBytes) ?? rawBytes;
+
+      // Register under both bare font name and package font name for maximum compatibility
+      for (final name in [fontName, 'packages/qcf_quran/$fontName']) {
+        final fontLoader = FontLoader(name);
+        fontLoader.addFont(Future.value(ByteData.view(ttfBytes.buffer, ttfBytes.offsetInBytes, ttfBytes.lengthInBytes)));
+        await fontLoader.load();
+      }
+
+      _loadedFonts.add(fontName);
+      return true;
     } catch (e) {
       debugPrint('[WoffFontLoader] Failed to load font $fontName: $e');
+      return false;
     }
   }
 
   /// Loads common shared fonts like Surah name calligraphy ('surahname') and Basmala ('QCF_BSML')
   static Future<void> ensureCommonFontsLoaded() async {
-    if (kIsWeb || (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS)) {
-      return;
-    }
+    if (kIsWeb) return;
 
     if (_loadedFonts.contains('__common_fonts__')) return;
     _loadedFonts.add('__common_fonts__');
 
     // 1. Load Surah Name calligraphy font
-    await _loadCustomWoff(
-      assetPaths: [
-        'packages/qcf_quran/assets/fonts/surah-name-v2.woff',
-        'assets/fonts/surah-name-v2.woff',
-      ],
+    await _loadCustomFont(
+      assetPaths: ['assets/fonts/surah-name-v2.woff'],
+      assetPackSubPaths: ['surah-name-v2.woff', 'qcf4/../surah-name-v2.woff'],
       fontFamilies: ['surahname', 'packages/qcf_quran/surahname', 'SurahName', 'packages/qcf_quran/SurahName'],
     );
 
     // 2. Load BSML (Basmala) font
-    await _loadCustomWoff(
-      assetPaths: [
-        'packages/qcf_quran/assets/fonts/QCF2BSMLfonts/QCF4_QBSML-Regular.woff',
-        'assets/fonts/QCF2BSMLfonts/QCF4_QBSML-Regular.woff',
-      ],
+    await _loadCustomFont(
+      assetPaths: ['assets/fonts/QCF4_QBSML-Regular.woff'],
+      assetPackSubPaths: ['QCF2BSMLfonts/QCF4_QBSML-Regular.woff'],
       fontFamilies: ['QCF_BSML', 'packages/qcf_quran/QCF_BSML'],
     );
   }
 
-  static Future<void> _loadCustomWoff({
+  static Future<void> _loadCustomFont({
     required List<String> assetPaths,
+    required List<String> assetPackSubPaths,
     required List<String> fontFamilies,
   }) async {
     try {
-      ByteData? byteData;
+      Uint8List? rawBytes;
+
+      // 1. Try root bundle
       for (final p in assetPaths) {
         try {
-          byteData = await rootBundle.load(p);
+          final bd = await rootBundle.load(p);
+          rawBytes = bd.buffer.asUint8List(bd.offsetInBytes, bd.lengthInBytes);
           break;
         } catch (_) {}
       }
 
-      if (byteData == null) return;
-
-      final rawBytes = byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes);
-      final ttfBytes = woffToTtf(rawBytes);
-
-      if (ttfBytes != null) {
-        for (final family in fontFamilies) {
-          final fontLoader = FontLoader(family);
-          fontLoader.addFont(Future.value(ByteData.view(ttfBytes.buffer, ttfBytes.offsetInBytes, ttfBytes.lengthInBytes)));
-          await fontLoader.load();
+      // 2. Try asset pack
+      if (rawBytes == null) {
+        final fontsDir = await PlayAssetDeliveryService.instance.getFontsDirectoryPath();
+        if (fontsDir != null) {
+          for (final sub in assetPackSubPaths) {
+            final f = File('$fontsDir/$sub');
+            if (await f.exists()) {
+              rawBytes = await f.readAsBytes();
+              break;
+            }
+          }
         }
+      }
+
+      if (rawBytes == null) return;
+
+      final ttfBytes = woffToTtf(rawBytes) ?? rawBytes;
+
+      for (final family in fontFamilies) {
+        final fontLoader = FontLoader(family);
+        fontLoader.addFont(Future.value(ByteData.view(ttfBytes.buffer, ttfBytes.offsetInBytes, ttfBytes.lengthInBytes)));
+        await fontLoader.load();
       }
     } catch (e) {
       debugPrint('[WoffFontLoader] Failed to load custom font $fontFamilies: $e');
