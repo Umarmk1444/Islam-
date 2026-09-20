@@ -8,6 +8,7 @@ import '../models/library_item.dart';
 import '../models/fatwa_item.dart';
 import '../models/roqua_item.dart';
 import '../models/user_pdf_book.dart';
+import 'pdf_annotation_service.dart';
 
 class LibraryService {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
@@ -419,6 +420,7 @@ class LibraryService {
         }
       }
       await db.delete('user_pdf_books', where: 'id = ?', whereArgs: [id]);
+      await PdfAnnotationService().deleteAnnotationsForBook(id);
     } catch (e) {
       debugPrint('[LibraryService] Error deleting user PDF book: $e');
     }

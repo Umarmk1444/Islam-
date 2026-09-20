@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../theme_notifier.dart';
 import '../services/library_service.dart';
+import '../services/pdf_thumbnail_service.dart';
 import '../models/library_item.dart';
 import '../models/user_pdf_book.dart';
 import 'library_category_screen.dart';
@@ -1198,7 +1200,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 crossAxisCount: 2,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
-                childAspectRatio: 0.85,
+                childAspectRatio: 0.68,
               ),
               delegate: SliverChildBuilderDelegate(
                 (context, idx) {
@@ -1700,9 +1702,10 @@ class _HeroResumeCard extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Grid PDF Book Card (for My Shelf 2-Column Grid)
 // ─────────────────────────────────────────────────────────────────────────────
-class _GridPdfBookCard extends StatelessWidget {
+// Grid PDF Book Card with Real Stopped-Page Preview (My Shelf)
+// ─────────────────────────────────────────────────────────────────────────────
+class _GridPdfBookCard extends StatefulWidget {
   final UserPdfBook book;
   final bool isDark;
   final Color cardBg;
@@ -1722,125 +1725,354 @@ class _GridPdfBookCard extends StatelessWidget {
   });
 
   @override
+  State<_GridPdfBookCard> createState() => _GridPdfBookCardState();
+}
+
+class _GridPdfBookCardState extends State<_GridPdfBookCard> {
+  final PdfThumbnailService _thumbnailService = PdfThumbnailService();
+  String? _thumbnailPath;
+  bool _isGenerating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadOrGenerateThumbnail();
+  }
+
+  @override
+  void didUpdateWidget(covariant _GridPdfBookCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.book.id != widget.book.id ||
+        oldWidget.book.lastPageRead != widget.book.lastPageRead) {
+      _loadOrGenerateThumbnail();
+    }
+  }
+
+  void _loadOrGenerateThumbnail() async {
+    final bookId = widget.book.id;
+    if (bookId == null) return;
+
+    final targetPage = widget.book.lastPageRead > 0 ? widget.book.lastPageRead : 1;
+
+    // Check synchronous cache first
+    final existing = _thumbnailService.getExistingThumbnailPathSync(bookId, targetPage);
+    if (existing != null) {
+      if (mounted) {
+        setState(() {
+          _thumbnailPath = existing;
+          _isGenerating = false;
+        });
+      }
+      return;
+    }
+
+    // Check asynchronous storage
+    final asyncPath = await _thumbnailService.getExistingThumbnailPath(bookId, targetPage);
+    if (asyncPath != null) {
+      if (mounted) {
+        setState(() {
+          _thumbnailPath = asyncPath;
+          _isGenerating = false;
+        });
+      }
+      return;
+    }
+
+    // If not generated, trigger generation
+    if (mounted) setState(() => _isGenerating = true);
+
+    final generatedPath = await _thumbnailService.generateThumbnail(
+      bookId: bookId,
+      filePath: widget.book.filePath,
+      pageNumber: targetPage,
+    );
+
+    if (mounted && generatedPath != null) {
+      setState(() {
+        _thumbnailPath = generatedPath;
+        _isGenerating = false;
+      });
+    } else if (mounted) {
+      setState(() => _isGenerating = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final titleColor = isDark ? Colors.white : const Color(0xFF152A24);
+    final isRtl = widget.locale == 'ar';
+    final hasThumbnail = _thumbnailPath != null && File(_thumbnailPath!).existsSync();
+    final pageNum = widget.book.lastPageRead > 0 ? widget.book.lastPageRead : 1;
+    final isCover = pageNum <= 1;
+    final pageBadgeText = isCover
+        ? (isRtl ? 'الغلاف' : 'Cover')
+        : (isRtl ? 'صفحة $pageNum' : 'Page $pageNum');
 
     return LiquidPressable(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Container(
-        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: borderColor, width: 1),
+          color: widget.cardBg,
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(
+            color: widget.borderColor.withValues(alpha: widget.isDark ? 0.35 : 0.5),
+            width: 1.2,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
-              blurRadius: 7,
-              offset: const Offset(0, 2),
+              color: Colors.black.withValues(alpha: widget.isDark ? 0.35 : 0.1),
+              blurRadius: 9,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Top Row: PDF Badge + Delete button
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // 1. Page Preview (Actual rendered image of the page user stopped at!)
+              if (hasThumbnail)
+                Image.file(
+                  File(_thumbnailPath!),
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                  errorBuilder: (context, error, stackTrace) => _buildFallbackPage(),
+                )
+              else
+                _buildFallbackPage(),
+
+              // 2. Realistic Book Spine Shadow Effect
+              Positioned(
+                top: 0,
+                bottom: 0,
+                right: isRtl ? 0 : null,
+                left: isRtl ? null : 0,
+                width: 10,
+                child: Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD32F2F).withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(6),
+                    gradient: LinearGradient(
+                      begin: isRtl ? Alignment.centerRight : Alignment.centerLeft,
+                      end: isRtl ? Alignment.centerLeft : Alignment.centerRight,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.28),
+                        Colors.transparent,
+                      ],
+                    ),
                   ),
-                  child: const Row(
+                ),
+              ),
+
+              // 3. Top Floating Header (Page Badge + Delete Action)
+              Positioned(
+                top: 8,
+                left: 8,
+                right: 8,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Stopped Page Indicator Badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.68),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xFFECC94B).withValues(alpha: 0.5),
+                          width: 0.8,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.25),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 5.5,
+                            height: 5.5,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFECC94B),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            pageBadgeText,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Amiri',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Circular Glassmorphic Delete Button
+                    GestureDetector(
+                      onTap: widget.onDelete,
+                      child: Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.6),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            width: 0.6,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.delete_outline_rounded,
+                          size: 13.5,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // 4. Bottom Information Scrim (Title + Reading Progress)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(10, 24, 10, 8),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.65),
+                        Colors.black.withValues(alpha: 0.88),
+                        Colors.black,
+                      ],
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.picture_as_pdf_rounded, color: Color(0xFFD32F2F), size: 12),
-                      SizedBox(width: 3),
+                      // Book Title
                       Text(
-                        'PDF',
-                        style: TextStyle(
-                          color: Color(0xFFD32F2F),
-                          fontSize: 9.5,
+                        widget.book.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
                           fontWeight: FontWeight.bold,
+                          fontSize: 12.5,
+                          fontFamily: 'Amiri',
+                          height: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+
+                      // Progress Row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            widget.book.totalPages > 0
+                                ? '${widget.book.lastPageRead}/${widget.book.totalPages} ${isRtl ? 'صفحة' : 'p'}'
+                                : '${isRtl ? 'صفحة' : 'p'} ${widget.book.lastPageRead}',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.75),
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            '${(widget.book.progressPercent * 100).toInt()}%',
+                            style: const TextStyle(
+                              color: Color(0xFFECC94B),
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+
+                      // Progress Bar
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(2.5),
+                        child: LinearProgressIndicator(
+                          value: widget.book.progressPercent,
+                          backgroundColor: Colors.white.withValues(alpha: 0.2),
+                          valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFECC94B)),
+                          minHeight: 2.8,
                         ),
                       ),
                     ],
                   ),
                 ),
-                GestureDetector(
-                  onTap: onDelete,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withValues(alpha: 0.06) : Colors.black.withValues(alpha: 0.04),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.delete_outline_rounded,
-                      size: 14,
-                      color: isDark ? Colors.white60 : Colors.black54,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            // Book Title
-            Text(
-              book.title,
-              style: TextStyle(
-                color: titleColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 12.5,
-                fontFamily: locale == 'ar' ? 'Amiri' : null,
-                height: 1.25,
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Authentic book page placeholder when thumbnail is generating
+  Widget _buildFallbackPage() {
+    final isDark = widget.isDark;
+    return Container(
+      color: isDark ? const Color(0xFF14201C) : const Color(0xFFFAF5EC),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 20),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFECC94B).withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFFECC94B).withValues(alpha: 0.4),
+                  width: 1,
+                ),
+              ),
+              child: const Icon(
+                Icons.auto_stories_rounded,
+                color: Color(0xFFECC94B),
+                size: 24,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              widget.book.title,
+              textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: isDark ? Colors.white70 : const Color(0xFF3E3127),
+                fontFamily: 'Amiri',
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                height: 1.3,
+              ),
             ),
-
-            // Bottom Progress & Size
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      book.totalPages > 0
-                          ? '${locale == 'ar' ? 'ص' : 'p.'} ${book.lastPageRead}/${book.totalPages}'
-                          : '${locale == 'ar' ? 'ص' : 'p.'} ${book.lastPageRead}',
-                      style: TextStyle(
-                        color: isDark ? const Color(0xFF8A9995) : const Color(0xFF657B74),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      book.formattedSize,
-                      style: TextStyle(
-                        color: isDark ? const Color(0xFF6C7C78) : const Color(0xFF9AA8A4),
-                        fontSize: 9,
-                      ),
-                    ),
-                  ],
+            if (_isGenerating) ...[
+              const SizedBox(height: 12),
+              const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(
+                  strokeWidth: 1.6,
+                  color: Color(0xFFECC94B),
                 ),
-                const SizedBox(height: 4),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: LinearProgressIndicator(
-                    value: book.progressPercent,
-                    backgroundColor: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.06),
-                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF1B8A6B)),
-                    minHeight: 3,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ],
         ),
       ),

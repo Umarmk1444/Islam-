@@ -165,5 +165,41 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- AI App detection queries -->
+        <package android:name="com.google.android.apps.bard" />
+        <package android:name="com.google.android.googlequicksearchbox" />
+        <package android:name="com.openai.chatgpt" />
+        <package android:name="com.deepseek.chat" />
+        <package android:name="com.anthropic.claude" />
+        <package android:name="com.x.android" />
+        <package android:name="com.moonshot.kimichat" />
+        <package android:name="com.microsoft.copilot" />
+        <package android:name="com.microsoft.bing" />
+        <package android:name="ai.perplexity.app.android" />
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="text/plain" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="chatgpt" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="claude" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="googleapp" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="ms-copilot" />
+        </intent>
+        <package android:name="com.google.android.apps.translate" />
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="googletranslate" />
+        </intent>
     </queries>
 </manifest>

@@ -16,12 +16,87 @@ class MainActivity : AudioServiceActivity() {
 
     private val DEVICE_CHANNEL = "com.umer.quranzone/device"
     private val ATHAN_ALARM_CHANNEL = "com.umer.quranzone/athan_alarm"
+    private val SYSTEM_ACTIONS_CHANNEL = "com.umer.quranzone/system_actions"
 
     private var deviceChannel: MethodChannel? = null
     private var athanAlarmChannel: MethodChannel? = null
+    private var systemActionsChannel: MethodChannel? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        // ── System Actions Channel (ACTION_PROCESS_TEXT for AI & Translate popup) ──
+        systemActionsChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, SYSTEM_ACTIONS_CHANNEL)
+        systemActionsChannel?.setMethodCallHandler { call, result ->
+            when (call.method) {
+                "getProcessTextApps" -> {
+                    try {
+                        val intent = Intent(Intent.ACTION_PROCESS_TEXT).setType("text/plain")
+                        val resolveInfos = packageManager.queryIntentActivities(intent, 0)
+                        val apps = mutableListOf<Map<String, String>>()
+                        for (ri in resolveInfos) {
+                            try {
+                                val actInfo = ri.activityInfo ?: continue
+                                val pkg = actInfo.packageName ?: continue
+                                val name = actInfo.name ?: ""
+                                var labelStr = pkg
+                                try {
+                                    val charSeq = ri.loadLabel(packageManager)
+                                    if (charSeq != null && charSeq.isNotEmpty()) {
+                                        labelStr = charSeq.toString()
+                                    }
+                                } catch (_: Throwable) {
+                                    labelStr = pkg
+                                }
+                                apps.add(mapOf(
+                                    "packageName" to pkg,
+                                    "activityName" to name,
+                                    "label" to labelStr
+                                ))
+                            } catch (_: Throwable) {}
+                        }
+                        result.success(apps)
+                    } catch (e: Throwable) {
+                        Log.e("MainActivity", "getProcessTextApps error: ${e.message}", e)
+                        result.success(emptyList<Map<String, String>>())
+                    }
+                }
+                "launchProcessText" -> {
+                    try {
+                        val packageName = call.argument<String>("packageName")
+                        val activityName = call.argument<String>("activityName")
+                        val text = call.argument<String>("text") ?: ""
+
+                        val intent = Intent(Intent.ACTION_PROCESS_TEXT).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_PROCESS_TEXT, text)
+                            putExtra(Intent.EXTRA_PROCESS_TEXT_READONLY, true)
+                            if (!activityName.isNullOrEmpty() && !packageName.isNullOrEmpty()) {
+                                setClassName(packageName, activityName)
+                            } else if (!packageName.isNullOrEmpty()) {
+                                setPackage(packageName)
+                            }
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        startActivity(intent)
+                        result.success(true)
+                    } catch (e: Throwable) {
+                        Log.e("MainActivity", "launchProcessText error: ${e.message}", e)
+                        result.error("LAUNCH_ERROR", e.message ?: "Failed to launch", null)
+                    }
+                }
+                "isPackageInstalled" -> {
+                    try {
+                        val packageName = call.argument<String>("packageName") ?: ""
+                        packageManager.getPackageInfo(packageName, 0)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.success(false)
+                    }
+                }
+                else -> result.notImplemented()
+            }
+        }
 
         // ── Device info channel (existing) ──────────────────────────────────
         deviceChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, DEVICE_CHANNEL)
