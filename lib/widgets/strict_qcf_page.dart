@@ -1,4 +1,3 @@
-import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import '../qcf/qcf_quran.dart';
@@ -613,7 +612,7 @@ class _StrictQcfPageState extends State<StrictQcfPage>
     }
 
     if (line.isBasmala) {
-      if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+      if (!kIsWeb) {
         WoffFontLoader.ensurePageFontLoaded(1);
       }
       return Center(

@@ -6,6 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
+import 'notification_service.dart';
 
 class AppUpdateService {
   AppUpdateService._();
@@ -85,11 +86,33 @@ class AppUpdateService {
       // 2. Fallback Check: Query Play Store / remote API version
       final updateAvailable = await _checkRemoteVersion();
       if (updateAvailable != null && updateAvailable['hasUpdate'] == true) {
+        final storeVersion = (updateAvailable['version'] as String?) ?? '';
+        final notes = (updateAvailable['notes'] as String?) ?? '';
+
+        // Trigger phone notification if user hasn't seen this version notification yet
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          final lastNotified = prefs.getString('last_notified_update_ver');
+          if (lastNotified != storeVersion) {
+            await prefs.setString('last_notified_update_ver', storeVersion);
+            final isArabic = Platform.localeName.startsWith('ar');
+            await NotificationService().showUpdateNotification(
+              version: storeVersion,
+              releaseNotes: notes,
+              title: isArabic
+                  ? '🎉 تحديث جديد متوفر: Quran Zone $storeVersion'
+                  : '🎉 New Update Available: Quran Zone $storeVersion',
+            );
+          }
+        } catch (notifErr) {
+          debugPrint('[AppUpdateService] Notification dispatch error: $notifErr');
+        }
+
         if (context.mounted) {
           _showUpdateAvailableDialog(
             context,
-            latestVersion: updateAvailable['version'] ?? '',
-            releaseNotes: updateAvailable['notes'] ?? '',
+            latestVersion: storeVersion,
+            releaseNotes: notes,
           );
         }
       } else if (isManual && context.mounted) {
@@ -122,10 +145,32 @@ class AppUpdateService {
         if (match != null && match.groupCount >= 1) {
           final storeVersion = match.group(1)!;
           if (_isVersionHigher(storeVersion, currentVersion)) {
+            String notes = '';
+            try {
+              final wnMatch = RegExp(r'\["What.?s new",\[\["([^"]+)"\]', caseSensitive: false)
+                  .firstMatch(res.body);
+              if (wnMatch != null && wnMatch.groupCount >= 1) {
+                final captured = wnMatch.group(1);
+                if (captured != null && captured.isNotEmpty) {
+                  notes = captured
+                      .replaceAll(r'\n', '\n')
+                      .replaceAll(r'\"', '"')
+                      .replaceAll(r'\\', '')
+                      .trim();
+                }
+              }
+            } catch (_) {}
+            if (notes.isEmpty) {
+              final isArabic = Platform.localeName.startsWith('ar');
+              notes = isArabic
+                  ? 'يتوفر إصدار جديد من Quran Zone ($storeVersion) يضم قارئ كتب الـ PDF، تقليل حجم التخزين، وأحدث التحسينات!'
+                  : 'A new version of Quran Zone ($storeVersion) is available with the new Islamic PDF Reader, 51 MB storage reduction, and exciting optimizations!';
+            }
+
             return {
               'hasUpdate': true,
               'version': storeVersion,
-              'notes': 'A new version with latest improvements is available on Google Play.',
+              'notes': notes,
             };
           }
         }

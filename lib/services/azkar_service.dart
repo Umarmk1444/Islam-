@@ -226,4 +226,116 @@ class AzkarService {
     
     return null;
   }
+
+  /// Generates smart periodic daytime reminders (8:00 AM - 10:00 PM):
+  /// - 50% Salawat on Prophet Muhammad ﷺ
+  /// - 50% Authentic Dhikr (Istighfar, Tahleel, Tasbih, Hawqala) & short Sunnah Duas
+  /// - Smart anti-repetition memory so today's reminders differ from tomorrow's
+  Future<ContextualZekr> getPeriodicSmartZekr() async {
+    final prefs = await SharedPreferences.getInstance();
+    final random = Random();
+    
+    // Toggle between Salawat (50%) and Dhikr/Dua (50%)
+    final bool isSalawatTurn = (prefs.getBool('smart_dhikr_toggle') ?? false);
+    await prefs.setBool('smart_dhikr_toggle', !isSalawatTurn);
+
+    if (isSalawatTurn) {
+      // ── 50% Salawat on Prophet Muhammad ﷺ ─────────────────────────────
+      const salawatList = [
+        'اللهم صلِّ وسلِّم وبارك على نبينا وحبيبنا محمد ﷺ',
+        'قال رسول الله ﷺ: «من صلى عليّ صلاة صلى الله عليه بها عشراً»',
+        'اللهم صلِّ على محمد وعلى آل محمد كما صليت على إبراهيم وعلى آل إبراهيم إنك حميد مجيد',
+        'إن الله وملائكته يصلون على النبي، يا أيها الذين آمنوا صلوا عليه وسلموا تسليماً ﷺ',
+        'قال رسول الله ﷺ: «أولى الناس بي يوم القيامة أكثرهم عليّ صلاة»',
+        'صلوا على خير البرية وشفيع الأمة سيدنا محمد ﷺ',
+        'اللهم صلِّ وسلم على نبينا محمد صلاة تفرّج بها الكروب وتيسّر بها الأمور ﷺ',
+        'قال رسول الله ﷺ: «البخيل من ذُكِرتُ عنده فلم يُصلِّ عليّ» ﷺ',
+        'أكثروا من الصلاة على الحبيب المصطفى، فإن صلاتكم معروضة عليه ﷺ',
+        'يا رب صلِّ وسلِّم دائماً أبداً على حبيبك خير الخلق كلهم ﷺ',
+      ];
+      
+      final recentSalawat = prefs.getStringList('recent_salawat_idx') ?? [];
+      List<int> available = [];
+      for (int i = 0; i < salawatList.length; i++) {
+        if (!recentSalawat.contains(i.toString())) available.add(i);
+      }
+      if (available.isEmpty) {
+        recentSalawat.clear();
+        available = List.generate(salawatList.length, (i) => i);
+      }
+      final pickedIdx = available[random.nextInt(available.length)];
+      recentSalawat.add(pickedIdx.toString());
+      if (recentSalawat.length > 6) recentSalawat.removeAt(0);
+      await prefs.setStringList('recent_salawat_idx', recentSalawat);
+
+      return ContextualZekr(
+        id: 7000 + pickedIdx,
+        zekr: salawatList[pickedIdx],
+        context: ZekrContext.general,
+        title: '💚 الصلاة على النبي ﷺ',
+      );
+    } else {
+      // ── 50% Istighfar, Tahleel, Tasbih, & Short Sunnah Duas ─────────────
+      const generalDhikrList = [
+        // الاستغفار
+        'أستغفر الله العظيم وأتوب إليه (استغفار يمحو الذنب ويشرح الصدر ويوسع الرزق)',
+        'سيد الاستغفار: «اللهم أنت ربي لا إله إلا أنت، خلقتني وأنا عبدك، وأنا على عهدك ووعدك ما استطعت»',
+        '«أستغفر الله العظيم الذي لا إله إلا هو الحي القيوم وأتوب إليه»',
+        '«ربِّ اغفر لي وتُب عليَّ، إنك أنت التواب الرحيم»',
+        // التهليل والتوحيد
+        '«لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير»',
+        'أفضل الذكر: «لا إله إلا الله» تجديدٌ للإيمان ونورٌ للقلب',
+        '«لا إله إلا أنت سبحانك إني كنت من الظالمين» (دعوة ذي النون ما دعا بها مؤمن إلا استجاب الله له)',
+        // التسبيح والتحميد
+        '«سبحان الله وبحمده، سبحان الله العظيم» (كلمتان خفيفتان على اللسان ثقيلتان في الميزان)',
+        '«سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر» (أحب الكلام إلى الله)',
+        '«سبحان الله وبحمده عدد خلقه، ورضا نفسه، وزنة عرشه، ومداد كلماته»',
+        // الحوقلة والتوكل
+        '«لا حول ولا قوة إلا بالله العلي العظيم» (كنز عظيم من كنوز الجنة وباب من أبواب الفرج)',
+        '«حسبي الله لا إله إلا هو عليه توكلت وهو رب العرش العظيم»',
+        // أدعية مأثورة قصيرة
+        '«يا مقلب القلوب ثبّت قلبي على دينك»',
+        '«اللهم إني أسألك الهدى والتقى والعفاف والغنى»',
+        '«ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار»',
+        '«اللهم أعني على ذكرك وشكرك وحسن عبادتك»',
+        '«اللهم إنك عفوٌّ تحب العفو فاعفُ عني»',
+        '«اللهم إني أعوذ بك من الهم والحزن، والعجز والكسل، والبخل والجبن»',
+        '«رضيتُ بالله رباً، وبالإسلام ديناً، وبمحمد ﷺ نبياً ورسولاً»',
+        '«اللهم اشرح لي صدري ويسر لي أمري»',
+      ];
+
+      final recentDhikr = prefs.getStringList('recent_periodic_dhikr_idx') ?? [];
+      List<int> available = [];
+      for (int i = 0; i < generalDhikrList.length; i++) {
+        if (!recentDhikr.contains(i.toString())) available.add(i);
+      }
+      if (available.isEmpty) {
+        recentDhikr.clear();
+        available = List.generate(generalDhikrList.length, (i) => i);
+      }
+      final pickedIdx = available[random.nextInt(available.length)];
+      recentDhikr.add(pickedIdx.toString());
+      if (recentDhikr.length > 12) recentDhikr.removeAt(0);
+      await prefs.setStringList('recent_periodic_dhikr_idx', recentDhikr);
+
+      final text = generalDhikrList[pickedIdx];
+      String title = '✨ ذكر ودعاء';
+      if (text.contains('أستغفر')) {
+        title = '🤲 استغفار وتوبة';
+      } else if (text.contains('لا إله إلا الله')) {
+        title = '☝️ تهليل وتوحيد';
+      } else if (text.contains('سبحان الله')) {
+        title = '💎 تسبيح وتحميد';
+      } else if (text.contains('لا حول ولا قوة')) {
+        title = '🛡️ كنز من الجنة';
+      }
+
+      return ContextualZekr(
+        id: 8000 + pickedIdx,
+        zekr: text,
+        context: ZekrContext.general,
+        title: title,
+      );
+    }
+  }
 }

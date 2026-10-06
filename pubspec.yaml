@@ -1,7 +1,7 @@
 name: quran_zone
 description: An Islamic application (Quran & Dawah) in Arabic, English, Amharic and Oromo languages.
 publish_to: 'none'
-version: 1.1.1+9
+version: 1.2.0+11
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -69,12 +69,16 @@ flutter:
     - assets/cities.json.gz
     - assets/icons/light/
     - assets/icons/dark/
+    - assets/mainframe.png
   fonts:
     - family: Amiri
       fonts:
         - asset: assets/fonts/Amiri-Regular.ttf
         - asset: assets/fonts/Amiri-Bold.ttf
           weight: 700
+    - family: QCF_P001
+      fonts:
+        - asset: assets/fonts/QCF4001_X-Regular.woff
     - family: QCF_P052
       fonts:
         - asset: assets/fonts/QCF4052_X-Regular.woff

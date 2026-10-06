@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../qcf_quran.dart';
 
 class HeaderWidget extends StatelessWidget {
@@ -36,9 +36,25 @@ class HeaderWidget extends StatelessWidget {
           children: [
             Image(
               image: const AssetImage("assets/mainframe.png", package: null),
-              width:isPortrait? getScreenType(context) == ScreenType.large 
-                  ? effectiveTheme.headerWidthLarge 
-                  : effectiveTheme.headerWidthSmall:MediaQuery.of(  context).size.width * 0.8,
+              width: isPortrait
+                  ? getScreenType(context) == ScreenType.large
+                      ? effectiveTheme.headerWidthLarge
+                      : effectiveTheme.headerWidthSmall
+                  : MediaQuery.of(context).size.width * 0.8,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 44,
+                  width: MediaQuery.of(context).size.width * 0.85,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                      width: 1.2,
+                    ),
+                  ),
+                );
+              },
             ),
             RichText(
               textAlign: TextAlign.center,

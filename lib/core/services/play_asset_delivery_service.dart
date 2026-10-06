@@ -19,6 +19,10 @@ class PlayAssetDeliveryService {
   static String? _cachedPath;
   static bool _isChecking = false;
   static bool _isDownloadingHttp = false;
+  static bool _isPlayStoreDownloading = false;
+
+  /// Whether Google Play Store's native Asset Delivery is actively downloading.
+  static bool get isPlayStoreDownloading => _isPlayStoreDownloading;
 
   final ValueNotifier<bool> isFontsReadyNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<double> downloadProgressNotifier =
@@ -46,19 +50,39 @@ class PlayAssetDeliveryService {
           downloadProgressNotifier.value = (downloaded / total).clamp(0.0, 1.0);
         }
 
-        if (status == 'COMPLETED') {
-          isFontsReadyNotifier.value = true;
-          downloadProgressNotifier.value = 1.0;
-          await getFontsDirectoryPath();
-        } else if (status == 'DOWNLOADING') {
+        if (status == 'DOWNLOADING' || status == 'PENDING') {
+          _isPlayStoreDownloading = true;
           final mbDown = (downloaded / (1024 * 1024)).toStringAsFixed(1);
           final mbTotal = (total / (1024 * 1024)).toStringAsFixed(1);
           statusMessageNotifier.value =
-              'جاري تنزيل خطوط المصحف ($mbDown MB / $mbTotal MB)...';
+              'جاري تنزيل خطوط المصحف من Google Play ($mbDown MB / $mbTotal MB)...';
+        } else if (status == 'COMPLETED') {
+          _isPlayStoreDownloading = false;
+          isFontsReadyNotifier.value = true;
+          downloadProgressNotifier.value = 1.0;
+          await getFontsDirectoryPath();
+          // Clean up temporary HTTP files: Play Store official pack is installed, so 0 junk files remain!
+          await cleanupTemporaryCache();
+        } else if (status == 'FAILED' || status == 'CANCELED' || status == 'NOT_INSTALLED') {
+          _isPlayStoreDownloading = false;
         }
       } catch (e) {
         debugPrint('[PlayAssetDelivery] Error processing state update: $e');
       }
+    }
+  }
+
+  /// Deletes the temporary HTTP download cache once Play Store asset pack is confirmed installed.
+  Future<void> cleanupTemporaryCache() async {
+    try {
+      final appDir = await getApplicationDocumentsDirectory();
+      final fontsDir = Directory('${appDir.path}/quran_fonts');
+      if (fontsDir.existsSync()) {
+        await fontsDir.delete(recursive: true);
+        debugPrint('[PlayAssetDelivery] Successfully cleaned up temporary font cache (0 junk files).');
+      }
+    } catch (e) {
+      debugPrint('[PlayAssetDelivery] Error cleaning up temporary cache: $e');
     }
   }
 
@@ -160,8 +184,54 @@ class PlayAssetDeliveryService {
     return null;
   }
 
+  final Set<int> _activePrefetches = {};
+
+  /// Prefetches a window of pages around [centerPage] (at least 30 to 50 pages before & after).
+  /// Downloads in priority order closest to [centerPage] first.
+  Future<void> prefetchNeighborhood(int centerPage, {int radius = 35}) async {
+    // If native asset pack is already installed and verified, no need for HTTP prefetch
+    if (isFontsReadyNotifier.value && _cachedPath != null && !_cachedPath!.contains('quran_fonts/qcf4')) {
+      return;
+    }
+
+    final start = (centerPage - radius).clamp(1, 604);
+    final end = (centerPage + radius).clamp(1, 604);
+
+    // Sort by distance to centerPage so current and closest pages download first
+    final List<int> pages = [];
+    for (int p = start; p <= end; p++) {
+      pages.add(p);
+    }
+    pages.sort((a, b) => (a - centerPage).abs().compareTo((b - centerPage).abs()));
+
+    final localBase = await getLocalCacheDirectory();
+    final qcf4Dir = Directory('$localBase/qcf4');
+    final List<int> missing = [];
+    for (final p in pages) {
+      final num = p.toString().padLeft(3, '0');
+      if (!File('${qcf4Dir.path}/QCF4${num}_X-Regular.woff').existsSync() && !_activePrefetches.contains(p)) {
+        missing.add(p);
+      }
+    }
+
+    if (missing.isEmpty) return;
+
+    _activePrefetches.addAll(missing);
+
+    try {
+      const batchSize = 6;
+      for (int i = 0; i < missing.length; i += batchSize) {
+        final batch = missing.skip(i).take(batchSize).toList();
+        await Future.wait(batch.map((p) => downloadSinglePageFont(p)));
+      }
+    } finally {
+      _activePrefetches.removeAll(missing);
+    }
+  }
+
   /// Starts downloading the Quran fonts pack in the background with progress.
-  Future<void> startDirectHttpDownload() async {
+  /// First downloads 30-50 pages around [initialPage], then yields to Play Store if active.
+  Future<void> startDirectHttpDownload({int initialPage = 1}) async {
     if (_isDownloadingHttp || isFontsReadyNotifier.value) return;
     _isDownloadingHttp = true;
 
@@ -170,6 +240,18 @@ class PlayAssetDeliveryService {
       final qcf4Dir = Directory('$localBase/qcf4');
       if (!qcf4Dir.existsSync()) {
         qcf4Dir.createSync(recursive: true);
+      }
+
+      // 1. Immediately prefetch the 30-50 pages neighborhood around active page first!
+      await prefetchNeighborhood(initialPage, radius: 35);
+
+      // 2. Check if Play Store is actively downloading.
+      // If Play Store is downloading, DO NOT download all 604 pages via HTTP!
+      // Let Play Store complete the full pack.
+      if (_isPlayStoreDownloading) {
+        debugPrint('[PlayAssetDelivery] Play Store is actively downloading pack. Waiting for Play Store.');
+        _isDownloadingHttp = false;
+        return;
       }
 
       int completedCount = 0;
@@ -196,8 +278,7 @@ class PlayAssetDeliveryService {
         return;
       }
 
-      // Download in parallel batches of 6 concurrent requests for blazing speed
-      const batchSize = 6;
+      // Download remaining pages sorted by proximity to initialPage
       final List<int> pagesToDownload = [];
       for (int i = 1; i <= totalPages; i++) {
         final num = i.toString().padLeft(3, '0');
@@ -205,8 +286,16 @@ class PlayAssetDeliveryService {
           pagesToDownload.add(i);
         }
       }
+      pagesToDownload.sort((a, b) => (a - initialPage).abs().compareTo((b - initialPage).abs()));
 
+      const batchSize = 6;
       for (int i = 0; i < pagesToDownload.length; i += batchSize) {
+        // If Play Store started downloading during this process, yield and stop HTTP download!
+        if (_isPlayStoreDownloading) {
+          debugPrint('[PlayAssetDelivery] Play Store started downloading mid-flight. Yielding HTTP download.');
+          break;
+        }
+
         final batch = pagesToDownload.skip(i).take(batchSize).toList();
         await Future.wait(batch.map((pageNum) async {
           final bytes = await downloadSinglePageFont(pageNum);
@@ -227,9 +316,11 @@ class PlayAssetDeliveryService {
         }
       }
 
-      isFontsReadyNotifier.value = true;
-      downloadProgressNotifier.value = 1.0;
-      _cachedPath = localBase;
+      if (completedCount >= totalPages) {
+        isFontsReadyNotifier.value = true;
+        downloadProgressNotifier.value = 1.0;
+        _cachedPath = localBase;
+      }
     } catch (e) {
       debugPrint('[PlayAssetDelivery] Direct download error: $e');
     } finally {
@@ -238,7 +329,7 @@ class PlayAssetDeliveryService {
   }
 
   /// Checks the asset pack status and initiates fetch.
-  Future<bool> ensureAssetPackReady() async {
+  Future<bool> ensureAssetPackReady({int initialPage = 1}) async {
     if (isFontsReadyNotifier.value) return true;
     if (_isChecking) return isFontsReadyNotifier.value;
     _isChecking = true;
@@ -264,8 +355,11 @@ class PlayAssetDeliveryService {
             if (status == 'COMPLETED') {
               isFontsReadyNotifier.value = true;
               await getFontsDirectoryPath();
+              await cleanupTemporaryCache();
               _isChecking = false;
               return true;
+            } else if (status == 'DOWNLOADING' || status == 'PENDING') {
+              _isPlayStoreDownloading = true;
             }
           }
 
@@ -275,8 +369,16 @@ class PlayAssetDeliveryService {
         } catch (_) {}
       }
 
-      // Always start the fast direct HTTP download in parallel so it never hangs!
-      unawaited(startDirectHttpDownload());
+      // 1. Immediately pre-fetch the 30-50 page neighborhood around active page
+      unawaited(prefetchNeighborhood(initialPage, radius: 35));
+
+      // 2. Wait 2.5s for Play Store to confirm if it has started downloading
+      await Future.delayed(const Duration(milliseconds: 2500));
+
+      // 3. If Play Store didn't start (sideloaded, offline, or delay), continue background download
+      if (!_isPlayStoreDownloading && !isFontsReadyNotifier.value) {
+        unawaited(startDirectHttpDownload(initialPage: initialPage));
+      }
     } catch (e) {
       debugPrint('[PlayAssetDelivery] ensureAssetPackReady error: $e');
     } finally {

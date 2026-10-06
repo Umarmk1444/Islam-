@@ -35,7 +35,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   String _selectedLanguage = 'English';
   bool _notificationsEnabled = true;
   int _notificationInterval = 60;
-  String _appVersion = 'Version 1.1.1 (Build 9)';
+  String _appVersion = 'Version 1.2.0 (Build 10)';
 
   // Entrance & Header Animations
   late final AnimationController _headerCtrl;
@@ -1399,6 +1399,16 @@ class _SettingsScreenState extends State<SettingsScreen>
         }
 
         final List<Map<String, dynamic>> featureTickets = [
+          {
+            'icon': Icons.picture_as_pdf_rounded,
+            'color': const Color(0xFFEF4444),
+            'title': isArabic
+                ? 'قارئ كتب PDF ورف كتبي الخاص'
+                : 'Islamic PDF Reader & Personal Bookshelf',
+            'desc': isArabic
+                ? 'قارئ كتب PDF متكامل ومطور: قراءة بالتمرير الرأسي المستمر، ترجمة النصوص الفورية، البحث في Google، وسؤال الذكاء الاصطناعي (AI) مباشرة من الصفحة، مع حفظ تلقائي لآخر صفحة ومشاركة الكتب.'
+                : 'Complete built-in PDF reader: continuous vertical scrolling, instant text translation, Google Search & on-device AI queries, automatic page tracking, and easy book sharing.',
+          },
           {
             'icon': Icons.menu_book_rounded,
             'color': const Color(0xFF10B981),

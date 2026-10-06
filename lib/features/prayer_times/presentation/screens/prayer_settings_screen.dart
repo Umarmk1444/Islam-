@@ -233,10 +233,18 @@ class _PrayerSettingsScreenState extends State<PrayerSettingsScreen> {
                               children: [
                                 Text('Start Delay:', style: AppTextStyles.bodySmall.copyWith(color: textColor.withValues(alpha: 0.8))),
                                 DropdownButton<int>(
-                                  value: cfg.autoSilentDelayMins,
+                                  value: [0, 5, 10, 15, 20, 25, 30].contains(cfg.autoSilentDelayMins)
+                                      ? cfg.autoSilentDelayMins
+                                      : 15,
                                   dropdownColor: Theme.of(context).cardColor,
                                   underline: const SizedBox(),
-                                  items: [0, 1, 2, 5, 10].map((val) => DropdownMenuItem(value: val, child: Text('$val min', style: AppTextStyles.bodySmall.copyWith(color: textColor)))).toList(),
+                                  items: [0, 5, 10, 15, 20, 25, 30]
+                                      .map((val) => DropdownMenuItem(
+                                          value: val,
+                                          child: Text('$val min',
+                                              style: AppTextStyles.bodySmall
+                                                  .copyWith(color: textColor))))
+                                      .toList(),
                                   onChanged: (val) {
                                     if (val != null) ctrl.updateConfig(cfg.copyWith(autoSilentDelayMins: val));
                                   },

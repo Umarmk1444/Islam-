@@ -13,7 +13,7 @@ class WoffFontLoader {
   }
 
   static const Set<int> localQcfPages = {
-    52, 62, 113, 120, 217, 261, 263, 267, 277, 282, 296,
+    1, 52, 62, 113, 120, 217, 261, 263, 267, 277, 282, 296,
     304, 307, 311, 321, 421, 473, 499, 543, 557, 563, 580
   };
 
@@ -193,6 +193,9 @@ class WoffFontLoader {
       assetPackSubPaths: ['QCF2BSMLfonts/QCF4_QBSML-Regular.woff'],
       fontFamilies: ['QCF_BSML', 'packages/qcf_quran/QCF_BSML'],
     );
+
+    // 3. Always ensure Page 1 font (QCF_P001) is loaded for Basmala glyphs
+    await ensurePageFontLoaded(1);
   }
 
   static Future<void> _loadCustomFont({

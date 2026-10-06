@@ -135,7 +135,7 @@ class PrayerConfig {
     this.isManualLocation   = false,
     this.is24HourFormat     = false,
     this.autoSilentEnabled  = false,
-    this.autoSilentDelayMins = 10,
+    this.autoSilentDelayMins = 15,
     this.autoSilentDurationMins = 25,
     this.hijriOffset        = 0,
     this.prayerOffsets      = const {
@@ -320,7 +320,7 @@ class PrayerConfig {
       isManualLocation: j['isManualLocation'] as bool? ?? false,
       is24HourFormat: j['is24HourFormat'] as bool? ?? false,
       autoSilentEnabled: j['autoSilentEnabled'] as bool? ?? false,
-      autoSilentDelayMins: j['autoSilentDelayMins'] as int? ?? 10,
+      autoSilentDelayMins: j['autoSilentDelayMins'] as int? ?? 15,
       autoSilentDurationMins: j['autoSilentDurationMins'] as int? ?? 25,
       hijriOffset:    j['hijriOffset'] as int? ?? 0,
       prayerOffsets:  parsedOffsets,

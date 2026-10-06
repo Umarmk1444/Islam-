@@ -322,7 +322,13 @@ VoidCallback? _onAutoPlayTap;
 // ═════════════════════════════════════════════════════════════════════════════
 
 class AzkarScreen extends StatefulWidget {
-  const AzkarScreen({super.key});
+  final String? initialCategory;
+  final int initialTabIndex;
+  const AzkarScreen({
+    super.key,
+    this.initialCategory,
+    this.initialTabIndex = 0,
+  });
 
   @override
   State<AzkarScreen> createState() => _AzkarScreenState();
@@ -337,7 +343,11 @@ class _AzkarScreenState extends State<AzkarScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: widget.initialTabIndex.clamp(0, 1),
+    );
     _tabController.addListener(() {
       if (_tabController.index != 0) {
         _showAutoPlayNotifier.value = false;
@@ -443,7 +453,10 @@ class _AzkarScreenState extends State<AzkarScreen>
           body: TabBarView(
             controller: _tabController,
             children: [
-              _DailyAzkarTab(key: _dailyTabKey),
+              _DailyAzkarTab(
+                key: _dailyTabKey,
+                initialCategory: widget.initialCategory,
+              ),
               const _HisnAlMuslimTab(),
             ],
           ),
@@ -458,7 +471,8 @@ class _AzkarScreenState extends State<AzkarScreen>
 // ═════════════════════════════════════════════════════════════════════════════
 
 class _DailyAzkarTab extends StatefulWidget {
-  const _DailyAzkarTab({super.key});
+  final String? initialCategory;
+  const _DailyAzkarTab({super.key, this.initialCategory});
 
   @override
   State<_DailyAzkarTab> createState() => _DailyAzkarTabState();
@@ -706,7 +720,15 @@ class _DailyAzkarTabState extends State<_DailyAzkarTab>
       if (mounted) {
         setState(() => _categories = cats);
         if (cats.isNotEmpty) {
-          await _loadAzkarForCategory(cats[0]);
+          int initialIdx = 0;
+          if (widget.initialCategory != null && widget.initialCategory!.isNotEmpty) {
+            final target = widget.initialCategory!;
+            final foundIdx = cats.indexWhere(
+                (c) => c.contains(target) || target.contains(c));
+            if (foundIdx != -1) initialIdx = foundIdx;
+          }
+          setState(() => _selectedCategoryIndex = initialIdx);
+          await _loadAzkarForCategory(cats[initialIdx]);
         } else {
           setState(() => _isLoading = false);
         }

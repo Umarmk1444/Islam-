@@ -28,3 +28,13 @@
 -dontwarn org.conscrypt.**
 -dontwarn okio.**
 
+# Gson & Reflection Rules (Fixes TypeToken.getSuperclassTypeParameter crash)
+-keepattributes Signature, *Annotation*, EnclosingMethod, InnerClasses
+-keep class com.google.gson.** { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+-dontwarn com.google.gson.**
+
+

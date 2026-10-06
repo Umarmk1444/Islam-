@@ -443,12 +443,17 @@ void azkarReminderCallback(int id) async {
   DartPluginRegistrant.ensureInitialized();
   try {
     final bool isMorning = id == 300;
-    final title = isMorning ? '☀️ أذكار الصباح' : '🌙 أذكار المساء';
-    final body = isMorning
-        ? 'حان وقت أذكار الصباح، لا تنس ذكر الله'
-        : 'حان وقت أذكار المساء، لا تنس ذكر الله';
+    final String title = isMorning ? '🌅 حان وقت أذكار الصباح' : '🌙 حان وقت أذكار المساء والنوم';
+    final String body = isMorning
+        ? '«أصبحنا وأصبح الملك لله، والحمد لله»'
+        : '«باسمك ربي وضعت جنبي وبك أرفعه» تلاوة سورة الملك';
+    final String expandedText = isMorning
+        ? '«أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير»\n\n✨ حصّن يومك وبركة نهارك بالذكر والتسبيح.. اضغط هنا لقراءة أذكار الصباح كاملة.'
+        : '«باسمك ربي وضعت جنبي وبك أرفعه، فإن أمسكت نفسي فارحمها وإن أرسلتها فاحفظها بما تحفظ به عبادك الصالحين»\n\n✨ تلاوة سورة الملك المنجية من عذاب القبر.. اضغط هنا لقراءة أذكار النوم وسورة الملك.';
+    final String summary = isMorning ? '📖 أذكار الصباح' : '📖 أذكار النوم وسورة الملك';
     final soundName = isMorning ? 'azkarsabah' : 'azkarmassa';
-    final channelId = isMorning ? 'azkar_sabah_channel' : 'azkar_massa_channel';
+    final channelId = isMorning ? 'azkar_sabah_voice_channel' : 'azkar_massa_voice_channel';
+    final payload = isMorning ? 'morning_azkar' : 'evening_azkar';
 
     final plugin = FlutterLocalNotificationsPlugin();
     const androidSettings =
@@ -463,8 +468,8 @@ void azkarReminderCallback(int id) async {
       await androidImplementation.createNotificationChannel(
         AndroidNotificationChannel(
           channelId,
-          isMorning ? 'Morning Azkar' : 'Evening Azkar',
-          description: 'Azkar reminders 40 mins after prayer',
+          isMorning ? 'Morning Azkar Voice' : 'Evening/Night Azkar Voice',
+          description: 'Human voice reminder with expanded Azkar cards',
           importance: Importance.max,
           playSound: true,
           sound: RawResourceAndroidNotificationSound(soundName),
@@ -475,14 +480,26 @@ void azkarReminderCallback(int id) async {
 
     final androidDetails = AndroidNotificationDetails(
       channelId,
-      isMorning ? 'Morning Azkar' : 'Evening Azkar',
-      channelDescription: 'Azkar reminders 40 mins after prayer',
+      isMorning ? 'Morning Azkar Voice' : 'Evening/Night Azkar Voice',
+      channelDescription: 'Human voice reminder with expanded Azkar cards',
       importance: Importance.max,
       priority: Priority.high,
-      sound: RawResourceAndroidNotificationSound(soundName),
       playSound: true,
+      sound: RawResourceAndroidNotificationSound(soundName),
       category: AndroidNotificationCategory.reminder,
       visibility: NotificationVisibility.public,
+      styleInformation: BigTextStyleInformation(
+        expandedText,
+        contentTitle: title,
+        summaryText: summary,
+      ),
+      actions: <AndroidNotificationAction>[
+        AndroidNotificationAction(
+          isMorning ? 'open_morning' : 'open_evening',
+          isMorning ? '📖 فتح أذكار الصباح' : '📖 فتح أذكار النوم',
+          showsUserInterface: true,
+        ),
+      ],
     );
 
     await plugin.show(
@@ -490,67 +507,73 @@ void azkarReminderCallback(int id) async {
       title,
       body,
       NotificationDetails(android: androidDetails),
+      payload: payload,
     );
-    debugPrint('[azkarReminderCallback] Notification shown for id: $id');
+    debugPrint('[azkarReminderCallback] Rich notification shown for id: $id ($soundName)');
   } catch (e, stack) {
     debugPrint('[azkarReminderCallback] Error: $e');
     debugPrint(stack.toString());
   }
 }
 
-// ── Zekr Notification Callback ───────────────────────────────────────────────
+// ── Zekr Notification Callback (Periodic Smart Daytime Reminders) ────────────
 
 @pragma('vm:entry-point')
 void zekrNotificationCallback(int id) async {
   WidgetsFlutterBinding.ensureInitialized();
   DartPluginRegistrant.ensureInitialized();
   try {
-    final zekrService = AzkarService();
-    final contextualZekr =
-        await zekrService.getSmartContextualZekr(shortOnly: true);
-    if (contextualZekr != null && contextualZekr.zekr.isNotEmpty) {
-      final zekr = contextualZekr.zekr;
-      final title = contextualZekr.title;
-      final plugin = FlutterLocalNotificationsPlugin();
-      const androidSettings =
-          AndroidInitializationSettings('@mipmap/ic_launcher');
-      const initSettings = InitializationSettings(android: androidSettings);
-      await plugin.initialize(initSettings);
+    final now = DateTime.now();
+    // Quiet hours: do NOT show periodic notification between 10:00 PM and 8:00 AM
+    if (now.hour < 8 || now.hour >= 22) {
+      debugPrint('[zekrNotificationCallback] Quiet night hours (10 PM - 8 AM). Skipping notification.');
+    } else {
+      final zekrService = AzkarService();
+      final contextualZekr = await zekrService.getPeriodicSmartZekr();
+      if (contextualZekr.zekr.isNotEmpty) {
+        final zekr = contextualZekr.zekr;
+        final title = contextualZekr.title;
+        final plugin = FlutterLocalNotificationsPlugin();
+        const androidSettings =
+            AndroidInitializationSettings('@mipmap/ic_launcher');
+        const initSettings = InitializationSettings(android: androidSettings);
+        await plugin.initialize(initSettings);
 
-      final androidImplementation =
-          plugin.resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
+        final androidImplementation =
+            plugin.resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>();
 
-      if (androidImplementation != null) {
-        await androidImplementation.createNotificationChannel(
-          const AndroidNotificationChannel(
-            'zekr_reminder_channel',
-            'Zekr Reminder',
-            description: 'Heads-up notifications for Zekr',
-            importance: Importance.max,
-            playSound: true,
-            enableVibration: true,
-          ),
+        if (androidImplementation != null) {
+          await androidImplementation.createNotificationChannel(
+            const AndroidNotificationChannel(
+              'zekr_reminder_channel',
+              'Zekr Reminder',
+              description: 'Heads-up notifications for Zekr',
+              importance: Importance.high,
+              playSound: true,
+              enableVibration: true,
+            ),
+          );
+        }
+
+        final androidDetails = AndroidNotificationDetails(
+          'zekr_reminder_channel',
+          'Zekr Reminder',
+          channelDescription: 'Heads-up notifications for Zekr',
+          importance: Importance.high,
+          priority: Priority.high,
+          styleInformation: BigTextStyleInformation(zekr),
+          category: AndroidNotificationCategory.reminder,
+          visibility: NotificationVisibility.public,
+        );
+
+        await plugin.show(
+          888,
+          title,
+          zekr,
+          NotificationDetails(android: androidDetails),
         );
       }
-
-      const androidDetails = AndroidNotificationDetails(
-        'zekr_reminder_channel',
-        'Zekr Reminder',
-        channelDescription: 'Heads-up notifications for Zekr',
-        importance: Importance.max,
-        priority: Priority.high,
-        styleInformation: BigTextStyleInformation(''),
-        category: AndroidNotificationCategory.reminder,
-        visibility: NotificationVisibility.public,
-      );
-
-      await plugin.show(
-        888,
-        title,
-        zekr,
-        const NotificationDetails(android: androidDetails),
-      );
     }
   } catch (e) {
     debugPrint('[zekrNotificationCallback] Error: $e');
@@ -560,7 +583,32 @@ void zekrNotificationCallback(int id) async {
       final bool enabled = prefs.getBool('notifications_enabled') ?? true;
       final int interval = prefs.getInt('notification_interval') ?? 60;
       if (enabled && interval > 0) {
-        await BackgroundEngine().scheduleZekrNotification(interval);
+        final now = DateTime.now();
+        int nextDelayMinutes = interval;
+
+        // If currently in night hours (10 PM to 8 AM), target 8:00 AM next morning
+        if (now.hour >= 22 || now.hour < 8) {
+          DateTime target8AM;
+          if (now.hour >= 22) {
+            final tomorrow = now.add(const Duration(days: 1));
+            target8AM = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 8, 0);
+          } else {
+            target8AM = DateTime(now.year, now.month, now.day, 8, 0);
+          }
+          nextDelayMinutes = target8AM.difference(now).inMinutes;
+          if (nextDelayMinutes <= 0) nextDelayMinutes = 1;
+        } else {
+          // Daytime: check if now + interval would land past 22:00
+          final nextTime = now.add(Duration(minutes: interval));
+          if (nextTime.hour >= 22) {
+            final tomorrow = now.add(const Duration(days: 1));
+            final target8AM = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 8, 0);
+            nextDelayMinutes = target8AM.difference(now).inMinutes;
+            if (nextDelayMinutes <= 0) nextDelayMinutes = 1;
+          }
+        }
+
+        await BackgroundEngine().scheduleZekrNotification(nextDelayMinutes);
       }
     } catch (e) {
       debugPrint('[zekrNotificationCallback] Reschedule error: $e');
@@ -812,9 +860,13 @@ class BackgroundEngine {
           final dndEnd = prayerTime.add(Duration(minutes: config.autoSilentDelayMins + config.autoSilentDurationMins));
           if (dndEnd.isAfter(activeUntil)) activeUntil = dndEnd;
         }
-        if (prayer == PrayerName.fajr || prayer == PrayerName.asr) {
-          final azkarEnd = prayerTime.add(const Duration(minutes: 41));
-          if (azkarEnd.isAfter(activeUntil)) activeUntil = azkarEnd;
+        if (prayer == PrayerName.fajr) {
+          final morningEnd = DateTime(prayerTime.year, prayerTime.month, prayerTime.day, 7, 5);
+          if (morningEnd.isAfter(activeUntil)) activeUntil = morningEnd;
+        }
+        if (prayer == PrayerName.isha) {
+          final ishaAzkarEnd = prayerTime.add(const Duration(minutes: 55));
+          if (ishaAzkarEnd.isAfter(activeUntil)) activeUntil = ishaAzkarEnd;
         }
 
         if (activeUntil.isAfter(now)) {
@@ -883,26 +935,59 @@ class BackgroundEngine {
           }
         }
 
-        // 3. Smart Azkar Reminder (40 mins after Fajr/Asr)
-        if (prayer == PrayerName.fajr || prayer == PrayerName.asr) {
-          final isMorning = prayer == PrayerName.fajr;
-          final azkarId = isMorning ? 300 : 301;
-          final azkarTime =
-              targetEntry.time.add(const Duration(minutes: 40)).toLocal();
+        // 3. Morning Azkar Voice Reminder (7:00 AM)
+        if (prayer == PrayerName.fajr) {
+          DateTime morningVoiceTime = DateTime(
+            targetEntry.time.toLocal().year,
+            targetEntry.time.toLocal().month,
+            targetEntry.time.toLocal().day,
+            7,
+            0,
+          );
+          if (morningVoiceTime.isBefore(now)) {
+            final tomorrowEntry = prayerEntries.firstWhere(
+              (e) => e.time.toLocal().isAfter(targetEntry!.time.toLocal()),
+              orElse: () => targetEntry!,
+            );
+            morningVoiceTime = DateTime(
+              tomorrowEntry.time.toLocal().year,
+              tomorrowEntry.time.toLocal().month,
+              tomorrowEntry.time.toLocal().day,
+              7,
+              0,
+            );
+          }
+          if (morningVoiceTime.isAfter(now)) {
+            await AndroidAlarmManager.oneShotAt(
+              morningVoiceTime,
+              300,
+              azkarReminderCallback,
+              exact: true,
+              wakeup: true,
+              rescheduleOnReboot: true,
+              alarmClock: true,
+              allowWhileIdle: true,
+            );
+          }
+        }
 
-          if (azkarTime.isBefore(now)) {
-            // Today's Azkar passed; find tomorrow's entry
+        // 4. Night Azkar Voice Reminder (50 mins after Isha prayer)
+        if (prayer == PrayerName.isha) {
+          final nightAzkarTime =
+              targetEntry.time.add(const Duration(minutes: 50)).toLocal();
+
+          if (nightAzkarTime.isBefore(now)) {
             final tomorrowEntry = prayerEntries.firstWhere(
               (e) => e.time.toLocal().isAfter(targetEntry!.time.toLocal()),
               orElse: () => targetEntry!,
             );
             if (tomorrowEntry != targetEntry) {
-              final tomorrowAzkarTime =
-                  tomorrowEntry.time.add(const Duration(minutes: 40)).toLocal();
-              if (tomorrowAzkarTime.isAfter(now)) {
+              final tomorrowNightTime =
+                  tomorrowEntry.time.add(const Duration(minutes: 50)).toLocal();
+              if (tomorrowNightTime.isAfter(now)) {
                 await AndroidAlarmManager.oneShotAt(
-                  tomorrowAzkarTime,
-                  azkarId,
+                  tomorrowNightTime,
+                  301,
                   azkarReminderCallback,
                   exact: true,
                   wakeup: true,
@@ -914,8 +999,8 @@ class BackgroundEngine {
             }
           } else {
             await AndroidAlarmManager.oneShotAt(
-              azkarTime,
-              azkarId,
+              nightAzkarTime,
+              301,
               azkarReminderCallback,
               exact: true,
               wakeup: true,

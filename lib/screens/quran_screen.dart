@@ -136,7 +136,9 @@ class _QuranScreenState extends State<QuranScreen> {
   bool _isFontsReady = false;
 
   Future<void> _initFontsCheck() async {
-    final ready = await PlayAssetDeliveryService.instance.ensureAssetPackReady();
+    final ready = await PlayAssetDeliveryService.instance.ensureAssetPackReady(
+      initialPage: _currentPageIndex + 1,
+    );
     if (mounted) {
       setState(() {
         _isFontsReady = ready;
@@ -344,10 +346,12 @@ class _QuranScreenState extends State<QuranScreen> {
     setState(() => _currentPageIndex = index);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_prefPageKey, index + 1);
+    PlayAssetDeliveryService.instance.prefetchNeighborhood(index + 1, radius: 35);
   }
 
   void _jumpToPage(int pageNum) {
     if (pageNum < 1 || pageNum > 604) return;
+    PlayAssetDeliveryService.instance.prefetchNeighborhood(pageNum, radius: 35);
     _pageController?.jumpToPage(pageNum - 1);
   }
 
