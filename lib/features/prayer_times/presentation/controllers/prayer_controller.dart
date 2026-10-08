@@ -123,6 +123,114 @@ class PrayerController extends ChangeNotifier {
 
   // ── GPS / location resolution ──────────────────────────────────────────────
 
+  /// Passive background location analyzer.
+  /// Runs silently without interrupting the user, blocking UI, or zeroing coordinates.
+  /// If GPS is turned off, permission is missing, or getLastKnownPosition is null,
+  /// it silently aborts and leaves the cached location 100% intact.
+  /// If displacement > 30 km OR the timezone offset changed, it updates the location.
+  Future<void> analyzeLocationInBackground() async {
+    if (config.isManualLocation) return;
+    if (!config.useGps) return;
+
+    try {
+      // 1. Check permission silently without prompt
+      final permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        return; // Silent pass: keep cached location intact
+      }
+
+      // 2. Check if GPS service toggle is turned on
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        return; // Silent pass: NEVER prompt user to turn on GPS, NEVER mark location missing
+      }
+
+      // 3. Obtain cached position (<10ms). Do NOT wake up active GPS sensors on startup!
+      Position? pos;
+      try {
+        pos = await Geolocator.getLastKnownPosition();
+      } catch (_) {}
+
+      // Handle null gracefully (e.g. fresh reboot or no recent location by other apps)
+      if (pos == null) {
+        return; // Silent pass: maintain stored location peacefully
+      }
+
+      final bool hasExistingCoords = (config.latitude != 0.0 && config.longitude != 0.0);
+      double distanceMeters = 0.0;
+      if (hasExistingCoords) {
+        distanceMeters = Geolocator.distanceBetween(
+          config.latitude,
+          config.longitude,
+          pos.latitude,
+          pos.longitude,
+        );
+      }
+
+      // 4. Check device timezone offset
+      final currentTzOffset = DateTime.now().timeZoneOffset.inMinutes;
+      final bool tzChanged = hasExistingCoords &&
+          (config.timeZoneOffsetMinutes != 0) &&
+          (config.timeZoneOffsetMinutes != currentTzOffset);
+
+      // 5. Update only if:
+      // - No existing coords yet, OR
+      // - User moved > 30 km (30,000 meters), OR
+      // - Timezone changed (e.g. crossed country/time boundary)
+      final bool shouldUpdate = !hasExistingCoords || (distanceMeters > 30000) || tzChanged;
+
+      if (shouldUpdate) {
+        debugPrint(
+            '[PrayerController] Background analyzer: Significant location/timezone change detected (delta=${distanceMeters.toStringAsFixed(0)}m, tzChanged=$tzChanged). Mutating state...');
+        await _applyVerifiedLocationChange(pos);
+      } else {
+        debugPrint(
+            '[PrayerController] Background analyzer: Location within threshold (${distanceMeters.toStringAsFixed(0)}m). No state change needed.');
+      }
+    } catch (e) {
+      debugPrint('[PrayerController] analyzeLocationInBackground silent error: $e');
+    }
+  }
+
+  /// Applies a verified location change, updates storage, computes prayer times,
+  /// and reschedules background alarms. Old alarms are cleanly replaced.
+  Future<void> _applyVerifiedLocationChange(Position pos) async {
+    final existingLabel = config.locationLabel;
+    final initialLabel = (existingLabel.isNotEmpty && !existingLabel.contains('°'))
+        ? existingLabel
+        : _coordsToLabel(pos.latitude, pos.longitude);
+
+    final currentTzOffset = DateTime.now().timeZoneOffset.inMinutes;
+
+    config = config.copyWith(
+      latitude: pos.latitude,
+      longitude: pos.longitude,
+      locationLabel: initialLabel,
+      isManualLocation: false,
+      timeZoneOffsetMinutes: currentTzOffset,
+    );
+
+    isLocationMissing = false;
+    _applySmartDefaults(pos.latitude, pos.longitude, null);
+    await _saveConfig();
+
+    _compute();
+    notifyListeners();
+
+    // Reverse geocode city name in background without delaying prayer times
+    _fetchCityName(pos.latitude, pos.longitude).then((cityName) async {
+      if (cityName != null && cityName.isNotEmpty) {
+        config = config.copyWith(locationLabel: cityName);
+        await _saveConfig();
+        _compute();
+        notifyListeners();
+      }
+    });
+
+    await _scheduleNotifications();
+  }
+
   /// Requests location permission and fetches a fresh GPS fix.
   /// Uses getLastKnownPosition for instant (<10ms) coordinates, with fallback to low-accuracy GPS.
   /// Reverse-geocoding occurs asynchronously in the background so the prayer times UI updates immediately.
@@ -195,6 +303,7 @@ class PrayerController extends ChangeNotifier {
         longitude: pos.longitude,
         locationLabel: initialLabel,
         isManualLocation: false,
+        timeZoneOffsetMinutes: DateTime.now().timeZoneOffset.inMinutes,
       );
 
       isLocationMissing = false;
@@ -596,6 +705,7 @@ class PrayerController extends ChangeNotifier {
       locationLabel: '',
       latitude: 0.0,
       longitude: 0.0,
+      timeZoneOffsetMinutes: DateTime.now().timeZoneOffset.inMinutes,
     );
     await _saveConfig(); // Explicitly delete from local storage
     
@@ -624,6 +734,7 @@ class PrayerController extends ChangeNotifier {
       locationLabel: label,
       isManualLocation: true,
       useGps: false, // Turn off auto GPS since they chose manual
+      timeZoneOffsetMinutes: DateTime.now().timeZoneOffset.inMinutes,
     );
     isLocationMissing = false;
     await _saveConfig();

@@ -163,6 +163,7 @@ class PrayerConfig {
       'isha': 'takbir_mishary_alafasy',
     },
     this.athanDurationSeconds = 30,
+    this.timeZoneOffsetMinutes = 0,
   });
 
   /// Stored coordinates — updated whenever GPS succeeds.
@@ -220,6 +221,9 @@ class PrayerConfig {
   /// Duration to play the Adhan in seconds. 0 = Full Adhan. Defaults to 30.
   final int athanDurationSeconds;
 
+  /// Device timezone offset in minutes when times were calculated.
+  final int timeZoneOffsetMinutes;
+
   // ── SharedPreferences persistence ─────────────────────────────────────────
 
   static const String _prefKey = 'prayer_config_v1';
@@ -244,6 +248,7 @@ class PrayerConfig {
     'preAthanMinutes': preAthanMinutes,
     'prayerMuezzins': prayerMuezzins,
     'athanDurationSeconds': athanDurationSeconds,
+    'timeZoneOffsetMinutes': timeZoneOffsetMinutes,
   });
 
   factory PrayerConfig.fromJsonString(String raw) {
@@ -327,6 +332,7 @@ class PrayerConfig {
       preAthanMinutes: parsedPreAthan,
       prayerMuezzins: parsedMuezzins,
       athanDurationSeconds: j['athanDurationSeconds'] as int? ?? 30,
+      timeZoneOffsetMinutes: j['timeZoneOffsetMinutes'] as int? ?? 0,
     );
   }
 
@@ -352,6 +358,7 @@ class PrayerConfig {
     Map<String, int>? preAthanMinutes,
     Map<String, String>? prayerMuezzins,
     int? athanDurationSeconds,
+    int? timeZoneOffsetMinutes,
   }) {
     return PrayerConfig(
       latitude:      latitude      ?? this.latitude,
@@ -373,6 +380,7 @@ class PrayerConfig {
       preAthanMinutes: preAthanMinutes ?? this.preAthanMinutes,
       prayerMuezzins: prayerMuezzins ?? this.prayerMuezzins,
       athanDurationSeconds: athanDurationSeconds ?? this.athanDurationSeconds,
+      timeZoneOffsetMinutes: timeZoneOffsetMinutes ?? this.timeZoneOffsetMinutes,
     );
   }
 }

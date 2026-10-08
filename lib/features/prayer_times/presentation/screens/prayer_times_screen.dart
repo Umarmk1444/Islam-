@@ -46,6 +46,14 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   }
 
   Future<void> _checkAndRequestPermissions() async {
+    final prefs = await SharedPreferences.getInstance();
+    final bool isOnboardingDone =
+        prefs.getBool('permissions_onboarding_completed') ?? false;
+    if (isOnboardingDone) {
+      // User has already completed the unified permissions onboarding.
+      return;
+    }
+
     // 1. POST_NOTIFICATIONS
     if (!await Permission.notification.isGranted) {
       await Permission.notification.request();
