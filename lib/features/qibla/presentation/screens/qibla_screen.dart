@@ -20,6 +20,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../theme_notifier.dart';
 import '../../../../language_notifier.dart';
+import '../../../prayer_times/presentation/controllers/prayer_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -107,6 +108,13 @@ class _QiblaScreenState extends State<QiblaScreen>
       // 1. Check location service
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
+        final cached = PrayerController().config;
+        if (cached.latitude != 0.0 && cached.longitude != 0.0) {
+          _updateLocationData(cached.latitude, cached.longitude);
+          _startCompassStream();
+          if (mounted) setState(() => _status = _QiblaStatus.ready);
+          return;
+        }
         _setError('qiblaLocationDisabled');
         return;
       }
@@ -116,11 +124,25 @@ class _QiblaScreenState extends State<QiblaScreen>
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
+          final cached = PrayerController().config;
+          if (cached.latitude != 0.0 && cached.longitude != 0.0) {
+            _updateLocationData(cached.latitude, cached.longitude);
+            _startCompassStream();
+            if (mounted) setState(() => _status = _QiblaStatus.ready);
+            return;
+          }
           _setError('qiblaPermissionDenied');
           return;
         }
       }
       if (permission == LocationPermission.deniedForever) {
+        final cached = PrayerController().config;
+        if (cached.latitude != 0.0 && cached.longitude != 0.0) {
+          _updateLocationData(cached.latitude, cached.longitude);
+          _startCompassStream();
+          if (mounted) setState(() => _status = _QiblaStatus.ready);
+          return;
+        }
         _setError('qiblaPermissionPermanentlyDenied');
         return;
       }
@@ -148,11 +170,25 @@ class _QiblaScreenState extends State<QiblaScreen>
         }
       }).catchError((e) {
         if (_status == _QiblaStatus.loading) {
+          final cached = PrayerController().config;
+          if (cached.latitude != 0.0 && cached.longitude != 0.0) {
+            _updateLocationData(cached.latitude, cached.longitude);
+            _startCompassStream();
+            if (mounted) setState(() => _status = _QiblaStatus.ready);
+            return;
+          }
           _setError('qiblaFailedInit', e.toString());
         }
       });
 
     } catch (e) {
+      final cached = PrayerController().config;
+      if (cached.latitude != 0.0 && cached.longitude != 0.0) {
+        _updateLocationData(cached.latitude, cached.longitude);
+        _startCompassStream();
+        if (mounted) setState(() => _status = _QiblaStatus.ready);
+        return;
+      }
       _setError('qiblaFailedInit', e.toString());
     }
   }

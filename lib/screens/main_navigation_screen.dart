@@ -13,6 +13,7 @@ import 'quran_screen.dart';
 import '../features/prayer_times/presentation/controllers/prayer_controller.dart';
 import '../features/prayer_times/presentation/screens/permissions_setup_screen.dart';
 import '../services/app_update_service.dart';
+import '../services/permission_health_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MainNavigationScreen
@@ -37,7 +38,8 @@ class MainNavigationScreen extends StatefulWidget {
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
-class _MainNavigationScreenState extends State<MainNavigationScreen> {
+class _MainNavigationScreenState extends State<MainNavigationScreen>
+    with WidgetsBindingObserver {
   int _currentIndex = 0;
   late final PageController _pageController;
 
@@ -51,6 +53,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _pageController = PageController(initialPage: _currentIndex);
     _pageController.addListener(_onPageScroll);
     
@@ -91,6 +94,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       // Silently checks displacement delta (>30km) or timezone changes.
       // If GPS is turned off or permission denied, does nothing and keeps cached location intact!
       await PrayerController().analyzeLocationInBackground();
+
+      // Refresh permission health count for reactive Settings badge
+      await PermissionHealthService.checkHealth();
     } catch (e) {
       debugPrint('[MainNavigationScreen] _initAppPermissionsSequence error: $e');
     }
@@ -101,7 +107,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      PermissionHealthService.checkHealth();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pageController.removeListener(_onPageScroll);
     _pageController.dispose();
     super.dispose();
@@ -544,24 +558,51 @@ class _NavBarButtonState extends State<_NavBarButton>
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                TweenAnimationBuilder<Color?>(
-                  duration: kQuranThemeDuration,
-                  curve: kQuranThemeCurve,
-                  tween: ColorTween(end: iconColor),
-                  builder: (context, animIconColor, _) {
-                    return AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 220),
-                      transitionBuilder: (child, anim) =>
-                          ScaleTransition(scale: anim, child: child),
-                      child: Icon(
-                        isSelected ? widget.item.activeIcon : widget.item.icon,
-                        key: ValueKey('${widget.item.labelKey}_$isSelected'),
-                        color: animIconColor,
-                        size: isSelected ? 21.5 : 20.0,
-                      ),
+                () {
+                  final Widget iconWidget = TweenAnimationBuilder<Color?>(
+                    duration: kQuranThemeDuration,
+                    curve: kQuranThemeCurve,
+                    tween: ColorTween(end: iconColor),
+                    builder: (context, animIconColor, _) {
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 220),
+                        transitionBuilder: (child, anim) =>
+                            ScaleTransition(scale: anim, child: child),
+                        child: Icon(
+                          isSelected ? widget.item.activeIcon : widget.item.icon,
+                          key: ValueKey('${widget.item.labelKey}_$isSelected'),
+                          color: animIconColor,
+                          size: isSelected ? 21.5 : 20.0,
+                        ),
+                      );
+                    },
+                  );
+
+                  if (widget.item.labelKey == 'navSettings') {
+                    return ValueListenableBuilder<int>(
+                      valueListenable: PermissionHealthService.missingCountNotifier,
+                      builder: (context, missingCount, child) {
+                        if (missingCount <= 0) return child!;
+                        return Badge(
+                          label: Text(
+                            '$missingCount',
+                            style: const TextStyle(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          backgroundColor: const Color(0xFFE53935),
+                          offset: const Offset(6, -4),
+                          child: child,
+                        );
+                      },
+                      child: iconWidget,
                     );
-                  },
-                ),
+                  }
+
+                  return iconWidget;
+                }(),
                 const SizedBox(height: 2.5),
                 FittedBox(
                   fit: BoxFit.scaleDown,

@@ -8,6 +8,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../theme_notifier.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../services/permission_health_service.dart';
 import '../controllers/prayer_controller.dart';
 
 class PermissionsSetupScreen extends StatefulWidget {
@@ -68,6 +69,7 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
           _hasDndAccess = dnd;
         });
       }
+      PermissionHealthService.checkHealth();
     } catch (e) {
       debugPrint('[PermissionsSetupScreen] Error checking permissions: $e');
     }
@@ -90,6 +92,7 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
         // Trigger silent background location resolution
         PrayerController().analyzeLocationInBackground();
       }
+      PermissionHealthService.checkHealth();
     } catch (e) {
       debugPrint('[PermissionsSetupScreen] Location permission error: $e');
     }
@@ -101,6 +104,7 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
       if (mounted) {
         setState(() => _hasNotification = status.isGranted);
       }
+      PermissionHealthService.checkHealth();
     } catch (e) {
       debugPrint('[PermissionsSetupScreen] Notification permission error: $e');
     }
@@ -112,6 +116,7 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
       if (mounted) {
         setState(() => _hasExactAlarm = status.isGranted);
       }
+      PermissionHealthService.checkHealth();
     } catch (e) {
       debugPrint('[PermissionsSetupScreen] Exact alarm permission error: $e');
     }
@@ -123,6 +128,7 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
       if (mounted) {
         setState(() => _hasBatteryIgnore = status.isGranted);
       }
+      PermissionHealthService.checkHealth();
     } catch (e) {
       debugPrint('[PermissionsSetupScreen] Battery optimization permission error: $e');
     }
@@ -137,6 +143,7 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
       if (status.isGranted) {
         await PrayerController().toggleAutoSilent(true);
       }
+      PermissionHealthService.checkHealth();
     } catch (e) {
       debugPrint('[PermissionsSetupScreen] DND permission error: $e');
     }
@@ -145,6 +152,7 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
   Future<void> _onFinish() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('permissions_onboarding_completed', true);
+    await PermissionHealthService.checkHealth();
     if (mounted) {
       Navigator.pop(context);
     }

@@ -14,6 +14,7 @@ import '../services/library_service.dart';
 import '../services/pdf_annotation_service.dart';
 import '../services/pdf_thumbnail_service.dart';
 import '../theme_notifier.dart';
+import '../widgets/custom_banner_ad.dart';
 
 class PdfReaderScreen extends StatefulWidget {
   final UserPdfBook book;
@@ -46,6 +47,8 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
   // Default to Clean Mode: When opened, it displays a 100% clean page (tap anywhere to toggle controls!)
   bool _controlsVisible = false;
   String? _errorMessage;
+  bool _isDocumentLoaded = false;
+  bool _hasSavedProgressOnExit = false;
 
   // Search State
   bool _isSearchActive = false;
@@ -94,6 +97,7 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
 
     _pdfViewerController = PdfViewerController();
     _searchResult = PdfTextSearchResult();
+    kQuranScreenActive.value = true;
   }
 
   Future<void> _loadSavedReaderPreferences() async {
@@ -117,6 +121,7 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
 
   @override
   void dispose() {
+    kQuranScreenActive.value = false;
     _hideContextMenu();
     _saveProgressDebounce?.cancel();
     _saveProgressAndGenerateThumbnailOnExit();
@@ -152,6 +157,8 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
 
   /// Called only on exit (dispose / back button) to update DB and generate the final cover thumbnail once
   void _saveProgressAndGenerateThumbnailOnExit() {
+    if (_hasSavedProgressOnExit) return;
+    _hasSavedProgressOnExit = true;
     if (widget.book.id != null) {
       _libraryService.updatePdfReadingProgress(
         widget.book.id!,
@@ -1251,6 +1258,51 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
                   Positioned.fill(
                     child: _buildPdfViewer(isDark, isCream),
                   ),
+
+                  // 2. Initial Document Parsing Islamic Loading Indicator
+                  if (!_isDocumentLoaded && _errorMessage == null)
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                        decoration: BoxDecoration(
+                          color: (isDark ? const Color(0xFF16201B) : Colors.white).withValues(alpha: 0.96),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: const Color(0xFF10B981).withValues(alpha: 0.3),
+                            width: 1.2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.12),
+                              blurRadius: 16,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(
+                              width: 36,
+                              height: 36,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3.2,
+                                color: Color(0xFF10B981),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'جاري فتح الكتاب وتجهيز الصفحات...',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : const Color(0xFF1B382B),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
 
                   // 3. Error Overlay if any
                   if (_errorMessage != null)
@@ -2926,6 +2978,7 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
         if (mounted) {
           _totalPages = details.document.pages.count;
           _pageNotifier.value = _currentPage;
+          _isDocumentLoaded = true;
           _loadPersistentAnnotations();
           setState(() {});
         }
@@ -2933,6 +2986,7 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
       onDocumentLoadFailed: (PdfDocumentLoadFailedDetails details) {
         if (mounted) {
           setState(() {
+            _isDocumentLoaded = true;
             _errorMessage = details.description;
           });
         }

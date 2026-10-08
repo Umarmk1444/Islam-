@@ -14,6 +14,8 @@ import '../features/prayer_times/presentation/controllers/prayer_controller.dart
 import '../features/prayer_times/presentation/screens/prayer_settings_screen.dart';
 import 'minbar_downloads_screen.dart';
 import '../services/app_update_service.dart';
+import '../services/permission_health_service.dart';
+import '../features/prayer_times/presentation/screens/permissions_setup_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SETTINGS SCREEN — Modern Luxury Islamic Redesign
@@ -68,12 +70,12 @@ class _SettingsScreenState extends State<SettingsScreen>
       'storage_section': 'STORAGE & OFFLINE',
       'downloads': 'Downloaded Audio Library',
       'downloads_desc': 'Manage offline surahs, recitations & lectures',
-      'creator_community': 'CREATOR & COMMUNITY',
+      'creator_community': 'DAWAH & COMMUNITY',
       'creator_name': 'Umer Muktar',
-      'creator_role': 'Lead Developer & Creator',
-      'tiktok_title': 'Official TikTok Channel',
+      'creator_role': 'App Maintainer & Creator',
+      'tiktok_title': 'Official Recitations Channel',
       'tiktok_desc': 'Quran recitations, reflections & app updates',
-      'tiktok_follow': 'Follow on TikTok',
+      'tiktok_follow': 'Visit Channel',
       'copy_handle': 'Copy',
       'tap_to_copy': 'Tap anywhere to copy handle',
       'copied_to_clipboard': 'Copied @umer.almuktar to clipboard!',
@@ -111,12 +113,12 @@ class _SettingsScreenState extends State<SettingsScreen>
       'storage_section': 'التخزين والمحفوظات',
       'downloads': 'التسجيلات المحملة',
       'downloads_desc': 'إدارة السور والمحاضرات بدون إنترنت',
-      'creator_community': 'المطور والمجتمع',
+      'creator_community': 'المجتمع والتواصل الدعوي',
       'creator_name': 'عمر المختار',
-      'creator_role': 'مطور ومصمم التطبيق',
-      'tiktok_title': 'قناة تيك توك الرسمية',
+      'creator_role': 'خادم التطبيق ومطوره',
+      'tiktok_title': 'قناة التلاوات والفوائد القرآنية',
       'tiktok_desc': 'تلاوات خاشعة، تدبرات قرآنية، وآخر تحديثات التطبيق',
-      'tiktok_follow': 'متابعة على تيك توك',
+      'tiktok_follow': 'فتح القناة',
       'copy_handle': 'نسخ',
       'tap_to_copy': 'اضغط في أي مكان لنسخ الحساب',
       'copied_to_clipboard': 'تم نسخ @umer.almuktar إلى الحافظة!',
@@ -241,6 +243,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   void initState() {
     super.initState();
     _loadSettings();
+    PermissionHealthService.checkHealth();
 
     _headerCtrl = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 600));
@@ -507,7 +510,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     HapticFeedback.lightImpact();
     Clipboard.setData(const ClipboardData(text: '@umer.almuktar')).then((_) {
       if (!mounted) return;
-      _showSnack(_tr(context, 'copied_to_clipboard'), const Color(0xFFFE2C55));
+      _showSnack(_tr(context, 'copied_to_clipboard'), const Color(0xFF10B981));
     });
   }
 
@@ -965,6 +968,14 @@ class _SettingsScreenState extends State<SettingsScreen>
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
+                // ── 🛡️ PERMISSIONS & SYSTEM HEALTH CENTER ────────────────────
+                _PermissionsHealthCard(
+                  isDark: isDark,
+                  cardBg: cardBg,
+                  primary: primary,
+                  borderColor: borderColor,
+                ),
+
                 // ── SECTION A: PREFERENCES (THEME & LANGUAGE SIDE-BY-SIDE) ───
                 _sectionHeader(
                   icon: Icons.tune_rounded,
@@ -1104,29 +1115,28 @@ class _SettingsScreenState extends State<SettingsScreen>
                 ),
                 const SizedBox(height: 6),
 
-                // ── 🌟 SECTION D: VIP CREATOR & COMMUNITY (TIKTOK) ────────────
+                // ── 🌟 SECTION D: DAWAH & COMMUNITY ─────────────────────────
                 _sectionHeader(
-                  icon: Icons.stars_rounded,
+                  icon: Icons.diversity_3_rounded,
                   title: _tr(context, 'creator_community'),
-                  color: const Color(0xFFFE2C55),
-                  badgeText: 'VIP CREATOR',
+                  color: const Color(0xFF10B981),
+                  badgeText: isArabic ? 'خدمة القرآن الكريم' : 'FOR THE UMMAH',
                 ),
-                _TikTokSpotlightCard(
+                _IslamicCommunityCard(
                   isDark: isDark,
                   cardBg: cardBg,
                   primary: primary,
                   goldBorder: borderColor,
                   creatorName: _tr(context, 'creator_name'),
                   creatorRole: _tr(context, 'creator_role'),
-                  tiktokTitle: _tr(context, 'tiktok_title'),
-                  tiktokDesc: _tr(context, 'tiktok_desc'),
-                  tapToCopyLabel: _tr(context, 'tap_to_copy'),
-                  followLabel: _tr(context, 'tiktok_follow'),
+                  channelTitle: _tr(context, 'tiktok_title'),
+                  channelDesc: _tr(context, 'tiktok_desc'),
+                  visitLabel: _tr(context, 'tiktok_follow'),
                   copyLabel: _tr(context, 'copy_handle'),
                   telegramLabel: _tr(context, 'telegram_btn'),
                   emailLabel: _tr(context, 'email_btn'),
                   creatorNote: _tr(context, 'creator_note'),
-                  onFollowTikTok: _openTikTok,
+                  onVisitChannel: _openTikTok,
                   onCopyHandle: _copyTikTokHandle,
                   onTelegram: _openTelegram,
                   onEmail: _openEmail,
@@ -1266,10 +1276,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           child: Text(
-                            'TikTok: @umer.almuktar',
+                            'Channel: @umer.almuktar',
                             style: TextStyle(
-                              color: const Color(0xFFFE2C55)
-                                  .withValues(alpha: 0.85),
+                              color: primary.withValues(alpha: 0.85),
                               fontSize: 10.5,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.4,
@@ -1322,7 +1331,7 @@ class _SettingsScreenState extends State<SettingsScreen>
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFFFE2C55), Color(0xFF25F4EE)],
+                  colors: [Color(0xFF10B981), Color(0xFFD4AF37)],
                 ),
                 borderRadius: BorderRadius.circular(5),
               ),
@@ -2459,45 +2468,255 @@ class _ThemeSwatchSelector extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 🌟 COMPONENT 6: Real VIP Creator & TikTok Card (No Truncation, Pure Prestige!)
+// 🛡️ COMPONENT: System & Athan Permissions Health Center
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _TikTokSpotlightCard extends StatelessWidget {
+class _PermissionsHealthCard extends StatelessWidget {
+  final bool isDark;
+  final Color cardBg;
+  final Color primary;
+  final Color borderColor;
+
+  const _PermissionsHealthCard({
+    required this.isDark,
+    required this.cardBg,
+    required this.primary,
+    required this.borderColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isArabic =
+        Localizations.maybeLocaleOf(context)?.languageCode == 'ar';
+
+    return ValueListenableBuilder<int>(
+      valueListenable: PermissionHealthService.missingCountNotifier,
+      builder: (context, missingCount, _) {
+        if (missingCount <= 0) {
+          // All systems optimal - subtle dignified green banner
+          return Container(
+            margin: const EdgeInsets.only(bottom: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF071B11) : const Color(0xFFE8F5E9),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: const Color(0xFF10B981).withValues(alpha: 0.35),
+                width: 1.2,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_circle_rounded,
+                    color: Color(0xFF10B981),
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isArabic
+                            ? 'حالة النظام والأذان ممتازة'
+                            : 'All Systems & Permissions Optimal',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : const Color(0xFF065F46),
+                        ),
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        isArabic
+                            ? 'كافة الصلاحيات مفعلة لضمان استقرار أوقات الأذان'
+                            : 'All permissions active for punctual background Athan',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: isDark ? Colors.white70 : const Color(0xFF047857),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // Missing permissions alert card with review action
+        const alertColor = Color(0xFFE53935);
+        return Container(
+          margin: const EdgeInsets.only(bottom: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF220C0C) : const Color(0xFFFFF3F3),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: alertColor.withValues(alpha: 0.4),
+              width: 1.4,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: alertColor.withValues(alpha: isDark ? 0.2 : 0.08),
+                blurRadius: 12,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      color: alertColor.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.warning_amber_rounded,
+                      color: alertColor,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              isArabic
+                                  ? 'تنبيه إعدادات النظام والأذان'
+                                  : 'System Permissions Health',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 1.5),
+                              decoration: BoxDecoration(
+                                color: alertColor,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '$missingCount ${isArabic ? 'مفقودة' : 'Missing'}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          isArabic
+                              ? 'لضمان دقة الأذان في موعده والتنبيهات، يرجى تفعيل الصلاحيات.'
+                              : 'To ensure punctual Athan alarms, please review disabled permissions.',
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            color: isDark ? Colors.white70 : Colors.black54,
+                            height: 1.25,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                height: 36,
+                child: FilledButton.icon(
+                  onPressed: () async {
+                    await PermissionsSetupScreen.showAsModal(context);
+                    await PermissionHealthService.checkHealth();
+                  },
+                  icon: const Icon(Icons.tune_rounded, size: 15),
+                  label: Text(
+                    isArabic
+                        ? 'مراجعة وتفعيل الصلاحيات المعطلة'
+                        : 'Review & Enable Permissions',
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: alertColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 🌟 COMPONENT 6: Authentic Islamic Community & Dawah Hub
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _IslamicCommunityCard extends StatelessWidget {
   final bool isDark;
   final Color cardBg;
   final Color primary;
   final Color goldBorder;
   final String creatorName;
   final String creatorRole;
-  final String tiktokTitle;
-  final String tiktokDesc;
-  final String tapToCopyLabel;
-  final String followLabel;
+  final String channelTitle;
+  final String channelDesc;
+  final String visitLabel;
   final String copyLabel;
   final String telegramLabel;
   final String emailLabel;
   final String creatorNote;
-  final VoidCallback onFollowTikTok;
+  final VoidCallback onVisitChannel;
   final VoidCallback onCopyHandle;
   final VoidCallback onTelegram;
   final VoidCallback onEmail;
 
-  const _TikTokSpotlightCard({
+  const _IslamicCommunityCard({
     required this.isDark,
     required this.cardBg,
     required this.primary,
     required this.goldBorder,
     required this.creatorName,
     required this.creatorRole,
-    required this.tiktokTitle,
-    required this.tiktokDesc,
-    required this.tapToCopyLabel,
-    required this.followLabel,
+    required this.channelTitle,
+    required this.channelDesc,
+    required this.visitLabel,
     required this.copyLabel,
     required this.telegramLabel,
     required this.emailLabel,
     required this.creatorNote,
-    required this.onFollowTikTok,
+    required this.onVisitChannel,
     required this.onCopyHandle,
     required this.onTelegram,
     required this.onEmail,
@@ -2505,41 +2724,40 @@ class _TikTokSpotlightCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const tiktokPink = Color(0xFFFE2C55);
-    const tiktokCyan = Color(0xFF25F4EE);
+    const emeraldAccent = Color(0xFF10B981);
+    const goldAccent = Color(0xFFD4AF37);
 
     return Container(
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: tiktokPink.withValues(alpha: isDark ? 0.4 : 0.3),
-          width: 1.4,
+          color: emeraldAccent.withValues(alpha: isDark ? 0.35 : 0.25),
+          width: 1.3,
         ),
         boxShadow: [
           BoxShadow(
-            color: tiktokPink.withValues(alpha: isDark ? 0.2 : 0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+            color: emeraldAccent.withValues(alpha: isDark ? 0.12 : 0.05),
+            blurRadius: 14,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
-      padding: const EdgeInsets.fromLTRB(14, 11, 14, 10),
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Row 1: Creator Identity (Spacious, Never Truncated!) ─────────────
+          // ── Row 1: Creator & App Maintainer Identity ────────────────────────
           Row(
             children: [
-              // Glowing Creator Avatar
               Container(
-                width: 36,
-                height: 36,
+                width: 38,
+                height: 38,
                 padding: const EdgeInsets.all(2),
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    colors: [tiktokCyan, tiktokPink],
+                    colors: [emeraldAccent, goldAccent],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -2552,7 +2770,7 @@ class _TikTokSpotlightCard extends StatelessWidget {
                   child: Center(
                     child: Icon(
                       Icons.person_rounded,
-                      size: 19,
+                      size: 20,
                       color: isDark ? Colors.white : Colors.black87,
                     ),
                   ),
@@ -2574,11 +2792,11 @@ class _TikTokSpotlightCard extends StatelessWidget {
                             color: isDark ? Colors.white : Colors.black87,
                           ),
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: 5),
                         const Icon(
                           Icons.verified_rounded,
                           size: 15,
-                          color: Color(0xFF00B2FF),
+                          color: emeraldAccent,
                         ),
                       ],
                     ),
@@ -2589,7 +2807,7 @@ class _TikTokSpotlightCard extends StatelessWidget {
                         color: isDark
                             ? const Color(0xFFE8C77A)
                             : const Color(0xFF8D6800),
-                        fontSize: 10,
+                        fontSize: 10.5,
                         fontWeight: FontWeight.w600,
                       ),
                       maxLines: 1,
@@ -2600,23 +2818,23 @@ class _TikTokSpotlightCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 11),
 
-          // ── Row 2: TikTok VIP Spotlight Container ───────────────────────────
+          // ── Row 2: Official Recitations Channel Container ────────────────────
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF060B09) : Colors.white,
+              color: isDark ? const Color(0xFF060B09) : const Color(0xFFF9FBF9),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: isDark
-                    ? Colors.white.withValues(alpha: 0.1)
-                    : Colors.black.withValues(alpha: 0.08),
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.black.withValues(alpha: 0.06),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
-                  blurRadius: 8,
+                  color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.03),
+                  blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
               ],
@@ -2624,34 +2842,21 @@ class _TikTokSpotlightCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header: TikTok Badge + Channel Title & Tag
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
-                      width: 34,
-                      height: 34,
+                      width: 36,
+                      height: 36,
                       decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: tiktokCyan,
-                            blurRadius: 4,
-                            offset: Offset(-1, 0),
-                          ),
-                          BoxShadow(
-                            color: tiktokPink,
-                            blurRadius: 4,
-                            offset: Offset(1, 0),
-                          ),
-                        ],
+                        color: emeraldAccent.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Center(
                         child: Icon(
-                          Icons.music_note_rounded,
-                          color: Colors.white,
-                          size: 19,
+                          Icons.headphones_rounded,
+                          color: emeraldAccent,
+                          size: 20,
                         ),
                       ),
                     ),
@@ -2664,12 +2869,11 @@ class _TikTokSpotlightCard extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  tiktokTitle,
+                                  channelTitle,
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 12.5,
                                     fontWeight: FontWeight.bold,
-                                    color:
-                                        isDark ? Colors.white : Colors.black87,
+                                    color: isDark ? Colors.white : Colors.black87,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -2678,15 +2882,15 @@ class _TikTokSpotlightCard extends StatelessWidget {
                               const SizedBox(width: 6),
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 5, vertical: 1),
+                                    horizontal: 6, vertical: 1.5),
                                 decoration: BoxDecoration(
-                                  color: tiktokPink.withValues(alpha: 0.14),
-                                  borderRadius: BorderRadius.circular(4),
+                                  color: emeraldAccent.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(5),
                                 ),
                                 child: const Text(
                                   '@umer.almuktar',
                                   style: TextStyle(
-                                    color: tiktokPink,
+                                    color: emeraldAccent,
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -2696,7 +2900,7 @@ class _TikTokSpotlightCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            tiktokDesc,
+                            channelDesc,
                             style: TextStyle(
                               fontSize: 10.5,
                               color: isDark ? Colors.white60 : Colors.black54,
@@ -2712,21 +2916,20 @@ class _TikTokSpotlightCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
 
-                // Side-by-Side Action Buttons: Follow on TikTok + Copy Handle
+                // Action Buttons: Visit Channel + Copy Handle
                 Row(
                   children: [
-                    // Follow on TikTok Button
                     Expanded(
                       flex: 6,
                       child: SizedBox(
                         height: 36,
                         child: ElevatedButton.icon(
-                          onPressed: onFollowTikTok,
+                          onPressed: onVisitChannel,
                           icon: const Icon(Icons.open_in_new_rounded,
                               size: 14, color: Colors.white),
-                          label: const Text(
-                            'Follow on TikTok',
-                            style: TextStyle(
+                          label: Text(
+                            visitLabel,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -2734,9 +2937,8 @@ class _TikTokSpotlightCard extends StatelessWidget {
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: tiktokPink,
-                            elevation: 2,
-                            shadowColor: tiktokPink.withValues(alpha: 0.35),
+                            backgroundColor: emeraldAccent,
+                            elevation: 1,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -2746,7 +2948,6 @@ class _TikTokSpotlightCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    // Copy Handle Button
                     Expanded(
                       flex: 4,
                       child: SizedBox(
@@ -2754,22 +2955,22 @@ class _TikTokSpotlightCard extends StatelessWidget {
                         child: OutlinedButton.icon(
                           onPressed: onCopyHandle,
                           icon: const Icon(Icons.copy_rounded,
-                              size: 13, color: tiktokPink),
-                          label: const Text(
-                            'Copy',
-                            style: TextStyle(
-                              color: tiktokPink,
+                              size: 13, color: emeraldAccent),
+                          label: Text(
+                            copyLabel,
+                            style: const TextStyle(
+                              color: emeraldAccent,
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           style: OutlinedButton.styleFrom(
                             side: BorderSide(
-                              color: tiktokPink.withValues(alpha: 0.45),
+                              color: emeraldAccent.withValues(alpha: 0.45),
                               width: 1.2,
                             ),
-                            backgroundColor: tiktokPink.withValues(
-                                alpha: isDark ? 0.12 : 0.07),
+                            backgroundColor: emeraldAccent.withValues(
+                                alpha: isDark ? 0.10 : 0.06),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -2783,10 +2984,9 @@ class _TikTokSpotlightCard extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(height: 9),
 
-          // ── Row 3: Quick Support Channels (Telegram & Email) ────────────────
+          // ── Row 3: Community & Support (Telegram & Email) ────────────────────
           Row(
             children: [
               Expanded(
@@ -2797,7 +2997,7 @@ class _TikTokSpotlightCard extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(
                         color: Color(0xFF0088CC),
-                        width: 1.4,
+                        width: 1.3,
                       ),
                       backgroundColor:
                           const Color(0xFF0088CC).withValues(alpha: 0.08),
@@ -2809,7 +3009,6 @@ class _TikTokSpotlightCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Telegram paper-plane icon with brand colours
                         SizedBox(
                           width: 18,
                           height: 18,
@@ -2819,7 +3018,7 @@ class _TikTokSpotlightCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'Telegram',
+                          telegramLabel,
                           style: TextStyle(
                             color: isDark
                                 ? const Color(0xFF54C5F8)
@@ -2841,7 +3040,7 @@ class _TikTokSpotlightCard extends StatelessWidget {
                     onPressed: onEmail,
                     icon: Icon(Icons.email_outlined, size: 15, color: primary),
                     label: Text(
-                      'Email',
+                      emailLabel,
                       style: TextStyle(
                         color: isDark ? Colors.white : Colors.black87,
                         fontSize: 12,
