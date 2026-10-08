@@ -19,7 +19,7 @@ import '../features/prayer_times/presentation/screens/permissions_setup_screen.d
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SETTINGS SCREEN — Modern Luxury Islamic Redesign
-// Circular Ripple Reveal (Telegram-Style) & Islamic Community Card
+// Circular Ripple Reveal (Telegram-Style) & VIP TikTok Spotlight Showcase
 // ─────────────────────────────────────────────────────────────────────────────
 
 class SettingsScreen extends StatefulWidget {
@@ -70,12 +70,18 @@ class _SettingsScreenState extends State<SettingsScreen>
       'storage_section': 'STORAGE & OFFLINE',
       'downloads': 'Downloaded Audio Library',
       'downloads_desc': 'Manage offline surahs, recitations & lectures',
-      'creator_community': 'DAWAH & COMMUNITY',
+      'creator_community': 'CREATOR & COMMUNITY',
       'creator_name': 'Umer Muktar',
-      'creator_role': 'App Maintainer & Creator',
+      'creator_role': 'Lead Developer & Creator',
+      'tiktok_title': 'Official TikTok Channel',
+      'tiktok_desc': 'Quran recitations, reflections & app updates',
+      'tiktok_follow': 'Follow on TikTok',
+      'copy_handle': 'Copy',
+      'tap_to_copy': 'Tap anywhere to copy handle',
+      'copied_to_clipboard': 'Copied @umer.almuktar to clipboard!',
       'telegram_btn': 'Telegram',
       'email_btn': 'Email',
-      'creator_note': 'Developed with care for the Ummah • Dua appreciated',
+      'creator_note': 'Handcrafted for the Ummah • Dua appreciated',
       'share_info': 'SUPPORT, PRIVACY & INFO',
       'share_app': 'Share Quran Zone',
       'rate_us': 'Rate Us on Google Play',
@@ -107,9 +113,15 @@ class _SettingsScreenState extends State<SettingsScreen>
       'storage_section': 'التخزين والمحفوظات',
       'downloads': 'التسجيلات المحملة',
       'downloads_desc': 'إدارة السور والمحاضرات بدون إنترنت',
-      'creator_community': 'المجتمع والتواصل الدعوي',
+      'creator_community': 'المطور والمجتمع',
       'creator_name': 'عمر المختار',
-      'creator_role': 'خادم التطبيق ومطوره',
+      'creator_role': 'مطور ومصمم التطبيق',
+      'tiktok_title': 'قناة تيك توك الرسمية',
+      'tiktok_desc': 'تلاوات خاشعة، تدبرات قرآنية، وآخر تحديثات التطبيق',
+      'tiktok_follow': 'متابعة على تيك توك',
+      'copy_handle': 'نسخ',
+      'tap_to_copy': 'اضغط في أي مكان لنسخ الحساب',
+      'copied_to_clipboard': 'تم نسخ @umer.almuktar إلى الحافظة!',
       'telegram_btn': 'تيليجرام',
       'email_btn': 'إرسال ملاحظة',
       'creator_note': 'عمل خالص لوجه الله للأمة الإسلامية • نسألكم صالح الدعاء',
@@ -147,9 +159,15 @@ class _SettingsScreenState extends State<SettingsScreen>
       'creator_community': 'አዘጋጅ እና ማህበረሰብ',
       'creator_name': 'ኡመር ሙክታር',
       'creator_role': 'ዋና አዘጋጅ እና ፈጣሪ',
+      'tiktok_title': 'Official TikTok Channel',
+      'tiktok_desc': 'የቁርኣን ቲላዋዎችና ዝመናዎች',
+      'tiktok_follow': 'Follow on TikTok',
+      'copy_handle': 'Copy',
+      'tap_to_copy': 'ለመቅዳት የትም ይጫኑ',
+      'copied_to_clipboard': '@umer.almuktar ወደ ቅንጥብ ሰሌዳ ተቀድቷል!',
       'telegram_btn': 'ቴሌግራም',
       'email_btn': 'ኢሜይል',
-      'creator_note': 'ለመላው ኡማህ በፍቅር የተዘጋጀ • የእርስዎ ዱዓ ይደግፈናል',
+      'creator_note': 'ለመላው ኡማህ የተዘጋጀ • የእርስዎ ዱዓ ይደግፈናል',
       'share_info': 'ስለ መተግበሪያው፣ ግላዊነት እና ድጋፍ',
       'share_app': 'መተግበሪያውን ያጋሩ',
       'rate_us': 'በፕሌይ ስቶር ደረጃ ይስጡ',
@@ -185,6 +203,12 @@ class _SettingsScreenState extends State<SettingsScreen>
       'creator_community': 'Hojjataa fi Hawaasa',
       'creator_name': 'Umar Muktaar',
       'creator_role': 'Hojjataa fi Qindeessaa App',
+      'tiktok_title': 'Official TikTok Channel',
+      'tiktok_desc': 'Qiraatii Qur\'aanaa fi odeeffannoo',
+      'tiktok_follow': 'Follow on TikTok',
+      'copy_handle': 'Copy',
+      'tap_to_copy': 'Kopiisuuf bakka kamiyyuu tuqaa',
+      'copied_to_clipboard': '@umer.almuktar garagalfameera!',
       'telegram_btn': 'Telegiraamii',
       'email_btn': 'Imeeylii',
       'creator_note':
@@ -403,7 +427,33 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-
+  void _showSnack(String msg, Color color) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle_rounded,
+                color: Colors.white, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                msg,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
+    );
+  }
 
   // ── Circular Reveal Trigger ────────────────────────────────────────────────
 
@@ -440,7 +490,29 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   // ── Action Handlers ────────────────────────────────────────────────────────
 
+  Future<void> _openTikTok() async {
+    final Uri url = Uri.parse('https://www.tiktok.com/@umer.almuktar');
+    try {
+      final launched =
+          await launchUrl(url, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        await launchUrl(url, mode: LaunchMode.platformDefault);
+      }
+    } catch (e) {
+      debugPrint('Error launching TikTok: $e');
+      if (mounted) {
+        _copyTikTokHandle();
+      }
+    }
+  }
 
+  void _copyTikTokHandle() {
+    HapticFeedback.lightImpact();
+    Clipboard.setData(const ClipboardData(text: '@umer.almuktar')).then((_) {
+      if (!mounted) return;
+      _showSnack(_tr(context, 'copied_to_clipboard'), const Color(0xFFFE2C55));
+    });
+  }
 
   Future<void> _openTelegram() async {
     final Uri url = Uri.parse('https://t.me/UMER_jr');
@@ -1043,7 +1115,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                 ),
                 const SizedBox(height: 6),
 
-                // ── 🌟 SECTION D: DAWAH & COMMUNITY ─────────────────────────
+                // ── 🌟 SECTION D: CREATOR & COMMUNITY ─────────────────────────
                 _sectionHeader(
                   icon: Icons.diversity_3_rounded,
                   title: _tr(context, 'creator_community'),
@@ -1054,12 +1126,11 @@ class _SettingsScreenState extends State<SettingsScreen>
                   isDark: isDark,
                   cardBg: cardBg,
                   primary: primary,
-                  goldBorder: borderColor,
+                  borderColor: borderColor,
                   creatorName: _tr(context, 'creator_name'),
                   creatorRole: _tr(context, 'creator_role'),
-                  telegramLabel: _tr(context, 'telegram_btn'),
-                  emailLabel: _tr(context, 'email_btn'),
                   creatorNote: _tr(context, 'creator_note'),
+                  onTikTok: _openTikTok,
                   onTelegram: _openTelegram,
                   onEmail: _openEmail,
                 ),
@@ -1178,7 +1249,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                               size: 12, color: primary.withValues(alpha: 0.6)),
                           const SizedBox(width: 5),
                           Text(
-                            'Developed with care for the Ummah • Umer Muktar',
+                            'Handcrafted for the Ummah by Umer Muktar',
                             style: TextStyle(
                               color: textSub.withValues(alpha: 0.8),
                               fontSize: 11,
@@ -1186,6 +1257,28 @@ class _SettingsScreenState extends State<SettingsScreen>
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 2),
+                      InkWell(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          _copyTikTokHandle();
+                        },
+                        borderRadius: BorderRadius.circular(6),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          child: Text(
+                            'TikTok: @umer.almuktar',
+                            style: TextStyle(
+                              color: const Color(0xFFFE2C55)
+                                  .withValues(alpha: 0.85),
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -1232,7 +1325,7 @@ class _SettingsScreenState extends State<SettingsScreen>
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF10B981), Color(0xFFD4AF37)],
+                  colors: [Color(0xFFFE2C55), Color(0xFF25F4EE)],
                 ),
                 borderRadius: BorderRadius.circular(5),
               ),
@@ -1304,7 +1397,7 @@ class _SettingsScreenState extends State<SettingsScreen>
             case 'om':
               return 'Quran Zone bakka tasgabbii lubbuu keessanii kan guyyuu akka ta\'uuf qophaa\'e. Kaayyoon keenya Qur\'aana Rabbii ﷻ fi Sunnah Nabiyyii ﷺ haala bareedaan gara onnee keessanitti dhiheessuudha.';
             default:
-              return 'Quran Zone was developed with utmost care to be your daily spiritual sanctuary, seamlessly connecting you with the Words of Allah ﷻ and the Sunnah of His Messenger ﷺ wherever you are in the world.';
+              return 'Quran Zone was handcrafted to be your daily spiritual sanctuary, seamlessly connecting you with the Words of Allah ﷻ and the Sunnah of His Messenger ﷺ wherever you are in the world.';
           }
         }
 
@@ -2369,6 +2462,7 @@ class _ThemeSwatchSelector extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // 🛡️ COMPONENT: System & Athan Permissions Health Center
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -2581,19 +2675,18 @@ class _PermissionsHealthCard extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 🌟 COMPONENT 6: Authentic Islamic Community & Dawah Hub
+// 🌟 COMPONENT 6: Authentic Islamic Community & Creator Hub
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _IslamicCommunityCard extends StatelessWidget {
   final bool isDark;
   final Color cardBg;
   final Color primary;
-  final Color goldBorder;
+  final Color borderColor;
   final String creatorName;
   final String creatorRole;
-  final String telegramLabel;
-  final String emailLabel;
   final String creatorNote;
+  final VoidCallback onTikTok;
   final VoidCallback onTelegram;
   final VoidCallback onEmail;
 
@@ -2601,12 +2694,11 @@ class _IslamicCommunityCard extends StatelessWidget {
     required this.isDark,
     required this.cardBg,
     required this.primary,
-    required this.goldBorder,
+    required this.borderColor,
     required this.creatorName,
     required this.creatorRole,
-    required this.telegramLabel,
-    required this.emailLabel,
     required this.creatorNote,
+    required this.onTikTok,
     required this.onTelegram,
     required this.onEmail,
   });
@@ -2632,11 +2724,11 @@ class _IslamicCommunityCard extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+      padding: const EdgeInsets.fromLTRB(14, 13, 14, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Row 1: Creator & App Maintainer Identity ────────────────────────
+          // ── Row 1: Creator Identity ─────────────────────────────────────────
           Row(
             children: [
               Container(
@@ -2709,44 +2801,54 @@ class _IslamicCommunityCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // ── Row 2: Community & Direct Support (Telegram & Email) ───────────
+          // ── Row 2: 3 Equal Side-by-Side Channels (TikTok, Telegram, Email) ───
           Row(
             children: [
+              // 1. TikTok Button
               Expanded(
                 child: SizedBox(
-                  height: 38,
+                  height: 36,
                   child: OutlinedButton(
-                    onPressed: onTelegram,
+                    onPressed: onTikTok,
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(
-                        color: Color(0xFF0088CC),
-                        width: 1.3,
+                      side: BorderSide(
+                        color: const Color(0xFFFE2C55).withValues(alpha: 0.45),
+                        width: 1.2,
                       ),
                       backgroundColor:
-                          const Color(0xFF0088CC).withValues(alpha: 0.08),
+                          const Color(0xFFFE2C55).withValues(alpha: 0.08),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CustomPaint(
-                            painter: _TelegramIconPainter(),
+                        Container(
+                          width: 16,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.music_note_rounded,
+                              size: 11,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 5),
                         Text(
-                          telegramLabel,
+                          'TikTok',
                           style: TextStyle(
                             color: isDark
-                                ? const Color(0xFF54C5F8)
-                                : const Color(0xFF0088CC),
-                            fontSize: 12,
+                                ? const Color(0xFFFF5277)
+                                : const Color(0xFFFE2C55),
+                            fontSize: 11.5,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -2755,35 +2857,94 @@ class _IslamicCommunityCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 7),
+
+              // 2. Telegram Button
               Expanded(
                 child: SizedBox(
-                  height: 38,
-                  child: OutlinedButton.icon(
-                    onPressed: onEmail,
-                    icon: Icon(Icons.email_outlined, size: 15, color: primary),
-                    label: Text(
-                      emailLabel,
-                      style: TextStyle(
-                        color: isDark ? Colors.white : Colors.black87,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  height: 36,
+                  child: OutlinedButton(
+                    onPressed: onTelegram,
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                        color: primary.withValues(alpha: 0.4),
+                      side: const BorderSide(
+                        color: Color(0xFF0088CC),
+                        width: 1.2,
                       ),
+                      backgroundColor:
+                          const Color(0xFF0088CC).withValues(alpha: 0.08),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CustomPaint(
+                            painter: _TelegramIconPainter(),
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          'Telegram',
+                          style: TextStyle(
+                            color: isDark
+                                ? const Color(0xFF54C5F8)
+                                : const Color(0xFF0088CC),
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 7),
+
+              // 3. Email Button
+              Expanded(
+                child: SizedBox(
+                  height: 36,
+                  child: OutlinedButton(
+                    onPressed: onEmail,
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(
+                        color: primary.withValues(alpha: 0.45),
+                        width: 1.2,
+                      ),
+                      backgroundColor: primary.withValues(alpha: 0.08),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.email_outlined, size: 15, color: primary),
+                        const SizedBox(width: 5),
+                        Text(
+                          'Email',
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 9),
 
           // Spiritual Note
           Text(
