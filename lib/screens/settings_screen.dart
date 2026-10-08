@@ -19,7 +19,7 @@ import '../features/prayer_times/presentation/screens/permissions_setup_screen.d
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SETTINGS SCREEN — Modern Luxury Islamic Redesign
-// Circular Ripple Reveal (Telegram-Style) & VIP TikTok Spotlight Showcase
+// Circular Ripple Reveal (Telegram-Style) & Islamic Community Card
 // ─────────────────────────────────────────────────────────────────────────────
 
 class SettingsScreen extends StatefulWidget {
@@ -73,15 +73,9 @@ class _SettingsScreenState extends State<SettingsScreen>
       'creator_community': 'DAWAH & COMMUNITY',
       'creator_name': 'Umer Muktar',
       'creator_role': 'App Maintainer & Creator',
-      'tiktok_title': 'Official Recitations Channel',
-      'tiktok_desc': 'Quran recitations, reflections & app updates',
-      'tiktok_follow': 'Visit Channel',
-      'copy_handle': 'Copy',
-      'tap_to_copy': 'Tap anywhere to copy handle',
-      'copied_to_clipboard': 'Copied @umer.almuktar to clipboard!',
       'telegram_btn': 'Telegram',
       'email_btn': 'Email',
-      'creator_note': 'Handcrafted for the Ummah • Dua appreciated',
+      'creator_note': 'Developed with care for the Ummah • Dua appreciated',
       'share_info': 'SUPPORT, PRIVACY & INFO',
       'share_app': 'Share Quran Zone',
       'rate_us': 'Rate Us on Google Play',
@@ -116,12 +110,6 @@ class _SettingsScreenState extends State<SettingsScreen>
       'creator_community': 'المجتمع والتواصل الدعوي',
       'creator_name': 'عمر المختار',
       'creator_role': 'خادم التطبيق ومطوره',
-      'tiktok_title': 'قناة التلاوات والفوائد القرآنية',
-      'tiktok_desc': 'تلاوات خاشعة، تدبرات قرآنية، وآخر تحديثات التطبيق',
-      'tiktok_follow': 'فتح القناة',
-      'copy_handle': 'نسخ',
-      'tap_to_copy': 'اضغط في أي مكان لنسخ الحساب',
-      'copied_to_clipboard': 'تم نسخ @umer.almuktar إلى الحافظة!',
       'telegram_btn': 'تيليجرام',
       'email_btn': 'إرسال ملاحظة',
       'creator_note': 'عمل خالص لوجه الله للأمة الإسلامية • نسألكم صالح الدعاء',
@@ -159,15 +147,9 @@ class _SettingsScreenState extends State<SettingsScreen>
       'creator_community': 'አዘጋጅ እና ማህበረሰብ',
       'creator_name': 'ኡመር ሙክታር',
       'creator_role': 'ዋና አዘጋጅ እና ፈጣሪ',
-      'tiktok_title': 'Official TikTok Channel',
-      'tiktok_desc': 'የቁርኣን ቲላዋዎችና ዝመናዎች',
-      'tiktok_follow': 'Follow on TikTok',
-      'copy_handle': 'Copy',
-      'tap_to_copy': 'ለመቅዳት የትም ይጫኑ',
-      'copied_to_clipboard': '@umer.almuktar ወደ ቅንጥብ ሰሌዳ ተቀድቷል!',
       'telegram_btn': 'ቴሌግራም',
       'email_btn': 'ኢሜይል',
-      'creator_note': 'ለመላው ኡማህ የተዘጋጀ • የእርስዎ ዱዓ ይደግፈናል',
+      'creator_note': 'ለመላው ኡማህ በፍቅር የተዘጋጀ • የእርስዎ ዱዓ ይደግፈናል',
       'share_info': 'ስለ መተግበሪያው፣ ግላዊነት እና ድጋፍ',
       'share_app': 'መተግበሪያውን ያጋሩ',
       'rate_us': 'በፕሌይ ስቶር ደረጃ ይስጡ',
@@ -203,12 +185,6 @@ class _SettingsScreenState extends State<SettingsScreen>
       'creator_community': 'Hojjataa fi Hawaasa',
       'creator_name': 'Umar Muktaar',
       'creator_role': 'Hojjataa fi Qindeessaa App',
-      'tiktok_title': 'Official TikTok Channel',
-      'tiktok_desc': 'Qiraatii Qur\'aanaa fi odeeffannoo',
-      'tiktok_follow': 'Follow on TikTok',
-      'copy_handle': 'Copy',
-      'tap_to_copy': 'Kopiisuuf bakka kamiyyuu tuqaa',
-      'copied_to_clipboard': '@umer.almuktar garagalfameera!',
       'telegram_btn': 'Telegiraamii',
       'email_btn': 'Imeeylii',
       'creator_note':
@@ -427,33 +403,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  void _showSnack(String msg, Color color) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle_rounded,
-                color: Colors.white, size: 20),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                msg,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      ),
-    );
-  }
+
 
   // ── Circular Reveal Trigger ────────────────────────────────────────────────
 
@@ -490,29 +440,7 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   // ── Action Handlers ────────────────────────────────────────────────────────
 
-  Future<void> _openTikTok() async {
-    final Uri url = Uri.parse('https://www.tiktok.com/@umer.almuktar');
-    try {
-      final launched =
-          await launchUrl(url, mode: LaunchMode.externalApplication);
-      if (!launched) {
-        await launchUrl(url, mode: LaunchMode.platformDefault);
-      }
-    } catch (e) {
-      debugPrint('Error launching TikTok: $e');
-      if (mounted) {
-        _copyTikTokHandle();
-      }
-    }
-  }
 
-  void _copyTikTokHandle() {
-    HapticFeedback.lightImpact();
-    Clipboard.setData(const ClipboardData(text: '@umer.almuktar')).then((_) {
-      if (!mounted) return;
-      _showSnack(_tr(context, 'copied_to_clipboard'), const Color(0xFF10B981));
-    });
-  }
 
   Future<void> _openTelegram() async {
     final Uri url = Uri.parse('https://t.me/UMER_jr');
@@ -1129,15 +1057,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                   goldBorder: borderColor,
                   creatorName: _tr(context, 'creator_name'),
                   creatorRole: _tr(context, 'creator_role'),
-                  channelTitle: _tr(context, 'tiktok_title'),
-                  channelDesc: _tr(context, 'tiktok_desc'),
-                  visitLabel: _tr(context, 'tiktok_follow'),
-                  copyLabel: _tr(context, 'copy_handle'),
                   telegramLabel: _tr(context, 'telegram_btn'),
                   emailLabel: _tr(context, 'email_btn'),
                   creatorNote: _tr(context, 'creator_note'),
-                  onVisitChannel: _openTikTok,
-                  onCopyHandle: _copyTikTokHandle,
                   onTelegram: _openTelegram,
                   onEmail: _openEmail,
                 ),
@@ -1256,7 +1178,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                               size: 12, color: primary.withValues(alpha: 0.6)),
                           const SizedBox(width: 5),
                           Text(
-                            'Handcrafted for the Ummah by Umer Muktar',
+                            'Developed with care for the Ummah • Umer Muktar',
                             style: TextStyle(
                               color: textSub.withValues(alpha: 0.8),
                               fontSize: 11,
@@ -1264,27 +1186,6 @@ class _SettingsScreenState extends State<SettingsScreen>
                             ),
                           ),
                         ],
-                      ),
-                      const SizedBox(height: 2),
-                      InkWell(
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          _copyTikTokHandle();
-                        },
-                        borderRadius: BorderRadius.circular(6),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
-                          child: Text(
-                            'Channel: @umer.almuktar',
-                            style: TextStyle(
-                              color: primary.withValues(alpha: 0.85),
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.4,
-                            ),
-                          ),
-                        ),
                       ),
                     ],
                   ),
@@ -1403,7 +1304,7 @@ class _SettingsScreenState extends State<SettingsScreen>
             case 'om':
               return 'Quran Zone bakka tasgabbii lubbuu keessanii kan guyyuu akka ta\'uuf qophaa\'e. Kaayyoon keenya Qur\'aana Rabbii ﷻ fi Sunnah Nabiyyii ﷺ haala bareedaan gara onnee keessanitti dhiheessuudha.';
             default:
-              return 'Quran Zone was handcrafted to be your daily spiritual sanctuary, seamlessly connecting you with the Words of Allah ﷻ and the Sunnah of His Messenger ﷺ wherever you are in the world.';
+              return 'Quran Zone was developed with utmost care to be your daily spiritual sanctuary, seamlessly connecting you with the Words of Allah ﷻ and the Sunnah of His Messenger ﷺ wherever you are in the world.';
           }
         }
 
@@ -2690,15 +2591,9 @@ class _IslamicCommunityCard extends StatelessWidget {
   final Color goldBorder;
   final String creatorName;
   final String creatorRole;
-  final String channelTitle;
-  final String channelDesc;
-  final String visitLabel;
-  final String copyLabel;
   final String telegramLabel;
   final String emailLabel;
   final String creatorNote;
-  final VoidCallback onVisitChannel;
-  final VoidCallback onCopyHandle;
   final VoidCallback onTelegram;
   final VoidCallback onEmail;
 
@@ -2709,15 +2604,9 @@ class _IslamicCommunityCard extends StatelessWidget {
     required this.goldBorder,
     required this.creatorName,
     required this.creatorRole,
-    required this.channelTitle,
-    required this.channelDesc,
-    required this.visitLabel,
-    required this.copyLabel,
     required this.telegramLabel,
     required this.emailLabel,
     required this.creatorNote,
-    required this.onVisitChannel,
-    required this.onCopyHandle,
     required this.onTelegram,
     required this.onEmail,
   });
@@ -2743,7 +2632,7 @@ class _IslamicCommunityCard extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -2818,180 +2707,14 @@ class _IslamicCommunityCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 11),
+          const SizedBox(height: 12),
 
-          // ── Row 2: Official Recitations Channel Container ────────────────────
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF060B09) : const Color(0xFFF9FBF9),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.08)
-                    : Colors.black.withValues(alpha: 0.06),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.03),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: emeraldAccent.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.headphones_rounded,
-                          color: emeraldAccent,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  channelTitle,
-                                  style: TextStyle(
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.black87,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 1.5),
-                                decoration: BoxDecoration(
-                                  color: emeraldAccent.withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                                child: const Text(
-                                  '@umer.almuktar',
-                                  style: TextStyle(
-                                    color: emeraldAccent,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            channelDesc,
-                            style: TextStyle(
-                              fontSize: 10.5,
-                              color: isDark ? Colors.white60 : Colors.black54,
-                              height: 1.25,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-
-                // Action Buttons: Visit Channel + Copy Handle
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 6,
-                      child: SizedBox(
-                        height: 36,
-                        child: ElevatedButton.icon(
-                          onPressed: onVisitChannel,
-                          icon: const Icon(Icons.open_in_new_rounded,
-                              size: 14, color: Colors.white),
-                          label: Text(
-                            visitLabel,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.2,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: emeraldAccent,
-                            elevation: 1,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 6),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      flex: 4,
-                      child: SizedBox(
-                        height: 36,
-                        child: OutlinedButton.icon(
-                          onPressed: onCopyHandle,
-                          icon: const Icon(Icons.copy_rounded,
-                              size: 13, color: emeraldAccent),
-                          label: Text(
-                            copyLabel,
-                            style: const TextStyle(
-                              color: emeraldAccent,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color: emeraldAccent.withValues(alpha: 0.45),
-                              width: 1.2,
-                            ),
-                            backgroundColor: emeraldAccent.withValues(
-                                alpha: isDark ? 0.10 : 0.06),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 6),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 9),
-
-          // ── Row 3: Community & Support (Telegram & Email) ────────────────────
+          // ── Row 2: Community & Direct Support (Telegram & Email) ───────────
           Row(
             children: [
               Expanded(
                 child: SizedBox(
-                  height: 36,
+                  height: 38,
                   child: OutlinedButton(
                     onPressed: onTelegram,
                     style: OutlinedButton.styleFrom(
@@ -3035,7 +2758,7 @@ class _IslamicCommunityCard extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: SizedBox(
-                  height: 36,
+                  height: 38,
                   child: OutlinedButton.icon(
                     onPressed: onEmail,
                     icon: Icon(Icons.email_outlined, size: 15, color: primary),
@@ -3060,7 +2783,7 @@ class _IslamicCommunityCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
 
           // Spiritual Note
           Text(

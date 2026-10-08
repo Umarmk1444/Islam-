@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -25,7 +26,7 @@ class PdfReaderScreen extends StatefulWidget {
   State<PdfReaderScreen> createState() => _PdfReaderScreenState();
 }
 
-class _PdfReaderScreenState extends State<PdfReaderScreen> {
+class _PdfReaderScreenState extends State<PdfReaderScreen> with TickerProviderStateMixin {
   final LibraryService _libraryService = LibraryService();
   final PdfAnnotationService _annotationService = PdfAnnotationService();
   final PdfThumbnailService _thumbnailService = PdfThumbnailService();
@@ -35,6 +36,11 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
 
   late PdfViewerController _pdfViewerController;
   late PdfTextSearchResult _searchResult;
+
+  // Fling inertia controller for smooth multi-page velocity glides
+  VelocityTracker? _flingVelocityTracker;
+  AnimationController? _flingAnimationController;
+  Animation<double>? _flingAnimation;
 
   late int _currentPage;
   late int _totalPages;
@@ -129,6 +135,8 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
     _searchFieldController.dispose();
     _searchResult.dispose();
     _pdfViewerController.dispose();
+    _flingAnimationController?.stop();
+    _flingAnimationController?.dispose();
     try {
       WakelockPlus.disable();
     } catch (e) {
@@ -2931,6 +2939,77 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
     }
   }
 
+  // ── Fluid Fling Momentum Scroll Physics ─────────────────────────────────────
+  void _onFlingPointerDown(PointerDownEvent event) {
+    if (_flingAnimationController?.isAnimating ?? false) {
+      _flingAnimationController?.stop();
+    }
+    _flingVelocityTracker = VelocityTracker.withKind(event.kind);
+  }
+
+  void _onFlingPointerMove(PointerMoveEvent event) {
+    _flingVelocityTracker?.addPosition(event.timeStamp, event.position);
+  }
+
+  void _onFlingPointerUp(PointerUpEvent event) {
+    if (_isSwipeHorizontal) return;
+    if (_totalPages <= 1) return;
+    if (_pdfViewerController.zoomLevel > 1.05) return;
+    if (_pdfViewerKey.currentState?.getSelectedTextLines().isNotEmpty == true) return;
+
+    final tracker = _flingVelocityTracker;
+    if (tracker == null) return;
+    final estimate = tracker.getVelocityEstimate();
+    if (estimate == null) return;
+
+    final double vy = estimate.pixelsPerSecond.dy;
+
+    // Minimum flick speed threshold (px/sec) to distinguish deliberate swipe from tap/gentle drag
+    if (vy.abs() < 550) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _applyScrollFlingInertia(vy);
+    });
+  }
+
+  void _applyScrollFlingInertia(double vy) {
+    if (_isSwipeHorizontal) return;
+
+    final double startY = _pdfViewerController.scrollOffset.dy;
+
+    // Negative vy means swiping upward (scrolling forward towards subsequent pages)
+    // Positive vy means swiping downward (scrolling backward towards earlier pages)
+    final double flingDistance = -vy * 0.85;
+    final double targetY = (startY + flingDistance).clamp(0.0, double.infinity);
+    if ((targetY - startY).abs() < 15) return;
+
+    final int durationMs = (600 + (vy.abs() * 0.12).clamp(0, 800)).round();
+
+    _flingAnimationController?.stop();
+    _flingAnimationController?.dispose();
+
+    _flingAnimationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: durationMs),
+    );
+
+    _flingAnimation = Tween<double>(
+      begin: startY,
+      end: targetY,
+    ).animate(CurvedAnimation(
+      parent: _flingAnimationController!,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _flingAnimation!.addListener(() {
+      if (!mounted) return;
+      _pdfViewerController.jumpTo(yOffset: _flingAnimation!.value);
+    });
+
+    _flingAnimationController!.forward();
+  }
+
   // ── Syncfusion PDF Viewer Widget ───────────────────────────────────────────
   Widget _buildPdfViewer(bool isDark, bool isCream) {
     final viewer = SfPdfViewer.file(
@@ -2938,8 +3017,8 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
       key: _pdfViewerKey,
       controller: _pdfViewerController,
       initialPageNumber: _currentPage > 0 ? _currentPage : 1, // Directly load the exact page stopped at on frame 1!
-      canShowScrollHead: false, // Disabling heavy internal overlay avoids frame drops on 300+ pages
-      canShowScrollStatus: false, // Replaced with smooth bottom scrubber matching Screenshot 3
+      canShowScrollHead: true, // Native draggable fast-scroll thumb handle for effortless multi-page jumping
+      canShowScrollStatus: true, // Native page counter status pill during fast scrolling
       canShowPaginationDialog: false,
       canShowTextSelectionMenu: false, // Disable built-in Syncfusion menu to avoid overlapping
       canShowPageLoadingIndicator: false, // Eliminates background 60 FPS repaint loop
@@ -2998,15 +3077,22 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
       },
     );
 
+    final wrappedViewer = Listener(
+      onPointerDown: _onFlingPointerDown,
+      onPointerMove: _onFlingPointerMove,
+      onPointerUp: _onFlingPointerUp,
+      child: viewer,
+    );
+
     // If standard Day/White theme, return viewer directly with ZERO GPU filters (saves 60fps Impeller compositor passes)
     if (!isDark && !isCream) {
-      return viewer;
+      return wrappedViewer;
     }
 
     // Instant GPU-accelerated theme filter for Dark / Night and Cream / Eye-comfort modes
     return ColorFiltered(
       colorFilter: isDark ? _kInvertColorFilter : _kCreamColorFilter,
-      child: viewer,
+      child: wrappedViewer,
     );
   }
 
