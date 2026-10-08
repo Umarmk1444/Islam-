@@ -70,18 +70,18 @@ class _SettingsScreenState extends State<SettingsScreen>
       'storage_section': 'STORAGE & OFFLINE',
       'downloads': 'Downloaded Audio Library',
       'downloads_desc': 'Manage offline surahs, recitations & lectures',
-      'creator_community': 'CREATOR & COMMUNITY',
-      'creator_name': 'Umer Muktar',
-      'creator_role': 'Lead Developer & Creator',
-      'tiktok_title': 'Official TikTok Channel',
+      'creator_community': 'COMMUNITY & CHANNELS',
+      'creator_name': 'Quran Zone',
+      'creator_role': 'Official channels, recitations & feedback',
+      'tiktok_title': 'TikTok Channel',
       'tiktok_desc': 'Quran recitations, reflections & app updates',
-      'tiktok_follow': 'Follow on TikTok',
+      'tiktok_follow': 'Visit TikTok',
       'copy_handle': 'Copy',
       'tap_to_copy': 'Tap anywhere to copy handle',
-      'copied_to_clipboard': 'Copied @umer.almuktar to clipboard!',
+      'copied_to_clipboard': 'Copied handle to clipboard!',
       'telegram_btn': 'Telegram',
       'email_btn': 'Email',
-      'creator_note': 'Handcrafted for the Ummah • Dua appreciated',
+      'creator_note': 'Sadaqah Jariyah • Purely for the sake of Allah',
       'share_info': 'SUPPORT, PRIVACY & INFO',
       'share_app': 'Share Quran Zone',
       'rate_us': 'Rate Us on Google Play',
@@ -113,18 +113,18 @@ class _SettingsScreenState extends State<SettingsScreen>
       'storage_section': 'التخزين والمحفوظات',
       'downloads': 'التسجيلات المحملة',
       'downloads_desc': 'إدارة السور والمحاضرات بدون إنترنت',
-      'creator_community': 'المطور والمجتمع',
-      'creator_name': 'عمر المختار',
-      'creator_role': 'مطور ومصمم التطبيق',
-      'tiktok_title': 'قناة تيك توك الرسمية',
+      'creator_community': 'قنوات التواصل والمجتمع',
+      'creator_name': 'Quran Zone',
+      'creator_role': 'تلاوات قرآنية، تدبرات، وتواصل مباشر',
+      'tiktok_title': 'قناة تيك توك',
       'tiktok_desc': 'تلاوات خاشعة، تدبرات قرآنية، وآخر تحديثات التطبيق',
-      'tiktok_follow': 'متابعة على تيك توك',
+      'tiktok_follow': 'زيارة تيك توك',
       'copy_handle': 'نسخ',
       'tap_to_copy': 'اضغط في أي مكان لنسخ الحساب',
-      'copied_to_clipboard': 'تم نسخ @umer.almuktar إلى الحافظة!',
+      'copied_to_clipboard': 'تم نسخ الحساب إلى الحافظة!',
       'telegram_btn': 'تيليجرام',
       'email_btn': 'إرسال ملاحظة',
-      'creator_note': 'عمل خالص لوجه الله للأمة الإسلامية • نسألكم صالح الدعاء',
+      'creator_note': 'عمل خالص لوجه الله تعالى • نسألكم صالح الدعاء',
       'share_info': 'الدعم والخصوصية ومعلومات التطبيق',
       'share_app': 'مشاركة تطبيق Quran Zone',
       'rate_us': 'تقييم التطبيق على متجر جوجل',
@@ -156,18 +156,18 @@ class _SettingsScreenState extends State<SettingsScreen>
       'storage_section': 'ማከማቻ እና የወረዱ ፋይሎች',
       'downloads': 'የወረዱ የድምጽ ፋይሎች',
       'downloads_desc': 'ያለ ኢንተርኔት የሚያዳምጡትን ያስተዳድሩ',
-      'creator_community': 'አዘጋጅ እና ማህበረሰብ',
-      'creator_name': 'ኡመር ሙክታር',
-      'creator_role': 'ዋና አዘጋጅ እና ፈጣሪ',
-      'tiktok_title': 'Official TikTok Channel',
+      'creator_community': 'ማህበረሰብ እና አድራሻዎች',
+      'creator_name': 'Quran Zone',
+      'creator_role': 'የቁርኣን ቲላዋዎችና ማህበራዊ ገጾች',
+      'tiktok_title': 'TikTok Channel',
       'tiktok_desc': 'የቁርኣን ቲላዋዎችና ዝመናዎች',
-      'tiktok_follow': 'Follow on TikTok',
+      'tiktok_follow': 'Visit TikTok',
       'copy_handle': 'Copy',
       'tap_to_copy': 'ለመቅዳት የትም ይጫኑ',
-      'copied_to_clipboard': '@umer.almuktar ወደ ቅንጥብ ሰሌዳ ተቀድቷል!',
+      'copied_to_clipboard': 'አድራሻው ወደ ቅንጥብ ሰሌዳ ተቀድቷል!',
       'telegram_btn': 'ቴሌግራም',
       'email_btn': 'ኢሜይል',
-      'creator_note': 'ለመላው ኡማህ የተዘጋጀ • የእርስዎ ዱዓ ይደግፈናል',
+      'creator_note': 'የጋራ ሰደቃ • ለአላህ ተብሎ የተዘጋጀ',
       'share_info': 'ስለ መተግበሪያው፣ ግላዊነት እና ድጋፍ',
       'share_app': 'መተግበሪያውን ያጋሩ',
       'rate_us': 'በፕሌይ ስቶር ደረጃ ይስጡ',
@@ -200,19 +200,19 @@ class _SettingsScreenState extends State<SettingsScreen>
       'storage_section': 'Kuusaa fi Buufataalee',
       'downloads': 'Sagaleewwan Buufaman',
       'downloads_desc': 'Toora malee fayyadamuuf kanneen qophaa\'an',
-      'creator_community': 'Hojjataa fi Hawaasa',
-      'creator_name': 'Umar Muktaar',
-      'creator_role': 'Hojjataa fi Qindeessaa App',
-      'tiktok_title': 'Official TikTok Channel',
+      'creator_community': 'Hawaasaa fi Quunnamtii',
+      'creator_name': 'Quran Zone',
+      'creator_role': 'Qiraatii Qur\'aanaa fi quunnamtii',
+      'tiktok_title': 'TikTok Channel',
       'tiktok_desc': 'Qiraatii Qur\'aanaa fi odeeffannoo',
-      'tiktok_follow': 'Follow on TikTok',
+      'tiktok_follow': 'Visit TikTok',
       'copy_handle': 'Copy',
       'tap_to_copy': 'Kopiisuuf bakka kamiyyuu tuqaa',
-      'copied_to_clipboard': '@umer.almuktar garagalfameera!',
+      'copied_to_clipboard': 'Garagalfameera!',
       'telegram_btn': 'Telegiraamii',
       'email_btn': 'Imeeylii',
       'creator_note':
-          'Ummata hundaaf kan qophaa\'e • Du\'aayiin keessan nuuf qabeenya',
+          'Sadaqah Jaariyaa • Waaqayyoof jedhamee kan qophaa\'e',
       'share_info': 'Waa\'ee App, Dhuunfaa fi Deeggarsa',
       'share_app': 'Appilikeeshinii Qoodaa',
       'rate_us': 'Play Store irratti sadarkaa kennaa',
@@ -1115,12 +1115,12 @@ class _SettingsScreenState extends State<SettingsScreen>
                 ),
                 const SizedBox(height: 6),
 
-                // ── 🌟 SECTION D: CREATOR & COMMUNITY ─────────────────────────
+                // ── 🌟 SECTION D: COMMUNITY & OFFICIAL CHANNELS ───────────────
                 _sectionHeader(
-                  icon: Icons.diversity_3_rounded,
+                  icon: Icons.forum_rounded,
                   title: _tr(context, 'creator_community'),
                   color: const Color(0xFF10B981),
-                  badgeText: isArabic ? 'خدمة القرآن الكريم' : 'FOR THE UMMAH',
+                  badgeText: isArabic ? 'تواصل ومتابعة' : 'OFFICIAL',
                 ),
                 _IslamicCommunityCard(
                   isDark: isDark,
@@ -1249,7 +1249,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                               size: 12, color: primary.withValues(alpha: 0.6)),
                           const SizedBox(width: 5),
                           Text(
-                            'Handcrafted for the Ummah by Umer Muktar',
+                            isArabic
+                                ? 'Quran Zone • صدقة جارية لوجه الله تعالى'
+                                : 'Quran Zone • Sadaqah Jariyah for the Ummah',
                             style: TextStyle(
                               color: textSub.withValues(alpha: 0.8),
                               fontSize: 11,
@@ -1258,26 +1260,15 @@ class _SettingsScreenState extends State<SettingsScreen>
                           ),
                         ],
                       ),
-                      const SizedBox(height: 2),
-                      InkWell(
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          _copyTikTokHandle();
-                        },
-                        borderRadius: BorderRadius.circular(6),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
-                          child: Text(
-                            'TikTok: @umer.almuktar',
-                            style: TextStyle(
-                              color: const Color(0xFFFE2C55)
-                                  .withValues(alpha: 0.85),
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.4,
-                            ),
-                          ),
+                      const SizedBox(height: 4),
+                      Text(
+                        isArabic
+                            ? 'نسألكم صالح الدعاء'
+                            : 'Keep us in your sincere Du\'a',
+                        style: TextStyle(
+                          color: textSub.withValues(alpha: 0.55),
+                          fontSize: 10,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                     ],
@@ -2706,7 +2697,6 @@ class _IslamicCommunityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const emeraldAccent = Color(0xFF10B981);
-    const goldAccent = Color(0xFFD4AF37);
 
     return Container(
       decoration: BoxDecoration(
@@ -2728,32 +2718,25 @@ class _IslamicCommunityCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Row 1: Creator Identity ─────────────────────────────────────────
+          // ── Row 1: Official Channels & Community ────────────────────────────
           Row(
             children: [
               Container(
                 width: 38,
                 height: 38,
-                padding: const EdgeInsets.all(2),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [emeraldAccent, goldAccent],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                  color: emeraldAccent.withValues(alpha: isDark ? 0.16 : 0.10),
+                  border: Border.all(
+                    color: emeraldAccent.withValues(alpha: 0.35),
+                    width: 1.2,
                   ),
                 ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isDark ? const Color(0xFF09120E) : Colors.white,
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.person_rounded,
-                      size: 20,
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
+                child: const Center(
+                  child: Icon(
+                    Icons.forum_rounded,
+                    size: 19,
+                    color: emeraldAccent,
                   ),
                 ),
               ),
@@ -2763,33 +2746,23 @@ class _IslamicCommunityCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          creatorName,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        const Icon(
-                          Icons.verified_rounded,
-                          size: 15,
-                          color: emeraldAccent,
-                        ),
-                      ],
+                    Text(
+                      creatorName,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
                     ),
                     const SizedBox(height: 1.5),
                     Text(
                       creatorRole,
                       style: TextStyle(
                         color: isDark
-                            ? const Color(0xFFE8C77A)
-                            : const Color(0xFF8D6800),
+                            ? Colors.white.withValues(alpha: 0.6)
+                            : Colors.black.withValues(alpha: 0.6),
                         fontSize: 10.5,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
