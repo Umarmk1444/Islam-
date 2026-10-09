@@ -67,6 +67,7 @@ flutter:
     - assets/audio/
     - assets/muezzins.json
     - assets/cities.json.gz
+    - assets/hadith_library.db.gz
     - assets/icons/light/
     - assets/icons/dark/
     - assets/mainframe.png

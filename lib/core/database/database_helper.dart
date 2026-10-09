@@ -92,7 +92,10 @@ class DatabaseHelper {
   Future<Database> get database async {
     if (_db != null && _db!.isOpen) return _db!;
 
-    // Serialise concurrent callers: only one coroutine runs the init path.
+    // If _db was closed or is null, ensure the future is reset so it re-opens
+    if (_initialiseFuture != null && (_db == null || !_db!.isOpen)) {
+      _initialiseFuture = null;
+    }
     _initialiseFuture ??= _initDatabase();
     return _initialiseFuture!;
   }

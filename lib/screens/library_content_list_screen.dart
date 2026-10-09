@@ -4,7 +4,10 @@ import '../services/library_service.dart';
 import '../models/library_item.dart';
 import '../models/fatwa_item.dart';
 import '../models/roqua_item.dart';
+import '../models/hadith_models.dart';
+import '../core/database/hadith_database_helper.dart';
 import 'story_reading_screen.dart';
+import 'hadith_reader_screen.dart';
 import '../widgets/liquid_pressable.dart';
 
 class LibraryContentListScreen extends StatefulWidget {
@@ -28,6 +31,19 @@ class _LibraryContentListScreenState extends State<LibraryContentListScreen> {
   final LibraryService _libraryService = LibraryService();
   final TextEditingController _searchController = TextEditingController();
 
+  static const Map<int, String> _collectionNames = {
+    1: 'صحيح البخاري',
+    2: 'صحيح مسلم',
+    3: 'سنن النسائي',
+    4: 'سنن أبي داود',
+    5: 'جامع الترمذي',
+    6: 'سنن ابن ماجه',
+    7: 'موطأ مالك',
+    8: 'رياض الصالحين',
+    9: 'الأدب المفرد',
+    10: 'بلوغ المرام',
+  };
+
   List<dynamic> _items = [];
   bool _isLoading = true;
 
@@ -48,14 +64,41 @@ class _LibraryContentListScreenState extends State<LibraryContentListScreen> {
     List<dynamic> items;
 
     if (widget.part == 'favorites') {
-      items = await _libraryService.getFavorites();
+      final legacyFavs = await _libraryService.getFavorites();
+      List<HadithItem> hadithFavs = [];
+      try {
+        hadithFavs = await HadithDatabaseHelper.instance.getFavorites();
+      } catch (e) {
+        debugPrint('[LibraryContentListScreen] Error loading hadith favorites: $e');
+      }
+
+      // Deduplicate: If hadithFav has legacyBukhariId, exclude that legacy item from legacyFavs
+      final existingLegacyBukhariIds = hadithFavs
+          .where((h) => h.legacyBukhariId != null)
+          .map((h) => h.legacyBukhariId!)
+          .toSet();
+
+      final filteredLegacy = legacyFavs.where((item) {
+        if (existingLegacyBukhariIds.contains(item.id)) {
+          return false;
+        }
+        return true;
+      }).toList();
+
+      items = [...filteredLegacy, ...hadithFavs];
+
       if (query.trim().isNotEmpty) {
-        items = items
-            .where((item) => (item as LibraryItem)
-                .title
-                .toLowerCase()
-                .contains(query.toLowerCase()))
-            .toList();
+        final q = query.trim().toLowerCase();
+        items = items.where((item) {
+          if (item is LibraryItem) {
+            return item.title.toLowerCase().contains(q);
+          } else if (item is HadithItem) {
+            return item.arabicClean.contains(q) ||
+                item.arabicText.toLowerCase().contains(q) ||
+                item.hadithNumber.contains(q);
+          }
+          return false;
+        }).toList();
       }
     } else if (widget.part == 'فتاوى') {
       items = await _libraryService.getFatawyItems(widget.categoryId,
@@ -82,6 +125,33 @@ class _LibraryContentListScreenState extends State<LibraryContentListScreen> {
   }
 
   void _openItem(dynamic item, int index) async {
+    if (item is HadithItem) {
+      HadithCollection? collection;
+      HadithBook? book;
+      try {
+        collection = await HadithDatabaseHelper.instance.getCollection(item.collectionId);
+        book = await HadithDatabaseHelper.instance.getBook(item.bookId);
+      } catch (e) {
+        debugPrint('[LibraryContentListScreen] Error getting collection/book for hadith: $e');
+      }
+      if (collection != null && book != null && mounted) {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => HadithReaderScreen(
+              collection: collection!,
+              book: book!,
+              initialHadithIndex: item.inBookNumber > 0 ? item.inBookNumber - 1 : 0,
+            ),
+          ),
+        );
+        if (widget.part == 'favorites' && mounted) {
+          _loadItems(query: _searchController.text);
+        }
+      }
+      return;
+    }
+
     final bool isBukhari = widget.part == 'صحيح البخارى' || widget.part == 'البخارى';
     await Navigator.push(context, MaterialPageRoute(builder: (_) {
       if (isBukhari) {
@@ -107,7 +177,7 @@ class _LibraryContentListScreenState extends State<LibraryContentListScreen> {
         );
       }
     }));
-    if (widget.part == 'favorites') {
+    if (widget.part == 'favorites' && mounted) {
       _loadItems(query: _searchController.text);
     }
   }
@@ -262,12 +332,17 @@ class _LibraryContentListScreenState extends State<LibraryContentListScreen> {
                           final item = _items[index];
                           final bool isFatwa = item is FatwaItem;
                           final bool isRoqua = item is RoquaItem;
+                          final bool isHadith = item is HadithItem;
 
                           final String rawTitle = isFatwa
                               ? item.question
                               : isRoqua
                                   ? item.title
-                                  : (item as LibraryItem).title;
+                                  : isHadith
+                                      ? (item.matnAr != null && item.matnAr!.trim().isNotEmpty
+                                          ? item.matnAr!
+                                          : item.arabicText)
+                                      : (item as LibraryItem).title;
                           final String title = rawTitle
                               .replaceAll('{', '')
                               .replaceAll('}', '')
@@ -276,15 +351,19 @@ class _LibraryContentListScreenState extends State<LibraryContentListScreen> {
 
                           final bool isFav = (isFatwa || isRoqua)
                               ? false
-                              : (item as LibraryItem).isFav;
-                          final int readings = (isFatwa || isRoqua)
+                              : isHadith
+                                  ? item.isFavorite
+                                  : (item as LibraryItem).isFav;
+                          final int readings = (isFatwa || isRoqua || isHadith)
                               ? 0
                               : (item as LibraryItem).numReadings;
 
                           final String typeTag = widget.part == 'favorites'
-                              ? (item is LibraryItem
-                                  ? (item.part.isNotEmpty ? item.part : 'المكتبة')
-                                  : 'المفضلة')
+                              ? (isHadith
+                                  ? '${_collectionNames[item.collectionId] ?? 'حديث نبوي'} • رقم ${item.hadithNumber}'
+                                  : (item is LibraryItem
+                                      ? (item.part.isNotEmpty ? item.part : 'المكتبة')
+                                      : 'المفضلة'))
                               : isFatwa
                                   ? (widget.categoryTitle.isNotEmpty
                                       ? widget.categoryTitle
@@ -309,12 +388,14 @@ class _LibraryContentListScreenState extends State<LibraryContentListScreen> {
                           IconData getIcon() {
                             if (isFatwa) return Icons.live_help_rounded;
                             if (isRoqua) return Icons.healing_rounded;
+                            if (isHadith) return Icons.auto_stories_rounded;
                             return Icons.menu_book_rounded;
                           }
 
                           Color getIconColor() {
                             if (isFatwa) return const Color(0xFFAB47BC);
                             if (isRoqua) return const Color(0xFFED64A6);
+                            if (isHadith) return const Color(0xFF1B8A6B);
                             return const Color(0xFF1B8A6B);
                           }
 

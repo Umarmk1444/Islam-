@@ -7,11 +7,15 @@ import '../widgets/liquid_pressable.dart';
 class LibraryCategoryScreen extends StatefulWidget {
   final String domainPart; // e.g. 'المكتبة', 'فتاوى', 'صحيح البخارى'
   final String domainTitle;
+  final List<String>? filterCategories;
+  final Widget? headerWidget;
 
   const LibraryCategoryScreen({
     super.key,
     required this.domainPart,
     required this.domainTitle,
+    this.filterCategories,
+    this.headerWidget,
   });
 
   @override
@@ -45,6 +49,15 @@ class _LibraryCategoryScreenState extends State<LibraryCategoryScreen> {
         cats = await _libraryService.getFatawyCategories();
       } else {
         cats = await _libraryService.getLibraryCategories(widget.domainPart);
+      }
+
+      if (widget.filterCategories != null && widget.filterCategories!.isNotEmpty) {
+        final filterSet = widget.filterCategories!.map((s) => s.trim()).toSet();
+        cats = cats.where((c) {
+          final id = c['id']?.trim() ?? '';
+          final title = c['title']?.trim() ?? '';
+          return filterSet.contains(id) || filterSet.contains(title);
+        }).toList();
       }
 
       if (mounted) {
@@ -221,9 +234,13 @@ class _LibraryCategoryScreenState extends State<LibraryCategoryScreen> {
                     : ListView.builder(
                         physics: const BouncingScrollPhysics(),
                         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                        itemCount: _filteredCategories.length,
+                        itemCount: _filteredCategories.length + (widget.headerWidget != null ? 1 : 0),
                         itemBuilder: (context, index) {
-                          final cat = _filteredCategories[index];
+                          if (widget.headerWidget != null && index == 0) {
+                            return widget.headerWidget!;
+                          }
+                          final actualIndex = index - (widget.headerWidget != null ? 1 : 0);
+                          final cat = _filteredCategories[actualIndex];
                           return LiquidPressable(
                             onTap: () => _navigateToCategory(cat),
                             child: Container(
@@ -259,17 +276,36 @@ class _LibraryCategoryScreenState extends State<LibraryCategoryScreen> {
                                   ),
                                   const SizedBox(width: 14),
 
-                                  // Category Title
+                                  // Category Title & Count
                                   Expanded(
-                                    child: Text(
-                                      cat['title']!,
-                                      style: TextStyle(
-                                        color: textColor,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15.5,
-                                        fontFamily: 'Amiri',
-                                        height: 1.2,
-                                      ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          cat['title']!,
+                                          style: TextStyle(
+                                            color: textColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15.5,
+                                            fontFamily: 'Amiri',
+                                            height: 1.2,
+                                          ),
+                                        ),
+                                        if (cat['count'] != null && cat['count']!.isNotEmpty) ...[
+                                          const SizedBox(height: 3),
+                                          Text(
+                                            widget.domainPart == 'فتاوى'
+                                                ? '${cat['count']} فتوى موثقة'
+                                                : '${cat['count']} موضوعاً',
+                                            style: TextStyle(
+                                              color: isDark ? const Color(0xFF8A9995) : const Color(0xFF6B8079),
+                                              fontSize: 11,
+                                              fontFamily: 'Amiri',
+                                            ),
+                                          ),
+                                        ],
+                                      ],
                                     ),
                                   ),
 

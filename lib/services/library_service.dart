@@ -31,20 +31,22 @@ class LibraryService {
       }).toList();
     } else if (part == 'الرقية الشرعية') {
       final result = await db.rawQuery(
-        "SELECT DISTINCT level FROM roqua WHERE level IS NOT NULL AND level != ''",
+        "SELECT level, COUNT(*) as count FROM roqua WHERE level IS NOT NULL AND level != '' GROUP BY level",
       );
       return result.map((e) => {
         'id': e['level'].toString(),
         'title': e['level'].toString(),
+        'count': e['count'].toString(),
       }).toList();
     } else {
       final result = await db.rawQuery(
-        "SELECT DISTINCT type FROM library WHERE part = ? AND type IS NOT NULL AND type != ''",
+        "SELECT type, COUNT(*) as count FROM library WHERE part = ? AND type IS NOT NULL AND type != '' GROUP BY type ORDER BY count DESC",
         [part],
       );
       return result.map((e) => {
         'id': e['type'].toString(),
         'title': e['type'].toString(),
+        'count': e['count'].toString(),
       }).toList();
     }
   }
@@ -52,11 +54,12 @@ class LibraryService {
   Future<List<Map<String, String>>> getFatawyCategories() async {
     final db = await _dbHelper.database;
     final result = await db.rawQuery(
-      "SELECT DISTINCT fatwy_type FROM fatawy WHERE fatwy_type IS NOT NULL AND fatwy_type != ''",
+      "SELECT fatwy_type, COUNT(*) as count FROM fatawy WHERE fatwy_type IS NOT NULL AND fatwy_type != '' GROUP BY fatwy_type ORDER BY count DESC",
     );
     return result.map((e) => {
       'id': e['fatwy_type'].toString(),
       'title': e['fatwy_type'].toString(),
+      'count': e['count'].toString(),
     }).toList();
   }
 

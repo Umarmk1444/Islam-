@@ -32,7 +32,10 @@ class QuranPageContentWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return child;
+    return Padding(
+      padding: EdgeInsets.only(bottom: hasOverlay ? overlayBottomInset : 0.0),
+      child: child,
+    );
   }
 }
 
