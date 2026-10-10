@@ -144,6 +144,15 @@ class LibraryService {
     return rows.map((e) => LibraryItem.fromMap(e)).toList();
   }
 
+  Future<LibraryItem?> getLibraryItemById(int id) async {
+    final db = await _dbHelper.database;
+    final rows = await db.rawQuery('SELECT * FROM library WHERE id = ?', [id]);
+    if (rows.isNotEmpty) {
+      return LibraryItem.fromMap(rows.first);
+    }
+    return null;
+  }
+
   Future<List<FatwaItem>> getFatawyItems(String fatwyType, {String? searchQuery}) async {
     final db = await _dbHelper.database;
     String query = 'SELECT $_fatwaListCols FROM fatawy WHERE fatwy_type = ?';

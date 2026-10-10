@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'main_navigation_screen.dart';
+import 'language_selection_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/database/database_helper.dart';
 import '../services/app_update_service.dart';
 import '../widgets/custom_banner_ad.dart';
@@ -176,10 +178,19 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (mounted) {
       kQuranScreenActive.value = false;
+      final prefs = await SharedPreferences.getInstance();
+      if (!mounted) return;
+      final bool hasChosenLang = prefs.getBool('has_chosen_initial_language') ?? false;
+      final bool isFirstLaunch = !hasChosenLang && prefs.getString('app_language') == null;
+
+      final Widget targetScreen = isFirstLaunch
+          ? const LanguageSelectionScreen(isFirstRun: true)
+          : const MainNavigationScreen();
+
       Navigator.pushReplacement(
         context,
         PageRouteBuilder(
-          pageBuilder: (_, __, ___) => const MainNavigationScreen(),
+          pageBuilder: (_, __, ___) => targetScreen,
           transitionsBuilder: (_, animation, __, child) {
             return FadeTransition(
               opacity: CurvedAnimation(

@@ -3,6 +3,7 @@ import '../theme_notifier.dart';
 import '../services/library_service.dart';
 import 'library_content_list_screen.dart';
 import '../widgets/liquid_pressable.dart';
+import '../utils/category_translations.dart';
 
 class LibraryCategoryScreen extends StatefulWidget {
   final String domainPart; // e.g. 'المكتبة', 'فتاوى', 'صحيح البخارى'
@@ -52,12 +53,25 @@ class _LibraryCategoryScreenState extends State<LibraryCategoryScreen> {
       }
 
       if (widget.filterCategories != null && widget.filterCategories!.isNotEmpty) {
-        final filterSet = widget.filterCategories!.map((s) => s.trim()).toSet();
+        final orderList = widget.filterCategories!.map((s) => s.trim()).toList();
+        final filterSet = orderList.toSet();
         cats = cats.where((c) {
           final id = c['id']?.trim() ?? '';
           final title = c['title']?.trim() ?? '';
           return filterSet.contains(id) || filterSet.contains(title);
         }).toList();
+
+        // Preserve caller's custom ordering precisely
+        cats.sort((a, b) {
+          final aKey = a['id']?.trim() ?? a['title']?.trim() ?? '';
+          final bKey = b['id']?.trim() ?? b['title']?.trim() ?? '';
+          final aIdx = orderList.indexOf(aKey);
+          final bIdx = orderList.indexOf(bKey);
+          if (aIdx != -1 && bIdx != -1) return aIdx.compareTo(bIdx);
+          if (aIdx != -1) return -1;
+          if (bIdx != -1) return 1;
+          return 0;
+        });
       }
 
       if (mounted) {
@@ -83,21 +97,26 @@ class _LibraryCategoryScreenState extends State<LibraryCategoryScreen> {
       return;
     }
     final lowerQuery = query.toLowerCase();
+    final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
     setState(() {
-      _filteredCategories = _categories
-          .where((cat) => cat['title']!.toLowerCase().contains(lowerQuery))
-          .toList();
+      _filteredCategories = _categories.where((cat) {
+        final raw = (cat['title'] ?? '').toLowerCase();
+        final translated = CategoryTranslations.getTitle(cat['title'] ?? '', locale).toLowerCase();
+        return raw.contains(lowerQuery) || translated.contains(lowerQuery);
+      }).toList();
     });
   }
 
   void _navigateToCategory(Map<String, String> category) {
+    final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
+    final localizedTitle = CategoryTranslations.getTitle(category['title']!, locale);
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => LibraryContentListScreen(
           part: widget.domainPart,
           categoryId: category['id']!,
-          categoryTitle: category['title']!,
+          categoryTitle: localizedTitle,
         ),
       ),
     );
@@ -133,26 +152,38 @@ class _LibraryCategoryScreenState extends State<LibraryCategoryScreen> {
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: textColor, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Column(
-          children: [
-            Text(
-              widget.domainTitle,
-              style: TextStyle(
-                color: textColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 19,
-                fontFamily: 'Amiri',
-              ),
-            ),
-            if (!_isLoading && _categories.isNotEmpty)
-              Text(
-                '${_categories.length} قسم وفهرس',
-                style: TextStyle(
-                  color: isDark ? const Color(0xFF8A9995) : const Color(0xFF5A726A),
-                  fontSize: 11.5,
+        title: Builder(
+          builder: (ctx) {
+            final locale = Localizations.maybeLocaleOf(ctx)?.languageCode ?? 'ar';
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.domainTitle,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: textColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                    fontFamily: locale == 'ar' ? 'Amiri' : null,
+                  ),
                 ),
-              ),
-          ],
+                if (!_isLoading && _categories.isNotEmpty)
+                  Text(
+                    locale == 'ar'
+                        ? '${_categories.length} قسم وفهرس'
+                        : '${_categories.length} ${locale == 'am' ? 'ክፍሎች' : (locale == 'om' ? 'Kutaa' : 'Categories')}',
+                    style: TextStyle(
+                      color: isDark ? const Color(0xFF8A9995) : const Color(0xFF5A726A),
+                      fontSize: 11,
+                      fontFamily: locale == 'ar' ? 'Amiri' : null,
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
         centerTitle: true,
       ),
@@ -174,31 +205,41 @@ class _LibraryCategoryScreenState extends State<LibraryCategoryScreen> {
                   ),
                 ],
               ),
-              child: TextField(
-                controller: _searchController,
-                onChanged: _onSearchChanged,
-                style: TextStyle(color: textColor, fontSize: 14),
-                decoration: InputDecoration(
-                  hintText: (Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar') == 'ar'
-                      ? 'ابحث بالعربية في أقسام ${widget.domainTitle}...'
-                      : 'Search in Arabic in ${widget.domainTitle}...',
-                  hintStyle: TextStyle(
-                    color: isDark ? const Color(0xFF6C7C78) : const Color(0xFF9AA8A4),
-                    fontSize: 13,
-                  ),
-                  prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF1B8A6B), size: 20),
-                  suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear_rounded, size: 18),
-                          onPressed: () {
-                            _searchController.clear();
-                            _onSearchChanged('');
-                          },
-                        )
-                      : null,
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                ),
+              child: Builder(
+                builder: (ctx) {
+                  final locale = Localizations.maybeLocaleOf(ctx)?.languageCode ?? 'ar';
+                  final String hint = locale == 'ar'
+                      ? 'ابحث في أقسام ${widget.domainTitle}...'
+                      : (locale == 'am'
+                          ? 'በ${widget.domainTitle} ውስጥ ይፈልጉ...'
+                          : (locale == 'om'
+                              ? 'Keessatti barbaadi ${widget.domainTitle}...'
+                              : 'Search within ${widget.domainTitle}...'));
+                  return TextField(
+                    controller: _searchController,
+                    onChanged: _onSearchChanged,
+                    style: TextStyle(color: textColor, fontSize: 13.5),
+                    decoration: InputDecoration(
+                      hintText: hint,
+                      hintStyle: TextStyle(
+                        color: isDark ? const Color(0xFF6C7C78) : const Color(0xFF9AA8A4),
+                        fontSize: 12.5,
+                      ),
+                      prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF1B8A6B), size: 20),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear_rounded, size: 18),
+                              onPressed: () {
+                                _searchController.clear();
+                                _onSearchChanged('');
+                              },
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -278,34 +319,62 @@ class _LibraryCategoryScreenState extends State<LibraryCategoryScreen> {
 
                                   // Category Title & Count
                                   Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          cat['title']!,
-                                          style: TextStyle(
-                                            color: textColor,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15.5,
-                                            fontFamily: 'Amiri',
-                                            height: 1.2,
-                                          ),
-                                        ),
-                                        if (cat['count'] != null && cat['count']!.isNotEmpty) ...[
-                                          const SizedBox(height: 3),
-                                          Text(
-                                            widget.domainPart == 'فتاوى'
-                                                ? '${cat['count']} فتوى موثقة'
-                                                : '${cat['count']} موضوعاً',
-                                            style: TextStyle(
-                                              color: isDark ? const Color(0xFF8A9995) : const Color(0xFF6B8079),
-                                              fontSize: 11,
-                                              fontFamily: 'Amiri',
+                                    child: Builder(
+                                      builder: (ctx) {
+                                        final locale = Localizations.maybeLocaleOf(ctx)?.languageCode ?? 'ar';
+                                        final rawTitle = cat['title'] ?? '';
+                                        final displayTitle = CategoryTranslations.getTitle(rawTitle, locale);
+                                        final isTranslated = locale != 'ar' && displayTitle != rawTitle;
+
+                                        return Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              displayTitle,
+                                              style: TextStyle(
+                                                color: textColor,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: isTranslated ? 14.5 : 15.5,
+                                                fontFamily: isTranslated ? null : 'Amiri',
+                                                height: 1.25,
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
-                                          ),
-                                        ],
-                                      ],
+                                            const SizedBox(height: 3),
+                                            Row(
+                                              children: [
+                                                if (cat['count'] != null && cat['count']!.isNotEmpty)
+                                                  Text(
+                                                    CategoryTranslations.getCountBadge(cat['count']!, widget.domainPart, locale),
+                                                    style: TextStyle(
+                                                      color: const Color(0xFF1B8A6B),
+                                                      fontSize: 11,
+                                                      fontWeight: FontWeight.w600,
+                                                      fontFamily: locale == 'ar' ? 'Amiri' : null,
+                                                    ),
+                                                  ),
+                                                if (isTranslated) ...[
+                                                  const SizedBox(width: 8),
+                                                  Expanded(
+                                                    child: Text(
+                                                      '•  $rawTitle',
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: TextStyle(
+                                                        color: isDark ? const Color(0xFF8A9995) : const Color(0xFF6B8079),
+                                                        fontSize: 11,
+                                                        fontFamily: 'Amiri',
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                          ],
+                                        );
+                                      },
                                     ),
                                   ),
 
