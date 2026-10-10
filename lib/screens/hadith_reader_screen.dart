@@ -62,6 +62,9 @@ class _HadithReaderScreenState extends State<HadithReaderScreen> {
   bool _showIsnad = true;
   int _initialTargetIndex = 0;
   ReadingTheme _readingTheme = ReadingTheme.sepia;
+  bool _showTopBar = true;
+  double _accumulatedUpwardScroll = 0.0;
+  double _accumulatedDownwardScroll = 0.0;
 
   @override
   void initState() {
@@ -722,70 +725,128 @@ class _HadithReaderScreenState extends State<HadithReaderScreen> {
         textDirection: TextDirection.rtl,
         child: Scaffold(
           backgroundColor: pageBg,
-          appBar: AppBar(
-            backgroundColor: topBarColor,
-            elevation: 0.5,
-            centerTitle: true,
-            iconTheme: IconThemeData(color: textColor),
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios_new_rounded, color: textColor, size: 20),
-              onPressed: () => Navigator.pop(context),
-            ),
-            title: Column(
+          body: SafeArea(
+            top: _showTopBar,
+            bottom: true,
+            child: Stack(
               children: [
-                Text(
-                  widget.book.nameAr,
-                  style: TextStyle(
-                    fontFamily: 'Amiri',
-                    fontSize: 16.5,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
-                  ),
-                ),
-                Text(
-                  widget.collection.nameAr,
-                  style: TextStyle(
-                    fontFamily: 'Amiri',
-                    fontSize: 12,
-                    color: textColor.withValues(alpha: 0.7),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-            actions: [
-              Builder(
-                builder: (btnContext) {
-                  return IconButton(
-                    icon: Icon(
-                      _readingTheme == ReadingTheme.sepia
-                          ? Icons.palette_outlined
-                          : _readingTheme == ReadingTheme.light
-                              ? Icons.wb_sunny_outlined
-                              : Icons.dark_mode_outlined,
-                      color: accentColor,
-                      size: 21,
+                Column(
+                  children: [
+                    // ── Animated Collapsing Header ──
+                    AnimatedCrossFade(
+                      duration: const Duration(milliseconds: 240),
+                      firstCurve: Curves.easeOutCubic,
+                      secondCurve: Curves.easeOutCubic,
+                      crossFadeState: _showTopBar ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+                      firstChild: Container(
+                        color: topBarColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.arrow_back_ios_new_rounded, color: textColor, size: 20),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                            Expanded(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    widget.book.nameAr,
+                                    style: TextStyle(
+                                      fontFamily: 'Amiri',
+                                      fontSize: 16.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: textColor,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    widget.collection.nameAr,
+                                    style: TextStyle(
+                                      fontFamily: 'Amiri',
+                                      fontSize: 11.5,
+                                      color: textColor.withValues(alpha: 0.7),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Builder(
+                              builder: (btnContext) {
+                                return IconButton(
+                                  icon: Icon(
+                                    _readingTheme == ReadingTheme.sepia
+                                        ? Icons.palette_outlined
+                                        : _readingTheme == ReadingTheme.light
+                                            ? Icons.wb_sunny_outlined
+                                            : Icons.dark_mode_outlined,
+                                    color: accentColor,
+                                    size: 21,
+                                  ),
+                                  tooltip: 'تغيير المظهر',
+                                  onPressed: () => _cycleReadingThemeWithReveal(btnContext),
+                                );
+                              },
+                            ),
+                            if (_chapters.isNotEmpty)
+                              IconButton(
+                                icon: Icon(Icons.format_list_bulleted_rounded, color: textColor, size: 21),
+                                tooltip: 'فهرس الأبواب',
+                                onPressed: () => _openChaptersIndexSheet(context, textColor, cardBg, pageBg),
+                              ),
+                            IconButton(
+                              icon: Icon(Icons.format_size_rounded, color: textColor, size: 21),
+                              tooltip: 'إعدادات الخط',
+                              onPressed: () => _showDisplaySettingsSheet(context, textColor, cardBg),
+                            ),
+                          ],
+                        ),
+                      ),
+                      secondChild: const SizedBox(width: double.infinity, height: 0),
                     ),
-                    tooltip: 'تغيير المظهر',
-                    onPressed: () => _cycleReadingThemeWithReveal(btnContext),
-                  );
-                },
-              ),
-              if (_chapters.isNotEmpty)
-                IconButton(
-                  icon: Icon(Icons.format_list_bulleted_rounded, color: textColor, size: 21),
-                  tooltip: 'فهرس الأبواب',
-                  onPressed: () => _openChaptersIndexSheet(context, textColor, cardBg, pageBg),
-                ),
-              IconButton(
-                icon: Icon(Icons.format_size_rounded, color: textColor, size: 21),
-                tooltip: 'إعدادات الخط',
-                onPressed: () => _showDisplaySettingsSheet(context, textColor, cardBg),
-              ),
-            ],
-          ),
-          body: _isLoading
+
+                    // ── Reading Viewport ──
+                    Expanded(
+                      child: NotificationListener<ScrollNotification>(
+                        onNotification: (notification) {
+                          if (notification is ScrollUpdateNotification) {
+                            final delta = notification.scrollDelta ?? 0.0;
+                            final pixels = notification.metrics.pixels;
+
+                            // Near top of document: always reveal smoothly
+                            if (pixels <= 20) {
+                              _accumulatedUpwardScroll = 0.0;
+                              _accumulatedDownwardScroll = 0.0;
+                              if (!_showTopBar) {
+                                setState(() => _showTopBar = true);
+                              }
+                              return false;
+                            }
+
+                            if (delta > 0) {
+                              // Scrolling down (reading deeper)
+                              _accumulatedDownwardScroll += delta;
+                              _accumulatedUpwardScroll = 0.0;
+                              if (_accumulatedDownwardScroll >= 25.0 && _showTopBar) {
+                                setState(() => _showTopBar = false);
+                              }
+                            } else if (delta < 0) {
+                              // Scrolling up (returning backwards)
+                              _accumulatedUpwardScroll += delta.abs();
+                              _accumulatedDownwardScroll = 0.0;
+                              // Require deliberate upward scroll of >= 45px
+                              if (_accumulatedUpwardScroll >= 45.0 && !_showTopBar) {
+                                setState(() => _showTopBar = true);
+                              }
+                            }
+                          }
+                          return false;
+                        },
+                        child: _isLoading
               ? const Center(
                   child: CircularProgressIndicator(color: Color(0xFF1B8A6B)),
                 )
@@ -837,6 +898,64 @@ class _HadithReaderScreenState extends State<HadithReaderScreen> {
                             return const SizedBox.shrink();
                           },
                         ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // ── Floating Restore Pill when Top Bar is Hidden ──
+                if (!_showTopBar)
+                  Positioned(
+                    top: 6,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() => _showTopBar = true);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: topBarColor.withValues(alpha: 0.92),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: accentColor.withValues(alpha: 0.35),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.18),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: accentColor),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${widget.book.nameAr} • ${widget.collection.nameAr}',
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Amiri',
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );

@@ -52,10 +52,21 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
   double _fontSize = 20.0;
   ReadingTheme _readingTheme = ReadingTheme.sepia; // Warm Cream default everywhere
   String _chapterName = '';
+  bool _showTopBars = true;
+  final ScrollController _singleScrollController = ScrollController();
+  double _accumulatedUpwardScroll = 0.0;
+  double _accumulatedDownwardScroll = 0.0;
 
   @override
   void initState() {
     super.initState();
+    _singleScrollController.addListener(() {
+      if (_singleScrollController.hasClients && _singleScrollController.offset <= 20) {
+        if (!_showTopBars) {
+          setState(() => _showTopBars = true);
+        }
+      }
+    });
     final globalTheme = AppTheme.notifier.value;
     if (globalTheme == QuranTheme.white) {
       _readingTheme = ReadingTheme.light;
@@ -98,6 +109,12 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
         }
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _singleScrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _initChapterName() async {
@@ -468,171 +485,219 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Scaffold(
-        backgroundColor: pageBg,
-        appBar: AppBar(
-          backgroundColor: topBarColor,
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios_new_rounded, color: textColor, size: 20),
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: Text(
-            _isBukhariStream ? displayTag : mainTitle,
-            style: TextStyle(
-              color: textColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 16.5,
-              fontFamily: 'Amiri',
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          centerTitle: true,
-          actions: [
-            // Theme Switcher with 1-pixel radial ripple
-            Builder(
-              builder: (btnContext) {
-                return IconButton(
-                  icon: Icon(
-                    _readingTheme == ReadingTheme.sepia
-                        ? Icons.palette_outlined
-                        : _readingTheme == ReadingTheme.light
-                            ? Icons.wb_sunny_outlined
-                            : Icons.dark_mode_outlined,
-                    color: accentColor,
-                    size: 21,
-                  ),
-                  tooltip: _t('theme'),
-                  onPressed: () => _cycleReadingThemeWithReveal(btnContext),
-                );
-              },
-            ),
-            // Actions for single reading mode
-            if (!_isBukhariStream) ...[
-              IconButton(
-                icon: Icon(Icons.copy_rounded, color: textColor, size: 20),
-                tooltip: _t('copy'),
-                onPressed: () => _copyContent(0),
-              ),
-              IconButton(
-                icon: Icon(Icons.share_rounded, color: textColor, size: 20),
-                tooltip: _t('share'),
-                onPressed: () => _shareContent(0),
-              ),
-              if (singleItem is LibraryItem)
-                IconButton(
-                  icon: Icon(
-                    isSingleFav
-                        ? Icons.bookmark_added_rounded
-                        : Icons.bookmark_border_rounded,
-                    color: isSingleFav ? const Color(0xFFD4AF37) : textColor,
-                    size: 22,
-                  ),
-                  tooltip: _t('fav_tooltip'),
-                  onPressed: () => _toggleFav(0),
-                ),
-            ],
-            const SizedBox(width: 4),
-          ],
-        ),
-        body: Column(
-          children: [
-            // ── Reading Control Bar (Displaying Chapter Name & Font Scaler) ──
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              decoration: BoxDecoration(
-                color: topBarColor.withValues(alpha: 0.7),
-                border: Border(
-                  bottom: BorderSide(
-                    color: textColor.withValues(alpha: 0.08),
-                    width: 0.8,
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Chapter Name Badge
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: accentColor.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.menu_book_rounded,
-                                  size: 14, color: accentColor),
-                              const SizedBox(width: 6),
-                              Flexible(
-                                child: Text(
-                                  _isBukhariStream
-                                      ? '$displayTag (${_currentIndex + 1} / ${_itemList.length})'
-                                      : displayTag,
-                                  style: TextStyle(
-                                    color: accentColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                    fontFamily: 'Amiri',
+          backgroundColor: pageBg,
+          body: SafeArea(
+            top: _showTopBars,
+            bottom: true,
+            child: Stack(
+              children: [
+                Column(
+                  children: [
+                    // ── Animated Collapsing Header (AppBar + Control Bar) ──
+                    AnimatedCrossFade(
+                      duration: const Duration(milliseconds: 240),
+                      firstCurve: Curves.easeOutCubic,
+                      secondCurve: Curves.easeOutCubic,
+                      crossFadeState: _showTopBars ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+                      firstChild: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // 1. Custom Top Navigation Bar
+                          Container(
+                            color: topBarColor,
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                            child: Row(
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.arrow_back_ios_new_rounded, color: textColor, size: 20),
+                                  onPressed: () => Navigator.pop(context),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    _isBukhariStream ? displayTag : mainTitle,
+                                    style: TextStyle(
+                                      color: textColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16.5,
+                                      fontFamily: 'Amiri',
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Builder(
+                                  builder: (btnContext) {
+                                    return IconButton(
+                                      icon: Icon(
+                                        _readingTheme == ReadingTheme.sepia
+                                            ? Icons.palette_outlined
+                                            : _readingTheme == ReadingTheme.light
+                                                ? Icons.wb_sunny_outlined
+                                                : Icons.dark_mode_outlined,
+                                        color: accentColor,
+                                        size: 21,
+                                      ),
+                                      tooltip: _t('theme'),
+                                      onPressed: () => _cycleReadingThemeWithReveal(btnContext),
+                                    );
+                                  },
+                                ),
+                                if (!_isBukhariStream) ...[
+                                  IconButton(
+                                    icon: Icon(Icons.copy_rounded, color: textColor, size: 20),
+                                    tooltip: _t('copy'),
+                                    onPressed: () => _copyContent(0),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.share_rounded, color: textColor, size: 20),
+                                    tooltip: _t('share'),
+                                    onPressed: () => _shareContent(0),
+                                  ),
+                                  if (singleItem is LibraryItem)
+                                    IconButton(
+                                      icon: Icon(
+                                        isSingleFav
+                                            ? Icons.bookmark_added_rounded
+                                            : Icons.bookmark_border_rounded,
+                                        color: isSingleFav ? const Color(0xFFD4AF37) : textColor,
+                                        size: 22,
+                                      ),
+                                      tooltip: _t('fav_tooltip'),
+                                      onPressed: () => _toggleFav(0),
+                                    ),
+                                ],
+                                const SizedBox(width: 4),
+                              ],
+                            ),
+                          ),
+
+                          // 2. Reading Control Bar (Displaying Chapter Name & Font Scaler)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: topBarColor.withValues(alpha: 0.7),
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: textColor.withValues(alpha: 0.08),
+                                  width: 0.8,
                                 ),
                               ),
-                            ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: accentColor.withValues(alpha: 0.12),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.menu_book_rounded, size: 14, color: accentColor),
+                                            const SizedBox(width: 6),
+                                            Flexible(
+                                              child: Text(
+                                                _isBukhariStream
+                                                    ? ' ( / )'
+                                                    : displayTag,
+                                                style: TextStyle(
+                                                  color: accentColor,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 12,
+                                                  fontFamily: 'Amiri',
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(Icons.text_decrease_rounded, color: textColor, size: 20),
+                                      onPressed: _decreaseFontSize,
+                                      tooltip: _t('font_dec'),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                                      child: Text(
+                                        '${_fontSize.toInt()}',
+                                        style: TextStyle(
+                                          color: textColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.text_increase_rounded, color: textColor, size: 20),
+                                      onPressed: _increaseFontSize,
+                                      tooltip: _t('font_inc'),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                      secondChild: const SizedBox(width: double.infinity, height: 0),
                     ),
-                  ),
 
-                  // Font Scaling Controls
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.text_decrease_rounded,
-                            color: textColor, size: 20),
-                        onPressed: _decreaseFontSize,
-                        tooltip: _t('font_dec'),
-                        padding: EdgeInsets.zero,
-                        constraints:
-                            const BoxConstraints(minWidth: 32, minHeight: 32),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Text(
-                          '${_fontSize.toInt()}',
-                          style: TextStyle(
-                            color: textColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.text_increase_rounded,
-                            color: textColor, size: 20),
-                        onPressed: _increaseFontSize,
-                        tooltip: _t('font_inc'),
-                        padding: EdgeInsets.zero,
-                        constraints:
-                            const BoxConstraints(minWidth: 32, minHeight: 32),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+                    // ── Reading Viewport (Auto-collapses top bars on scroll down) ──
+                    Expanded(
+                      child: NotificationListener<ScrollNotification>(
+                        onNotification: (notification) {
+                          if (notification is ScrollUpdateNotification) {
+                            final delta = notification.scrollDelta ?? 0.0;
+                            final pixels = notification.metrics.pixels;
 
-            // ── Reading Viewport (Bukhari Stream vs Single Document) ────────
-            Expanded(
-              child: _isBukhariStream
+                            // Near top of document: always reveal smoothly
+                            if (pixels <= 20) {
+                              _accumulatedUpwardScroll = 0.0;
+                              _accumulatedDownwardScroll = 0.0;
+                              if (!_showTopBars) {
+                                setState(() => _showTopBars = true);
+                              }
+                              return false;
+                            }
+
+                            if (delta > 0) {
+                              // Scrolling down (reading deeper)
+                              _accumulatedDownwardScroll += delta;
+                              _accumulatedUpwardScroll = 0.0;
+                              if (_accumulatedDownwardScroll >= 25.0 && _showTopBars) {
+                                setState(() => _showTopBars = false);
+                              }
+                            } else if (delta < 0) {
+                              // Scrolling up (returning backwards)
+                              _accumulatedUpwardScroll += delta.abs();
+                              _accumulatedDownwardScroll = 0.0;
+                              // Require deliberate, sustained upward scroll of >= 45px
+                              if (_accumulatedUpwardScroll >= 45.0 && !_showTopBars) {
+                                setState(() => _showTopBars = true);
+                              }
+                            }
+                          }
+                          return false;
+                        },
+                        child: _isBukhariStream
                   ? ScrollablePositionedList.builder(
                       itemScrollController: _itemScrollController,
                       itemPositionsListener: _itemPositionsListener,
@@ -866,6 +931,7 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                              content.contains(cleanTitle));
 
                         return SingleChildScrollView(
+                          controller: _singleScrollController,
                           physics: const BouncingScrollPhysics(),
                           padding: const EdgeInsets.symmetric(
                               horizontal: 22, vertical: 20),
@@ -985,12 +1051,67 @@ class _StoryReadingScreenState extends State<StoryReadingScreen> {
                         );
                       },
                     ),
+                  ),
+                ),
+              ],
             ),
+
+            // Floating Restore Pill when top bars are collapsed
+            if (!_showTopBars)
+              Positioned(
+                top: 6,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() => _showTopBars = true);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: topBarColor.withValues(alpha: 0.92),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: accentColor.withValues(alpha: 0.35),
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.18),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: accentColor),
+                          const SizedBox(width: 4),
+                          Text(
+                            _isBukhariStream ? displayTag : mainTitle,
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Amiri',
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
     ),
-  );
+  ),
+);
 }
 
   Widget _buildActionBtn({

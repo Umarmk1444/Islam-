@@ -252,6 +252,194 @@ class _FiqhAndFatawaScreenState extends State<FiqhAndFatawaScreen>
     );
   }
 
+
+  Widget _buildFiqhHeroCard(bool isFiqh) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      height: 142,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: const Color(0xFFD4AF37).withValues(alpha: 0.65),
+          width: 1.2,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black45,
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(17),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Authentic Masterpiece Andalusian Fiqh Artwork
+            Image.asset(
+              'assets/images/faculty_fiqh.webp',
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF4A154B), Color(0xFF7A257C)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
+            ),
+
+            // Rich Multi-Stop Scrim Gradient
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.40),
+                    Colors.black.withValues(alpha: 0.15),
+                    Colors.black.withValues(alpha: 0.68),
+                    Colors.black.withValues(alpha: 0.94),
+                  ],
+                  stops: const [0.0, 0.35, 0.68, 1.0],
+                ),
+              ),
+            ),
+
+            // Inner Gilded Rim
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(17),
+                  border: Border.all(
+                    color: const Color(0xFFFFD700).withValues(alpha: 0.15),
+                    width: 0.8,
+                  ),
+                ),
+              ),
+            ),
+
+            // Content Structure
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Top Row: Sacred Medallion + Explanatory Badge
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFF0A1411).withValues(alpha: 0.80),
+                          border: Border.all(
+                            color: const Color(0xFFD4AF37).withValues(alpha: 0.80),
+                            width: 1.2,
+                          ),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black54,
+                              blurRadius: 6,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          isFiqh ? Icons.balance_rounded : Icons.question_answer_rounded,
+                          color: const Color(0xFFFFD54F),
+                          size: 18,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF091210).withValues(alpha: 0.85),
+                          borderRadius: BorderRadius.circular(9),
+                          border: Border.all(
+                            color: const Color(0xFFD4AF37).withValues(alpha: 0.55),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.stars_rounded, color: Color(0xFFFFD54F), size: 12),
+                            const SizedBox(width: 5),
+                            Text(
+                              isFiqh ? 'أبواب الفقه الإسلامي • 15 باباً معتمداً' : 'فتاوى كبار العلماء • 3,929 فتوى',
+                              style: const TextStyle(
+                                color: Color(0xFFFFF6D6),
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Amiri',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Bottom Plate: Title & Subtitle
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7.5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF07100D).withValues(alpha: 0.75),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          isFiqh ? 'الفقه الإسلامي وأحكام الشريعة' : 'فتاوى وإرشادات كبار الأئمة والعلماء',
+                          style: const TextStyle(
+                            color: Color(0xFFFFFBF0),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15.5,
+                            fontFamily: 'Amiri',
+                            height: 1.2,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          isFiqh
+                              ? 'أحكام العبادات والمعاملات والأحوال الشخصية الميسرة'
+                              : 'فتاوى شرعية موثوقة بالأدلة من الكتاب والسنة النبوية',
+                          style: const TextStyle(
+                            color: Color(0xFFDFD5C4),
+                            fontSize: 10.5,
+                            fontFamily: 'Amiri',
+                            height: 1.2,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildCategoryTab({
     required String part,
     required TextEditingController searchCtrl,
@@ -332,9 +520,13 @@ class _FiqhAndFatawaScreenState extends State<FiqhAndFatawaScreen>
                   : ListView.builder(
                       physics: const BouncingScrollPhysics(),
                       padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                      itemCount: categories.length,
+                      itemCount: categories.length + (searchCtrl.text.isEmpty ? 1 : 0),
                       itemBuilder: (context, index) {
-                        final cat = categories[index];
+                        if (searchCtrl.text.isEmpty && index == 0) {
+                          return _buildFiqhHeroCard(part == 'فقه');
+                        }
+                        final actualIndex = index - (searchCtrl.text.isEmpty ? 1 : 0);
+                        final cat = categories[actualIndex];
                         return LiquidPressable(
                           onTap: () => _navigateToCategory(part, cat),
                           child: Container(

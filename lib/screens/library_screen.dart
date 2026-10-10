@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -546,61 +545,100 @@ class _LibraryScreenState extends State<LibraryScreen> {
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        height: 84,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF6B183E), Color(0xFF9E275E)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
+          border: Border.all(
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.65),
+            width: 1.1,
+          ),
+          boxShadow: const [
             BoxShadow(
-              color: const Color(0xFF9E275E).withValues(alpha: 0.3),
+              color: Colors.black45,
               blurRadius: 8,
-              offset: const Offset(0, 3),
+              offset: Offset(0, 3),
             ),
           ],
         ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.16),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.healing_rounded, color: Colors.white, size: 22),
-            ),
-            const SizedBox(width: 14),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'الرقية الشرعية المعتمدة',
-                    style: TextStyle(
-                      fontFamily: 'Amiri',
-                      fontSize: 15.5,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(15),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.asset(
+                'assets/images/faculty_tibb.webp',
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF6B183E), Color(0xFF9E275E)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
                   ),
-                  SizedBox(height: 2),
-                  Text(
-                    'تحصينات وأدعية الشفاء من الكتاب والسنة (3 مراحل)',
-                    style: TextStyle(
-                      fontFamily: 'Amiri',
-                      fontSize: 11.5,
-                      color: Colors.white70,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white70, size: 14),
-          ],
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.black.withValues(alpha: 0.68),
+                      Colors.black.withValues(alpha: 0.88),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF091210).withValues(alpha: 0.85),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: const Color(0xFFD4AF37).withValues(alpha: 0.75),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Icon(Icons.healing_rounded, color: Color(0xFFFFD54F), size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'الرقية الشرعية المعتمدة',
+                            style: TextStyle(
+                              fontFamily: 'Amiri',
+                              fontSize: 15.5,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFFFFBF0),
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'تحصينات وأدعية الشفاء من الكتاب والسنة (3 مراحل)',
+                            style: TextStyle(
+                              fontFamily: 'Amiri',
+                              fontSize: 11,
+                              color: Color(0xFFDFD5C4),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFFFD54F), size: 14),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -640,6 +678,29 @@ class _LibraryScreenState extends State<LibraryScreen> {
         borderRadius: BorderRadius.circular(18),
         child: Stack(
           children: [
+            Positioned.fill(
+              child: Image.asset(
+                'assets/images/faculty_seerah.webp',
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+              ),
+            ),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.50),
+                      Colors.black.withValues(alpha: 0.25),
+                      Colors.black.withValues(alpha: 0.70),
+                      Colors.black.withValues(alpha: 0.94),
+                    ],
+                  ),
+                ),
+              ),
+            ),
             // Gold ambient corner glow
             Positioned(
               top: -24,
@@ -841,6 +902,29 @@ class _LibraryScreenState extends State<LibraryScreen> {
         borderRadius: BorderRadius.circular(18),
         child: Stack(
           children: [
+            Positioned.fill(
+              child: Image.asset(
+                'assets/images/faculty_quran_sciences.webp',
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+              ),
+            ),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.55),
+                      Colors.black.withValues(alpha: 0.35),
+                      Colors.black.withValues(alpha: 0.75),
+                      Colors.black.withValues(alpha: 0.95),
+                    ],
+                  ),
+                ),
+              ),
+            ),
             // Gold filigree corner glow
             Positioned(
               top: -24,
@@ -1135,7 +1219,202 @@ class _LibraryScreenState extends State<LibraryScreen> {
     );
   }
 
-  // 8 Core Islamic Reference Faculties (Comprehensive Preservation • 4,680 Topics)
+
+  Widget _buildFacultyHeroHeaderCard(_IslamicPillar pillar, String locale) {
+    final imageAsset = _getFacultyImage(pillar.id);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      height: 148,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.65),
+            width: 1.2,
+          ),
+          boxShadow: [
+            const BoxShadow(
+              color: Colors.black45,
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+            BoxShadow(
+              color: pillar.accentColor.withValues(alpha: 0.25),
+              blurRadius: 14,
+              spreadRadius: -2,
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(17),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // 1. Authentic Masterpiece Islamic Artwork
+              Image.asset(
+                imageAsset,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: _getFacultyCardGradient(pillar.id),
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+              // 2. Rich Multi-Stop Scrim Gradient
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.40),
+                      Colors.black.withValues(alpha: 0.15),
+                      Colors.black.withValues(alpha: 0.65),
+                      Colors.black.withValues(alpha: 0.94),
+                    ],
+                    stops: const [0.0, 0.35, 0.68, 1.0],
+                  ),
+                ),
+              ),
+
+              // 3. Inner Gilded Rim
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(17),
+                    border: Border.all(
+                      color: const Color(0xFFFFD700).withValues(alpha: 0.15),
+                      width: 0.8,
+                    ),
+                  ),
+                ),
+              ),
+
+              // 4. Content Structure
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Top Row: Sacred Medallion + Explanatory Badge
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: const Color(0xFF0A1411).withValues(alpha: 0.80),
+                            border: Border.all(
+                              color: const Color(0xFFD4AF37).withValues(alpha: 0.80),
+                              width: 1.2,
+                            ),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black54,
+                                blurRadius: 6,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            pillar.icon,
+                            color: const Color(0xFFFFD54F),
+                            size: 18,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF091210).withValues(alpha: 0.85),
+                            borderRadius: BorderRadius.circular(9),
+                            border: Border.all(
+                              color: const Color(0xFFD4AF37).withValues(alpha: 0.55),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const _LuminousPulsingDot(color: Color(0xFFFFD54F), size: 5.5),
+                              const SizedBox(width: 5),
+                              Text(
+                                pillar.countBadge,
+                                style: TextStyle(
+                                  color: const Color(0xFFFFF6D6),
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: locale == 'ar' ? 'Amiri' : null,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // Bottom Plate: Title & Subtitle
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF07100D).withValues(alpha: 0.75),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            pillar.title(locale),
+                            style: TextStyle(
+                              color: const Color(0xFFFFFBF0),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              fontFamily: locale == 'ar' ? 'Amiri' : null,
+                              height: 1.2,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            pillar.subtitle(locale),
+                            style: TextStyle(
+                              color: const Color(0xFFDFD5C4),
+                              fontSize: 11,
+                              fontFamily: locale == 'ar' ? 'Amiri' : null,
+                              height: 1.2,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+  }
+
+    // 8 Core Islamic Reference Faculties (Comprehensive Preservation • 4,680 Topics)
   List<_IslamicPillar> _getPillars(String locale) => [
         _IslamicPillar(
           id: 'quran_sciences',
@@ -1242,6 +1521,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     'om': 'Seenaa Sahaabotaa',
                   }[locale] ?? 'سير الصحابة والتابعين',
                   filterCategories: const ['قصص الصحابة', 'خلفاء وقادة', 'قصص التابعين ', 'قصص الصحابيات'],
+                  headerWidget: _buildFacultyHeroHeaderCard(
+                    _getPillars(locale).firstWhere((p) => p.id == 'companions'),
+                    locale,
+                  ),
                 ),
               ),
             ).then((_) => _loadResumeItem());
@@ -1278,6 +1561,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     'om': 'Seenaa Raajotaa fi Gorsa',
                   }[locale] ?? 'قصص الأنبياء والعبر',
                   filterCategories: const ['قصص الأنبياء', 'قصص وعبر'],
+                  headerWidget: _buildFacultyHeroHeaderCard(
+                    _getPillars(locale).firstWhere((p) => p.id == 'prophets'),
+                    locale,
+                  ),
                 ),
               ),
             ).then((_) => _loadResumeItem());
@@ -1339,6 +1626,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     'om': 'Aqiidaa fi Iimaana',
                   }[locale] ?? 'العقيدة والإيمانيات والرقائق',
                   filterCategories: const ['الله - عز وجل', 'الملائكة', 'علامات الساعة الكبرى', 'الأحاديث القدسية'],
+                  headerWidget: _buildFacultyHeroHeaderCard(
+                    _getPillars(locale).firstWhere((p) => p.id == 'aqeedah'),
+                    locale,
+                  ),
                 ),
               ),
             ).then((_) => _loadResumeItem());
@@ -1444,16 +1735,14 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
                 return Column(
                   children: [
-                    // 1. Serene Header Bar
-                    _buildHeader(isDark, isCream, textColor, cardBg, borderColor, l10n, locale),
+                    // 1. Sleek Unified Top Header Bar (Title + Search & Bookmark actions OR Active Search)
+                    _buildUnifiedTopBar(isDark, isCream, textColor, cardBg, borderColor, l10n, locale),
 
-                    // 2. Focused Search Bar
-                    _buildSearchBar(isDark, isCream, textColor, cardBg, borderColor, locale),
+                    // 2. Slim 2-Segment Zen Navigation (Streamlined pill, hidden when searching)
+                    if (!_isSearching)
+                      _buildZenSegmentedNav(isDark, isCream, textColor, cardBg, borderColor, locale),
 
-                    // 3. Calm 2-Segment Zen Navigation (Islamic Library vs My Shelf)
-                    _buildZenSegmentedNav(isDark, isCream, textColor, cardBg, borderColor, locale),
-
-                    // 4. Content Area
+                    // 3. Content Area with 100% Stable Native Fluid Scrolling (Zero Jumping!)
                     Expanded(
                       child: _isSearching
                           ? _buildSearchResults(isDark, isCream, textColor, cardBg, borderColor, bottomClearance)
@@ -1491,9 +1780,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   // ───────────────────────────────────────────────────────────────────────────
-  // 1. Serene Header Bar
+  // 1. Sleek Unified Top Header Bar (Ultra-compact, No Giant Permanent Box!)
   // ───────────────────────────────────────────────────────────────────────────
-  Widget _buildHeader(
+  Widget _buildUnifiedTopBar(
     bool isDark,
     bool isCream,
     Color textColor,
@@ -1502,86 +1791,172 @@ class _LibraryScreenState extends State<LibraryScreen> {
     AppLocalizations? l10n,
     String locale,
   ) {
-    final String subtitleText = {
-      'ar': 'السنة النبوية • السيرة والعلوم الشرعية • المراجع',
-      'en': 'Sunnah • Seerah • Fiqh & Islamic Heritage',
-      'am': 'ሱናህ • ሲራህ • ፊቅህ እና እስላማዊ ማጣቀሻዎች',
-      'om': 'Sunnah • Seenaa • Fiqhii fi Qorannoo',
-    }[locale] ?? 'السنة النبوية • السيرة والعلوم الشرعية • المراجع';
+    if (_isSearching) {
+      // ── Active Search Bar (Transforms smoothly within the same 44px height) ──
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+        child: Container(
+          height: 44,
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(13),
+            border: Border.all(
+              color: const Color(0xFF1B8A6B).withValues(alpha: 0.6),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.04),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back_rounded, size: 20),
+                color: const Color(0xFF1B8A6B),
+                tooltip: locale == 'ar' ? 'إغلاق البحث' : 'Close search',
+                onPressed: () {
+                  setState(() {
+                    _isSearching = false;
+                    _searchController.clear();
+                    _searchResults = [];
+                  });
+                },
+              ),
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  onChanged: _onSearchChanged,
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 13,
+                    fontFamily: locale == 'ar' ? 'Amiri' : null,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: locale == 'ar'
+                        ? 'ابحث في المراجع، الأحاديث، والكتب...'
+                        : 'Search references, hadiths & books...',
+                    hintStyle: TextStyle(
+                      color: isDark ? const Color(0xFF7A8B87) : const Color(0xFF90A49E),
+                      fontSize: 12,
+                      fontFamily: locale == 'ar' ? 'Amiri' : null,
+                    ),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                  ),
+                ),
+              ),
+              if (_searchController.text.isNotEmpty)
+                IconButton(
+                  icon: const Icon(Icons.clear_rounded, size: 18),
+                  color: isDark ? Colors.white60 : Colors.black45,
+                  onPressed: () {
+                    _searchController.clear();
+                    _onSearchChanged('');
+                  },
+                ),
+            ],
+          ),
+        ),
+      );
+    }
 
+    // ── Normal Sleek Header (Only ~46px, Title + Search & Bookmark actions) ──
     return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 6, 18, 4),
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
       child: Row(
         children: [
-          // Islamic Emblem Icon
+          // Elegant Micro Jewel Emblem
           Container(
-            width: 38,
-            height: 38,
+            width: 34,
+            height: 34,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFF0F5A47), Color(0xFF1B8A6B)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(11),
+              borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF1B8A6B).withValues(alpha: 0.3),
-                  blurRadius: 8,
+                  color: const Color(0xFF1B8A6B).withValues(alpha: 0.28),
+                  blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
-            child: const Icon(Icons.auto_stories_rounded, color: Colors.white, size: 19),
+            child: const Icon(Icons.auto_stories_rounded, color: Colors.white, size: 17),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
 
-          // Title & Subtitle
+          // Title
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  l10n?.navLibrary ?? (locale == 'ar' ? 'المكتبة' : 'Library'),
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 18.5,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: locale == 'ar' ? 'Amiri' : null,
-                    letterSpacing: -0.3,
-                  ),
-                ),
-                Text(
-                  subtitleText,
-                  style: TextStyle(
-                    color: isDark ? const Color(0xFF8A9995) : const Color(0xFF6B8079),
-                    fontSize: 10.5,
-                    fontFamily: locale == 'ar' ? 'Amiri' : null,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+            child: Text(
+              l10n?.navLibrary ?? (locale == 'ar' ? 'المكتبة الإسلامية' : 'Islamic Library'),
+              style: TextStyle(
+                color: textColor,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                fontFamily: locale == 'ar' ? 'Amiri' : null,
+                letterSpacing: -0.3,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
 
-          // Favorites Action Pill
+          // Action 1: Search Button (Instant access without giant permanent box!)
+          LiquidPressable(
+            onTap: () {
+              setState(() => _isSearching = true);
+            },
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: cardBg,
+                shape: BoxShape.circle,
+                border: Border.all(color: borderColor, width: 0.9),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.04),
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.search_rounded,
+                color: Color(0xFF1B8A6B),
+                size: 19,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // Action 2: Favorites Bookmark Pill
           LiquidPressable(
             onTap: _navigateToFavorites,
             child: Stack(
               clipBehavior: Clip.none,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  width: 36,
+                  height: 36,
                   decoration: BoxDecoration(
                     color: cardBg,
                     shape: BoxShape.circle,
-                    border: Border.all(color: borderColor, width: 1),
+                    border: Border.all(color: borderColor, width: 0.9),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
-                        blurRadius: 6,
+                        color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.04),
+                        blurRadius: 5,
                         offset: const Offset(0, 2),
                       ),
                     ],
@@ -1589,7 +1964,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   child: const Icon(
                     Icons.bookmark_outline_rounded,
                     color: Color(0xFF1B8A6B),
-                    size: 18,
+                    size: 19,
                   ),
                 ),
                 if (_favCount > 0)
@@ -1624,78 +1999,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   // ───────────────────────────────────────────────────────────────────────────
-  // 2. Focused Search Bar
-  // ───────────────────────────────────────────────────────────────────────────
-  Widget _buildSearchBar(
-    bool isDark,
-    bool isCream,
-    Color textColor,
-    Color cardBg,
-    Color borderColor,
-    String locale,
-  ) {
-    final String hint = {
-      'ar': 'ابحث في المراجع، الأحاديث، والكتب...',
-      'en': 'Search in references, hadiths & books...',
-      'am': 'በማጣቀሻዎች፣ ሐዲሶች እና መጽሐፍት ውስጥ ይፈልጉ...',
-      'om': 'Kitaabota fi hadiisota keessatti barbaadi...',
-    }[locale] ?? 'ابحث في المراجع، الأحاديث، والكتب...';
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 2),
-      child: Container(
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: borderColor, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.16 : 0.03),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: TextField(
-          controller: _searchController,
-          onChanged: _onSearchChanged,
-          style: TextStyle(color: textColor, fontSize: 12.5),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(
-              color: isDark ? const Color(0xFF6C7C78) : const Color(0xFF9AA8A4),
-              fontSize: 11.5,
-            ),
-            prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF1B8A6B), size: 18),
-            suffixIcon: _searchController.text.isNotEmpty
-                ? IconButton(
-                    icon: const Icon(Icons.clear_rounded, size: 18),
-                    onPressed: () {
-                      _searchController.clear();
-                      _onSearchChanged('');
-                    },
-                  )
-                : IconButton(
-                    icon: const Icon(Icons.manage_search_rounded, color: Color(0xFFC68A2E), size: 20),
-                    tooltip: 'البحث في الحديث الشريف',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const HadithSearchScreen()),
-                      );
-                    },
-                  ),
-            border: InputBorder.none,
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(vertical: 7.5, horizontal: 12),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ───────────────────────────────────────────────────────────────────────────
-  // 3. Calm 2-Segment Zen Navigation Capsule
+  // 2. Slim 2-Segment Zen Navigation Capsule (Height: 34px)
   // ───────────────────────────────────────────────────────────────────────────
   Widget _buildZenSegmentedNav(
     bool isDark,
@@ -1719,12 +2023,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
     ];
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 6, 18, 4),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
       child: Container(
-        padding: const EdgeInsets.all(3.5),
+        height: 34,
+        padding: const EdgeInsets.all(2.5),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF0C1412) : const Color(0xFFF1F5F3),
-          borderRadius: BorderRadius.circular(15),
+          color: isDark ? const Color(0xFF0C1412) : const Color(0xFFEFF4F1),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: borderColor, width: 0.8),
         ),
         child: Row(
@@ -1743,57 +2048,57 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   }
                 },
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
+                  duration: const Duration(milliseconds: 180),
                   curve: Curves.easeOutCubic,
-                  padding: const EdgeInsets.symmetric(vertical: 6.5),
                   decoration: BoxDecoration(
                     color: isSelected ? cardBg : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(9.5),
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
+                              color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+                              blurRadius: 4,
+                              offset: const Offset(0, 1.5),
                             ),
                           ]
                         : null,
                   ),
+                  alignment: Alignment.center,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
                         tab['icon'] as IconData,
-                        size: 14.5,
+                        size: 13.5,
                         color: isSelected
                             ? const Color(0xFF1B8A6B)
                             : (isDark ? const Color(0xFF7A8B87) : const Color(0xFF6B8079)),
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 5),
                       Text(
                         tab['title'] as String,
                         style: TextStyle(
                           color: isSelected
                               ? textColor
                               : (isDark ? const Color(0xFF7A8B87) : const Color(0xFF6B8079)),
-                          fontSize: 11.5,
+                          fontSize: 11,
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                           fontFamily: locale == 'ar' ? 'Amiri' : null,
                         ),
                       ),
                       if (badgeText != null) ...[
-                        const SizedBox(width: 5),
+                        const SizedBox(width: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                          padding: const EdgeInsets.symmetric(horizontal: 4.5, vertical: 0.5),
                           decoration: BoxDecoration(
                             color: const Color(0xFF1B8A6B).withValues(alpha: isSelected ? 0.15 : 0.08),
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(5),
                           ),
                           child: Text(
                             badgeText,
                             style: const TextStyle(
                               color: Color(0xFF1B8A6B),
-                              fontSize: 9.5,
+                              fontSize: 9,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -1972,7 +2277,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               crossAxisCount: 2,
               mainAxisSpacing: 11,
               crossAxisSpacing: 11,
-              childAspectRatio: 0.90,
+              childAspectRatio: 0.86,
             ),
             delegate: SliverChildBuilderDelegate(
               (context, idx) {
@@ -2102,72 +2407,31 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      LiquidPressable(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const HadithSearchScreen()),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFC68A2E).withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: const Color(0xFFC68A2E).withValues(alpha: 0.3),
-                              width: 0.8,
+                  LiquidPressable(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const HadithCollectionsScreen()),
+                      ).then((_) => _loadResumeItem());
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            locale == 'ar' ? 'عرض الكل' : 'View All',
+                            style: const TextStyle(
+                              color: Color(0xFF1B8A6B),
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.manage_search_rounded, color: Color(0xFFC68A2E), size: 14),
-                              const SizedBox(width: 3.5),
-                              Text(
-                                locale == 'ar' ? 'بحث' : 'Search',
-                                style: const TextStyle(
-                                  color: Color(0xFFC68A2E),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                          const SizedBox(width: 2),
+                          const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFF1B8A6B), size: 9),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      InkWell(
-                        borderRadius: BorderRadius.circular(8),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const HadithCollectionsScreen()),
-                          ).then((_) => _loadResumeItem());
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                locale == 'ar' ? 'عرض الكل' : 'View All',
-                                style: const TextStyle(
-                                  color: Color(0xFF1B8A6B),
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 2),
-                              const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFF1B8A6B), size: 9),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ),
@@ -2586,24 +2850,79 @@ class _LibraryScreenState extends State<LibraryScreen> {
     Color borderColor,
     double bottomClearance,
   ) {
-    if (_searchResults.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+    final hadithDeepSearchBanner = LiquidPressable(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const HadithSearchScreen()),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        decoration: BoxDecoration(
+          color: const Color(0xFFC68A2E).withValues(alpha: isDark ? 0.16 : 0.10),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: const Color(0xFFC68A2E).withValues(alpha: isDark ? 0.40 : 0.30),
+            width: 1,
+          ),
+        ),
+        child: const Row(
           children: [
+            Icon(Icons.manage_search_rounded, color: Color(0xFFC68A2E), size: 20),
+            SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'البحث في متون السنة النبوية',
+                    style: TextStyle(
+                      color: Color(0xFFC68A2E),
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Amiri',
+                    ),
+                  ),
+                  Text(
+                    'البحث الدقيق في دواوين الحديث الـ 10 (40,937 حديثاً)',
+                    style: TextStyle(
+                      color: Color(0xFF8A9995),
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFC68A2E), size: 11),
+          ],
+        ),
+      ),
+    );
+
+    if (_searchResults.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.fromLTRB(16, 12, 16, bottomClearance),
+        child: Column(
+          children: [
+            hadithDeepSearchBanner,
+            const Spacer(),
             Icon(
               Icons.search_off_rounded,
-              size: 46,
+              size: 44,
               color: isDark ? Colors.white24 : Colors.black26,
             ),
             const SizedBox(height: 10),
             Text(
-              'لا توجد نتائج بحث مطابقة',
+              'لا توجد نتائج بحث في العناوين',
               style: TextStyle(
                 color: isDark ? const Color(0xFF8A9995) : const Color(0xFF6B8079),
-                fontSize: 14,
+                fontSize: 13.5,
+                fontFamily: 'Amiri',
               ),
             ),
+            const Spacer(flex: 2),
           ],
         ),
       );
@@ -2612,9 +2931,12 @@ class _LibraryScreenState extends State<LibraryScreen> {
     return ListView.builder(
       physics: const BouncingScrollPhysics(),
       padding: EdgeInsets.fromLTRB(16, 6, 16, bottomClearance),
-      itemCount: _searchResults.length,
+      itemCount: _searchResults.length + 1,
       itemBuilder: (context, idx) {
-        final item = _searchResults[idx];
+        if (idx == 0) {
+          return hadithDeepSearchBanner;
+        }
+        final item = _searchResults[idx - 1];
         final cleanTitle = item.title
             .replaceAll('{', '')
             .replaceAll('}', '')
@@ -2810,396 +3132,33 @@ List<Color> _getFacultyCardGradient(String facultyId) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Meaningful, High-Visibility Islamic Artwork Painter for Each Faculty
 // ─────────────────────────────────────────────────────────────────────────────
-class _FacultyIllustrationPainter extends CustomPainter {
-  final String facultyId;
-  final Color accentColor;
-
-  const _FacultyIllustrationPainter({
-    required this.facultyId,
-    required this.accentColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // 1. Ambient Luminous Spotlight Aura behind artwork so it stands out prominently
-    final cx = size.width * 0.74;
-    final cy = size.height * 0.68;
-    final r = size.width * 0.38;
-
-    final auraPaint = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          accentColor.withValues(alpha: 0.32),
-          const Color(0xFFFFD54F).withValues(alpha: 0.14),
-          Colors.transparent,
-        ],
-      ).createShader(Rect.fromCircle(center: Offset(cx, cy), radius: r * 1.2));
-    canvas.drawCircle(Offset(cx, cy), r * 1.2, auraPaint);
-
-    final strokePaint = Paint()
-      ..color = accentColor.withValues(alpha: 0.85)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final fillPaint = Paint()
-      ..color = accentColor.withValues(alpha: 0.32)
-      ..style = PaintingStyle.fill;
-
-    final goldGlow = Paint()
-      ..color = const Color(0xFFFFD700).withValues(alpha: 0.85)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.7
-      ..strokeCap = StrokeCap.round;
-
-    final goldFill = Paint()
-      ..color = const Color(0xFFFFD700).withValues(alpha: 0.28)
-      ..style = PaintingStyle.fill;
-
-    final whiteGlow = Paint()
-      ..color = Colors.white.withValues(alpha: 0.80)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.6
-      ..strokeCap = StrokeCap.round;
-
-    switch (facultyId) {
-      case 'quran_sciences':
-        // ── 1. The Holy Quran resting open upon an ornate wooden Rihal stand ──
-        // Radiant background Rub el Hizb 8-pointed star
-        final starPath = Path();
-        for (int i = 0; i < 8; i++) {
-          final rad = i * (math.pi / 4);
-          final p = Offset(cx + (r * 0.85) * math.cos(rad), cy + (r * 0.85) * math.sin(rad));
-          if (i == 0) {
-            starPath.moveTo(p.dx, p.dy);
-          } else {
-            starPath.lineTo(p.dx, p.dy);
-          }
-        }
-        starPath.close();
-        canvas.drawPath(starPath, goldGlow);
-
-        // Open Holy Quran pages (curved open codex)
-        final leftPage = Path()
-          ..moveTo(cx, cy + 4)
-          ..quadraticBezierTo(cx - r * 0.45, cy - r * 0.38, cx - r * 0.90, cy - r * 0.15)
-          ..lineTo(cx - r * 0.90, cy + r * 0.38)
-          ..quadraticBezierTo(cx - r * 0.45, cy + r * 0.15, cx, cy + r * 0.48)
-          ..close();
-        canvas.drawPath(leftPage, fillPaint);
-        canvas.drawPath(leftPage, strokePaint);
-
-        final rightPage = Path()
-          ..moveTo(cx, cy + 4)
-          ..quadraticBezierTo(cx + r * 0.45, cy - r * 0.38, cx + r * 0.90, cy - r * 0.15)
-          ..lineTo(cx + r * 0.90, cy + r * 0.38)
-          ..quadraticBezierTo(cx + r * 0.45, cy + r * 0.15, cx, cy + r * 0.48)
-          ..close();
-        canvas.drawPath(rightPage, fillPaint);
-        canvas.drawPath(rightPage, strokePaint);
-
-        // Scripture lines on the open pages
-        for (double dy = -0.15; dy <= 0.25; dy += 0.12) {
-          canvas.drawLine(
-            Offset(cx - r * 0.78, cy + r * dy),
-            Offset(cx - r * 0.20, cy + r * (dy - 0.05)),
-            whiteGlow,
-          );
-          canvas.drawLine(
-            Offset(cx + r * 0.20, cy + r * (dy - 0.05)),
-            Offset(cx + r * 0.78, cy + r * dy),
-            whiteGlow,
-          );
-        }
-
-        // Crossing legs of the Wooden Rihal stand
-        canvas.drawLine(Offset(cx - r * 0.60, cy + r * 0.75), Offset(cx + r * 0.40, cy + r * 0.25), strokePaint);
-        canvas.drawLine(Offset(cx + r * 0.60, cy + r * 0.75), Offset(cx - r * 0.40, cy + r * 0.25), strokePaint);
-
-        // Celestial light rays rising from the Quran
-        for (double a = -0.6; a <= 0.6; a += 0.3) {
-          canvas.drawLine(
-            Offset(cx + math.sin(a) * 8, cy - r * 0.2),
-            Offset(cx + math.sin(a) * (r * 1.0), cy - r * 1.05),
-            goldGlow,
-          );
-        }
-        break;
-
-      case 'seerah':
-        // ── 2. The Prophet's Green Mosque Dome (القبة الخضراء) & Tall Minaret ──
-        // Desert sand dune base
-        final dune = Path()
-          ..moveTo(cx - r * 1.15, cy + r * 0.85)
-          ..quadraticBezierTo(cx, cy + r * 0.45, cx + r * 1.15, cy + r * 0.85);
-        canvas.drawPath(dune, strokePaint);
-
-        // The Sacred Green Dome (القبة الخضراء)
-        final dome = Path()
-          ..moveTo(cx - r * 0.60, cy + r * 0.45)
-          ..quadraticBezierTo(cx, cy - r * 0.60, cx + r * 0.60, cy + r * 0.45)
-          ..close();
-        canvas.drawPath(dome, fillPaint);
-        canvas.drawPath(dome, strokePaint);
-        // Dome spire with Golden Crescent
-        canvas.drawLine(Offset(cx, cy - r * 0.60), Offset(cx, cy - r * 0.88), goldGlow);
-        canvas.drawCircle(Offset(cx, cy - r * 0.88), 3.0, goldFill);
-        canvas.drawCircle(Offset(cx, cy - r * 0.88), 3.0, goldGlow);
-
-        // Tall Minaret beside the dome
-        final minaretX = cx + r * 0.75;
-        canvas.drawRect(Rect.fromLTWH(minaretX - 7, cy - r * 0.80, 14, r * 1.25), fillPaint);
-        canvas.drawRect(Rect.fromLTWH(minaretX - 7, cy - r * 0.80, 14, r * 1.25), strokePaint);
-        // Minaret Balcony
-        canvas.drawRect(Rect.fromLTWH(minaretX - 10, cy - r * 0.52, 20, 5), goldGlow);
-        // Minaret Spire & Crescent
-        final minCap = Path()
-          ..moveTo(minaretX - 7, cy - r * 0.80)
-          ..lineTo(minaretX, cy - r * 1.20)
-          ..lineTo(minaretX + 7, cy - r * 0.80)
-          ..close();
-        canvas.drawPath(minCap, fillPaint);
-        canvas.drawPath(minCap, strokePaint);
-        canvas.drawCircle(Offset(minaretX, cy - r * 1.20), 2.5, goldGlow);
-
-        // Prophetic Crescent Moon in the sky
-        final moonCenter = Offset(cx - r * 0.65, cy - r * 0.88);
-        canvas.drawCircle(moonCenter, 11, goldFill);
-        canvas.drawCircle(moonCenter, 11, goldGlow);
-        break;
-
-      case 'companions':
-        // ── 3. Illuminated Ancient Parchment Scroll, Ink Quill & Stars ──
-        // Rolled Parchment Scroll
-        final scroll = Path()
-          ..moveTo(cx - r * 0.70, cy - r * 0.50)
-          ..lineTo(cx + r * 0.50, cy - r * 0.50)
-          ..quadraticBezierTo(cx + r * 0.75, cy - r * 0.28, cx + r * 0.50, cy - r * 0.05)
-          ..lineTo(cx - r * 0.70, cy - r * 0.05)
-          ..lineTo(cx - r * 0.70, cy + r * 0.60)
-          ..lineTo(cx + r * 0.50, cy + r * 0.60)
-          ..quadraticBezierTo(cx + r * 0.75, cy + r * 0.80, cx + r * 0.50, cy + r * 0.90)
-          ..lineTo(cx - r * 0.80, cy + r * 0.90)
-          ..close();
-        canvas.drawPath(scroll, fillPaint);
-        canvas.drawPath(scroll, strokePaint);
-
-        // Quill Pen angled across the scroll
-        final quill = Path()
-          ..moveTo(cx - r * 0.25, cy + r * 0.65)
-          ..quadraticBezierTo(cx + r * 0.35, cy + r * 0.1, cx + r * 0.90, cy - r * 0.70)
-          ..quadraticBezierTo(cx + r * 0.70, cy - r * 0.35, cx - r * 0.25, cy + r * 0.65);
-        canvas.drawPath(quill, goldFill);
-        canvas.drawPath(quill, goldGlow);
-
-        // Radiant Companion Stars ("أصحابي كالنجوم")
-        final starOffsets = [
-          Offset(cx - r * 0.80, cy - r * 0.75),
-          Offset(cx, cy - r * 0.95),
-          Offset(cx + r * 0.80, cy - r * 0.40),
-          Offset(cx - r * 0.90, cy + r * 0.20),
-          Offset(cx + r * 0.35, cy + r * 0.85),
-        ];
-        for (final so in starOffsets) {
-          canvas.drawCircle(so, 4.0, goldFill);
-          canvas.drawCircle(so, 4.0, goldGlow);
-          canvas.drawCircle(so, 1.8, whiteGlow);
-        }
-        break;
-
-      case 'prophets':
-        // ── 4. The Sacred Ark of Noah & Peak of Mount Sinai ──
-        // Water Waves
-        final waves = Path()
-          ..moveTo(cx - r * 1.15, cy + r * 0.65)
-          ..quadraticBezierTo(cx - r * 0.6, cy + r * 0.48, cx - r * 0.2, cy + r * 0.65)
-          ..quadraticBezierTo(cx + r * 0.3, cy + r * 0.82, cx + r * 0.7, cy + r * 0.65)
-          ..quadraticBezierTo(cx + r * 0.9, cy + r * 0.52, cx + r * 1.15, cy + r * 0.65);
-        canvas.drawPath(waves, strokePaint);
-
-        // The Sacred Ark (سفينة نوح)
-        final ark = Path()
-          ..moveTo(cx - r * 0.80, cy + r * 0.40)
-          ..quadraticBezierTo(cx, cy + r * 0.72, cx + r * 0.80, cy + r * 0.40)
-          ..lineTo(cx + r * 0.65, cy + r * 0.22)
-          ..lineTo(cx - r * 0.65, cy + r * 0.22)
-          ..close();
-        canvas.drawPath(ark, fillPaint);
-        canvas.drawPath(ark, strokePaint);
-        // Cabin on Ark
-        canvas.drawRect(Rect.fromLTWH(cx - r * 0.38, cy + r * 0.02, r * 0.76, r * 0.22), fillPaint);
-        canvas.drawRect(Rect.fromLTWH(cx - r * 0.38, cy + r * 0.02, r * 0.76, r * 0.22), strokePaint);
-
-        // Mount Sinai (طور سيناء) mountain peak in background
-        final mt = Path()
-          ..moveTo(cx - r * 0.95, cy + r * 0.25)
-          ..lineTo(cx - r * 0.1, cy - r * 0.80)
-          ..lineTo(cx + r * 0.70, cy + r * 0.25);
-        canvas.drawPath(mt, goldGlow);
-        // Divine sun halo over Sinai
-        canvas.drawCircle(Offset(cx - r * 0.1, cy - r * 0.80), 12, goldFill);
-        canvas.drawCircle(Offset(cx - r * 0.1, cy - r * 0.80), 12, goldGlow);
-        break;
-
-      case 'fiqh_and_fatawa':
-        // ── 5. Classical Scales of Sacred Justice (ميزان العدل والشرع) ──
-        // Central upright Pillar
-        canvas.drawLine(Offset(cx, cy - r * 1.0), Offset(cx, cy + r * 0.90), strokePaint);
-        // Pillar Base
-        canvas.drawOval(Rect.fromCenter(center: Offset(cx, cy + r * 0.90), width: r * 0.65, height: 12), fillPaint);
-        canvas.drawOval(Rect.fromCenter(center: Offset(cx, cy + r * 0.90), width: r * 0.65, height: 12), strokePaint);
-        // Fulcrum Ring
-        canvas.drawCircle(Offset(cx, cy - r * 0.58), 5, goldFill);
-        canvas.drawCircle(Offset(cx, cy - r * 0.58), 5, goldGlow);
-
-        // Horizontal Balance Beam
-        final beamY = cy - r * 0.58;
-        final beamLeft = cx - r * 0.80;
-        final beamRight = cx + r * 0.80;
-        canvas.drawLine(Offset(beamLeft, beamY), Offset(beamRight, beamY), strokePaint);
-
-        // Left Pan & Suspension Chains
-        canvas.drawLine(Offset(beamLeft, beamY), Offset(beamLeft - 12, cy + 6), goldGlow);
-        canvas.drawLine(Offset(beamLeft, beamY), Offset(beamLeft + 12, cy + 6), goldGlow);
-        final leftPan = Path()
-          ..moveTo(beamLeft - 18, cy + 6)
-          ..quadraticBezierTo(beamLeft, cy + 22, beamLeft + 18, cy + 6)
-          ..close();
-        canvas.drawPath(leftPan, fillPaint);
-        canvas.drawPath(leftPan, strokePaint);
-
-        // Right Pan & Suspension Chains
-        canvas.drawLine(Offset(beamRight, beamY), Offset(beamRight - 12, cy + 6), goldGlow);
-        canvas.drawLine(Offset(beamRight, beamY), Offset(beamRight + 12, cy + 6), goldGlow);
-        final rightPan = Path()
-          ..moveTo(beamRight - 18, cy + 6)
-          ..quadraticBezierTo(beamRight, cy + 22, beamRight + 18, cy + 6)
-          ..close();
-        canvas.drawPath(rightPan, fillPaint);
-        canvas.drawPath(rightPan, strokePaint);
-        break;
-
-      case 'aqeedah':
-        // ── 6. Radiant Divine Sunburst of Tawhid & Celestial Minarets ──
-        final sunCenter = Offset(cx, cy - r * 0.12);
-        canvas.drawCircle(sunCenter, r * 0.38, fillPaint);
-        canvas.drawCircle(sunCenter, r * 0.38, strokePaint);
-
-        // 16 Emanating Divine Light Rays
-        for (int i = 0; i < 16; i++) {
-          final rad = i * (math.pi / 8);
-          final inner = (i % 2 == 0) ? r * 0.44 : r * 0.55;
-          final outer = (i % 2 == 0) ? r * 1.15 : r * 0.90;
-          canvas.drawLine(
-            Offset(sunCenter.dx + inner * math.cos(rad), sunCenter.dy + inner * math.sin(rad)),
-            Offset(sunCenter.dx + outer * math.cos(rad), sunCenter.dy + outer * math.sin(rad)),
-            (i % 2 == 0) ? strokePaint : goldGlow,
-          );
-        }
-
-        // Two Sacred Minarets rising into the light
-        for (final mx in [cx - r * 0.70, cx + r * 0.70]) {
-          canvas.drawRect(Rect.fromLTWH(mx - 5, cy + r * 0.08, 10, r * 0.80), fillPaint);
-          canvas.drawRect(Rect.fromLTWH(mx - 5, cy + r * 0.08, 10, r * 0.80), strokePaint);
-          final spire = Path()
-            ..moveTo(mx - 6, cy + r * 0.08)
-            ..lineTo(mx, cy - r * 0.28)
-            ..lineTo(mx + 6, cy + r * 0.08)
-            ..close();
-          canvas.drawPath(spire, goldGlow);
-        }
-        break;
-
-      case 'tibb':
-        // ── 7. Sacred Healing Olive Branch & Honeycomb Lattice ──
-        // Hexagonal Honeycomb grid (العسل والشفاء)
-        for (int i = 0; i < 5; i++) {
-          final hexCenter = Offset(
-            cx + (i % 2 == 0 ? 0 : 18) - 10,
-            cy - r * 0.55 + (i * 20),
-          );
-          final hex = Path();
-          for (int j = 0; j < 6; j++) {
-            final a = j * (math.pi / 3);
-            final pt = Offset(hexCenter.dx + 13 * math.cos(a), hexCenter.dy + 13 * math.sin(a));
-            if (j == 0) {
-              hex.moveTo(pt.dx, pt.dy);
-            } else {
-              hex.lineTo(pt.dx, pt.dy);
-            }
-          }
-          hex.close();
-          canvas.drawPath(hex, fillPaint);
-          canvas.drawPath(hex, strokePaint);
-        }
-
-        // Branch of the Sacred Olive Tree with Leaves
-        final branch = Path()
-          ..moveTo(cx - r * 0.85, cy + r * 0.85)
-          ..quadraticBezierTo(cx - r * 0.3, cy + r * 0.3, cx + r * 0.75, cy + r * 0.18);
-        canvas.drawPath(branch, goldGlow);
-
-        // Olive leaves and golden olives
-        for (final leafCenter in [
-          Offset(cx - r * 0.55, cy + r * 0.52),
-          Offset(cx - r * 0.12, cy + r * 0.35),
-          Offset(cx + r * 0.38, cy + r * 0.24),
-        ]) {
-          final leaf = Path()
-            ..moveTo(leafCenter.dx - 12, leafCenter.dy)
-            ..quadraticBezierTo(leafCenter.dx, leafCenter.dy - 10, leafCenter.dx + 12, leafCenter.dy)
-            ..quadraticBezierTo(leafCenter.dx, leafCenter.dy + 10, leafCenter.dx - 12, leafCenter.dy);
-          canvas.drawPath(leaf, fillPaint);
-          canvas.drawPath(leaf, strokePaint);
-          // Golden Olive fruit
-          canvas.drawCircle(Offset(leafCenter.dx + 6, leafCenter.dy + 8), 3.5, goldFill);
-          canvas.drawCircle(Offset(leafCenter.dx + 6, leafCenter.dy + 8), 3.5, goldGlow);
-        }
-        break;
-
-      case 'quizzes':
-      default:
-        // ── 8. Ancient Astrolabe Rings & Triumph Star ──
-        // Astrolabe concentric graduated brass rings
-        canvas.drawCircle(Offset(cx, cy), r * 0.38, goldGlow);
-        canvas.drawCircle(Offset(cx, cy), r * 0.68, strokePaint);
-        canvas.drawCircle(Offset(cx, cy), r * 0.98, goldGlow);
-
-        // Throne ring (عروة الأسطرلاب)
-        canvas.drawCircle(Offset(cx, cy - r * 0.98), 9, goldGlow);
-
-        // Radiant 8-pointed star in the center
-        final star = Path();
-        for (int i = 0; i < 8; i++) {
-          final rad = i * (math.pi / 4);
-          final rad2 = rad + (math.pi / 8);
-          final p1 = Offset(cx + (r * 0.38) * math.cos(rad), cy + (r * 0.38) * math.sin(rad));
-          final p2 = Offset(cx + (r * 0.18) * math.cos(rad2), cy + (r * 0.18) * math.sin(rad2));
-          if (i == 0) {
-            star.moveTo(p1.dx, p1.dy);
-          } else {
-            star.lineTo(p1.dx, p1.dy);
-          }
-          star.lineTo(p2.dx, p2.dy);
-        }
-        star.close();
-        canvas.drawPath(star, goldFill);
-        canvas.drawPath(star, goldGlow);
-        break;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _FacultyIllustrationPainter oldDelegate) {
-    return oldDelegate.facultyId != facultyId || oldDelegate.accentColor != accentColor;
+// Authentic Islamic Heritage Faculty Artwork Mapping
+// ─────────────────────────────────────────────────────────────────────────────
+String _getFacultyImage(String facultyId) {
+  switch (facultyId) {
+    case 'quran_sciences':
+      return 'assets/images/faculty_quran_sciences.webp';
+    case 'seerah':
+      return 'assets/images/faculty_seerah.webp';
+    case 'companions':
+      return 'assets/images/faculty_companions.webp';
+    case 'prophets':
+      return 'assets/images/faculty_prophets.webp';
+    case 'fiqh_and_fatawa':
+      return 'assets/images/faculty_fiqh.webp';
+    case 'aqeedah':
+      return 'assets/images/faculty_aqeedah.webp';
+    case 'tibb':
+      return 'assets/images/faculty_tibb.webp';
+    case 'quizzes':
+    default:
+      return 'assets/images/faculty_quizzes.webp';
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Monumental Islamic Faculty Card (Authentic Rich Jewel-Toned Gradients & Art)
+// Monumental Islamic Heritage Faculty Card (Authentic Artwork & Manuscript Styling)
 // ─────────────────────────────────────────────────────────────────────────────
 class _ZenPillarCard extends StatelessWidget {
   final _IslamicPillar pillar;
@@ -3220,127 +3179,147 @@ class _ZenPillarCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gradientColors = _getFacultyCardGradient(pillar.id);
+    final imageAsset = _getFacultyImage(pillar.id);
 
     return LiquidPressable(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: gradientColors,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: pillar.accentColor.withValues(alpha: 0.50),
-            width: 1.3,
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.65),
+            width: 1.2,
           ),
           boxShadow: [
             BoxShadow(
-              color: pillar.accentColor.withValues(alpha: 0.24),
+              color: Colors.black.withValues(alpha: 0.45),
               blurRadius: 10,
-              offset: const Offset(0, 3),
+              offset: const Offset(0, 4),
             ),
-            const BoxShadow(
-              color: Colors.black38,
-              blurRadius: 6,
-              offset: Offset(0, 2),
+            BoxShadow(
+              color: pillar.accentColor.withValues(alpha: 0.22),
+              blurRadius: 12,
+              spreadRadius: -1,
             ),
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(17),
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // 1. Bespoke Rich Thematic Artwork
-              CustomPaint(
-                painter: _FacultyIllustrationPainter(
-                  facultyId: pillar.id,
-                  accentColor: pillar.accentColor,
+              // 1. Authentic Masterpiece Islamic Artwork
+              Image.asset(
+                imageAsset,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: _getFacultyCardGradient(pillar.id),
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+              // 2. Rich Multi-Stop Scrim Gradient for Superb Text Contrast & Artwork Depth
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.45),
+                      Colors.black.withValues(alpha: 0.15),
+                      Colors.black.withValues(alpha: 0.65),
+                      Colors.black.withValues(alpha: 0.94),
+                    ],
+                    stops: const [0.0, 0.35, 0.68, 1.0],
+                  ),
                 ),
               ),
 
-              // 2. Corner Atmospheric Ambient Halo
-              Positioned(
-                top: -24,
-                right: -24,
-                child: Container(
-                  width: 95,
-                  height: 95,
+              // 3. Subtle Inner Gilded Rim (Islamic Manuscript Margin)
+              Positioned.fill(
+                child: DecoratedBox(
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        pillar.accentColor.withValues(alpha: 0.28),
-                        Colors.transparent,
-                      ],
+                    borderRadius: BorderRadius.circular(17),
+                    border: Border.all(
+                      color: const Color(0xFFFFD700).withValues(alpha: 0.14),
+                      width: 0.8,
                     ),
                   ),
                 ),
               ),
 
-              // 3. Card Content
+              // 4. Integrated Content Structure
               Padding(
-                padding: const EdgeInsets.all(12.5),
+                padding: const EdgeInsets.all(10.5),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Top: Distinct Emblem Icon + Count Badge with Live Pulsing Dot
+                    // Top Row: Sacred Medallion + Explanatory Badge
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Leather Medallion Icon Container
+                        // Gilded Emblem Medallion
                         Container(
-                          width: 38,
-                          height: 38,
+                          width: 36,
+                          height: 36,
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: pillar.gradient,
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(11),
+                            shape: BoxShape.circle,
+                            color: const Color(0xFF0A1411).withValues(alpha: 0.80),
                             border: Border.all(
-                              color: pillar.accentColor.withValues(alpha: 0.6),
-                              width: 1.0,
+                              color: const Color(0xFFD4AF37).withValues(alpha: 0.80),
+                              width: 1.2,
                             ),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black45,
+                            boxShadow: [
+                              const BoxShadow(
+                                color: Colors.black54,
                                 blurRadius: 6,
                                 offset: Offset(0, 2),
                               ),
+                              BoxShadow(
+                                color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+                                blurRadius: 8,
+                              ),
                             ],
                           ),
-                          child: Icon(pillar.icon, color: Colors.white, size: 19),
+                          child: Icon(
+                            pillar.icon,
+                            color: const Color(0xFFFFD54F),
+                            size: 18,
+                          ),
                         ),
 
-                        // Count Badge with Luminous Live Pulsing Dot
+                        // Heritage Badge Pill
                         Flexible(
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                            padding: const EdgeInsets.symmetric(horizontal: 7.5, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.40),
-                              borderRadius: BorderRadius.circular(8),
+                              color: const Color(0xFF091210).withValues(alpha: 0.82),
+                              borderRadius: BorderRadius.circular(9),
                               border: Border.all(
-                                color: pillar.accentColor.withValues(alpha: 0.65),
-                                width: 0.9,
+                                color: const Color(0xFFD4AF37).withValues(alpha: 0.55),
+                                width: 0.8,
                               ),
                               boxShadow: const [
                                 BoxShadow(
-                                  color: Colors.black26,
+                                  color: Colors.black45,
                                   blurRadius: 4,
+                                  offset: Offset(0, 1),
                                 ),
                               ],
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                _LuminousPulsingDot(color: pillar.accentColor, size: 5.5),
+                                const _LuminousPulsingDot(color: Color(0xFFFFD54F), size: 5.0),
                                 const SizedBox(width: 4.5),
                                 Flexible(
                                   child: Text(
@@ -3348,12 +3327,12 @@ class _ZenPillarCard extends StatelessWidget {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
-                                      color: const Color(0xFFFFD54F),
+                                      color: const Color(0xFFFFF6D6),
                                       fontSize: 9.5,
                                       fontWeight: FontWeight.bold,
                                       fontFamily: locale == 'ar' ? 'Amiri' : null,
                                       shadows: const [
-                                        Shadow(color: Colors.black, blurRadius: 4),
+                                        Shadow(color: Colors.black, blurRadius: 3),
                                       ],
                                     ),
                                   ),
@@ -3365,42 +3344,62 @@ class _ZenPillarCard extends StatelessWidget {
                       ],
                     ),
 
-                    // Bottom: Prominent 2-Line Title & Descriptive Subtitle
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          pillar.title(locale),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13.5,
-                            fontFamily: locale == 'ar' ? 'Amiri' : null,
-                            height: 1.25,
-                            shadows: const [
-                              Shadow(color: Colors.black87, blurRadius: 6, offset: Offset(0, 1)),
-                            ],
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                    // Bottom: Illuminated Frosted Manuscript Plate for Title & Subtitle
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6.5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF07100D).withValues(alpha: 0.72),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xFFD4AF37).withValues(alpha: 0.32),
+                          width: 0.8,
                         ),
-                        const SizedBox(height: 3),
-                        Text(
-                          pillar.subtitle(locale),
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.82),
-                            fontSize: 10,
-                            fontFamily: locale == 'ar' ? 'Amiri' : null,
-                            height: 1.22,
-                            shadows: const [
-                              Shadow(color: Colors.black54, blurRadius: 4),
-                            ],
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black45,
+                            blurRadius: 6,
+                            offset: Offset(0, 2),
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Title with Ivory Gold Polish
+                          Text(
+                            pillar.title(locale),
+                            style: TextStyle(
+                              color: const Color(0xFFFFFBF0),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13.5,
+                              fontFamily: locale == 'ar' ? 'Amiri' : null,
+                              height: 1.22,
+                              shadows: const [
+                                Shadow(color: Colors.black, blurRadius: 4, offset: Offset(0, 1)),
+                              ],
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 3),
+                          // Subtitle with Warm Parchment Tone
+                          Text(
+                            pillar.subtitle(locale),
+                            style: TextStyle(
+                              color: const Color(0xFFDFD5C4),
+                              fontSize: 9.8,
+                              fontFamily: locale == 'ar' ? 'Amiri' : null,
+                              height: 1.20,
+                              shadows: const [
+                                Shadow(color: Colors.black87, blurRadius: 3),
+                              ],
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -3413,7 +3412,6 @@ class _ZenPillarCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Hero Continue Reading Card (Prominent & Eye-Catching)
 // ─────────────────────────────────────────────────────────────────────────────
 // ─────────────────────────────────────────────────────────────────────────────
@@ -3695,8 +3693,6 @@ class _HeroResumeCard extends StatelessWidget {
     final bool isHadith = type == 'hadith';
 
     String title = '';
-    String subtitle = '';
-    double progress = 0.5;
     VoidCallback onTapAction;
     IconData icon;
     Color accentColor;
@@ -3704,10 +3700,6 @@ class _HeroResumeCard extends StatelessWidget {
     if (isPdf) {
       final book = resumeItem['pdfBook'] as UserPdfBook;
       title = book.title;
-      subtitle = book.totalPages > 0
-          ? '${locale == 'ar' ? 'صفحة' : 'Page'} ${book.lastPageRead} / ${book.totalPages}  •  ${(book.progressPercent * 100).toInt()}%'
-          : '${locale == 'ar' ? 'صفحة' : 'Page'} ${book.lastPageRead}';
-      progress = book.progressPercent;
       icon = Icons.picture_as_pdf_rounded;
       accentColor = const Color(0xFFD32F2F);
       onTapAction = () => onOpenPdf(book);
@@ -3720,8 +3712,6 @@ class _HeroResumeCard extends StatelessWidget {
         (p) => p.id == hadith.collectionId,
         orElse: () => _kHadithPresets.first,
       );
-      subtitle = '${colPreset.title} • ${locale == 'ar' ? 'حديث رقم' : 'Hadith #'} ${hadith.hadithNumber}';
-      progress = 0.75;
       icon = Icons.menu_book_rounded;
       accentColor = colPreset.goldAccent;
       onTapAction = () => onOpenHadith(hadith);
@@ -3733,10 +3723,6 @@ class _HeroResumeCard extends StatelessWidget {
           .replaceAll(RegExp(r'\s+'), ' ')
           .trim();
       final bool isBukhari = item.part == 'صحيح البخارى' || item.part == 'البخارى';
-      subtitle = isBukhari
-          ? (locale == 'ar' ? 'صحيح البخاري' : 'Sahih Al-Bukhari')
-          : (locale == 'ar' ? 'المكتبة الإسلامية' : 'Islamic Library');
-      progress = 0.65;
       icon = isBukhari ? Icons.menu_book_rounded : Icons.auto_stories_rounded;
       accentColor = isBukhari ? const Color(0xFFC68A2E) : const Color(0xFF1B8A6B);
       onTapAction = () => onOpenStory(item);
@@ -3747,141 +3733,86 @@ class _HeroResumeCard extends StatelessWidget {
     return LiquidPressable(
       onTap: onTapAction,
       child: Container(
+        height: 38,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
           color: cardBg,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: accentColor.withValues(alpha: isDark ? 0.45 : 0.3),
-            width: 1.1,
+            color: accentColor.withValues(alpha: isDark ? 0.40 : 0.25),
+            width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: accentColor.withValues(alpha: isDark ? 0.16 : 0.08),
-              blurRadius: 8,
+              color: accentColor.withValues(alpha: isDark ? 0.12 : 0.05),
+              blurRadius: 6,
               offset: const Offset(0, 2),
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Stack(
-            children: [
-              Positioned(
-                top: -20,
-                right: -20,
-                child: Container(
-                  width: 90,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        accentColor.withValues(alpha: isDark ? 0.18 : 0.10),
-                        Colors.transparent,
-                      ],
+        child: Row(
+          children: [
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: accentColor.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: accentColor, size: 13),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              locale == 'ar' ? 'استئناف: ' : 'Resume: ',
+              style: TextStyle(
+                color: accentColor,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                fontFamily: locale == 'ar' ? 'Amiri' : null,
+              ),
+            ),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: titleColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 11.5,
+                  fontFamily: locale == 'ar' ? 'Amiri' : null,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+              decoration: BoxDecoration(
+                color: accentColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    locale == 'ar' ? 'متابعة' : 'Continue',
+                    style: TextStyle(
+                      color: accentColor,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: locale == 'ar' ? 'Amiri' : null,
                     ),
                   ),
-                ),
+                  const SizedBox(width: 3),
+                  Icon(
+                    locale == 'ar' ? Icons.arrow_back_ios_new_rounded : Icons.arrow_forward_ios_rounded,
+                    color: accentColor,
+                    size: 8.5,
+                  ),
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8.5),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: accentColor.withValues(alpha: 0.14),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(icon, color: accentColor, size: 18),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    width: 6,
-                                    height: 6,
-                                    decoration: BoxDecoration(
-                                      color: accentColor,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Text(
-                                    locale == 'ar' ? 'تابع القراءة' : 'Continue Reading',
-                                    style: TextStyle(
-                                      color: accentColor,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Text(
-                                locale == 'ar' ? 'اقرأ الآن ←' : 'Read now →',
-                                style: TextStyle(
-                                  color: accentColor,
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            title,
-                            style: TextStyle(
-                              color: titleColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              fontFamily: locale == 'ar' ? 'Amiri' : null,
-                              height: 1.2,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  subtitle,
-                                  style: TextStyle(
-                                    color: isDark ? const Color(0xFF8A9995) : const Color(0xFF657B74),
-                                    fontSize: 10,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(3),
-                            child: LinearProgressIndicator(
-                              value: progress > 0 ? progress : 0.1,
-                              backgroundColor: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.06),
-                              valueColor: AlwaysStoppedAnimation<Color>(accentColor),
-                              minHeight: 3,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

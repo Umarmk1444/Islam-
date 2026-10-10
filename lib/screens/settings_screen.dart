@@ -16,6 +16,7 @@ import 'minbar_downloads_screen.dart';
 import '../services/app_update_service.dart';
 import '../services/permission_health_service.dart';
 import '../features/prayer_times/presentation/screens/permissions_setup_screen.dart';
+import '../widgets/custom_banner_ad.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SETTINGS SCREEN — Modern Luxury Islamic Redesign
@@ -237,6 +238,58 @@ class _SettingsScreenState extends State<SettingsScreen>
   String _tr(BuildContext context, String key) {
     final lang = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
     return _l10n[lang]?[key] ?? _l10n['ar']?[key] ?? _l10n['en']![key] ?? key;
+  }
+
+  String _getRateUsSubtitle(String lang) {
+    switch (lang) {
+      case 'ar':
+        return 'ادعم تطبيق Quran Zone بـ 5 نجوم على متجر Google';
+      case 'am':
+        return 'በGoogle Play 5 ኮከቦችን በመስጠት ይደግፉን';
+      case 'om':
+        return 'Google Play irratti urjii 5 kennuun nu deeggaraa';
+      default:
+        return 'Support Quran Zone with 5 stars on Google Play';
+    }
+  }
+
+  String _getShareAppSubtitle(String lang) {
+    switch (lang) {
+      case 'ar':
+        return 'الدال على الخير كفاعله • شارك التطبيق واكسب الأجر';
+      case 'am':
+        return 'መልካምን ያመላከተ እንደ ሠሪው ነው • መተግበሪያውን ያጋሩ';
+      case 'om':
+        return 'Nama gara gaariitti qajeelche akka nama hojjateeti';
+      default:
+        return 'Guide others to goodness & earn continuous reward';
+    }
+  }
+
+  String _getPrivacySubtitle(String lang) {
+    switch (lang) {
+      case 'ar':
+        return 'quranzone.com.et • حفظ محلي 100% بدون تتبع';
+      case 'am':
+        return 'quranzone.com.et • 100% ከመስመር ውጭ እና ደህንነቱ የተጠበቀ';
+      case 'om':
+        return 'quranzone.com.et • 100% toora interneetii malee fi amansiisaa';
+      default:
+        return 'quranzone.com.et • 100% Offline, secure & private';
+    }
+  }
+
+  String _getAboutSubtitle(String lang) {
+    switch (lang) {
+      case 'ar':
+        return 'نبذة شاملة عن رسالة التطبيق ومزاياه الاستثنائية';
+      case 'am':
+        return 'አጠቃላይ እይታ እና የሰደቃ ጃሪያህ መረጃ';
+      case 'om':
+        return 'Ibsa waliigalaa fi odeeffannoo Sadaqah Jariyah';
+      default:
+        return 'Comprehensive overview & app dedication';
+    }
   }
 
   @override
@@ -462,14 +515,23 @@ class _SettingsScreenState extends State<SettingsScreen>
 
     HapticFeedback.selectionClick();
 
-    final mediaQuery = MediaQuery.of(context);
-    final size = mediaQuery.size;
+    // Map global origin to SettingsScreen's local coordinate space
+    // to account for any horizontal centering margins (e.g. ConstrainedBox maxWidth 850 on desktop/web)
+    final RenderBox? screenBox = context.findRenderObject() as RenderBox?;
+    final Offset localOrigin = screenBox != null && screenBox.hasSize
+        ? screenBox.globalToLocal(origin)
+        : origin;
+    final Size localSize = screenBox != null && screenBox.hasSize
+        ? screenBox.size
+        : MediaQuery.sizeOf(context);
 
     // Calculate maximum radius to engulf every corner of screen
-    final double dx = math.max(origin.dx, size.width - origin.dx);
-    final double dy = math.max(origin.dy, size.height - origin.dy);
+    final double dx =
+        math.max(localOrigin.dx, localSize.width - localOrigin.dx);
+    final double dy =
+        math.max(localOrigin.dy, localSize.height - localOrigin.dy);
     _maxRadius = math.sqrt(dx * dx + dy * dy) + 60.0;
-    _revealOrigin = origin;
+    _revealOrigin = localOrigin;
     _targetTheme = newTheme;
 
     // Instantiate synced scroll controller for the reveal layer
@@ -795,25 +857,29 @@ class _SettingsScreenState extends State<SettingsScreen>
               final double radius =
                   1.0 + (_revealAnim.value * (_maxRadius - 1.0));
 
-              return ClipPath(
-                clipper: CircularRevealClipper(
-                  center: _revealOrigin,
-                  radius: radius,
-                ),
-                child: Stack(
-                  children: [
-                    _buildSettingsView(_targetTheme, _revealScrollCtrl!),
-                    // Glowing circular ripple edge starting from 1px
-                    CustomPaint(
-                      painter: _RippleRingPainter(
-                        center: _revealOrigin,
-                        radius: radius,
-                        color: AppTheme.getBorderColor(_targetTheme),
-                        progress: _revealAnim.value,
+              return Stack(
+                children: [
+                  ClipPath(
+                    clipper: CircularRevealClipper(
+                      center: _revealOrigin,
+                      radius: radius,
+                    ),
+                    child: _buildSettingsView(_targetTheme, _revealScrollCtrl!),
+                  ),
+                  // Glowing circular ripple edge starting from 1px
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: CustomPaint(
+                        painter: _RippleRingPainter(
+                          center: _revealOrigin,
+                          radius: radius,
+                          color: AppTheme.getBorderColor(_targetTheme),
+                          progress: _revealAnim.value,
+                        ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               );
             },
           ),
@@ -826,6 +892,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   Widget _buildSettingsView(QuranTheme theme, ScrollController scrollCtrl) {
     final l10n = AppLocalizations.of(context)!;
     final isArabic = Localizations.maybeLocaleOf(context)?.languageCode == 'ar';
+    final lang = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
 
     final Color primary = AppTheme.getPrimaryColor(theme);
     final Color textMain = AppTheme.getMainTextColor(theme);
@@ -836,7 +903,13 @@ class _SettingsScreenState extends State<SettingsScreen>
     final Color scaffoldBg = _getScaffoldBg(theme);
     final Color heroBannerBg = _getHeroBg(theme);
 
-    return Scaffold(
+    return ValueListenableBuilder<bool>(
+      valueListenable: kAdVisibleNotifier,
+      builder: (context, isAdVisible, _) {
+        final double bottomClearance =
+            MediaQuery.paddingOf(context).bottom + (isAdVisible ? 165.0 : 125.0);
+
+        return Scaffold(
       backgroundColor: scaffoldBg,
       body: CustomScrollView(
         controller: scrollCtrl,
@@ -1115,28 +1188,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                 ),
                 const SizedBox(height: 6),
 
-                // ── 🌟 SECTION D: COMMUNITY & OFFICIAL CHANNELS ───────────────
-                _sectionHeader(
-                  icon: Icons.forum_rounded,
-                  title: _tr(context, 'creator_community'),
-                  color: const Color(0xFF10B981),
-                  badgeText: isArabic ? 'تواصل ومتابعة' : 'OFFICIAL',
-                ),
-                _IslamicCommunityCard(
-                  isDark: isDark,
-                  cardBg: cardBg,
-                  primary: primary,
-                  borderColor: borderColor,
-                  creatorName: _tr(context, 'creator_name'),
-                  creatorRole: _tr(context, 'creator_role'),
-                  creatorNote: _tr(context, 'creator_note'),
-                  onTikTok: _openTikTok,
-                  onTelegram: _openTelegram,
-                  onEmail: _openEmail,
-                ),
-                const SizedBox(height: 8),
-
-                // ── SECTION E: SUPPORT, PRIVACY & ABOUT ───────────────────────
+                // ── SECTION C: SUPPORT, PRIVACY & ABOUT ───────────────────────
                 _sectionHeader(
                   icon: Icons.info_outline_rounded,
                   title: _tr(context, 'share_info'),
@@ -1148,13 +1200,28 @@ class _SettingsScreenState extends State<SettingsScreen>
                   borderColor: borderColor,
                   children: [
                     _ModernActionTile(
+                      icon: Icons.system_update_rounded,
+                      iconGradient: const [
+                        Color(0xFF06B6D4),
+                        Color(0xFF0891B2)
+                      ],
+                      title: _tr(context, 'check_updates'),
+                      subtitle: _tr(context, 'check_updates_desc'),
+                      onTap: () => AppUpdateService.instance
+                          .checkForUpdate(context, isManual: true),
+                      isDark: isDark,
+                      textColor: textMain,
+                      subtextColor: textSub,
+                    ),
+                    _divider(isDark, borderColor),
+                    _ModernActionTile(
                       icon: Icons.star_rate_rounded,
                       iconGradient: const [
                         Color(0xFFF59E0B),
                         Color(0xFFD97706)
                       ],
                       title: _tr(context, 'rate_us'),
-                      subtitle: 'Support Quran Zone with 5 stars',
+                      subtitle: _getRateUsSubtitle(lang),
                       onTap: () async {
                         final Uri url = Uri.parse(
                             'https://play.google.com/store/apps/details?id=com.umer.quranzone');
@@ -1173,27 +1240,12 @@ class _SettingsScreenState extends State<SettingsScreen>
                         Color(0xFF1D4ED8)
                       ],
                       title: _tr(context, 'share_app'),
-                      subtitle: 'Guide others to goodness & earn reward',
+                      subtitle: _getShareAppSubtitle(lang),
                       onTap: () {
                         Share.share(
                           'Download Quran Zone for an exquisite Quran & Islamic experience:\nhttps://play.google.com/store/apps/details?id=com.umer.quranzone',
                         );
                       },
-                      isDark: isDark,
-                      textColor: textMain,
-                      subtextColor: textSub,
-                    ),
-                    _divider(isDark, borderColor),
-                    _ModernActionTile(
-                      icon: Icons.system_update_rounded,
-                      iconGradient: const [
-                        Color(0xFF06B6D4),
-                        Color(0xFF0891B2)
-                      ],
-                      title: _tr(context, 'check_updates'),
-                      subtitle: _tr(context, 'check_updates_desc'),
-                      onTap: () => AppUpdateService.instance
-                          .checkForUpdate(context, isManual: true),
                       isDark: isDark,
                       textColor: textMain,
                       subtextColor: textSub,
@@ -1206,7 +1258,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                         Color(0xFF047857)
                       ],
                       title: _tr(context, 'privacy_policy'),
-                      subtitle: 'quranzone.com.et • 100% Offline & Private',
+                      subtitle: _getPrivacySubtitle(lang),
                       onTap: () => _openPrivacyPolicy(
                           context, cardBg, textMain, textSub, primary),
                       isDark: isDark,
@@ -1221,7 +1273,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                         Color(0xFF6D28D9)
                       ],
                       title: _tr(context, 'about_app'),
-                      subtitle: 'Comprehensive overview & Sadaqah Jariyah',
+                      subtitle: _getAboutSubtitle(lang),
                       onTap: () => _openAboutQuranZoneDialog(
                         context,
                         isDark,
@@ -1235,6 +1287,27 @@ class _SettingsScreenState extends State<SettingsScreen>
                       subtextColor: textSub,
                     ),
                   ],
+                ),
+                const SizedBox(height: 8),
+
+                // ── 🌟 SECTION D: COMMUNITY & OFFICIAL CHANNELS ───────────────
+                _sectionHeader(
+                  icon: Icons.forum_rounded,
+                  title: _tr(context, 'creator_community'),
+                  color: const Color(0xFF10B981),
+                  badgeText: isArabic ? 'تواصل ومتابعة' : 'OFFICIAL',
+                ),
+                _IslamicCommunityCard(
+                  isDark: isDark,
+                  cardBg: cardBg,
+                  primary: primary,
+                  borderColor: borderColor,
+                  creatorName: _tr(context, 'creator_name'),
+                  creatorRole: _tr(context, 'creator_role'),
+                  creatorNote: _tr(context, 'creator_note'),
+                  onTikTok: _openTikTok,
+                  onTelegram: _openTelegram,
+                  onEmail: _openEmail,
                 ),
 
                 // ── FOOTER DEDICATION ─────────────────────────────────────────
@@ -1274,12 +1347,14 @@ class _SettingsScreenState extends State<SettingsScreen>
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: bottomClearance),
               ]),
             ),
           ),
         ],
       ),
+    );
+      },
     );
   }
 
@@ -2035,424 +2110,6 @@ class _ModernActionTile extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// COMPONENT 3: Modern Switch Tile
-// ─────────────────────────────────────────────────────────────────────────────
-
-// ignore: unused_element
-class _ModernSwitchTile extends StatelessWidget {
-  final IconData icon;
-  final List<Color> iconGradient;
-  final String title;
-  final String subtitle;
-  final bool value;
-  final Color activeColor;
-  final ValueChanged<bool> onChanged;
-  final bool isDark;
-  final Color textColor;
-  final Color subtextColor;
-
-  const _ModernSwitchTile({
-    required this.icon,
-    required this.iconGradient,
-    required this.title,
-    required this.subtitle,
-    required this.value,
-    required this.activeColor,
-    required this.onChanged,
-    required this.isDark,
-    required this.textColor,
-    required this.subtextColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-      child: Row(
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: iconGradient,
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(11),
-              boxShadow: [
-                BoxShadow(
-                  color: iconGradient.first.withValues(alpha: 0.3),
-                  blurRadius: 7,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Icon(icon, color: Colors.white, size: 20),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: textColor,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: subtextColor,
-                    fontSize: 11.5,
-                    height: 1.3,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Switch.adaptive(
-            value: value,
-            activeTrackColor: activeColor.withValues(alpha: 0.5),
-            activeThumbColor: activeColor,
-            onChanged: onChanged,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// COMPONENT 4: Modern Interval Picker
-// ─────────────────────────────────────────────────────────────────────────────
-
-// ignore: unused_element
-class _ModernIntervalPicker extends StatelessWidget {
-  final int value;
-  final Color primary;
-  final Color textColor;
-  final Color subtextColor;
-  final String title;
-  final ValueChanged<int> onChanged;
-  final bool isDark;
-
-  const _ModernIntervalPicker({
-    required this.value,
-    required this.primary,
-    required this.textColor,
-    required this.subtextColor,
-    required this.title,
-    required this.onChanged,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    const intervals = [5, 15, 30, 60, 120];
-    const labels = ['5m', '15m', '30m', '1h', '2h'];
-
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: isDark
-            ? Colors.white.withValues(alpha: 0.04)
-            : Colors.black.withValues(alpha: 0.03),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: primary.withValues(alpha: 0.15),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.timer_outlined, size: 15, color: primary),
-              const SizedBox(width: 6),
-              Text(
-                title,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(intervals.length, (i) {
-              final selected = intervals[i] == value;
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () => onChanged(intervals[i]),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    margin: const EdgeInsets.symmetric(horizontal: 2.5),
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    decoration: BoxDecoration(
-                      color: selected ? primary : Colors.transparent,
-                      borderRadius: BorderRadius.circular(9),
-                      border: Border.all(
-                        color: selected
-                            ? primary
-                            : (isDark ? Colors.white24 : Colors.black12),
-                        width: selected ? 1.5 : 1,
-                      ),
-                      boxShadow: selected
-                          ? [
-                              BoxShadow(
-                                color: primary.withValues(alpha: 0.35),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              )
-                            ]
-                          : [],
-                    ),
-                    child: Center(
-                      child: Text(
-                        labels[i],
-                        style: TextStyle(
-                          color: selected ? Colors.white : subtextColor,
-                          fontSize: 11.5,
-                          fontWeight:
-                              selected ? FontWeight.bold : FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// COMPONENT 5: Theme Swatch Selector with Tap Origin Capture
-// ─────────────────────────────────────────────────────────────────────────────
-
-// ignore: unused_element
-class _ThemeSwatchSelector extends StatelessWidget {
-  final QuranTheme currentTheme;
-  final Color primary;
-  final Color cardBg;
-  final Color borderColor;
-  final bool isDark;
-  final bool isArabic;
-  final String darkLabel;
-  final String darkDesc;
-  final String creamLabel;
-  final String creamDesc;
-  final String whiteLabel;
-  final String whiteDesc;
-  final void Function(QuranTheme theme, Offset origin) onThemeSelected;
-
-  const _ThemeSwatchSelector({
-    required this.currentTheme,
-    required this.primary,
-    required this.cardBg,
-    required this.borderColor,
-    required this.isDark,
-    required this.isArabic,
-    required this.darkLabel,
-    required this.darkDesc,
-    required this.creamLabel,
-    required this.creamDesc,
-    required this.whiteLabel,
-    required this.whiteDesc,
-    required this.onThemeSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final themeOptions = [
-      (
-        QuranTheme.dark,
-        darkLabel,
-        darkDesc,
-        Icons.nights_stay_rounded,
-        const Color(0xFF0D1F17),
-        const Color(0xFFE8C77A),
-        Colors.white,
-      ),
-      (
-        QuranTheme.cream,
-        creamLabel,
-        creamDesc,
-        Icons.wb_sunny_rounded,
-        const Color(0xFFFDFBF0),
-        const Color(0xFF1B4332),
-        const Color(0xFF1A120B),
-      ),
-      (
-        QuranTheme.white,
-        whiteLabel,
-        whiteDesc,
-        Icons.light_mode_rounded,
-        Colors.white,
-        const Color(0xFF10B981),
-        const Color(0xFF111827),
-      ),
-    ];
-
-    return Container(
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.08)
-              : Colors.black.withValues(alpha: 0.07),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.28 : 0.04),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(10),
-      child: Row(
-        children: themeOptions.map((t) {
-          final isSelected = currentTheme == t.$1;
-
-          return Expanded(
-            child: Builder(
-              builder: (swatchContext) {
-                Offset? tapPos;
-
-                return GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTapDown: (details) {
-                    tapPos = details.globalPosition;
-                  },
-                  onTap: () {
-                    final RenderBox? box =
-                        swatchContext.findRenderObject() as RenderBox?;
-                    Offset origin;
-                    if (box != null && box.hasSize) {
-                      final cardRect =
-                          box.localToGlobal(Offset.zero) & box.size;
-                      if (tapPos != null && cardRect.contains(tapPos!)) {
-                        origin = tapPos!;
-                      } else {
-                        origin =
-                            box.localToGlobal(box.size.center(Offset.zero));
-                      }
-                    } else if (tapPos != null) {
-                      origin = tapPos!;
-                    } else {
-                      origin =
-                          Offset(MediaQuery.of(context).size.width / 2, 250);
-                    }
-                    onThemeSelected(t.$1, origin);
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 240),
-                    curve: Curves.easeOutCubic,
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    padding: const EdgeInsets.fromLTRB(6, 10, 6, 8),
-                    decoration: BoxDecoration(
-                      color: t.$5,
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                        color: isSelected
-                            ? borderColor
-                            : (isDark ? Colors.white12 : Colors.black12),
-                        width: isSelected ? 2.5 : 1,
-                      ),
-                      boxShadow: isSelected
-                          ? [
-                              BoxShadow(
-                                color: borderColor.withValues(alpha: 0.45),
-                                blurRadius: 9,
-                                offset: const Offset(0, 2),
-                              ),
-                            ]
-                          : [],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Container(
-                              width: 34,
-                              height: 34,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: t.$6.withValues(alpha: 0.18),
-                              ),
-                              child: Icon(t.$4, size: 18, color: t.$6),
-                            ),
-                            if (isSelected)
-                              Positioned(
-                                right: 0,
-                                top: 0,
-                                child: Container(
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: borderColor,
-                                  ),
-                                  child: const Icon(Icons.check,
-                                      size: 10, color: Colors.black),
-                                ),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          t.$2,
-                          style: TextStyle(
-                            color: t.$7,
-                            fontSize: 11.5,
-                            fontWeight:
-                                isSelected ? FontWeight.bold : FontWeight.w600,
-                            fontFamily: isArabic ? 'Amiri' : null,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 1),
-                        Text(
-                          t.$3,
-                          style: TextStyle(
-                            color: t.$7.withValues(alpha: 0.6),
-                            fontSize: 9,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // ─────────────────────────────────────────────────────────────────────────────
 // 🛡️ COMPONENT: System & Athan Permissions Health Center
 // ─────────────────────────────────────────────────────────────────────────────
@@ -3055,90 +2712,138 @@ class _CompactThemeCard extends StatelessWidget {
             children: themeOptions.map((t) {
               final isSelected = currentTheme == t.$1;
               return Expanded(
-                child: Builder(
-                  builder: (ctx) {
-                    Offset? tapPos;
-                    return GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTapDown: (d) => tapPos = d.globalPosition,
-                      onTap: () {
-                        final box = ctx.findRenderObject() as RenderBox?;
-                        Offset origin;
-                        if (box != null && box.hasSize) {
-                          final r = box.localToGlobal(Offset.zero) & box.size;
-                          origin = (tapPos != null && r.contains(tapPos!))
-                              ? tapPos!
-                              : box.localToGlobal(box.size.center(Offset.zero));
-                        } else {
-                          origin = tapPos ??
-                              Offset(
-                                  MediaQuery.of(context).size.width / 2, 250);
-                        }
-                        onThemeSelected(t.$1, origin);
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 240),
-                        curve: Curves.easeOutCubic,
-                        margin: const EdgeInsets.symmetric(horizontal: 2.5),
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 9, horizontal: 4),
-                        decoration: BoxDecoration(
-                          color: t.$4,
-                          borderRadius: BorderRadius.circular(13),
-                          border: Border.all(
-                            color: isSelected
-                                ? borderColor
-                                : (isDark ? Colors.white12 : Colors.black12),
-                            width: isSelected ? 2 : 1,
-                          ),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: borderColor.withValues(alpha: 0.4),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  )
-                                ]
-                              : [],
-                        ),
-                        child: Center(
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Container(
-                                width: 28,
-                                height: 28,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: t.$5.withValues(alpha: 0.18),
-                                ),
-                                child: Icon(t.$3, size: 15, color: t.$5),
-                              ),
-                              if (isSelected)
-                                Positioned(
-                                  right: 0,
-                                  top: 0,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(1.5),
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: borderColor,
-                                    ),
-                                    child: const Icon(Icons.check,
-                                        size: 8, color: Colors.black),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
+                child: _ThemeSwatchButton(
+                  theme: t.$1,
+                  isSelected: isSelected,
+                  bgColor: t.$4,
+                  borderColor: borderColor,
+                  iconColor: t.$5,
+                  icon: t.$3,
+                  isDark: isDark,
+                  onSelected: onThemeSelected,
                 ),
               );
             }).toList(),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMPONENT 7.1: Individual Theme Swatch Button with Exact Tap Origin Tracking
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ThemeSwatchButton extends StatefulWidget {
+  final QuranTheme theme;
+  final bool isSelected;
+  final Color bgColor;
+  final Color borderColor;
+  final Color iconColor;
+  final IconData icon;
+  final bool isDark;
+  final void Function(QuranTheme theme, Offset origin) onSelected;
+
+  const _ThemeSwatchButton({
+    Key? key,
+    required this.theme,
+    required this.isSelected,
+    required this.bgColor,
+    required this.borderColor,
+    required this.iconColor,
+    required this.icon,
+    required this.isDark,
+    required this.onSelected,
+  }) : super(key: key);
+
+  @override
+  State<_ThemeSwatchButton> createState() => _ThemeSwatchButtonState();
+}
+
+class _ThemeSwatchButtonState extends State<_ThemeSwatchButton> {
+  Offset? _tapPosition;
+
+  void _triggerReveal([Offset? directTap]) {
+    final box = context.findRenderObject() as RenderBox?;
+    Offset origin;
+    if (box != null && box.hasSize) {
+      final Rect bounds = box.localToGlobal(Offset.zero) & box.size;
+      final Offset center = box.localToGlobal(box.size.center(Offset.zero));
+      final tap = directTap ?? _tapPosition;
+      if (tap != null && bounds.contains(tap)) {
+        origin = tap;
+      } else {
+        origin = center;
+      }
+    } else {
+      origin = directTap ?? _tapPosition ?? Offset.zero;
+    }
+    _tapPosition = null;
+    widget.onSelected(widget.theme, origin);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (details) => _tapPosition = details.globalPosition,
+      onTapCancel: () => _tapPosition = null,
+      onTap: () => _triggerReveal(),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 240),
+        curve: Curves.easeOutCubic,
+        margin: const EdgeInsets.symmetric(horizontal: 2.5),
+        padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 4),
+        decoration: BoxDecoration(
+          color: widget.bgColor,
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(
+            color: widget.isSelected
+                ? widget.borderColor
+                : (widget.isDark ? Colors.white12 : Colors.black12),
+            width: widget.isSelected ? 2 : 1,
+          ),
+          boxShadow: widget.isSelected
+              ? [
+                  BoxShadow(
+                    color: widget.borderColor.withValues(alpha: 0.4),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  )
+                ]
+              : [],
+        ),
+        child: Center(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: widget.iconColor.withValues(alpha: 0.18),
+                ),
+                child: Icon(widget.icon, size: 15, color: widget.iconColor),
+              ),
+              if (widget.isSelected)
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(1.5),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: widget.borderColor,
+                    ),
+                    child: const Icon(Icons.check,
+                        size: 8, color: Colors.black),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

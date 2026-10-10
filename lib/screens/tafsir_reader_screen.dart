@@ -36,6 +36,9 @@ class _TafsirReaderScreenState extends State<TafsirReaderScreen>
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchFilterController = TextEditingController();
+  bool _showTopBars = true;
+  double _accumulatedUpwardScroll = 0.0;
+  double _accumulatedDownwardScroll = 0.0;
 
   late int _currentSurah;
   late String _selectedTafsirKey;
@@ -161,6 +164,13 @@ class _TafsirReaderScreenState extends State<TafsirReaderScreen>
     _loadUserPreferencesAndProgress();
 
     _scrollController.addListener(_onScrollUpdateVisibleAyah);
+    _scrollController.addListener(() {
+      if (_scrollController.hasClients && _scrollController.offset <= 20) {
+        if (!_showTopBars) {
+          setState(() => _showTopBars = true);
+        }
+      }
+    });
   }
 
   void _initAudioPlayer() {
@@ -546,7 +556,7 @@ class _TafsirReaderScreenState extends State<TafsirReaderScreen>
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.palette_rounded, color: Color(0xFFD4AF37), size: 21),
+                          Icon(Icons.palette_rounded, color: _getGoldAccent(), size: 21),
                           const SizedBox(width: 8),
                           Text(
                             isAr ? 'تخصيص مظهر وحجم القراءة' : 'Reading Display Settings',
@@ -562,14 +572,14 @@ class _TafsirReaderScreenState extends State<TafsirReaderScreen>
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3.5),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                          color: _getGoldAccent().withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.35), width: 0.8),
+                          border: Border.all(color: _getGoldAccent().withValues(alpha: 0.35), width: 0.8),
                         ),
                         child: Text(
                           '${_tafsirFontSize.toStringAsFixed(1)} pt',
-                          style: const TextStyle(
-                            color: Color(0xFFD4AF37),
+                          style: TextStyle(
+                            color: _getGoldAccent(),
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
                           ),
@@ -1002,6 +1012,17 @@ class _TafsirReaderScreenState extends State<TafsirReaderScreen>
         return const Color(0xFF70E1B4);
       case TafsirTheme.emerald:
         return const Color(0xFFFFD54F);
+    }
+  }
+
+  Color _getGoldAccent() {
+    switch (_readerTheme) {
+      case TafsirTheme.light:
+      case TafsirTheme.sepia:
+        return const Color(0xFF8A6208);
+      case TafsirTheme.night:
+      case TafsirTheme.emerald:
+        return const Color(0xFFD4AF37);
     }
   }
 
@@ -1467,62 +1488,82 @@ class _TafsirReaderScreenState extends State<TafsirReaderScreen>
       return ayaText.contains(q) || tafsirText.contains(q) || aNumStr == q;
     }).toList();
 
+    final tafsirShortName = _selectedTafsirKey == 'tafsir_moysar'
+        ? (isArabic ? 'الميسر' : 'Al-Muyassar')
+        : _selectedTafsirKey == 'tafsir_saadi'
+            ? (isArabic ? 'السعدي' : 'As-Saadi')
+            : (isArabic ? 'البغوي' : 'Al-Baghawi');
+
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: textColor, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
+      body: SafeArea(
+        top: _showTopBars,
+        bottom: true,
+        child: Stack(
           children: [
-            Text(
-              isArabic ? 'جامع التفاسير القرآنية' : 'Quranic Tafsir Library',
-              style: TextStyle(
-                color: textColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 17,
-                fontFamily: isArabic ? 'Amiri' : null,
-              ),
-            ),
-            Text(
-              isArabic ? 'التفسير الميسر • السعدي • البغوي' : 'Al-Muyassar • As-Saadi • Al-Baghawi',
-              style: TextStyle(
-                color: textColor.withValues(alpha: 0.65),
-                fontSize: 10.5,
-              ),
-            ),
-          ],
-        ),
-        centerTitle: true,
-        actions: [
-          // Bookmark filter toggle
-          IconButton(
-            icon: Icon(
-              _showOnlyBookmarks ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-              color: _showOnlyBookmarks ? const Color(0xFFD4AF37) : textColor,
-              size: 21,
-            ),
-            tooltip: isArabic ? 'الآيات المحفوظة' : 'Bookmarked Ayahs',
-            onPressed: () {
-              setState(() => _showOnlyBookmarks = !_showOnlyBookmarks);
-            },
-          ),
-
-          // Display Customization (Theme + Font Slider Modal)
-          IconButton(
-            icon: const Icon(Icons.tune_rounded, size: 21),
-            color: const Color(0xFFD4AF37),
-            tooltip: isArabic ? 'تخصيص المظهر وحجم الخط' : 'Display & Font Settings',
-            onPressed: () => _openDisplaySettingsSheet(context, locale),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
+            Column(
+              children: [
+                // ── Animated Collapsing Header (AppBar + Surah Bar + Tafsir Switcher + Search Bar) ──
+                AnimatedCrossFade(
+                  duration: const Duration(milliseconds: 240),
+                  firstCurve: Curves.easeOutCubic,
+                  secondCurve: Curves.easeOutCubic,
+                  crossFadeState: _showTopBars ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+                  firstChild: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Custom Top Navigation Bar
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.arrow_back_ios_new_rounded, color: textColor, size: 20),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                            Expanded(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    isArabic ? 'جامع التفاسير القرآنية' : 'Quranic Tafsir Library',
+                                    style: TextStyle(
+                                      color: textColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16.5,
+                                      fontFamily: isArabic ? 'Amiri' : null,
+                                    ),
+                                  ),
+                                  Text(
+                                    isArabic ? 'التفسير الميسر • السعدي • البغوي' : 'Al-Muyassar • As-Saadi • Al-Baghawi',
+                                    style: TextStyle(
+                                      color: textColor.withValues(alpha: 0.65),
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                _showOnlyBookmarks ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                                color: _showOnlyBookmarks ? _getGoldAccent() : textColor,
+                                size: 21,
+                              ),
+                              tooltip: isArabic ? 'الآيات المحفوظة' : 'Bookmarked Ayahs',
+                              onPressed: () {
+                                setState(() => _showOnlyBookmarks = !_showOnlyBookmarks);
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.tune_rounded, size: 21),
+                              color: _getGoldAccent(),
+                              tooltip: isArabic ? 'تخصيص المظهر وحجم الخط' : 'Display & Font Settings',
+                              onPressed: () => _openDisplaySettingsSheet(context, locale),
+                            ),
+                          ],
+                        ),
+                      ),
           // ─────────────────────────────────────────────────────────────
           // 1. Crystal Clear, Prominent Surah & Ayah Controller Bar
           // ─────────────────────────────────────────────────────────────
@@ -1899,11 +1940,51 @@ class _TafsirReaderScreenState extends State<TafsirReaderScreen>
 
           const SizedBox(height: 6),
 
-          // ─────────────────────────────────────────────────────────────
-          // 4. Ayah & Tafsir Hero List (Tafseer is the Main Character!)
-          // ─────────────────────────────────────────────────────────────
-          Expanded(
-            child: _isLoading
+                    ],
+                  ),
+                  secondChild: const SizedBox(width: double.infinity, height: 0),
+                ),
+
+                // ─────────────────────────────────────────────────────────────
+                // 4. Ayah & Tafsir Hero List (Wrapped in NotificationListener)
+                // ─────────────────────────────────────────────────────────────
+                Expanded(
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (notification) {
+                      if (notification is ScrollUpdateNotification) {
+                        final delta = notification.scrollDelta ?? 0.0;
+                        final pixels = notification.metrics.pixels;
+
+                        // Near top of document: always reveal smoothly
+                        if (pixels <= 20) {
+                          _accumulatedUpwardScroll = 0.0;
+                          _accumulatedDownwardScroll = 0.0;
+                          if (!_showTopBars) {
+                            setState(() => _showTopBars = true);
+                          }
+                          return false;
+                        }
+
+                        if (delta > 0) {
+                          // Scrolling down (reading deeper)
+                          _accumulatedDownwardScroll += delta;
+                          _accumulatedUpwardScroll = 0.0;
+                          if (_accumulatedDownwardScroll >= 25.0 && _showTopBars) {
+                            setState(() => _showTopBars = false);
+                          }
+                        } else if (delta < 0) {
+                          // Scrolling up (returning backwards)
+                          _accumulatedUpwardScroll += delta.abs();
+                          _accumulatedDownwardScroll = 0.0;
+                          // Require deliberate upward scroll of >= 45px
+                          if (_accumulatedUpwardScroll >= 45.0 && !_showTopBars) {
+                            setState(() => _showTopBars = true);
+                          }
+                        }
+                      }
+                      return false;
+                    },
+                    child: _isLoading
                 ? const Center(
                     child: CircularProgressIndicator(color: Color(0xFF1B8A6B)),
                   )
@@ -2038,11 +2119,11 @@ class _TafsirReaderScreenState extends State<TafsirReaderScreen>
                                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
                                               decoration: BoxDecoration(
                                                 color: isPlayingThis
-                                                    ? const Color(0xFFD4AF37)
-                                                    : const Color(0xFFD4AF37).withValues(alpha: 0.12),
+                                                    ? _getGoldAccent()
+                                                    : _getGoldAccent().withValues(alpha: 0.12),
                                                 borderRadius: BorderRadius.circular(8),
                                                 border: Border.all(
-                                                  color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                                                  color: _getGoldAccent().withValues(alpha: 0.35),
                                                   width: 0.8,
                                                 ),
                                               ),
@@ -2050,28 +2131,28 @@ class _TafsirReaderScreenState extends State<TafsirReaderScreen>
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
                                                   if (_isBufferingAudio && _playingAyahNum == aNum) ...[
-                                                    const SizedBox(
+                                                    SizedBox(
                                                       width: 12,
                                                       height: 12,
                                                       child: CircularProgressIndicator(
                                                         strokeWidth: 2,
-                                                        color: Color(0xFFD4AF37),
+                                                        color: _getGoldAccent(),
                                                       ),
                                                     ),
                                                     const SizedBox(width: 5),
                                                     Text(
                                                       isArabic ? 'تحميل...' : 'Buffering...',
-                                                      style: const TextStyle(
+                                                      style: TextStyle(
                                                         fontSize: 10.5,
                                                         fontWeight: FontWeight.bold,
-                                                        color: Color(0xFFD4AF37),
+                                                        color: _getGoldAccent(),
                                                       ),
                                                     ),
                                                   ] else ...[
                                                     Icon(
                                                       isPlayingThis ? Icons.stop_rounded : Icons.volume_up_rounded,
                                                       size: 13,
-                                                      color: isPlayingThis ? Colors.black : const Color(0xFFD4AF37),
+                                                      color: isPlayingThis ? Colors.black : _getGoldAccent(),
                                                     ),
                                                     const SizedBox(width: 4),
                                                     Text(
@@ -2081,7 +2162,7 @@ class _TafsirReaderScreenState extends State<TafsirReaderScreen>
                                                       style: TextStyle(
                                                         fontSize: 10.5,
                                                         fontWeight: FontWeight.bold,
-                                                        color: isPlayingThis ? Colors.black : const Color(0xFFD4AF37),
+                                                        color: isPlayingThis ? Colors.black : _getGoldAccent(),
                                                       ),
                                                     ),
                                                   ],
@@ -2103,7 +2184,7 @@ class _TafsirReaderScreenState extends State<TafsirReaderScreen>
                                             icon: Icon(
                                               isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
                                               size: 20,
-                                              color: isBookmarked ? const Color(0xFFD4AF37) : Colors.grey,
+                                              color: isBookmarked ? _getGoldAccent() : Colors.grey,
                                             ),
                                             onPressed: () => _toggleBookmark(_currentSurah, aNum),
                                           ),
@@ -2254,8 +2335,61 @@ class _TafsirReaderScreenState extends State<TafsirReaderScreen>
                           );
                         },
                       ),
-          ),
-        ],
+                    ),
+                  ),
+                ],
+              ),
+
+              // ── Floating Restore Pill when Top Bars are Hidden ──
+            if (!_showTopBars)
+              Positioned(
+                top: 6,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() => _showTopBars = true);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: cardBg.withValues(alpha: 0.94),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: const Color(0xFF1B8A6B).withValues(alpha: 0.40),
+                          width: 1,
+                        ),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 8,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: Color(0xFF1B8A6B)),
+                          const SizedBox(width: 4),
+                          Text(
+                            isArabic ? 'سورة $surahAr • $tafsirShortName' : 'Surah $surahEn • $tafsirShortName',
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: isArabic ? 'Amiri' : null,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

@@ -239,62 +239,191 @@ class _HadithCollectionsScreenState extends State<HadithCollectionsScreen> {
 
   Widget _buildGrandBanner(bool isDark) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      height: 152,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isDark
-              ? [const Color(0xFF0F382A), const Color(0xFF1B5E46)]
-              : [const Color(0xFF104A3A), const Color(0xFF1B8A6B)],
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: const Color(0xFFD4AF37).withValues(alpha: 0.65),
+          width: 1.2,
         ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: const Color(0xFF1B8A6B).withValues(alpha: 0.25),
+            color: Colors.black45,
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+          BoxShadow(
+            color: Color(0xFF1B8A6B),
             blurRadius: 12,
-            offset: const Offset(0, 4),
+            spreadRadius: -2,
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(17),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // 1. Authentic Masterpiece Hadith Archival Artwork
+            Image.asset(
+              'assets/images/faculty_companions.webp',
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF0F382A), Color(0xFF1B5E46)],
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                    ),
+                  ),
+                );
+              },
             ),
-            child: const Icon(Icons.menu_book_rounded, color: Color(0xFFF3D27C), size: 32),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'مكتبة السنة النبوية الشريفة',
-                  style: TextStyle(
-                    fontFamily: 'Amiri',
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+
+            // 2. Rich Multi-Stop Scrim Gradient
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.40),
+                    Colors.black.withValues(alpha: 0.15),
+                    Colors.black.withValues(alpha: 0.68),
+                    Colors.black.withValues(alpha: 0.95),
+                  ],
+                  stops: const [0.0, 0.35, 0.68, 1.0],
+                ),
+              ),
+            ),
+
+            // 3. Inner Gilded Rim
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(17),
+                  border: Border.all(
+                    color: const Color(0xFFFFD700).withValues(alpha: 0.15),
+                    width: 0.8,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '10 دواوين معتمدة • 40,937 حديثاً شريفاً بالسند والترتيب الأصلي بدون إنترنت',
-                  style: TextStyle(
-                    fontFamily: 'Amiri',
-                    fontSize: 12.5,
-                    color: Colors.white.withValues(alpha: 0.85),
-                    height: 1.4,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+
+            // 4. Content Structure
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Top Row: Gilded Medallion + Statistics Badge
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFF0A1411).withValues(alpha: 0.82),
+                          border: Border.all(
+                            color: const Color(0xFFD4AF37).withValues(alpha: 0.80),
+                            width: 1.2,
+                          ),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black54,
+                              blurRadius: 6,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.menu_book_rounded,
+                          color: Color(0xFFFFD54F),
+                          size: 18,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF091210).withValues(alpha: 0.85),
+                          borderRadius: BorderRadius.circular(9),
+                          border: Border.all(
+                            color: const Color(0xFFD4AF37).withValues(alpha: 0.55),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.stars_rounded, color: Color(0xFFFFD54F), size: 12),
+                            SizedBox(width: 5),
+                            Text(
+                              '10 دواوين معتمدة • 40,937 حديثاً شريفاً',
+                              style: TextStyle(
+                                color: Color(0xFFFFF6D6),
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Amiri',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Bottom Plate: Title & Subtitle
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7.5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF07100D).withValues(alpha: 0.75),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'مكتبة السنة النبوية والكتب الستة المعتمدة',
+                          style: TextStyle(
+                            color: Color(0xFFFFFBF0),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15.5,
+                            fontFamily: 'Amiri',
+                            height: 1.2,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'موسوعة السنن والمصنفات الكبرى مفهرسة بالسند والأبواب الأصلية بدون إنترنت',
+                          style: TextStyle(
+                            color: Color(0xFFDFD5C4),
+                            fontSize: 10.5,
+                            fontFamily: 'Amiri',
+                            height: 1.2,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
