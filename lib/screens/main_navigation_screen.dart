@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
+import '../language_notifier.dart';
 import '../theme_notifier.dart';
 import 'muslim_dashboard_tab.dart';
 import 'minbar_tab.dart';
@@ -165,13 +166,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<QuranTheme>(
-      valueListenable: AppTheme.notifier,
-      builder: (context, theme, _) {
-        final isDark = theme == QuranTheme.dark;
-        final isCream = theme == QuranTheme.cream;
-        final l10n = AppLocalizations.of(context);
-        final bool isRtl = Directionality.of(context) == TextDirection.rtl;
+    return ValueListenableBuilder<Locale>(
+      valueListenable: AppLanguage.notifier,
+      builder: (context, currentLocale, _) {
+        final bool isRtl = currentLocale.languageCode == 'ar' ||
+            Directionality.of(context) == TextDirection.rtl;
+
+        return ValueListenableBuilder<QuranTheme>(
+          valueListenable: AppTheme.notifier,
+          builder: (context, theme, _) {
+            final isDark = theme == QuranTheme.dark;
+            final isCream = theme == QuranTheme.cream;
+            final l10n = AppLocalizations.of(context);
 
         final Color bgColor = AppTheme.getScreenBgColor(theme);
 
@@ -299,8 +305,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
             ),
           ),
         );
-      },
-    );
+            },
+          );
+        },
+      );
   }
 }
 
@@ -466,11 +474,11 @@ class _AppBottomNavBar extends StatelessWidget {
               ),
             ),
           ),
-          );
-        },
-      ),
-    );
-  }
+        );
+      },
+    ),
+  );
+}
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

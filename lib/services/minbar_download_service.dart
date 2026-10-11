@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import '../models/minbar_models.dart';
 import '../core/database/downloads_database.dart';
+import 'minbar_cdn_registry.dart';
 import 'dart:developer' as dev;
 
 class MinbarDownloadService {
@@ -13,7 +14,17 @@ class MinbarDownloadService {
   static final MinbarDownloadService instance = MinbarDownloadService._internal();
   factory MinbarDownloadService() => instance;
 
-  final Dio _dio = Dio();
+  final Dio _dio = Dio(BaseOptions(
+    connectTimeout: const Duration(seconds: 15),
+    receiveTimeout: const Duration(seconds: 60),
+    headers: {
+      'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    },
+    followRedirects: true,
+    maxRedirects: 5,
+  ));
+  Dio get dio => _dio;
   final DownloadsDatabase _db = DownloadsDatabase.instance;
   
   // Real-time progress map: { itemId: progressPercentage (0.0 to 1.0) }
@@ -75,14 +86,23 @@ class MinbarDownloadService {
       // Initialize progress at 0.01 so UI shows downloading state immediately
       _updateProgress(item.id, 0.01);
 
-      final candidateUrls = <String>[item.url];
-      if (item.url.contains('.mp3quran.net')) {
-        final qurangoMirror = item.url.replaceFirst(
-            RegExp(r'https?://[^/]+\.mp3quran\.net'),
-            'https://backup.qurango.net');
-        if (!candidateUrls.contains(qurangoMirror)) {
-          candidateUrls.add(qurangoMirror);
+      final candidateUrls = <String>[];
+      if (categoryId == 'quran') {
+        final parts = item.id.split('_');
+        if (parts.length >= 2) {
+          final authorIdInt = int.tryParse(parts[0]);
+          final surahNum = parts[1];
+          if (authorIdInt != null) {
+            final candidates = MinbarCdnRegistry.getCandidateUrls(
+                authorIdInt, surahNum, item.url);
+            for (final u in candidates) {
+              if (!candidateUrls.contains(u)) candidateUrls.add(u);
+            }
+          }
         }
+      }
+      if (!candidateUrls.contains(item.url)) {
+        candidateUrls.add(item.url);
       }
 
       bool downloaded = false;

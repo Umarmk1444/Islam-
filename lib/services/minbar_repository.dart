@@ -1,6 +1,7 @@
 import 'dart:developer' as dev;
 import '../core/database/database_helper.dart';
 import '../models/minbar_models.dart';
+import 'minbar_cdn_registry.dart';
 
 class MinbarRepository {
   final DatabaseHelper _dbHelper;
@@ -164,12 +165,19 @@ class MinbarRepository {
           "SELECT abc AS title, abc2 AS surah_num FROM all_index WHERE title = 'السور' ORDER BY id ASC",
         );
 
-        // Step C: Build direct Quran audio URLs dynamically using the mp3quran.net CDN
+        // Step C: Build direct high-speed Quran audio URLs using modern CDN registry with legacy fallback
         return surahRows.map((row) {
           final rawSurahNum = (row['surah_num'] as String).trim();
           final surahNum = rawSurahNum.padLeft(3, '0');
           final title = row['title'] as String;
-          final url = '$cleanServer/$cleanEngName/$surahNum.mp3';
+
+          final cdnUrl =
+              MinbarCdnRegistry.getPrimarySurahUrl(parsedAuthorId, surahNum);
+          final fallbackUrl = (cleanServer.isNotEmpty && cleanEngName.isNotEmpty)
+              ? '$cleanServer/$cleanEngName/$surahNum.mp3'
+              : '';
+
+          final url = (cdnUrl != null && cdnUrl.isNotEmpty) ? cdnUrl : fallbackUrl;
 
           return MinbarAudioItem(
             id: '${authorId}_$surahNum',

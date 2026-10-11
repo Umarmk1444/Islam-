@@ -33,10 +33,8 @@ class MuslimDashboardTab extends StatefulWidget {
   State<MuslimDashboardTab> createState() => _MuslimDashboardTabState();
 }
 
-bool _globalHasAnimatedDashboard = false;
-
 class _MuslimDashboardTabState extends State<MuslimDashboardTab>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   static const _localizedTitle = {
     'en': 'Quran Zone',
     'ar': 'Quran Zone',
@@ -60,24 +58,21 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
 
   late final AnimationController _pulseCtrl;
   late final Animation<double> _pulseAnim;
+  final GlobalKey<_ResumeReadingCardState> _resumeKey =
+      GlobalKey<_ResumeReadingCardState>();
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
     _pulseCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000),
+      duration: const Duration(milliseconds: 800),
     );
-    _pulseAnim = CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut);
-
-    if (!_globalHasAnimatedDashboard) {
-      _pulseCtrl.forward();
-      Future.delayed(const Duration(milliseconds: 2000), () {
-        _globalHasAnimatedDashboard = true;
-      });
-    } else {
-      _pulseCtrl.value = 1.0;
-    }
+    _pulseAnim = CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeOutCubic);
+    _pulseCtrl.forward();
   }
 
   @override
@@ -88,6 +83,7 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
     final title = _localizedTitle[locale] ?? _localizedTitle['ar']!;
     final secTitle = _sectionTitle[locale] ?? _sectionTitle['ar']!;
@@ -116,23 +112,34 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
             child: ValueListenableBuilder<bool>(
               valueListenable: kAdVisibleNotifier,
               builder: (context, isAdVisible, _) {
-                // Clean dynamic layout spacing
-                final double space8 = isAdVisible ? 5 : 7;
-                final double space10 = isAdVisible ? 5 : 7;
-                final double space6 = isAdVisible ? 4 : 5;
-                final double space12 = isAdVisible ? 8 : 10;
-                final double gridRatio = isAdVisible
-                    ? 1.35
-                    : 1.28; // Optimized ratio to fit tools grid
+                // Rock-solid layout spacing: immune to ad loading reflows
+                const double space8 = 8.0;
+                const double space10 = 10.0;
+                const double space6 = 6.0;
+                const double space12 = 10.0;
+                const double gridRatio = 1.30;
                 final double paddingBottom =
                     MediaQuery.paddingOf(context).bottom +
-                        90; // Space for elevated One UI floating bar
+                        88; // Snug clearance for floating navigation scrim without excessive scroll
 
-                return SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
+                return RefreshIndicator(
+                  color: isDark ? const Color(0xFFFFD700) : AppColors.emeraldDeep,
+                  backgroundColor: isDark ? const Color(0xFF111B26) : Colors.white,
+                  onRefresh: () async {
+                    HapticFeedback.lightImpact();
+                    await Future.wait([
+                      PrayerController().syncLocation(),
+                      _resumeKey.currentState?.reloadLastReadPosition() ??
+                          Future.value(),
+                    ]);
+                  },
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(
+                      parent: BouncingScrollPhysics(),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                       // ── Header with Brand Icon & Tagline ──────────────────
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 6, 16, 4),
@@ -202,14 +209,17 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: _MiqatCard(isAdVisible: isAdVisible),
                       ),
-                      SizedBox(height: space8),
+                      const SizedBox(height: space8),
 
                       // ── 2. Quran Gateway Card ───────────────────────────────
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: _ResumeReadingCard(isAdVisible: isAdVisible),
+                        child: _ResumeReadingCard(
+                          key: _resumeKey,
+                          isAdVisible: isAdVisible,
+                        ),
                       ),
-                      SizedBox(height: space10),
+                      const SizedBox(height: space10),
 
                       // ── Section Title ───────────────────────────────────────
                       Padding(
@@ -223,14 +233,14 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
                           ),
                         ),
                       ),
-                      SizedBox(height: space6),
+                      const SizedBox(height: space6),
 
                       // ── 3. Tools Grid — Fills list scroll view ─────────────
                       GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         padding: EdgeInsets.fromLTRB(12, 0, 12, paddingBottom),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           mainAxisSpacing: space12,
                           crossAxisSpacing: space12,
@@ -249,14 +259,15 @@ class _MuslimDashboardTabState extends State<MuslimDashboardTab>
                       ),
                     ],
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -302,11 +313,60 @@ class _MiqatCard extends StatelessWidget {
     },
   };
 
+  static const _missingLocTitle = {
+    'en': 'Prayer Times',
+    'ar': 'مواقيت الصلاة',
+    'am': 'የሶላት ወቅቶች',
+    'om': 'Yeroo Salaataa',
+  };
+
+  static const _missingLocSubtitle = {
+    'en': 'Please set your location to view accurate prayer times',
+    'ar': 'يرجى تحديد الموقع لعرض أوقات الصلاة بدقة',
+    'am': 'ትክክለኛ የሶላት ወቅቶችን ለማየት እባክዎ አካባቢዎን ይወስኑ',
+    'om': 'Yeroo salaataa sirrii argachuuf bakka keessan filadhaa',
+  };
+
+  static const _autoGpsLabel = {
+    'en': 'Auto-detect (GPS)',
+    'ar': 'تحديد تلقائي (GPS)',
+    'am': 'ራስ-ሰር ፈልግ (GPS)',
+    'om': 'Ofiin Barbaadi (GPS)',
+  };
+
+  static const _manualCityLabel = {
+    'en': 'Select City (Offline)',
+    'ar': 'اختيار المدينة (أوفلاين)',
+    'am': 'ከተማ ምረጥ (ከመስመር ውጭ)',
+    'om': 'Magaalaa Filadhu (Toora Ala)',
+  };
+
+  static const _nextPrayerLabels = {
+    'en': 'Next Prayer',
+    'ar': 'الصلاة القادمة',
+    'am': 'የሚቀጥለው ሶላት',
+    'om': 'Salaata Itti Aanu',
+  };
+
   static const _qiblaLabels = {
     'en': 'Qibla',
     'ar': 'القبلة',
     'am': 'ቂብላ',
     'om': 'Qiblaa',
+  };
+
+  static const _errorCalcTitle = {
+    'en': 'Unable to calculate prayer times',
+    'ar': 'تعذر حساب أوقات الصلاة',
+    'am': 'የሶላት ወቅቶችን ማስላት አልተቻለም',
+    'om': "Yeroo salaataa shallaguun hin danda'amne",
+  };
+
+  static const _retryLabel = {
+    'en': 'Retry',
+    'ar': 'إعادة المحاولة',
+    'am': 'እንደገና ሞክር',
+    'om': "Irra deebi'ii yaali",
   };
 
   @override
@@ -320,15 +380,13 @@ class _MiqatCard extends StatelessWidget {
         final model = ctrl.model;
         if (ctrl.isLocationMissing && !ctrl.isLoading) {
           final String title =
-              locale == 'ar' ? 'مواقيت الصلاة' : 'Prayer Times';
-          final String subtitle = locale == 'ar'
-              ? 'يرجى تحديد الموقع لعرض أوقات الصلاة بدقة'
-              : 'Please set your location to view accurate prayer times';
+              _missingLocTitle[locale] ?? _missingLocTitle['en']!;
+          final String subtitle =
+              _missingLocSubtitle[locale] ?? _missingLocSubtitle['en']!;
           final String autoGps =
-              locale == 'ar' ? 'تحديد تلقائي (GPS)' : 'Auto-detect (GPS)';
-          final String manualCity = locale == 'ar'
-              ? 'اختيار المدينة (أوفلاين)'
-              : 'Select City (Offline)';
+              _autoGpsLabel[locale] ?? _autoGpsLabel['en']!;
+          final String manualCity =
+              _manualCityLabel[locale] ?? _manualCityLabel['en']!;
 
           return Container(
             padding: const EdgeInsets.all(16),
@@ -445,7 +503,7 @@ class _MiqatCard extends StatelessWidget {
           );
         }
 
-        if (model == null || ctrl.isLoading) {
+        if (ctrl.isLoading) {
           return Container(
             padding: const EdgeInsets.symmetric(vertical: 40),
             decoration: BoxDecoration(
@@ -460,6 +518,75 @@ class _MiqatCard extends StatelessWidget {
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
+            ),
+          );
+        }
+
+        if (model == null) {
+          final errorTitle = _errorCalcTitle[locale] ?? _errorCalcTitle['en']!;
+          final retryText = _retryLabel[locale] ?? _retryLabel['en']!;
+
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF0D4F3C), Color(0xFF1A7A5E)],
+              ),
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF0D4F3C).withValues(alpha: 0.45),
+                  blurRadius: 14,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.refresh_rounded,
+                      color: Colors.white, size: 24),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    errorTitle,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF0D4F3C),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () => ctrl.syncLocation(),
+                  icon: const Icon(Icons.sync_rounded, size: 16),
+                  label: Text(
+                    retryText,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
           );
         }
@@ -509,7 +636,7 @@ class _MiqatCard extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
+                    alignment: AlignmentDirectional.centerStart,
                     child: Row(
                       children: [
                         Text(hijriStr,
@@ -523,15 +650,17 @@ class _MiqatCard extends StatelessWidget {
                         Text(gregStr,
                             style: const TextStyle(
                                 color: Colors.white60, fontSize: 11)),
-                        const SizedBox(width: 16),
-                        const Icon(Icons.location_on_outlined,
-                            size: 12, color: Colors.white54),
-                        const SizedBox(width: 4),
-                        Text(
-                          model.locationLabel,
-                          style: const TextStyle(
-                              color: Colors.white54, fontSize: 10),
-                        ),
+                        if (model.locationLabel.trim().isNotEmpty) ...[
+                          const SizedBox(width: 16),
+                          const Icon(Icons.location_on_outlined,
+                              size: 12, color: Colors.white54),
+                          const SizedBox(width: 4),
+                          Text(
+                            model.locationLabel,
+                            style: const TextStyle(
+                                color: Colors.white54, fontSize: 10),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -556,9 +685,8 @@ class _MiqatCard extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    locale == 'ar'
-                                        ? 'الصلاة القادمة'
-                                        : 'Next Prayer',
+                                    _nextPrayerLabels[locale] ??
+                                        _nextPrayerLabels['en']!,
                                     style: const TextStyle(
                                         color: Colors.white60, fontSize: 12),
                                   ),
@@ -592,7 +720,7 @@ class _MiqatCard extends StatelessWidget {
                                 valueListenable: ctrl.countdownNotifier,
                                 builder: (context, countdown, _) {
                                   return Text(
-                                    '-$countdown',
+                                    '\u200E-$countdown',
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 22,
@@ -658,7 +786,7 @@ class _MiqatCard extends StatelessWidget {
 
 class _ResumeReadingCard extends StatefulWidget {
   final bool isAdVisible;
-  const _ResumeReadingCard({required this.isAdVisible});
+  const _ResumeReadingCard({super.key, required this.isAdVisible});
 
   @override
   State<_ResumeReadingCard> createState() => _ResumeReadingCardState();
@@ -667,6 +795,7 @@ class _ResumeReadingCard extends StatefulWidget {
 class _ResumeReadingCardState extends State<_ResumeReadingCard>
     with SingleTickerProviderStateMixin {
   int _lastPage = 1;
+  int _ayahNum = 1;
   double _progressPct = 0.0016;
   String _ayahNameAr = 'سورة الفاتحة';
   String _ayahNameEn = 'Al-Fatihah 1:1';
@@ -674,15 +803,18 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
   late final AnimationController _pulseCtrl;
   late final Animation<double> _pulseAnim;
 
+  Future<void> reloadLastReadPosition() => _loadLastReadPosition();
+
   @override
   void initState() {
     super.initState();
     _loadLastReadPosition();
     _pulseCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2400),
-    )..repeat(reverse: true);
-    _pulseAnim = CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut);
+      duration: const Duration(milliseconds: 1400),
+    );
+    _pulseAnim = CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeOutCubic);
+    _pulseCtrl.forward();
   }
 
   @override
@@ -698,6 +830,7 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
 
       String foundAr = 'سورة الفاتحة';
       String foundEn = 'Al-Fatihah 1:1';
+      int foundAyah = 1;
 
       final db = await DatabaseHelper.instance.database;
       final List<Map<String, dynamic>> results = await db.rawQuery(
@@ -714,16 +847,19 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
             DatabaseHelper.surahTransliterations[surahNum - 1];
 
         foundAr = 'سورة $surahArabic';
-        foundEn = '$translit 1:$ayahNum';
+        foundEn = '$translit $surahNum:$ayahNum';
+        foundAyah = ayahNum;
       }
 
       if (mounted) {
         setState(() {
           _lastPage = lastPage;
+          _ayahNum = foundAyah;
           _progressPct = (lastPage / 604.0).clamp(0.0016, 1.0);
           _ayahNameAr = foundAr;
           _ayahNameEn = foundEn;
         });
+        _pulseCtrl.forward(from: 0.0);
       }
     } catch (e, stack) {
       debugPrint('Error loading last read position from DB: $e\n$stack');
@@ -851,10 +987,9 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                       ),
                     ),
                     // --- Soft Glowing Corner Radiance ---
-                    Positioned(
+                    PositionedDirectional(
                       top: -15,
-                      right: locale == 'ar' ? null : -15,
-                      left: locale == 'ar' ? -15 : null,
+                      end: -15,
                       child: Container(
                         width: 100,
                         height: 100,
@@ -918,7 +1053,7 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                               ),
                               const SizedBox(width: 8),
 
-                              // Surah Arabic Name & English Ayah Transliteration in Compact Stack
+                              // Surah Arabic Name & Subtitle in Compact Stack
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -938,7 +1073,9 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
                                     ),
                                     const SizedBox(height: 1),
                                     Text(
-                                      _ayahNameEn,
+                                      locale == 'ar'
+                                          ? 'الآية $_ayahNum · صفحة $_lastPage'
+                                          : _ayahNameEn,
                                       style: TextStyle(
                                         color: ayahColor,
                                         fontSize: 10,
@@ -978,9 +1115,7 @@ class _ResumeReadingCardState extends State<_ResumeReadingCard>
 
                           // ── ROW 2: Jewel-cut Glowing Progress Bar (3.5px) ─────
                           Stack(
-                            alignment: locale == 'ar'
-                                ? Alignment.centerRight
-                                : Alignment.centerLeft,
+                            alignment: AlignmentDirectional.centerStart,
                             children: [
                               Container(
                                 height: 3.5,
@@ -1186,7 +1321,7 @@ class _IslamicPatternPainter extends CustomPainter {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// 3. ISLAMIC TOOLS GRID — 8 tools, fills remaining screen, no scroll
+// 3. ISLAMIC TOOLS GRID — 6 tools (3x2 grid)
 // ═════════════════════════════════════════════════════════════════════════════
 
 class _ToolItem {
@@ -1210,15 +1345,15 @@ const _tools = <_ToolItem>[
     svgIconName: 'prayer_times',
     color: Color(0xFF00897B),
     labels: {
-      'en': 'Moazin',
+      'en': 'Prayer Times',
       'ar': 'مواقيت الصلاة',
-      'am': 'ሙአዚን',
+      'am': 'የሶላት ወቅቶች',
       'om': 'Yeroo Salaataa',
     },
   ),
   _ToolItem(
     key: 'azkar',
-    svgIconName: 'quran',
+    svgIconName: 'azkar',
     color: Color(0xFFE65100),
     labels: {
       'en': 'Azkar',
@@ -1264,7 +1399,6 @@ const _tools = <_ToolItem>[
       'om': 'Masjiida Dhihoo',
     },
   ),
-  // Row 5
   _ToolItem(
     key: 'calendar',
     svgIconName: 'hijri_calendar',
@@ -1298,12 +1432,6 @@ class _ToolGridCell extends StatefulWidget {
 }
 
 class _ToolGridCellState extends State<_ToolGridCell> {
-  double _phased(double raw) {
-    final shifted = (raw + widget.phaseOffset) % 1.0;
-    final tri = shifted < 0.5 ? shifted * 2.0 : (1.0 - shifted) * 2.0;
-    return Curves.easeInOut.transform(tri);
-  }
-
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
@@ -1368,180 +1496,156 @@ class _ToolGridCellState extends State<_ToolGridCell> {
           },
           child: AnimatedBuilder(
             animation: widget.pulseAnim,
-            builder: (_, child) {
-              final t = _globalHasAnimatedDashboard
-                  ? 0.0
-                  : _phased(widget.pulseAnim.value);
-
-              // Scale: 1.00 -> 1.025
-              final scale = 1.0 + 0.025 * t;
-
-              // Glow breathing
-              final glowAlpha = isDark
-                  ? (0.10 + 0.30 * t)
-                  : (isCream ? (0.06 + 0.18 * t) : (0.05 + 0.15 * t));
-              final glowBlur = 8.0 + 14.0 * t;
-              final glowSpread = 0.5 + 1.5 * t;
-
-              // Border breathing
+            builder: (context, _) {
+              final t = widget.pulseAnim.value;
               final borderAlpha = isDark
-                  ? (0.22 + 0.35 * t)
-                  : (isCream ? (0.20 + 0.25 * t) : (0.15 + 0.20 * t));
-              final borderWidth = 1.2 + 0.5 * t;
-
-              final currentAccent = Color.lerp(accent, bright, t * 0.5)!;
+                  ? (0.22 + 0.15 * t)
+                  : (isCream ? (0.20 + 0.10 * t) : (0.15 + 0.10 * t));
+              final currentAccent = Color.lerp(accent, bright, t * 0.3)!;
               final deep = isDark
                   ? Color.lerp(accent, const Color(0xFF0C0C14), 0.72)!
                   : (isCream
                       ? Color.lerp(accent, const Color(0xFFFAF4E6), 0.85)!
                       : Color.lerp(accent, Colors.white, 0.90)!);
 
-              // Fill gradient matching card style
               final Color bg1 = isDark
-                  ? currentAccent.withValues(alpha: 0.16 + 0.18 * t)
+                  ? currentAccent.withValues(alpha: 0.16 + 0.10 * t)
                   : (isCream
                       ? Colors.white.withValues(alpha: 0.85)
                       : Colors.white);
               final Color bg2 = isDark
-                  ? deep.withValues(alpha: 0.05 + 0.08 * t)
+                  ? deep.withValues(alpha: 0.05 + 0.05 * t)
                   : (isCream
                       ? const Color(0xFFF7EED9).withValues(alpha: 0.75)
                       : const Color(0xFFF4FAF6));
 
-              return Transform.scale(
-                scale: scale,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [bg1, bg2],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isDark
-                          ? currentAccent.withValues(alpha: borderAlpha)
-                          : (isCream
-                              ? const Color(0xFFD4AF37)
-                                  .withValues(alpha: borderAlpha)
-                              : currentAccent.withValues(alpha: borderAlpha)),
-                      width: borderWidth,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: isDark
-                            ? Colors.black.withValues(alpha: 0.35)
-                            : Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                      BoxShadow(
-                        color: currentAccent.withValues(alpha: glowAlpha),
-                        blurRadius: glowBlur,
-                        spreadRadius: glowSpread,
-                      ),
-                    ],
+              return Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [bg1, bg2],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Stack(
-                      children: [
-                        // Subtle Accent glow orb
-                        Positioned(
-                          top: -20,
-                          left: -20,
-                          child: Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: RadialGradient(
-                                colors: [
-                                  currentAccent.withValues(
-                                      alpha: isDark
-                                          ? 0.30 * t
-                                          : (isCream ? 0.15 * t : 0.12 * t)),
-                                  currentAccent.withValues(alpha: 0.0),
-                                ],
-                              ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isDark
+                        ? currentAccent.withValues(alpha: borderAlpha)
+                        : (isCream
+                            ? const Color(0xFFD4AF37)
+                                .withValues(alpha: borderAlpha)
+                            : currentAccent.withValues(alpha: borderAlpha)),
+                    width: 1.2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isDark
+                          ? Colors.black.withValues(alpha: 0.35)
+                          : Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Stack(
+                    children: [
+                      // Subtle Accent glow orb in directional start corner
+                      PositionedDirectional(
+                        top: -20,
+                        start: -20,
+                        child: Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: RadialGradient(
+                              colors: [
+                                currentAccent.withValues(
+                                    alpha: isDark
+                                        ? 0.20 * t
+                                        : (isCream ? 0.12 * t : 0.10 * t)),
+                                currentAccent.withValues(alpha: 0.0),
+                              ],
                             ),
                           ),
                         ),
-                        // Main cell contents
-                        Positioned.fill(child: child!),
-                      ],
-                    ),
+                      ),
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 6),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      currentAccent,
+                                      isDark
+                                          ? Color.lerp(
+                                              accent,
+                                              const Color(0xFF0C0C14),
+                                              0.72)!
+                                          : (isCream
+                                              ? Color.lerp(
+                                                  accent,
+                                                  const Color(0xFFE8DAC0),
+                                                  0.5)!
+                                              : Color.lerp(
+                                                  accent,
+                                                  const Color(0xFF093322),
+                                                  0.4)!),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color:
+                                          currentAccent.withValues(alpha: 0.25),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: SvgPicture.asset(
+                                    'assets/icons/${isDark ? 'dark' : 'light'}/${widget.item.svgIconName}.svg',
+                                    width: 24,
+                                    height: 24,
+                                    colorFilter: const ColorFilter.mode(
+                                        Colors.white, BlendMode.srcIn),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                label,
+                                style: TextStyle(
+                                  color: titleColor,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  height: 1.15,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );
             },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AnimatedBuilder(
-                    animation: widget.pulseAnim,
-                    builder: (_, __) {
-                      final t = _phased(widget.pulseAnim.value);
-                      final currentAccent =
-                          Color.lerp(accent, bright, t * 0.5)!;
-                      final deep = isDark
-                          ? Color.lerp(accent, const Color(0xFF0C0C14), 0.72)!
-                          : (isCream
-                              ? Color.lerp(
-                                  accent, const Color(0xFFE8DAC0), 0.5)!
-                              : Color.lerp(
-                                  accent, const Color(0xFF093322), 0.4)!);
-
-                      return Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [currentAccent, deep],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: currentAccent.withValues(
-                                  alpha: 0.30 + 0.25 * t),
-                              blurRadius: 8 + 10 * t,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: SvgPicture.asset(
-                            'assets/icons/${isDark ? 'dark' : 'light'}/${widget.item.svgIconName}.svg',
-                            width: 24,
-                            height: 24,
-                            colorFilter: const ColorFilter.mode(
-                                Colors.white, BlendMode.srcIn),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      color: titleColor,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      height: 1.15,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
           ),
         );
       },

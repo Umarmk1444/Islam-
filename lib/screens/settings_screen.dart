@@ -306,6 +306,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     _baseTheme = AppTheme.notifier.value;
     _targetTheme = AppTheme.notifier.value;
     AppTheme.notifier.addListener(_onExternalThemeChanged);
+    AppLanguage.notifier.addListener(_onExternalLanguageChanged);
     _baseScrollCtrl = ScrollController();
 
     _revealCtrl = AnimationController(
@@ -339,9 +340,33 @@ class _SettingsScreenState extends State<SettingsScreen>
     }
   }
 
+  void _onExternalLanguageChanged() {
+    if (mounted) {
+      setState(() {
+        _selectedLanguage =
+            _getLangNameFromLocale(AppLanguage.notifier.value);
+      });
+    }
+  }
+
+  String _getLangNameFromLocale(Locale locale) {
+    switch (locale.languageCode) {
+      case 'ar':
+        return 'Arabic';
+      case 'am':
+        return 'Amharic';
+      case 'om':
+        return 'Oromo';
+      case 'en':
+      default:
+        return 'English';
+    }
+  }
+
   @override
   void dispose() {
     AppTheme.notifier.removeListener(_onExternalThemeChanged);
+    AppLanguage.notifier.removeListener(_onExternalLanguageChanged);
     _headerCtrl.dispose();
     _revealCtrl.dispose();
     _baseScrollCtrl.dispose();
@@ -887,12 +912,16 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  // ── Reusable Settings View Builder for Layering ────────────────────────────
-
   Widget _buildSettingsView(QuranTheme theme, ScrollController scrollCtrl) {
     final l10n = AppLocalizations.of(context)!;
-    final isArabic = Localizations.maybeLocaleOf(context)?.languageCode == 'ar';
-    final lang = Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar';
+    final bool isArabic =
+        AppLanguage.notifier.value.languageCode == 'ar' ||
+            _selectedLanguage == 'Arabic' ||
+            Localizations.maybeLocaleOf(context)?.languageCode == 'ar' ||
+            Directionality.of(context) == TextDirection.rtl;
+    final lang = isArabic
+        ? 'ar'
+        : (Localizations.maybeLocaleOf(context)?.languageCode ?? 'ar');
 
     final Color primary = AppTheme.getPrimaryColor(theme);
     final Color textMain = AppTheme.getMainTextColor(theme);
@@ -1123,8 +1152,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                       },
                       isDark: isDark,
                       textColor: textMain,
+                      isRtl: isArabic,
                     ),
-                    _divider(isDark, borderColor),
+                    _divider(isDark, borderColor, indent: 52),
                     _CompactSwitchTile(
                       icon: Icons.notifications_active_rounded,
                       iconColor: const Color(0xFFF59E0B),
@@ -1136,6 +1166,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                       textColor: textMain,
                       intervalBadge: _notificationsEnabled
                           ? GestureDetector(
+                              behavior: HitTestBehavior.opaque,
                               onTap: () => _showIntervalSheet(
                                   context, primary, textMain, cardBg),
                               child: Container(
@@ -1169,7 +1200,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                             )
                           : null,
                     ),
-                    _divider(isDark, borderColor),
+                    _divider(isDark, borderColor, indent: 52),
                     _CompactTile(
                       icon: Icons.download_done_rounded,
                       iconColor: const Color(0xFF0D9488),
@@ -1183,6 +1214,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                       },
                       isDark: isDark,
                       textColor: textMain,
+                      isRtl: isArabic,
                     ),
                   ],
                 ),
@@ -1212,8 +1244,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                       isDark: isDark,
                       textColor: textMain,
                       subtextColor: textSub,
+                      isRtl: isArabic,
                     ),
-                    _divider(isDark, borderColor),
+                    _divider(isDark, borderColor, indent: 68),
                     _ModernActionTile(
                       icon: Icons.star_rate_rounded,
                       iconGradient: const [
@@ -1231,8 +1264,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                       isDark: isDark,
                       textColor: textMain,
                       subtextColor: textSub,
+                      isRtl: isArabic,
                     ),
-                    _divider(isDark, borderColor),
+                    _divider(isDark, borderColor, indent: 68),
                     _ModernActionTile(
                       icon: Icons.share_rounded,
                       iconGradient: const [
@@ -1249,8 +1283,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                       isDark: isDark,
                       textColor: textMain,
                       subtextColor: textSub,
+                      isRtl: isArabic,
                     ),
-                    _divider(isDark, borderColor),
+                    _divider(isDark, borderColor, indent: 68),
                     _ModernActionTile(
                       icon: Icons.security_rounded,
                       iconGradient: const [
@@ -1264,8 +1299,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                       isDark: isDark,
                       textColor: textMain,
                       subtextColor: textSub,
+                      isRtl: isArabic,
                     ),
-                    _divider(isDark, borderColor),
+                    _divider(isDark, borderColor, indent: 68),
                     _ModernActionTile(
                       icon: Icons.auto_stories_rounded,
                       iconGradient: const [
@@ -1285,6 +1321,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                       isDark: isDark,
                       textColor: textMain,
                       subtextColor: textSub,
+                      isRtl: isArabic,
                     ),
                   ],
                 ),
@@ -1411,14 +1448,14 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  Widget _divider(bool isDark, Color borderColor) {
+  Widget _divider(bool isDark, Color borderColor, {double indent = 54}) {
     return Divider(
       height: 1,
       thickness: 0.8,
       color: isDark
           ? Colors.white.withValues(alpha: 0.06)
           : Colors.black.withValues(alpha: 0.05),
-      indent: 54,
+      indent: indent,
       endIndent: 14,
     );
   }
@@ -1846,6 +1883,7 @@ class _CompactTile extends StatelessWidget {
   final VoidCallback onTap;
   final bool isDark;
   final Color textColor;
+  final bool? isRtl;
 
   const _CompactTile({
     required this.icon,
@@ -1854,14 +1892,20 @@ class _CompactTile extends StatelessWidget {
     required this.onTap,
     required this.isDark,
     required this.textColor,
+    this.isRtl,
   });
 
   @override
   Widget build(BuildContext context) {
+    final bool rtl = isRtl ??
+        (AppLanguage.notifier.value.languageCode == 'ar' ||
+            Directionality.of(context) == TextDirection.rtl ||
+            Localizations.maybeLocaleOf(context)?.languageCode == 'ar');
+
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         child: Row(
           children: [
             Container(
@@ -1885,7 +1929,9 @@ class _CompactTile extends StatelessWidget {
               ),
             ),
             Icon(
-              Icons.chevron_right_rounded,
+              rtl
+                  ? Icons.chevron_left_rounded
+                  : Icons.chevron_right_rounded,
               color: isDark ? Colors.white38 : Colors.black38,
               size: 18,
             ),
@@ -1925,47 +1971,59 @@ class _CompactSwitchTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-      child: Row(
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: iconColor, size: 15.5),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                color: textColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
+    return InkWell(
+      onTap: () => onChanged(!value),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        child: Row(
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              child: Icon(icon, color: iconColor, size: 15.5),
             ),
-          ),
-          if (intervalBadge != null) ...[
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (intervalBadge != null) ...[
+              const SizedBox(width: 6),
+              intervalBadge!,
+            ],
             const SizedBox(width: 6),
-            intervalBadge!,
-          ],
-          const SizedBox(width: 6),
-          Transform.scale(
-            scale: 0.8,
-            child: Switch.adaptive(
-              value: value,
-              activeTrackColor: activeColor.withValues(alpha: 0.5),
-              activeThumbColor: activeColor,
-              onChanged: onChanged,
+            Transform.scale(
+              scale: 0.82,
+              child: Switch.adaptive(
+                value: value,
+                activeTrackColor: activeColor.withValues(alpha: 0.5),
+                activeThumbColor: activeColor,
+                inactiveTrackColor: isDark
+                    ? Colors.white.withValues(alpha: 0.12)
+                    : Colors.black.withValues(alpha: 0.08),
+                inactiveThumbColor: isDark
+                    ? Colors.white.withValues(alpha: 0.65)
+                    : Colors.black.withValues(alpha: 0.45),
+                trackOutlineColor:
+                    WidgetStateProperty.all(Colors.transparent),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                onChanged: onChanged,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -2029,6 +2087,7 @@ class _ModernActionTile extends StatelessWidget {
   final bool isDark;
   final Color textColor;
   final Color subtextColor;
+  final bool? isRtl;
 
   const _ModernActionTile({
     required this.icon,
@@ -2039,10 +2098,16 @@ class _ModernActionTile extends StatelessWidget {
     required this.isDark,
     required this.textColor,
     required this.subtextColor,
+    this.isRtl,
   });
 
   @override
   Widget build(BuildContext context) {
+    final bool rtl = isRtl ??
+        (AppLanguage.notifier.value.languageCode == 'ar' ||
+            Directionality.of(context) == TextDirection.rtl ||
+            Localizations.maybeLocaleOf(context)?.languageCode == 'ar');
+
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -2089,8 +2154,8 @@ class _ModernActionTile extends StatelessWidget {
                       subtitle!,
                       style: TextStyle(
                         color: subtextColor,
-                        fontSize: 11.5,
-                        height: 1.3,
+                        fontSize: 12,
+                        height: 1.25,
                       ),
                     ),
                   ],
@@ -2098,7 +2163,9 @@ class _ModernActionTile extends StatelessWidget {
               ),
             ),
             Icon(
-              Icons.chevron_right_rounded,
+              rtl
+                  ? Icons.chevron_left_rounded
+                  : Icons.chevron_right_rounded,
               color: isDark ? Colors.white38 : Colors.black38,
               size: 22,
             ),

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Star of Divine Remembrance -->
+  <polygon points="24,5 25.8,10.2 31,12 25.8,13.8 24,19 22.2,13.8 17,12 22.2,10.2" fill="#B8860B"/>
+  <circle cx="16" cy="7" r="1.5" fill="#B8860B"/>
+  <circle cx="32" cy="7" r="1.5" fill="#B8860B"/>
+
+  <!-- Left Cupped Supplicating Hand -->
+  <path d="M11,38 C13,41 18,42 22.5,38 L22.5,22 C22.5,20.5 20,20.5 20,22 L20,30 C19,27 17,21.5 15,22 C13,22.5 14,26 15,29 C13.5,27 11.5,26.5 10.5,28 C9.5,29.5 9.5,35 11,38 Z" fill="#16302B"/>
+
+  <!-- Right Cupped Supplicating Hand -->
+  <path d="M37,38 C35,41 30,42 25.5,38 L25.5,22 C25.5,20.5 28,20.5 28,22 L28,30 C29,27 31,21.5 33,22 C35,22.5 34,26 33,29 C34.5,27 36.5,26.5 37.5,28 C38.5,29.5 38.5,35 37,38 Z" fill="#16302B"/>
+</svg>
