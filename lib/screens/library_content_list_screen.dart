@@ -67,7 +67,10 @@ class _LibraryContentListScreenState extends State<LibraryContentListScreen> {
       final legacyFavs = await _libraryService.getFavorites();
       List<HadithItem> hadithFavs = [];
       try {
-        hadithFavs = await HadithDatabaseHelper.instance.getFavorites();
+        final isExtracted = await HadithDatabaseHelper.instance.isDatabaseExtracted();
+        if (isExtracted) {
+          hadithFavs = await HadithDatabaseHelper.instance.getFavorites();
+        }
       } catch (e) {
         debugPrint('[LibraryContentListScreen] Error loading hadith favorites: $e');
       }

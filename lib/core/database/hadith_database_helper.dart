@@ -17,6 +17,9 @@ class HadithDatabaseHelper {
   /// Notifier reflecting whether initial extraction is underway
   final ValueNotifier<bool> isExtractingNotifier = ValueNotifier<bool>(false);
 
+  /// Notifier reflecting progress fraction (0.0 to 1.0) during extraction/preparation
+  final ValueNotifier<double> extractionProgressNotifier = ValueNotifier<double>(0.0);
+
   HadithDatabaseHelper._init();
 
   Future<Database> get database async {
@@ -54,6 +57,60 @@ class HadithDatabaseHelper {
     }
   }
 
+  /// Returns total bytes occupied by hadith_library.db on device storage, or 0 if unextracted.
+  Future<int> getDatabaseSizeBytes() async {
+    try {
+      final dbPath = await _resolveDatabasePath();
+      final file = File(dbPath);
+      if (await file.exists()) {
+        return await file.length();
+      }
+      return 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  /// Deletes the local hadith database file from device storage, freeing ~178 MB instantly.
+  Future<bool> deleteDatabaseFile() async {
+    try {
+      if (_database != null && _database!.isOpen) {
+        await _database!.close();
+        _database = null;
+      }
+      _initFuture = null;
+      final dbPath = await _resolveDatabasePath();
+      final file = File(dbPath);
+      if (await file.exists()) {
+        await file.delete();
+        debugPrint('[HadithDatabaseHelper] Successfully deleted $dbPath (freed storage).');
+      }
+      final tmpFile = File('$dbPath.tmp');
+      if (await tmpFile.exists()) {
+        await tmpFile.delete();
+      }
+      extractionProgressNotifier.value = 0.0;
+      return true;
+    } catch (e) {
+      debugPrint('[HadithDatabaseHelper] deleteDatabaseFile error: $e');
+      return false;
+    }
+  }
+
+  /// Explicitly triggers extraction/preparation with progress feedback.
+  Future<void> prepareDatabase() async {
+    final dbPath = await _resolveDatabasePath();
+    final isValid = await _isDatabaseValid(dbPath);
+    if (!isValid) {
+      final existingFile = File(dbPath);
+      if (await existingFile.exists()) {
+        await existingFile.delete();
+      }
+      await _extractDatabaseFromAsset(dbPath);
+    }
+    await database;
+  }
+
   Future<void> _extractDatabaseFromAsset(String dbPath) async {
     final tempPath = '$dbPath.tmp';
     final tempFile = File(tempPath);
@@ -63,6 +120,7 @@ class HadithDatabaseHelper {
 
     debugPrint('[HadithDatabaseHelper] Extracting hadith_library.db.gz stream...');
     isExtractingNotifier.value = true;
+    extractionProgressNotifier.value = 0.0;
 
     try {
       final byteData = await rootBundle.load('assets/hadith_library.db.gz');
@@ -72,7 +130,16 @@ class HadithDatabaseHelper {
       );
 
       final sink = tempFile.openWrite();
-      await sink.addStream(Stream<List<int>>.value(compressedBytes).transform(gzip.decoder));
+      final inputStream = Stream<List<int>>.value(compressedBytes).transform(gzip.decoder);
+      int writtenBytes = 0;
+      const double estimatedUncompressedSize = 186675200.0; // ~178 MB
+
+      await for (final chunk in inputStream) {
+        sink.add(chunk);
+        writtenBytes += chunk.length;
+        extractionProgressNotifier.value = (writtenBytes / estimatedUncompressedSize).clamp(0.0, 0.98);
+      }
+
       await sink.flush();
       await sink.close();
 
@@ -88,6 +155,7 @@ class HadithDatabaseHelper {
         await finalFile.delete();
       }
       await tempFile.rename(dbPath);
+      extractionProgressNotifier.value = 1.0;
       debugPrint('[HadithDatabaseHelper] Database successfully ready at: $dbPath');
     } catch (e, st) {
       debugPrint('[HadithDatabaseHelper] Extraction failure: $e\n$st');

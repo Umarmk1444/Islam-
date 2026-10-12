@@ -17,6 +17,7 @@ import '../services/app_update_service.dart';
 import '../services/permission_health_service.dart';
 import '../features/prayer_times/presentation/screens/permissions_setup_screen.dart';
 import '../widgets/custom_banner_ad.dart';
+import '../core/database/hadith_database_helper.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SETTINGS SCREEN — Modern Luxury Islamic Redesign
@@ -743,6 +744,212 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
+  Future<void> _showStorageManagerSheet(
+    BuildContext context,
+    Color primary,
+    Color textMain,
+    Color cardBg,
+    bool isDark,
+    bool isArabic,
+  ) async {
+    final hadithSize = await HadithDatabaseHelper.instance.getDatabaseSizeBytes();
+    final hadithMb = (hadithSize / (1024 * 1024)).toStringAsFixed(1);
+    final isHadithExtracted = hadithSize > 50 * 1024 * 1024;
+
+    if (!context.mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: cardBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setSheetState) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(Icons.storage_rounded, color: primary, size: 22),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        isArabic ? 'إدارة المساحة والتخزين' : 'Storage Management',
+                        style: TextStyle(
+                          fontFamily: 'Amiri',
+                          color: textMain,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF9FAFB),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              isArabic ? 'موسوعة الحديث الشريف' : 'Hadith Encyclopedia',
+                              style: TextStyle(
+                                fontFamily: 'Amiri',
+                                color: textMain,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: isHadithExtracted
+                                    ? primary.withValues(alpha: 0.15)
+                                    : Colors.grey.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                isHadithExtracted
+                                    ? '$hadithMb MB'
+                                    : (isArabic ? 'غير مهيأة (0 MB)' : 'Not unpacked (0 MB)'),
+                                style: TextStyle(
+                                  fontFamily: 'Amiri',
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: isHadithExtracted ? primary : Colors.grey,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          isArabic
+                              ? (isHadithExtracted
+                                  ? 'قاعدة بيانات الأحاديث (40,937 حديثاً) مهيأة وتعمل بالكامل بدون إنترنت.'
+                                  : 'الموسوعة موجودة في وضع الضغط ولا تستهلك أي مساحة إضافية على جهازك.')
+                              : (isHadithExtracted
+                                  ? 'Hadith database (40,937 hadiths) unpacked and available offline.'
+                                  : 'Database is kept compressed and takes zero additional storage.'),
+                          style: TextStyle(
+                            fontFamily: 'Amiri',
+                            fontSize: 12.5,
+                            color: textMain.withValues(alpha: 0.7),
+                            height: 1.4,
+                          ),
+                        ),
+                        if (isHadithExtracted) ...[
+                          const SizedBox(height: 14),
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.redAccent,
+                              side: const BorderSide(color: Colors.redAccent),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                            label: Text(
+                              isArabic ? 'مسح بيانات الحديث وتوفير المساحة' : 'Free Up Hadith Storage (~187 MB)',
+                              style: const TextStyle(fontFamily: 'Amiri', fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () async {
+                              await HadithDatabaseHelper.instance.deleteDatabaseFile();
+                              if (ctx.mounted) Navigator.pop(ctx);
+                              if (context.mounted) {
+                                _showSnack(
+                                  isArabic
+                                      ? 'تم مسح بيانات الحديث وتوفير المساحة بنجاح'
+                                      : 'Hadith database cleared and storage freed.',
+                                  Colors.redAccent,
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF9FAFB),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isArabic ? 'الصوتيات والخطب المحملة' : 'Downloaded Audio',
+                              style: TextStyle(
+                                fontFamily: 'Amiri',
+                                color: textMain,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              isArabic ? 'إدارة السور والمقاطع المحفوظة' : 'Manage offline surahs & audio',
+                              style: TextStyle(
+                                fontFamily: 'Amiri',
+                                fontSize: 12,
+                                color: textMain.withValues(alpha: 0.7),
+                              ),
+                            ),
+                          ],
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(ctx);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const MinbarDownloadsScreen()),
+                            );
+                          },
+                          child: Text(
+                            isArabic ? 'إدارة' : 'Manage',
+                            style: TextStyle(fontFamily: 'Amiri', color: primary, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> _openPrivacyPolicy(
     BuildContext context,
     Color cardBg,
@@ -1212,6 +1419,23 @@ class _SettingsScreenState extends State<SettingsScreen>
                               builder: (_) => const MinbarDownloadsScreen()),
                         );
                       },
+                      isDark: isDark,
+                      textColor: textMain,
+                      isRtl: isArabic,
+                    ),
+                    _divider(isDark, borderColor, indent: 52),
+                    _CompactTile(
+                      icon: Icons.storage_rounded,
+                      iconColor: const Color(0xFF3B82F6),
+                      title: isArabic ? 'إدارة المساحة والتخزين' : 'Storage Management',
+                      onTap: () => _showStorageManagerSheet(
+                        context,
+                        primary,
+                        textMain,
+                        cardBg,
+                        isDark,
+                        isArabic,
+                      ),
                       isDark: isDark,
                       textColor: textMain,
                       isRtl: isArabic,

@@ -50,12 +50,16 @@ class _SetupScreenState extends State<SetupScreen> {
         await tempFile.delete();
       }
 
-      // 4. Directly load raw asset bytes and stream to temp file (non-blocking, no isolate needed)
-      final byteData = await rootBundle.load('assets/muslim_house.db');
-      await tempFile.writeAsBytes(
-        byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
-        flush: true,
+      // 4. Directly load compressed asset and stream-decompress via gzip to temp file
+      final byteData = await rootBundle.load('assets/muslim_house.db.gz');
+      final compressedBytes = byteData.buffer.asUint8List(
+        byteData.offsetInBytes,
+        byteData.lengthInBytes,
       );
+      final sink = tempFile.openWrite();
+      await sink.addStream(Stream<List<int>>.value(compressedBytes).transform(gzip.decoder));
+      await sink.flush();
+      await sink.close();
 
       // 5. Verify integrity (> 50 MB) and atomically rename to final destination
       if (await tempFile.exists() && await tempFile.length() > 50 * 1024 * 1024) {

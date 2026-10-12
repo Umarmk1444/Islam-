@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import '../models/hadith_models.dart';
 import '../services/hadith_service.dart';
 import '../theme_notifier.dart';
+import '../language_notifier.dart';
 import 'hadith_chapters_screen.dart';
 import 'hadith_reader_screen.dart';
 import 'hadith_search_screen.dart';
+import 'hadith_collections_screen.dart';
 
 class HadithBooksScreen extends StatefulWidget {
   final HadithCollection collection;
@@ -26,6 +28,39 @@ class _HadithBooksScreenState extends State<HadithBooksScreen> {
   List<HadithBook> _filteredBooks = [];
   bool _isLoading = true;
   String? _errorMessage;
+
+  String _getLang(BuildContext context) {
+    return Localizations.maybeLocaleOf(context)?.languageCode ??
+        AppLanguage.notifier.value.languageCode;
+  }
+
+  String _searchTooltip(BuildContext context) {
+    final lang = _getLang(context);
+    switch (lang) {
+      case 'ar':
+        return 'البحث في هذه المجموعة';
+      case 'am':
+        return 'በዚህ ስብስብ ውስጥ ፈልግ';
+      case 'om':
+        return 'Walitti-qabaa kana keessatti barbaadi';
+      default:
+        return 'Search this collection';
+    }
+  }
+
+  String _collectionsTooltip(BuildContext context) {
+    final lang = _getLang(context);
+    switch (lang) {
+      case 'ar':
+        return 'جميع دواوين الحديث ومساحة الذاكرة';
+      case 'am':
+        return 'ሁሉም የሐዲስ ስብስቦች እና ማከማቻ';
+      case 'om':
+        return 'Walitti-qabaawwan hadiisaa fi kuusaa';
+      default:
+        return 'All Hadith Collections & Storage';
+    }
+  }
 
   @override
   void initState() {
@@ -119,7 +154,7 @@ class _HadithBooksScreenState extends State<HadithBooksScreen> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.search_rounded),
-                tooltip: 'البحث في هذه المجموعة',
+                tooltip: _searchTooltip(context),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -130,6 +165,20 @@ class _HadithBooksScreenState extends State<HadithBooksScreen> {
                       ),
                     ),
                   );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.auto_stories_rounded),
+                tooltip: _collectionsTooltip(context),
+                onPressed: () {
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  } else {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const HadithCollectionsScreen()),
+                    );
+                  }
                 },
               ),
             ],

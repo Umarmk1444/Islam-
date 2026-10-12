@@ -10,7 +10,12 @@ void main() {
 
   group('Library Classical Content Structural Preservation Tests', () {
     test('Verifies all 673 classical articles are mapped with zero orphaned categories', () async {
-      final dbFile = File('assets/muslim_house.db');
+      File dbFile = File('assets/muslim_house.db');
+      if (!dbFile.existsSync() && File('assets/muslim_house.db.gz').existsSync()) {
+        final tmp = File('${Directory.systemTemp.path}/test_mh.db');
+        tmp.writeAsBytesSync(gzip.decode(File('assets/muslim_house.db.gz').readAsBytesSync()));
+        dbFile = tmp;
+      }
       expect(dbFile.existsSync(), isTrue);
 
       final db = await databaseFactory.openDatabase(dbFile.absolute.path, options: OpenDatabaseOptions(readOnly: true));

@@ -224,11 +224,14 @@ class _LibraryScreenState extends State<LibraryScreen> {
     final favs = await _libraryService.getFavorites();
     int hadithFavCount = 0;
     try {
-      final hadithFavs = await HadithDatabaseHelper.instance.getFavorites();
-      final existingLegacyIds = favs.map((f) => f.id).toSet();
-      hadithFavCount = hadithFavs
-          .where((h) => h.legacyBukhariId == null || !existingLegacyIds.contains(h.legacyBukhariId))
-          .length;
+      final isExtracted = await HadithDatabaseHelper.instance.isDatabaseExtracted();
+      if (isExtracted) {
+        final hadithFavs = await HadithDatabaseHelper.instance.getFavorites();
+        final existingLegacyIds = favs.map((f) => f.id).toSet();
+        hadithFavCount = hadithFavs
+            .where((h) => h.legacyBukhariId == null || !existingLegacyIds.contains(h.legacyBukhariId))
+            .length;
+      }
     } catch (_) {}
     if (mounted) {
       setState(() {
@@ -517,12 +520,20 @@ class _LibraryScreenState extends State<LibraryScreen> {
     if (!isExtracted && mounted) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => const HadithCollectionsScreen()),
+        MaterialPageRoute(
+          builder: (_) => HadithCollectionsScreen(targetCollectionId: preset.id),
+        ),
       ).then((_) => _loadResumeItem());
       return;
     }
     final col = await HadithService().getCollection(preset.id);
-    if (col != null && mounted) {
+    if (mounted && col != null) {
+      // 1. Push HadithCollectionsScreen as the base layer in the back stack
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const HadithCollectionsScreen()),
+      );
+      // 2. Immediately push HadithBooksScreen on top so the book opens seamlessly
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => HadithBooksScreen(collection: col)),

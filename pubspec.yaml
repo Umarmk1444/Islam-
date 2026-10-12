@@ -62,7 +62,7 @@ flutter:
   uses-material-design: true
   generate: true
   assets:
-    - assets/muslim_house.db
+    - assets/muslim_house.db.gz
     - assets/images/
     - assets/audio/
     - assets/muezzins.json

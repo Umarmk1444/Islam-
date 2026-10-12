@@ -117,11 +117,15 @@ class DatabaseHelper {
           await tempFile.delete();
         }
 
-        final byteData = await rootBundle.load('assets/muslim_house.db');
-        await tempFile.writeAsBytes(
-          byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
-          flush: true,
+        final byteData = await rootBundle.load('assets/muslim_house.db.gz');
+        final compressedBytes = byteData.buffer.asUint8List(
+          byteData.offsetInBytes,
+          byteData.lengthInBytes,
         );
+        final sink = tempFile.openWrite();
+        await sink.addStream(Stream<List<int>>.value(compressedBytes).transform(gzip.decoder));
+        await sink.flush();
+        await sink.close();
 
         if (await tempFile.exists() && await tempFile.length() > 50 * 1024 * 1024) {
           if (await dbFile.exists()) {
