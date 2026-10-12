@@ -83,7 +83,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       'copied_to_clipboard': 'Copied handle to clipboard!',
       'telegram_btn': 'Telegram',
       'email_btn': 'Email',
-      'creator_note': 'Sadaqah Jariyah • Purely for the sake of Allah',
+      'creator_note': 'May Allah accept it from us all • Remember us in your Du\'a',
       'share_info': 'SUPPORT, PRIVACY & INFO',
       'share_app': 'Share Quran Zone',
       'rate_us': 'Rate Us on Google Play',
@@ -126,7 +126,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       'copied_to_clipboard': 'تم نسخ الحساب إلى الحافظة!',
       'telegram_btn': 'تيليجرام',
       'email_btn': 'إرسال ملاحظة',
-      'creator_note': 'عمل خالص لوجه الله تعالى • نسألكم صالح الدعاء',
+      'creator_note': 'نسأل الله الإخلاص والقبول • نسألكم صالح الدعاء',
       'share_info': 'الدعم والخصوصية ومعلومات التطبيق',
       'share_app': 'مشاركة تطبيق Quran Zone',
       'rate_us': 'تقييم التطبيق على متجر جوجل',
@@ -169,7 +169,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       'copied_to_clipboard': 'አድራሻው ወደ ቅንጥብ ሰሌዳ ተቀድቷል!',
       'telegram_btn': 'ቴሌግራም',
       'email_btn': 'ኢሜይል',
-      'creator_note': 'የጋራ ሰደቃ • ለአላህ ተብሎ የተዘጋጀ',
+      'creator_note': 'አላህ ቅቡል ያድርግልን • በመልካም ዱዓችሁ አስቡን',
       'share_info': 'ስለ መተግበሪያው፣ ግላዊነት እና ድጋፍ',
       'share_app': 'መተግበሪያውን ያጋሩ',
       'rate_us': 'በፕሌይ ስቶር ደረጃ ይስጡ',
@@ -214,7 +214,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       'telegram_btn': 'Telegiraamii',
       'email_btn': 'Imeeylii',
       'creator_note':
-          'Sadaqah Jaariyaa • Waaqayyoof jedhamee kan qophaa\'e',
+          'Rabbiin nuuf haa qeebalu • Du\'aa\'ii keessaniin nu yaadadhaa',
       'share_info': 'Waa\'ee App, Dhuunfaa fi Deeggarsa',
       'share_app': 'Appilikeeshinii Qoodaa',
       'rate_us': 'Play Store irratti sadarkaa kennaa',
@@ -285,11 +285,65 @@ class _SettingsScreenState extends State<SettingsScreen>
       case 'ar':
         return 'نبذة شاملة عن رسالة التطبيق ومزاياه الاستثنائية';
       case 'am':
-        return 'አጠቃላይ እይታ እና የሰደቃ ጃሪያህ መረጃ';
+        return 'አጠቃላይ እይታ እና የመተግበሪያው ዓላማ';
       case 'om':
-        return 'Ibsa waliigalaa fi odeeffannoo Sadaqah Jariyah';
+        return 'Ibsa waliigalaa fi kaayyoo appilikeeshinii';
       default:
         return 'Comprehensive overview & app dedication';
+    }
+  }
+
+  String _getFooterDedicationTitle(String lang) {
+    switch (lang) {
+      case 'ar':
+        return 'Quran Zone • نسأل الله الإخلاص والقبول';
+      case 'am':
+        return 'Quran Zone • አላህ ከሁላችንም በጎ ይቀበለን';
+      case 'om':
+        return 'Quran Zone • Rabbiin nurraa haa qeebalu';
+      case 'en':
+      default:
+        return 'Quran Zone • May Allah accept it from us all';
+    }
+  }
+
+  String _getFooterDuaSubtitle(String lang) {
+    switch (lang) {
+      case 'ar':
+        return 'نسألكم من صالح دعائكم بظهر الغيب';
+      case 'am':
+        return 'በመልካም ዱዓችሁ አትርሱን';
+      case 'om':
+        return 'Du\'aa\'ii keessan gaarii keessatti nu yaadadhaa';
+      case 'en':
+      default:
+        return 'Please remember us in your sincere Du\'a';
+    }
+  }
+
+  String _getAboutDedicationTitle(String locale) {
+    switch (locale) {
+      case 'ar':
+        return 'نسأل الله الإخلاص والقبول';
+      case 'am':
+        return 'አላህ ከሁላችንም በጎ ይቀበለን';
+      case 'om':
+        return 'Rabbiin nurraa haa qeebalu';
+      default:
+        return 'May Allah accept it from us all';
+    }
+  }
+
+  String _getAboutDedicationDesc(String locale) {
+    switch (locale) {
+      case 'ar':
+        return 'نسأل الله العلي القدير أن يتقبل هذا العمل وينفع به المسلمين أجمعين، ونسألكم من صالح دعائكم بظهر الغيب.';
+      case 'am':
+        return 'ይህ መተግበሪያ ሙስሊሙን ማህበረሰብ በቅንነት ለማገልገል የተዘጋጀ ነው፤ አላህ ከሁላችንም እንዲቀበል እናንተም በመልካም ዱዓችሁ እንድታስቡን እንጠይቃለን።';
+      case 'om':
+        return 'Appilikeeshiniin kun hawaasa Muslimaa tajaajiluuf kan qophaa\'e yoo ta\'u, Rabbiin akka nurraa qeebaluuf du\'aa\'ii keessan gaarii keessatti nu yaadadhaa.';
+      default:
+        return 'Humbly prepared to serve the Muslim community. We pray Allah accepts it, and we warmly ask for your sincere prayers in secret.';
     }
   }
 
@@ -1583,26 +1637,24 @@ class _SettingsScreenState extends State<SettingsScreen>
                               size: 12, color: primary.withValues(alpha: 0.6)),
                           const SizedBox(width: 5),
                           Text(
-                            isArabic
-                                ? 'Quran Zone • صدقة جارية لوجه الله تعالى'
-                                : 'Quran Zone • Sadaqah Jariyah for the Ummah',
+                            _getFooterDedicationTitle(lang),
                             style: TextStyle(
                               color: textSub.withValues(alpha: 0.8),
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
+                              fontFamily: (lang == 'ar') ? 'Amiri' : null,
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        isArabic
-                            ? 'نسألكم صالح الدعاء'
-                            : 'Keep us in your sincere Du\'a',
+                        _getFooterDuaSubtitle(lang),
                         style: TextStyle(
                           color: textSub.withValues(alpha: 0.55),
                           fontSize: 10,
                           fontWeight: FontWeight.normal,
+                          fontFamily: (lang == 'ar') ? 'Amiri' : null,
                         ),
                       ),
                     ],
@@ -2023,9 +2075,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          isArabic
-                                              ? 'صدقة جارية للأمة الإسلامية'
-                                              : 'Sadaqah Jariyah for the Ummah',
+                                          _getAboutDedicationTitle(locale),
                                           style: TextStyle(
                                             fontSize: 13,
                                             fontWeight: FontWeight.bold,
@@ -2036,9 +2086,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          isArabic
-                                              ? 'هذا العمل خالص لوجه الله تعالى وبلا مقابل. نسأل الله أن يتقبله وينفع به المسلمين أجمعين.'
-                                              : 'Built purely for the pleasure of Allah ﷻ without barrier. We pray Allah accepts it as a continuous charity for all believers.',
+                                          _getAboutDedicationDesc(locale),
                                           style: TextStyle(
                                             fontSize: 11.5,
                                             color: isDark
