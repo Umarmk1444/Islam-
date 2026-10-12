@@ -68,6 +68,24 @@ class MinbarAuthor {
       'eng_name': engName,
     };
   }
+
+  MinbarAuthor copyWith({
+    String? id,
+    String? name,
+    String? englishName,
+    String? type,
+    String? serverNum,
+    String? engName,
+  }) {
+    return MinbarAuthor(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      englishName: englishName ?? this.englishName,
+      type: type ?? this.type,
+      serverNum: serverNum ?? this.serverNum,
+      engName: engName ?? this.engName,
+    );
+  }
 }
 
 class MinbarAudioItem {

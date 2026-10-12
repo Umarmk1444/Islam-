@@ -464,6 +464,34 @@ class MinbarCdnRegistry {
       cdnUrl: 'https://cdn.mp3quran.net/audio/yousef-ahmad/r1',
       fallbackUrl: 'https://server8.mp3quran.net/noah',
     ),
+    113: MinbarReciterEndpoint(
+      cdnUrl: 'https://cdn.mp3quran.net/audio/idrees-abkar/r1',
+      fallbackUrl: 'https://server6.mp3quran.net/abkr',
+    ),
+    114: MinbarReciterEndpoint(
+      cdnUrl: 'https://cdn.mp3quran.net/audio/bandar-baleela/r1',
+      fallbackUrl: 'https://server6.mp3quran.net/balilah',
+    ),
+    115: MinbarReciterEndpoint(
+      cdnUrl: 'https://cdn.mp3quran.net/audio/khalid-jalil/r1',
+      fallbackUrl: 'https://server10.mp3quran.net/jleel',
+    ),
+    116: MinbarReciterEndpoint(
+      cdnUrl: 'https://cdn.mp3quran.net/audio/raad-kurdi/r1',
+      fallbackUrl: 'https://server6.mp3quran.net/kurdi',
+    ),
+    117: MinbarReciterEndpoint(
+      cdnUrl: 'https://cdn.mp3quran.net/audio/hazza-balushi/r1',
+      fallbackUrl: 'https://server6.mp3quran.net/hazza',
+    ),
+    118: MinbarReciterEndpoint(
+      cdnUrl: 'https://cdn.mp3quran.net/audio/mansour-salimi/r1',
+      fallbackUrl: 'https://server6.mp3quran.net/salimi',
+    ),
+    119: MinbarReciterEndpoint(
+      cdnUrl: 'https://cdn.mp3quran.net/audio/islam-sobhi/r1',
+      fallbackUrl: 'https://server6.mp3quran.net/sobhi',
+    ),
   };
 
   /// Returns the primary high-speed CDN URL for a given reciter ID and Surah number.

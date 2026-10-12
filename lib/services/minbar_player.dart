@@ -47,18 +47,9 @@ class MinbarPlayer {
         if (localPath != null) {
           audioSources.add(AudioSource.uri(Uri.file(localPath), tag: mediaItem));
         } else {
-          var safeUrl = item.url.trim();
-          if (safeUrl.startsWith('http://')) {
-            safeUrl = 'https://${safeUrl.substring(7)}';
-          }
-          audioSources.add(AudioSource.uri(
-            Uri.parse(Uri.encodeFull(safeUrl)),
-            tag: mediaItem,
-            headers: const {
-              'User-Agent':
-                  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            },
-          ));
+          final rawUrl = item.url.trim();
+          final uri = Uri.tryParse(rawUrl) ?? Uri.parse(Uri.encodeFull(rawUrl));
+          audioSources.add(AudioSource.uri(uri, tag: mediaItem));
         }
       }
 

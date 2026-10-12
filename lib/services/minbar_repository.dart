@@ -2,6 +2,7 @@ import 'dart:developer' as dev;
 import '../core/database/database_helper.dart';
 import '../models/minbar_models.dart';
 import 'minbar_cdn_registry.dart';
+import 'reciter_english_directory.dart';
 
 class MinbarRepository {
   final DatabaseHelper _dbHelper;
@@ -82,7 +83,20 @@ class MinbarRepository {
         final rows = await db.rawQuery(
           'SELECT id, name, server_num, eng_name, type FROM qoraa ORDER BY name ASC',
         );
-        return rows.map((row) => MinbarAuthor.fromMap(row)).toList();
+        final list = rows.map((row) {
+          final author = MinbarAuthor.fromMap(row);
+          final engName = ReciterEnglishDirectory.getEnglishName(author.id);
+          return author.copyWith(englishName: engName);
+        }).toList();
+
+        // Add additional iconic modern reciters (Idris Abkar, Bandar Baleela, Islam Sobhi, etc.)
+        for (final addReciter in ReciterEnglishDirectory.additionalReciters) {
+          if (!list.any((a) => a.id == addReciter.id)) {
+            list.add(addReciter);
+          }
+        }
+        list.sort((a, b) => a.name.compareTo(b.name));
+        return list;
       } else {
         // Map category ID to all_index title
         final dbTitle = _mapCategoryToDbTitle(categoryId);
@@ -121,7 +135,28 @@ class MinbarRepository {
       }
 
       if (categoryId == 'quran') {
-        // Step A: Find the Quran reciter metadata to get the CDN path
+        // Step A1: Check if this is one of the additional curated reciters (113-119)
+        final additionalReciter = ReciterEnglishDirectory.getAdditionalReciter(parsedAuthorId);
+        if (additionalReciter != null) {
+          final surahRows = await db.rawQuery(
+            "SELECT abc AS title, abc2 AS surah_num FROM all_index WHERE title = 'السور' ORDER BY id ASC",
+          );
+          return surahRows.map((row) {
+            final rawSurahNum = (row['surah_num'] as String).trim();
+            final surahNum = rawSurahNum.padLeft(3, '0');
+            final title = row['title'] as String;
+            final url = MinbarCdnRegistry.getPrimarySurahUrl(parsedAuthorId, surahNum) ?? '';
+
+            return MinbarAudioItem(
+              id: '${authorId}_$surahNum',
+              title: title,
+              url: url,
+              authorId: authorId,
+            );
+          }).toList();
+        }
+
+        // Step A2: Find the Quran reciter metadata to get the CDN path
         final reciterRows = await db.rawQuery(
           'SELECT server_num, eng_name FROM qoraa WHERE id = ? LIMIT 1',
           [parsedAuthorId],
@@ -204,16 +239,10 @@ class MinbarRepository {
         );
 
         return audioRows.map((row) {
-          var rawUrl = (row['url'] as String).trim();
-          if (rawUrl.startsWith('http://')) {
-            rawUrl = 'https://${rawUrl.substring(7)}';
-          }
-          final safeUrl = Uri.encodeFull(rawUrl);
-
           return MinbarAudioItem(
             id: row['id'].toString(),
             title: row['title'] as String,
-            url: safeUrl,
+            url: (row['url'] as String).trim(),
             authorId: authorId,
           );
         }).toList();

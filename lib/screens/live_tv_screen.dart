@@ -6,7 +6,7 @@ import '../core/constants/app_text_styles.dart';
 import '../theme_notifier.dart';
 import 'youtube_player_screen.dart';
 
-class _LiveChannel {
+class LiveChannelConfig {
   final String titleAr;
   final String titleEn;
   final String subtitleAr;
@@ -14,7 +14,7 @@ class _LiveChannel {
   final IconData icon;
   final String videoId;
 
-  const _LiveChannel({
+  const LiveChannelConfig({
     required this.titleAr,
     required this.titleEn,
     required this.subtitleAr,
@@ -24,27 +24,27 @@ class _LiveChannel {
   });
 }
 
-const List<_LiveChannel> _channels = [
-  _LiveChannel(
-    titleAr: 'المسجد الحرام – مكة المكرمة',
-    titleEn: 'Masjid al-Haram – Makkah',
-    subtitleAr: 'بث مباشر على مدار الساعة',
-    gradient: [Color(0xFF1E3A8A), Color(0xFF2563EB)],
-    icon: Icons.mosque_rounded,
-    videoId: 'wawzF8i5yAo',
-  ),
-  _LiveChannel(
-    titleAr: 'المسجد النبوي – المدينة المنورة',
-    titleEn: 'Al-Masjid an-Nabawi – Madinah',
-    subtitleAr: 'بث مباشر على مدار الساعة',
-    gradient: [Color(0xFF065F46), Color(0xFF059669)],
-    icon: Icons.location_city_rounded,
-    videoId: 'rHWSRMcGGBQ',
-  ),
-];
-
 class LiveTvScreen extends StatelessWidget {
   const LiveTvScreen({super.key});
+
+  static const List<LiveChannelConfig> channels = [
+    LiveChannelConfig(
+      titleAr: 'المسجد الحرام – مكة المكرمة',
+      titleEn: 'Masjid al-Haram – Makkah',
+      subtitleAr: 'بث مباشر على مدار الساعة',
+      gradient: [Color(0xFF1E3A8A), Color(0xFF2563EB)],
+      icon: Icons.mosque_rounded,
+      videoId: 'eC4LfEVxvKg',
+    ),
+    LiveChannelConfig(
+      titleAr: 'المسجد النبوي – المدينة المنورة',
+      titleEn: 'Al-Masjid an-Nabawi – Madinah',
+      subtitleAr: 'بث مباشر على مدار الساعة',
+      gradient: [Color(0xFF065F46), Color(0xFF059669)],
+      icon: Icons.location_city_rounded,
+      videoId: 'Rs7St51oDDc',
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -98,11 +98,11 @@ class LiveTvScreen extends StatelessWidget {
                     Expanded(
                       child: ListView.separated(
                         physics: const BouncingScrollPhysics(),
-                        itemCount: _channels.length,
+                        itemCount: channels.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 16),
                         itemBuilder: (context, i) {
                           return _ChannelCard(
-                            channel: _channels[i],
+                            channel: channels[i],
                             theme: theme,
                             textColor: textColor,
                             isDark: isDark,
@@ -148,7 +148,7 @@ class _ChannelCard extends StatelessWidget {
     required this.delay,
   });
 
-  final _LiveChannel channel;
+  final LiveChannelConfig channel;
   final QuranTheme theme;
   final Color textColor;
   final bool isDark;

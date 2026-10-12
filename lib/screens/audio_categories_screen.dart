@@ -7,6 +7,7 @@ import '../theme_notifier.dart';
 import '../widgets/persistent_audio_bar.dart';
 import '../widgets/liquid_pressable.dart';
 import 'author_audio_screen.dart';
+import '../services/reciter_english_directory.dart';
 
 class AudioCategoriesScreen extends StatefulWidget {
   final int initialIndex;
@@ -247,24 +248,13 @@ class _CategoryAuthorsListState extends State<_CategoryAuthorsList> {
   }
 
   void _onSearchChanged() {
-    final query = _searchController.text.trim().toLowerCase();
+    final query = _searchController.text.trim();
     setState(() {
       if (query.isEmpty) {
         _filteredAuthors = _allAuthors;
       } else {
         _filteredAuthors = _allAuthors.where((author) {
-          final nameLower = author.name.toLowerCase();
-          final engNameLower = author.engName?.toLowerCase() ?? '';
-          final englishNameLower = author.englishName?.toLowerCase() ?? '';
-
-          final engNameCleaned = engNameLower.replaceAll('_', ' ').replaceAll('-', ' ');
-          final englishNameCleaned = englishNameLower.replaceAll('_', ' ').replaceAll('-', ' ');
-
-          return nameLower.contains(query) ||
-              engNameLower.contains(query) ||
-              englishNameLower.contains(query) ||
-              engNameCleaned.contains(query) ||
-              englishNameCleaned.contains(query);
+          return ReciterEnglishDirectory.matches(author, query);
         }).toList();
       }
     });
@@ -303,8 +293,8 @@ class _CategoryAuthorsListState extends State<_CategoryAuthorsList> {
               style: TextStyle(fontSize: 14, color: textColor),
               decoration: InputDecoration(
                 hintText: isArabic
-                    ? 'البحث عن قارئ أو شيخ (بالعربية)...'
-                    : 'Search reciter or scholar (in Arabic)...',
+                    ? 'البحث عن قارئ أو شيخ (بالعربية أو الإنجليزية)...'
+                    : 'Search reciter or scholar in English or Arabic...',
                 hintStyle: TextStyle(
                   color: textColor.withValues(alpha: 0.4),
                   fontSize: 13,
@@ -472,7 +462,21 @@ class _CategoryAuthorsListState extends State<_CategoryAuthorsList> {
                                   overflow: TextOverflow.ellipsis,
                                   textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
                                 ),
-                                const SizedBox(height: 5),
+                                if (author.englishName != null &&
+                                    author.englishName!.isNotEmpty) ...[
+                                  const SizedBox(height: 1),
+                                  Text(
+                                    author.englishName!,
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: textColor.withValues(alpha: 0.6),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                                const SizedBox(height: 4),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(

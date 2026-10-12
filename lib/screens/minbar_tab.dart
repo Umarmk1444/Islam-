@@ -162,6 +162,73 @@ class MinbarTab extends StatelessWidget {
                             ),
                           ),
 
+                          // ── LIVE BROADCAST SHOWCASE (Dual Hero Grid) ──
+                          _buildSectionHeader(
+                            context: context,
+                            title: _tr(context, 'live_section'),
+                            isArabic: isArabic,
+                            textColor: textColor,
+                            accentColor: primaryAccent,
+                          ),
+                          const SizedBox(height: 8),
+
+                          Row(
+                            children: [
+                              // Live Islamic Radios Hero Card
+                              Expanded(
+                                child: _buildLiveHubCard(
+                                  context: context,
+                                  title: _tr(context, 'live_radio_title'),
+                                  subtitle: _tr(context, 'live_radio_sub'),
+                                  icon: Icons.radio_rounded,
+                                  isLive: true,
+                                  gradient: isDark
+                                      ? const [Color(0xFF0F3D2C), Color(0xFF1B6B4E)]
+                                      : [
+                                          const Color(0xFF0E5B3E),
+                                          const Color(0xFF1B8A6B)
+                                        ],
+                                  accentGlow: const Color(0xFF2ECC9A),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) =>
+                                              const LiveRadioScreen()),
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              // Live Makkah & Madinah TV Hero Card
+                              Expanded(
+                                child: _buildLiveHubCard(
+                                  context: context,
+                                  title: _tr(context, 'live_tv_title'),
+                                  subtitle: _tr(context, 'live_tv_sub'),
+                                  icon: Icons.mosque_rounded,
+                                  isLive: true,
+                                  gradient: isDark
+                                      ? const [Color(0xFF121B3B), Color(0xFF1E2F68)]
+                                      : [
+                                          const Color(0xFF1A2A6C),
+                                          const Color(0xFF274496)
+                                        ],
+                                  accentGlow: const Color(0xFF3B82F6),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) => const LiveTvScreen()),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 16),
+
                           // ── MAIN AUDIO PILLARS (Holy Quran & Audio Library) ──
                           _buildSectionHeader(
                             context: context,
@@ -264,71 +331,21 @@ class MinbarTab extends StatelessWidget {
                             ],
                           ),
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 10),
 
-                          // ── LIVE BROADCAST SHOWCASE (Dual Hero Grid) ──
-                          _buildSectionHeader(
+                          // 3. African / Regional Languages Card (Amharic & Oromo)
+                          _buildRegionalLanguagesCard(
                             context: context,
-                            title: _tr(context, 'live_section'),
-                            isArabic: isArabic,
+                            theme: theme,
+                            isDark: isDark,
+                            isCream: isCream,
+                            cardBg: cardBg,
+                            borderColor: borderColor,
                             textColor: textColor,
-                            accentColor: primaryAccent,
-                          ),
-                          const SizedBox(height: 8),
-
-                          Row(
-                            children: [
-                              // Live Islamic Radios Hero Card
-                              Expanded(
-                                child: _buildLiveHubCard(
-                                  context: context,
-                                  title: _tr(context, 'live_radio_title'),
-                                  subtitle: _tr(context, 'live_radio_sub'),
-                                  icon: Icons.radio_rounded,
-                                  isLive: true,
-                                  gradient: isDark
-                                      ? const [Color(0xFF0F3D2C), Color(0xFF1B6B4E)]
-                                      : [
-                                          const Color(0xFF0E5B3E),
-                                          const Color(0xFF1B8A6B)
-                                        ],
-                                  accentGlow: const Color(0xFF2ECC9A),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) =>
-                                              const LiveRadioScreen()),
-                                    );
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              // Live Makkah & Madinah TV Hero Card
-                              Expanded(
-                                child: _buildLiveHubCard(
-                                  context: context,
-                                  title: _tr(context, 'live_tv_title'),
-                                  subtitle: _tr(context, 'live_tv_sub'),
-                                  icon: Icons.mosque_rounded,
-                                  isLive: true,
-                                  gradient: isDark
-                                      ? const [Color(0xFF121B3B), Color(0xFF1E2F68)]
-                                      : [
-                                          const Color(0xFF1A2A6C),
-                                          const Color(0xFF274496)
-                                        ],
-                                  accentGlow: const Color(0xFF3B82F6),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) => const LiveTvScreen()),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
+                            isArabic: isArabic,
+                            title: _tr(context, 'regional_title'),
+                            subtitle: _tr(context, 'regional_sub'),
+                            comingSoonText: _tr(context, 'coming_soon'),
                           ),
 
                           const SizedBox(height: 12),
@@ -722,5 +739,118 @@ class MinbarTab extends StatelessWidget {
     );
   }
 
+  // ── Regional African Languages Card (Amharic & Afaan Oromo) ──
+  Widget _buildRegionalLanguagesCard({
+    required BuildContext context,
+    required QuranTheme theme,
+    required bool isDark,
+    required bool isCream,
+    required Color cardBg,
+    required Color borderColor,
+    required Color textColor,
+    required bool isArabic,
+    required String title,
+    required String subtitle,
+    required String comingSoonText,
+  }) {
+    return LiquidPressable(
+      onTap: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              isArabic
+                  ? 'الدروس باللغات الإفريقية (أمهري وأورومي) - قريباً بإذن الله'
+                  : 'Amharic & Oromo Islamic Dawah - Coming Soon InshaAllah',
+              textAlign: TextAlign.center,
+            ),
+            backgroundColor: isDark ? const Color(0xFF1E293B) : const Color(0xFF0F766E),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: borderColor, width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.02),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF0D9488), Color(0xFF059669)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Center(
+                child: Icon(Icons.language_rounded, color: Colors.white, size: 19),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontFamily: isArabic ? 'Amiri' : null,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: isCream ? AppColors.emeraldDeep : textColor,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: textColor.withValues(alpha: 0.55),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.3), width: 0.8),
+              ),
+              child: Text(
+                comingSoonText,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFD4AF37),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 

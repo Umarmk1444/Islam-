@@ -7,6 +7,7 @@ import '../widgets/custom_banner_ad.dart';
 import '../services/minbar_player.dart';
 import '../models/minbar_models.dart';
 import '../services/quran_radio_service.dart';
+import '../services/reciter_english_directory.dart';
 
 class LiveRadioScreen extends StatefulWidget {
   const LiveRadioScreen({super.key});
@@ -128,9 +129,13 @@ class _LiveRadioScreenState extends State<LiveRadioScreen> {
   List<QuranRadioItem> _getFilteredStations() {
     return QuranRadioService.stations.where((station) {
       if (_searchQuery.isNotEmpty) {
-        final query = _searchQuery.toLowerCase();
-        final matchesName = station.name.toLowerCase().contains(query);
-        final matchesEnglishName = station.englishName.toLowerCase().contains(query);
+        final normQueryAr = ReciterEnglishDirectory.normalizeArabic(_searchQuery);
+        final normQueryEn = ReciterEnglishDirectory.normalizeEnglish(_searchQuery);
+        final normNameAr = ReciterEnglishDirectory.normalizeArabic(station.name);
+        final normNameEn = ReciterEnglishDirectory.normalizeEnglish(station.englishName);
+
+        final matchesName = normNameAr.contains(normQueryAr);
+        final matchesEnglishName = normNameEn.contains(normQueryEn);
         if (!matchesName && !matchesEnglishName) return false;
       }
 
