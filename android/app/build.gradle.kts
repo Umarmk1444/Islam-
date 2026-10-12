@@ -75,8 +75,6 @@ android {
     androidResources {
         noCompress += listOf("woff", "woff2", "otf", "ttf")
     }
-
-    assetPacks += ":quran_fonts"
 }
 
 kotlin {

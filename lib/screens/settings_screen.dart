@@ -39,7 +39,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   String _selectedLanguage = 'English';
   bool _notificationsEnabled = true;
   int _notificationInterval = 60;
-  String _appVersion = 'Version 1.2.0 (Build 10)';
+  String _appVersion = 'Version 1.3.0 (Build 12)';
 
   // Entrance & Header Animations
   late final AnimationController _headerCtrl;

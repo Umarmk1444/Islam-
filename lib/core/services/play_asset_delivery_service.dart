@@ -17,18 +17,17 @@ class PlayAssetDeliveryService {
   }
 
   static String? _cachedPath;
-  static bool _isChecking = false;
   static bool _isDownloadingHttp = false;
   static bool _isPlayStoreDownloading = false;
 
   /// Whether Google Play Store's native Asset Delivery is actively downloading.
   static bool get isPlayStoreDownloading => _isPlayStoreDownloading;
 
-  final ValueNotifier<bool> isFontsReadyNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> isFontsReadyNotifier = ValueNotifier<bool>(true);
   final ValueNotifier<double> downloadProgressNotifier =
-      ValueNotifier<double>(0.0);
+      ValueNotifier<double>(1.0);
   final ValueNotifier<String> statusMessageNotifier =
-      ValueNotifier<String>('جاري التحقق من الخطوط...');
+      ValueNotifier<String>('الخطوط جاهزة بالكامل (Offline)');
 
   final StreamController<Map<String, dynamic>> _stateStreamController =
       StreamController<Map<String, dynamic>>.broadcast();
@@ -330,61 +329,9 @@ class PlayAssetDeliveryService {
 
   /// Checks the asset pack status and initiates fetch.
   Future<bool> ensureAssetPackReady({int initialPage = 1}) async {
-    if (isFontsReadyNotifier.value) return true;
-    if (_isChecking) return isFontsReadyNotifier.value;
-    _isChecking = true;
-
-    try {
-      final path = await getFontsDirectoryPath();
-      if (path != null) {
-        isFontsReadyNotifier.value = true;
-        _isChecking = false;
-        return true;
-      }
-
-      // Trigger Google Play Asset Delivery if on Android
-      if (Platform.isAndroid) {
-        try {
-          final dynamic statusResult =
-              await _channel.invokeMethod('getAssetPackStatus', {
-            'packName': 'quran_fonts',
-          });
-
-          if (statusResult is Map) {
-            final status = statusResult['status']?.toString();
-            if (status == 'COMPLETED') {
-              isFontsReadyNotifier.value = true;
-              await getFontsDirectoryPath();
-              await cleanupTemporaryCache();
-              _isChecking = false;
-              return true;
-            } else if (status == 'DOWNLOADING' || status == 'PENDING') {
-              _isPlayStoreDownloading = true;
-            }
-          }
-
-          await _channel.invokeMethod('fetchAssetPack', {
-            'packName': 'quran_fonts',
-          });
-        } catch (_) {}
-      }
-
-      // 1. Immediately pre-fetch the 30-50 page neighborhood around active page
-      unawaited(prefetchNeighborhood(initialPage, radius: 35));
-
-      // 2. Wait 2.5s for Play Store to confirm if it has started downloading
-      await Future.delayed(const Duration(milliseconds: 2500));
-
-      // 3. If Play Store didn't start (sideloaded, offline, or delay), continue background download
-      if (!_isPlayStoreDownloading && !isFontsReadyNotifier.value) {
-        unawaited(startDirectHttpDownload(initialPage: initialPage));
-      }
-    } catch (e) {
-      debugPrint('[PlayAssetDelivery] ensureAssetPackReady error: $e');
-    } finally {
-      _isChecking = false;
-    }
-
-    return isFontsReadyNotifier.value;
+    isFontsReadyNotifier.value = true;
+    downloadProgressNotifier.value = 1.0;
+    return true;
   }
 }
+

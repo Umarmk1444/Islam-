@@ -43,8 +43,8 @@ class _HadithCollectionsScreenState extends State<HadithCollectionsScreen> {
       'extracting_title': 'جاري تهيئة موسوعة الحديث الشريف...',
       'extracting_desc': 'يتم استخراج ١٠ دواوين معتمدة (٤٠,٩٣٧ حديثاً شريفاً)\nيستغرق هذا الإجراء بضع ثوانٍ فقط...',
       'loading': 'جاري تحميل الأحاديث الشريفة...',
-      'dialog_title': 'إدارة مساحة الحديث الشريف',
-      'dialog_desc': 'هل ترغب في توفير مساحة على هاتفك بحذف ملفات الموسوعة المؤقتة؟\n\n• سيتم توفير حوالي ١٨٧ ميجابايت من ذاكرة هاتفك فوراً.\n• مفضلاتك وقراءاتك السابقة ستبقى محفوظة بأمان تام.\n• يمكنك إعادة تهيئة الموسوعة في أي وقت مجاناً وبدون إنترنت.',
+      'dialog_title': 'توفير مساحة الهاتف',
+      'dialog_desc': '💡 معلومة: يمكنك توفير مساحة على هاتفك وكسب ~١٨٧ م.ب بمسح هذه الكتب العشرة.\n\nلا تقلق، لن تفقد أي شيء، ويمكنك إعادتها بالكامل في أي وقت بضغطة واحدة وبدون إنترنت.',
       'cancel': 'إلغاء',
       'confirm_delete': 'توفير ~١٨٧ م.ب الآن',
       'snack_deleted': 'تم توفير ١٨٧ ميجابايت بنجاح من ذاكرة الهاتف',
@@ -54,85 +54,85 @@ class _HadithCollectionsScreenState extends State<HadithCollectionsScreen> {
       'banner_title': 'مكتبة السنة النبوية والكتب الستة المعتمدة',
       'banner_desc': 'موسوعة السنن والمصنفات الكبرى مفهرسة بالسند والأبواب الأصلية بدون إنترنت',
       'storage_card_title': 'معلومات التخزين والقراءة بدون إنترنت',
-      'storage_card_desc': 'الموسوعة مثبتة بالكامل بدون إنترنت (~١٨٧ م.ب). إذا كنت بحاجة لتوفير مساحة على هاتفك مستقبلاً، يمكنك مسح الملفات مؤقتاً وإعادة تهيئتها بأمان في أي وقت دون فقدان مفضلاتك أو علاماتك.',
+      'storage_card_desc': 'يمكنك مسح هذه الكتب العشرة (~١٨٧ م.ب) لتوفير مساحة على هاتفك، وإعادتها متى أردت بدون إنترنت.',
       'storage_card_btn': 'إدارة المساحة',
     },
     'en': {
       'title': 'Hadith Encyclopedia',
       'search_tooltip': 'Search Hadith',
       'storage_btn': 'Manage Storage',
-      'storage_tooltip': 'Offline storage & database info',
+      'storage_tooltip': 'Storage info',
       'setup_title': 'The Grand Hadith Encyclopedia',
-      'setup_desc': 'Contains the Six Canonical Books, Muwatta Malik, Riyad as-Salihin, Al-Adab Al-Mufrad, and Bulugh al-Maram (40,937 noble Hadiths with full Isnād, Matn, instant search, and complete offline access).',
-      'setup_badge': '100% Offline • You can safely remove it anytime to free up storage',
-      'setup_btn': 'Unpack Encyclopedia & Start Reading',
-      'extracting_title': 'Unpacking Hadith Encyclopedia...',
+      'setup_desc': 'Contains the Six Canonical Books, Muwatta Malik, Riyad as-Salihin, Al-Adab Al-Mufrad, and Bulugh al-Maram (40,937 noble Hadiths with full Isnād, Matn, instant search, and reading without internet).',
+      'setup_badge': 'Works Without Internet • You can remove it anytime to save space',
+      'setup_btn': 'Set Up Encyclopedia & Start Reading',
+      'extracting_title': 'Setting up Hadith Encyclopedia...',
       'extracting_desc': 'Preparing 10 canonical collections (40,937 noble Hadiths)\nTakes only a few seconds...',
       'loading': 'Loading Hadith collections...',
-      'dialog_title': 'Manage Offline Storage',
-      'dialog_desc': 'Would you like to clear offline database files from your phone?\n\n• Instantly frees up ~187 MB of internal storage.\n• Your favorites and reading bookmarks remain completely safe.\n• You can re-unpack the encyclopedia anytime with one tap, 100% offline.',
+      'dialog_title': 'Free Up Phone Storage',
+      'dialog_desc': '💡 Tip: You can free up your phone storage and gain ~187 MB by clearing these 10 books.\n\nDon\'t worry, nothing is lost—you can bring them right back whenever you want with one tap, without internet.',
       'cancel': 'Cancel',
-      'confirm_delete': 'Free Up ~187 MB',
-      'snack_deleted': 'Hadith database cleared! ~187 MB freed successfully.',
+      'confirm_delete': 'Free Up ~187 MB Now',
+      'snack_deleted': '~187 MB freed successfully from phone storage',
       'section_kutub_sittah': 'The Six Canonical Books',
       'section_secondary': 'Other Compilations & Works',
       'banner_badge': '10 Canonical Collections • 40,937 Hadiths',
       'banner_title': 'Prophetic Sunnah & Canonical Hadith Library',
-      'banner_desc': 'Grand encyclopedia indexed with authentic isnad and classical chapters, 100% offline',
-      'storage_card_title': 'Offline Storage & Reading Info',
-      'storage_card_desc': 'Complete encyclopedia installed offline (~187 MB). If your device is ever low on space, you can temporarily clear files and restore them anytime without losing your bookmarks or favorites.',
+      'banner_desc': 'Grand encyclopedia indexed with authentic isnad and classical chapters, without internet',
+      'storage_card_title': 'Storage & Reading Without Internet',
+      'storage_card_desc': 'You can clear these 10 books (~187 MB) anytime to free up phone storage, and bring them back whenever you want without internet.',
       'storage_card_btn': 'Manage Storage',
     },
     'am': {
       'title': 'የሐዲስ ኢንሳይክሎፔዲያ',
       'search_tooltip': 'ሐዲሶችን ፈልግ',
-      'storage_btn': 'ማከማቻ አስተዳድር',
-      'storage_tooltip': 'የማከማቻ መረጃ እና ዳታቤዝ',
+      'storage_btn': 'ቦታ አስተዳድር',
+      'storage_tooltip': 'የማከማቻ መረጃ',
       'setup_title': 'ታላቁ የሐዲስ ኢንሳይክሎፔዲያ',
-      'setup_desc': 'ስድስቱን ታላላቅ የሐዲስ መጻሕፍት፣ ሙወጣእ ማሊክ፣ ሪያዱ አስ-ሷሊሒን፣ አል-አደብ አል-ሙፍረድ እና ቡሉግ አል-መራምን ያካትታል (40,937 ትክክለኛ ሐዲሶች ከሙሉ ሰነድ፣ ፈጣን ፍለጋ እና ከመስመር ውጭ ማንበብ ጋር)።',
-      'setup_badge': '100% ከመስመር ውጭ • ቦታ ለመቆጠብ በማንኛውም ጊዜ ማጥፋት ይችላሉ',
+      'setup_desc': 'ስድስቱን ታላላቅ የሐዲስ መጻሕፍት፣ ሙወጣእ ማሊክ፣ ሪያዱ አስ-ሷሊሒን፣ አል-አደብ አል-ሙፍረድ እና ቡሉግ አል-መራምን ያካትታል (40,937 ትክክለኛ ሐዲሶች ከሙሉ ሰነድ፣ ፈጣን ፍለጋ እና ያለ ኢንተርኔት ማንበብ ጋር)።',
+      'setup_badge': 'ያለ ኢንተርኔት ይሰራል • ቦታ ለመቆጠብ በማንኛውም ጊዜ ማጥፋት ይችላሉ',
       'setup_btn': 'ኢንሳይክሎፔዲያውን አዘጋጅተህ ማንበብ ጀምር',
       'extracting_title': 'የሐዲስ መዛግብት በመዘጋጀት ላይ ናቸው...',
       'extracting_desc': '10 የተመረጡ የሐዲስ ስብስቦች (40,937 ሐዲሶች) እየተዘጋጁ ነው\nጥቂት ሰኮንዶች ብቻ ይወስዳል...',
       'loading': 'ሐዲሶች በመጫን ላይ ናቸው...',
-      'dialog_title': 'የማከማቻ ቦታ አስተዳድር',
-      'dialog_desc': 'ከመስመር ውጭ ያለውን የሐዲስ ዳታቤዝ ከመሳሪያዎ ላይ መሰረዝ ይፈልጋሉ?\n\n• ወዲያውኑ ~187 MB የስልክ ማከማቻ ቦታ ነጻ ያደርጋል።\n• የእርስዎ ተወዳጆች እና ምልክት ያደረጓቸው ሐዲሶች በደህና ይቀመጣሉ።\n• በማንኛውም ጊዜ ያለ ኢንተርኔት በአንድ ጠቅታ መልሰው ማዘጋጀት ይችላሉ።',
-      'cancel': 'ሰርዝ',
-      'confirm_delete': '~187 MB ቦታ ነጻ አድርግ',
-      'snack_deleted': 'የሐዲስ ዳታ ተሰርዟል! ~187 MB ማከማቻ ቦታ በተሳካ ሁኔታ ነጻ ተደርጓል።',
+      'dialog_title': 'የስልክ ቦታ ማስተዳደር',
+      'dialog_desc': '💡 ጠቃሚ መረጃ፦ እነዚህን 10 መጻሕፍት በማጽዳት ~187 MB የስልክ ቦታ ማግኘት ይችላሉ።\n\nምንም አይጨነቁ፣ የሚጠፋ ነገር የለም—በፈለጉ ጊዜ ያለ ኢንተርኔት በአንድ ጠቅታ ወዲያውኑ መልሰው ማምጣት ይችላሉ።',
+      'cancel': 'ተወው',
+      'confirm_delete': 'አሁን ~187 MB ቦታ ነጻ አድርግ',
+      'snack_deleted': '~187 MB የስልክ ቦታ በተሳካ ሁኔታ ነጻ ተደርጓል',
       'section_kutub_sittah': 'ስድስቱ ታላላቅ የሐዲስ መጻሕፍት',
       'section_secondary': 'ተጨማሪ የታወቁ የሐዲስ ስብስቦች',
       'banner_badge': '10 የተሟሉ ስብስቦች • 40,937 ትክክለኛ ሐዲሶች',
       'banner_title': 'የነቢያዊ ሱና እና የሐዲስ መዛግብት ቤተ-መጻሕፍት',
-      'banner_desc': 'ከመስመር ውጭ ሙሉ በሙሉ የተሟላ የሐዲስ ኢንሳይክሎፔዲያ በምዕራፎች የተደራጀ',
-      'storage_card_title': 'ከመስመር ውጭ ማከማቻ እና የማንበብ መረጃ',
-      'storage_card_desc': 'ሙሉው ኢንሳይክሎፔዲያ ከመስመር ውጭ ተጭኗል (~187 MB)። ወደፊት የስልክዎ ማከማቻ ቦታ ካነሰ፣ ምልክት ያደረጓቸውን ሳያጡ ፋይሎችን ለጊዜው ማጥፋት ይችላሉ።',
-      'storage_card_btn': 'ማከማቻ አስተዳድር',
+      'banner_desc': 'ያለ ኢንተርኔት ሙሉ በሙሉ የሚሰራ የሐዲስ ኢንሳይክሎፔዲያ በምዕራፎች የተደራጀ',
+      'storage_card_title': 'የማከማቻ እና ያለ ኢንተርኔት የማንበብ መረጃ',
+      'storage_card_desc': 'የስልክ ቦታ ለመቆጠብ እነዚህን 10 መጻሕፍት (~187 MB) በማንኛውም ጊዜ ማጽዳት እና በፈለጉ ጊዜ ያለ ኢንተርኔት መልሰው ማምጣት ይችላሉ።',
+      'storage_card_btn': 'ቦታ አስተዳድር',
     },
     'om': {
       'title': 'Muusowaa Hadiisaa',
       'search_tooltip': 'Hadiisa Barbaadi',
       'storage_btn': 'Kuusaa Bulchi',
-      'storage_tooltip': 'Odeeffannoo kuusaa fi daataa',
+      'storage_tooltip': 'Odeeffannoo kuusaa bilbilaa',
       'setup_title': 'Muusowaa Hadiisaa Guddicha',
-      'setup_desc': 'Kitaabban hadiisaa beakkamoo jahan, Muwaxxa’a Maalik, Riyaadu As-Saalihiin, Al-Adab Al-Mufrad fi Buluugul Maraam of keessaa qaba (Hadiisota kabajamoo 40,937 sanadaa fi matniin guutuu, barbaacha saffisaa fi toora interneetii malee dubbisuuf).',
-      'setup_badge': '100% Toora Malee • Bakka kuusaa qusachuuf yeroo kamiyyuu haquu dandeessu',
+      'setup_desc': 'Kitaabban hadiisaa beakkamoo jahan, Muwaxxa’a Maalik, Riyaadu As-Saalihiin, Al-Adab Al-Mufrad fi Buluugul Maraam of keessaa qaba (Hadiisota kabajamoo 40,937 sanadaa fi matniin guutuu, barbaacha saffisaa fi interneetii malee dubbisuuf).',
+      'setup_badge': 'Interneetii Malee Hojjata • Bakka qusachuuf yeroo kamiyyuu haquu dandeessu',
       'setup_btn': 'Hadiisota Qopheessiitii Dubbisuu Eegali',
       'extracting_title': 'Hadiisonni qophaa\'aa jiru...',
       'extracting_desc': 'Kutaalee hadiisaa 10 (hadiisota 40,937) qopheessaa jira\nYeroo gabaabaa qofa fudhata...',
       'loading': 'Hadiisota fe\'aa jira...',
-      'dialog_title': 'Kuusaa Bilbilaa Bulchuu',
-      'dialog_desc': 'Kuusaa hadiisaa toora malee jiru bilbila keessan irraa haquu barbaadduu?\n\n• Battalumatti kuusaa bilbilaa ~187 MB bilisa baasa.\n• Hadiisonni jaallattanii fi as-irra gahe jettan hin banqan, nagaan taa\'u.\n• Yeroo kamiyyuu toora interneetii malee tuqaa tokkoon deebiftanii qopheeffachuu dandeessu.',
+      'dialog_title': 'Bakka Bilbilaa Bulchuu',
+      'dialog_desc': '💡 Gorsa: Bakka bilbilaa qusachuuf kitaabota kurnan kana (~187 MB) yeroo kamiyyuu balleessitanii, yeroo barbaaddan interneetii malee deebisuu dandeessu.',
       'cancel': 'Dhiisi',
-      'confirm_delete': '~187 MB Bilisa Baasi',
-      'snack_deleted': 'Kuusaan hadiisaa haqameera! ~187 MB nagaan bilisa ba\'eera.',
+      'confirm_delete': 'Amma ~187 MB Bilisa Baasi',
+      'snack_deleted': '~187 MB bakka bilbilaa nagaan bilisa ba\'eera',
       'section_kutub_sittah': 'Kitaabban Hadiisaa Jahan',
       'section_secondary': 'Walitti-qabaawwan Hadiisaa Biroo',
       'banner_badge': 'Kutaalee Hadiisaa 10 • Hadiisota 40,937',
       'banner_title': 'Mana Kitaaba Hadiisaa Nabiyyii fi Sunnaa',
-      'banner_desc': 'Muusowaa hadiisaa guutuu sanadaa fi boqonnaadhaan qophaa\'e toora malee',
-      'storage_card_title': 'Odeeffannoo Kuusaa fi Toora Malee Dubbisuu',
-      'storage_card_desc': 'Muusowaan guutuun toora malee fe\'ameera (~187 MB). Gara fuulduraatti bilbilli keessan bakka yoo dhabe, mallattoolee keessan osoo hin dhabin yeroof qulqulleessuu dandeessu.',
+      'banner_desc': 'Muusowaa hadiisaa guutuu sanadaa fi boqonnaadhaan qophaa\'e interneetii malee',
+      'storage_card_title': 'Odeeffannoo Kuusaa fi Interneetii Malee Dubbisuu',
+      'storage_card_desc': 'Bakka bilbilaa qusachuuf kitaabota kurnan kana (~187 MB) yeroo kamiyyuu balleessitanii yeroo barbaaddan interneetii malee deebisuu dandeessu.',
       'storage_card_btn': 'Kuusaa Bulchi',
     },
   };
@@ -244,7 +244,7 @@ class _HadithCollectionsScreenState extends State<HadithCollectionsScreen> {
     }
   }
 
-  Future<void> _confirmClearHadithStorage(BuildContext context) async {
+  Future<void> _confirmClearHadithStorage() async {
     final isDark = Theme.of(context).brightness == Brightness.dark ||
         AppTheme.notifier.value == QuranTheme.dark;
     final cardBg = AppTheme.getPageBgColor(AppTheme.notifier.value);
@@ -357,29 +357,28 @@ class _HadithCollectionsScreenState extends State<HadithCollectionsScreen> {
 
     if (confirmed == true) {
       await HadithDatabaseHelper.instance.deleteDatabaseFile();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: const Color(0xFF1B8A6B),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            content: Row(
-              children: [
-                const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    _t(context, 'snack_deleted'),
-                    style: const TextStyle(fontFamily: 'Amiri', color: Colors.white, fontWeight: FontWeight.bold),
-                  ),
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: const Color(0xFF1B8A6B),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  _t(context, 'snack_deleted'),
+                  style: const TextStyle(fontFamily: 'Amiri', color: Colors.white, fontWeight: FontWeight.bold),
                 ),
-              ],
-            ),
-            duration: const Duration(seconds: 4),
+              ),
+            ],
           ),
-        );
-        _loadCollections();
-      }
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      _loadCollections();
     }
   }
 
@@ -1011,7 +1010,7 @@ class _HadithCollectionsScreenState extends State<HadithCollectionsScreen> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              onPressed: () => _confirmClearHadithStorage(context),
+              onPressed: () => _confirmClearHadithStorage(),
             ),
           ),
         ],

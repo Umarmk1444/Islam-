@@ -117,15 +117,21 @@ class WoffFontLoader {
       final woffNum = pageNumber.toString().padLeft(3, '0');
       Uint8List? rawBytes;
 
-      // 1. If it's one of the preserved offline fonts in assets/fonts/
-      if (localQcfPages.contains(pageNumber)) {
+      // 1. Direct offline load from bundled assets/fonts/qcf4/
+      try {
+        final bd = await rootBundle.load('assets/fonts/qcf4/QCF4${woffNum}_X-Regular.woff');
+        rawBytes = bd.buffer.asUint8List(bd.offsetInBytes, bd.lengthInBytes);
+      } catch (_) {}
+
+      // 2. Fallback to assets/fonts/
+      if (rawBytes == null) {
         try {
           final bd = await rootBundle.load('assets/fonts/QCF4${woffNum}_X-Regular.woff');
           rawBytes = bd.buffer.asUint8List(bd.offsetInBytes, bd.lengthInBytes);
         } catch (_) {}
       }
 
-      // 2. Load from Google Play Asset Pack directory
+      // 3. Fallback to asset pack or cached documents if applicable
       if (rawBytes == null) {
         final fontsDir = await PlayAssetDeliveryService.instance.getFontsDirectoryPath();
         if (fontsDir != null) {
@@ -142,16 +148,8 @@ class WoffFontLoader {
         }
       }
 
-      // 3. Load from local documents cache or download on-demand (28 KB)
+      // 4. Fallback on-demand single page font download
       rawBytes ??= await PlayAssetDeliveryService.instance.downloadSinglePageFont(pageNumber);
-
-      // 4. Last fallback: rootBundle
-      if (rawBytes == null) {
-        try {
-          final bd = await rootBundle.load('assets/fonts/QCF4${woffNum}_X-Regular.woff');
-          rawBytes = bd.buffer.asUint8List(bd.offsetInBytes, bd.lengthInBytes);
-        } catch (_) {}
-      }
 
       if (rawBytes == null) return false;
 

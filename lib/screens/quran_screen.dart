@@ -136,7 +136,7 @@ class _QuranScreenState extends State<QuranScreen> {
         .addListener(_handleSelectedVerseNotifierChange);
   }
 
-  bool _isFontsReady = false;
+  bool _isFontsReady = true;
 
   Future<void> _initFontsCheck() async {
     final ready = await PlayAssetDeliveryService.instance.ensureAssetPackReady(
