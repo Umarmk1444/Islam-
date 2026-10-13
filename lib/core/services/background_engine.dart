@@ -367,7 +367,7 @@ void workmanagerDispatcher() {
           final title = contextualZekr.title;
           final plugin = FlutterLocalNotificationsPlugin();
           const androidSettings =
-              AndroidInitializationSettings('@mipmap/ic_launcher');
+              AndroidInitializationSettings('ic_notification');
           const initSettings = InitializationSettings(android: androidSettings);
           await plugin.initialize(initSettings);
 
@@ -394,6 +394,9 @@ void workmanagerDispatcher() {
             channelDescription: 'Heads-up notifications for Zekr',
             importance: Importance.max,
             priority: Priority.high,
+            icon: 'ic_notification',
+            color: Color(0xFF0D9488),
+            largeIcon: DrawableResourceAndroidBitmap('ic_notification_large'),
             ticker: 'ticker',
             styleInformation: BigTextStyleInformation(''),
             category: AndroidNotificationCategory.reminder,
@@ -663,7 +666,7 @@ void azkarReminderCallback(int id) async {
 
     final plugin = FlutterLocalNotificationsPlugin();
     const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('ic_notification');
     const initSettings = InitializationSettings(android: androidSettings);
     await plugin.initialize(initSettings);
 
@@ -709,6 +712,9 @@ void azkarReminderCallback(int id) async {
           : 'Sunnah, Duha, and Islamic reminders',
       importance: isVoiceSlot ? Importance.max : Importance.high,
       priority: Priority.high,
+      icon: 'ic_notification',
+      color: const Color(0xFF0D9488),
+      largeIcon: const DrawableResourceAndroidBitmap('ic_notification_large'),
       playSound: true,
       sound: soundName != null
           ? RawResourceAndroidNotificationSound(soundName)
@@ -781,7 +787,7 @@ void zekrNotificationCallback(int id) async {
         final title = contextualZekr.title;
         final plugin = FlutterLocalNotificationsPlugin();
         const androidSettings =
-            AndroidInitializationSettings('@mipmap/ic_launcher');
+            AndroidInitializationSettings('ic_notification');
         const initSettings = InitializationSettings(android: androidSettings);
         await plugin.initialize(initSettings);
 
@@ -808,6 +814,9 @@ void zekrNotificationCallback(int id) async {
           channelDescription: 'Heads-up notifications for Zekr',
           importance: Importance.high,
           priority: Priority.high,
+          icon: 'ic_notification',
+          color: const Color(0xFF0D9488),
+          largeIcon: const DrawableResourceAndroidBitmap('ic_notification_large'),
           styleInformation: BigTextStyleInformation(zekr),
           category: AndroidNotificationCategory.reminder,
           visibility: NotificationVisibility.public,

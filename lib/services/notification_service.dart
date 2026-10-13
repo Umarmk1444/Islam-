@@ -44,7 +44,7 @@ class NotificationService {
     tz.initializeTimeZones();
 
     const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('ic_notification');
 
     const initSettings = InitializationSettings(android: androidSettings);
 
@@ -192,7 +192,9 @@ class NotificationService {
       channelDescription: 'Notifications for new Quran Zone releases and features',
       importance: Importance.high,
       priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
+      icon: 'ic_notification',
+      color: const Color(0xFF0D9488),
+      largeIcon: const DrawableResourceAndroidBitmap('ic_notification_large'),
       styleInformation: BigTextStyleInformation(
         releaseNotes.isNotEmpty
             ? releaseNotes
