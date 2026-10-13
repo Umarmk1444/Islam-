@@ -463,7 +463,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     setState(() => _notificationsEnabled = value);
     if (value) {
       await NotificationService().scheduleIslamicReminders();
-      await BackgroundEngine().scheduleZekrNotification(_notificationInterval);
+      await BackgroundEngine().scheduleZekrNotification(_notificationInterval, true);
     } else {
       await NotificationService().cancelNotifications();
       await BackgroundEngine().cancelZekrNotification();
@@ -476,7 +476,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     if (!mounted) return;
     setState(() => _notificationInterval = value);
     if (_notificationsEnabled) {
-      await BackgroundEngine().scheduleZekrNotification(value);
+      await BackgroundEngine().scheduleZekrNotification(value, true);
     }
   }
 

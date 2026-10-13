@@ -9,6 +9,7 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../../../theme_notifier.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../services/permission_health_service.dart';
+import '../../../../core/services/background_engine.dart';
 import '../controllers/prayer_controller.dart';
 
 class PermissionsSetupScreen extends StatefulWidget {
@@ -117,6 +118,12 @@ class _PermissionsSetupScreenState extends State<PermissionsSetupScreen> {
         setState(() => _hasExactAlarm = status.isGranted);
       }
       PermissionHealthService.checkHealth();
+      if (status.isGranted) {
+        await BackgroundEngine().scheduleIslamicReminders();
+        final prefs = await SharedPreferences.getInstance();
+        final int interval = prefs.getInt('notification_interval') ?? 60;
+        await BackgroundEngine().scheduleZekrNotification(interval);
+      }
     } catch (e) {
       debugPrint('[PermissionsSetupScreen] Exact alarm permission error: $e');
     }

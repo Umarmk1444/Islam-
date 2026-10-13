@@ -16,7 +16,6 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -27,6 +26,7 @@ import '../features/prayer_times/presentation/screens/prayer_times_screen.dart';
 import '../features/prayer_times/presentation/controllers/prayer_controller.dart';
 import '../screens/azkar_screen.dart';
 import '../screens/quran_screen.dart';
+import '../core/services/background_engine.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -122,147 +122,29 @@ class NotificationService {
   // ── Reminders (Islamic & Daily) ──────────────────────────────────────────
 
   Future<void> scheduleIslamicReminders() async {
-    // Cancel prior Sunnah reminder IDs
-    await _plugin.cancel(1); // Morning Adhkar
-    await _plugin.cancel(2); // Duha Prayer
-    await _plugin.cancel(3); // Evening Adhkar
-    await _plugin.cancel(4); // Sleep Adhkar
-    await _plugin.cancel(10); // Friday Kahf
-    await _plugin.cancel(11); // Monday Fasting
-    await _plugin.cancel(12); // Thursday Fasting
-
-    final now = tz.TZDateTime.now(tz.local);
-
-    // Helper to find next occurrence of a daily time
-    tz.TZDateTime nextDailyTime(int hour, int minute) {
-      tz.TZDateTime scheduled =
-          tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
-      if (scheduled.isBefore(now)) {
-        scheduled = scheduled.add(const Duration(days: 1));
-      }
-      return scheduled;
+    // 1. Purge legacy local notification IDs (1..12) from _plugin
+    // so native Java ScheduledNotificationReceiver is never armed without freshness checks.
+    final legacyIds = [1, 2, 3, 4, 10, 11, 12];
+    for (final id in legacyIds) {
+      try {
+        await _plugin.cancel(id);
+      } catch (_) {}
     }
 
-    // Helper to find next occurrence of a weekday
-    tz.TZDateTime nextWeekday(int weekday, int hour, int minute) {
-      tz.TZDateTime scheduled =
-          tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
-      while (scheduled.weekday != weekday || scheduled.isBefore(now)) {
-        scheduled = scheduled.add(const Duration(days: 1));
-      }
-      return scheduled;
-    }
-
-    const androidDetails = AndroidNotificationDetails(
-      'islamic_reminders_channel',
-      'Islamic Reminders',
-      channelDescription: 'Morning, Evening, Duha, Sleep, and Sunnah reminders',
-      importance: Importance.high,
-      priority: Priority.high,
-      playSound: true,
-      styleInformation: BigTextStyleInformation(''),
-    );
-    const details = NotificationDetails(android: androidDetails);
-
-    // 1. أذكار الصباح (7:00 AM daily)
-    await _plugin.zonedSchedule(
-      1,
-      '🌅 أذكار الصباح',
-      'أصبحنا وأصبح الملك لله والحمد لله.. حان وقت أذكار الصباح لحفظك وبركة يومك',
-      nextDailyTime(7, 0),
-      details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-      payload: 'morning_azkar',
-    );
-
-    // 2. صلاة الضحى (9:30 AM daily)
-    await _plugin.zonedSchedule(
-      2,
-      '☀️ صلاة الضحى (صلاة الأوابين)',
-      'ركعتا الضحى صدقة عن كل مفصل في جسدك، لا تفوت أجرها العظيم',
-      nextDailyTime(9, 30),
-      details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-      payload: 'duha_prayer',
-    );
-
-    // 3. أذكار المساء (5:00 PM daily)
-    await _plugin.zonedSchedule(
-      3,
-      '🌇 أذكار المساء',
-      'أمسينا وأمسى الملك لله والحمد لله.. حصّن نفسك وأهلك بأذكار المساء',
-      nextDailyTime(17, 0),
-      details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-      payload: 'evening_azkar',
-    );
-
-    // 4. أذكار النوم وسورة الملك (10:00 PM daily)
-    await _plugin.zonedSchedule(
-      4,
-      '🌙 أذكار النوم وسورة الملك',
-      'باسمك ربي وضعت جنبي وبك أرفعه.. اختم يومك بذكر الله وتلاوة سورة الملك المنجية',
-      nextDailyTime(22, 0),
-      details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-      payload: 'sleep_azkar',
-    );
-
-    // 5. Friday Kahf (Friday 10:00 AM)
-    await _plugin.zonedSchedule(
-      10,
-      '🕌 جمعة مباركة: سورة الكهف والصلاة على النبي ﷺ',
-      'نور ما بين الجمعتين.. أكثروا من الصلاة على الحبيب المصطفى ﷺ واقرؤوا سورة الكهف',
-      nextWeekday(DateTime.friday, 10, 0),
-      details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-      payload: 'friday_kahf',
-    );
-
-    // 6. Monday Fasting (Sunday 8:00 PM)
-    await _plugin.zonedSchedule(
-      11,
-      '🌿 صيام الاثنين المبارك',
-      'غداً الاثنين يُستحب صيامه، تُعرض فيه الأعمال على الله عز وجل',
-      nextWeekday(DateTime.sunday, 20, 0),
-      details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-    );
-
-    // 7. Thursday Fasting (Wednesday 8:00 PM)
-    await _plugin.zonedSchedule(
-      12,
-      '🌿 صيام الخميس المبارك',
-      'غداً الخميس يُستحب صيامه، لا تفوت أجر الصيام وعظيم الثواب',
-      nextWeekday(DateTime.wednesday, 20, 0),
-      details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-    );
+    // 2. Delegate to BackgroundEngine as the single authoritative scheduler
+    await BackgroundEngine().scheduleIslamicReminders();
   }
 
   Future<void> cancelNotifications() async {
-    await _plugin.cancelAll();
+    // Targeted cancellation of only Islamic reminder IDs (1..12).
+    // NEVER call cancelAll() to protect Athan, pre-Adhan, goals, and update alerts.
+    final reminderIds = [1, 2, 3, 4, 10, 11, 12];
+    for (final id in reminderIds) {
+      try {
+        await _plugin.cancel(id);
+      } catch (_) {}
+    }
+    await BackgroundEngine().cancelIslamicReminders();
   }
 
   // ── Adhan Alert Scheduling ─────────────────────────────────────────────────

@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:adhan/adhan.dart' as adhan;
 
@@ -16,6 +17,7 @@ import '../../features/prayer_times/data/models/prayer_config.dart';
 import '../../features/prayer_times/data/models/prayer_time_model.dart';
 import '../../features/prayer_times/data/services/muezzin_manager.dart';
 import '../../services/azkar_service.dart';
+import 'islamic_reminder_strings.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MethodChannel for native AlarmManager scheduling (main isolate only)
@@ -437,23 +439,225 @@ Future<void> _syncAlarmsPrefsOnly(
 
 // ── Azkar Reminder Callback ──────────────────────────────────────────────────
 
+/// Calculates the next occurrence timestamp for in-scope non-Athan Islamic reminders.
+DateTime computeNextOccurrence(int slotId,
+    [DateTime? fromTime, SharedPreferences? prefs]) {
+  final now = fromTime ?? DateTime.now();
+  switch (slotId) {
+    case 1: // Morning Adhkar: 7:00 AM daily
+      DateTime target = DateTime(now.year, now.month, now.day, 7, 0);
+      if (!target.isAfter(now)) {
+        target = target.add(const Duration(days: 1));
+      }
+      return target;
+    case 2: // Duha Prayer: 9:30 AM daily
+      DateTime target = DateTime(now.year, now.month, now.day, 9, 30);
+      if (!target.isAfter(now)) {
+        target = target.add(const Duration(days: 1));
+      }
+      return target;
+    case 3: // Evening Adhkar: 17:00 (5:00 PM daily)
+      DateTime target = DateTime(now.year, now.month, now.day, 17, 0);
+      if (!target.isAfter(now)) {
+        target = target.add(const Duration(days: 1));
+      }
+      return target;
+    case 4: // Sleep Adhkar & Al-Mulk: 50 mins after Isha if known, or fallback to 22:00
+      final ishaStr = prefs?.getString('athan_next_time_isha');
+      if (ishaStr != null && ishaStr.isNotEmpty) {
+        try {
+          final ishaTime = DateTime.parse(ishaStr).toLocal();
+          final target = ishaTime.add(const Duration(minutes: 50));
+          if (target.isAfter(now)) {
+            return target;
+          }
+        } catch (_) {}
+      }
+      DateTime target = DateTime(now.year, now.month, now.day, 22, 0);
+      if (!target.isAfter(now)) {
+        target = target.add(const Duration(days: 1));
+      }
+      return target;
+    case 10: // Friday Al-Kahf: Friday 10:00 AM
+      DateTime target = DateTime(now.year, now.month, now.day, 10, 0);
+      while (target.weekday != DateTime.friday || !target.isAfter(now)) {
+        target = target.add(const Duration(days: 1));
+      }
+      return target;
+    case 11: // Monday Fasting: Sunday 20:00 (8:00 PM)
+      DateTime target = DateTime(now.year, now.month, now.day, 20, 0);
+      while (target.weekday != DateTime.sunday || !target.isAfter(now)) {
+        target = target.add(const Duration(days: 1));
+      }
+      return target;
+    case 12: // Thursday Fasting: Wednesday 20:00 (8:00 PM)
+      DateTime target = DateTime(now.year, now.month, now.day, 20, 0);
+      while (target.weekday != DateTime.wednesday || !target.isAfter(now)) {
+        target = target.add(const Duration(days: 1));
+      }
+      return target;
+    default:
+      DateTime target = DateTime(now.year, now.month, now.day, 7, 0);
+      if (!target.isAfter(now)) {
+        target = target.add(const Duration(days: 1));
+      }
+      return target;
+  }
+}
+
+/// Calculates the target DateTime for Slot 888 (Periodic Daytime Dhikr).
+///
+/// If [forceReset] is false and [currentScheduledEpoch] is a valid future timestamp,
+/// returns `null` to indicate that the running countdown must be preserved without
+/// postponing the next occurrence or re-arming the alarm.
+///
+/// If [forceReset] is false and [currentScheduledEpoch] is inactive, calculates
+/// the remaining time from [lastShownEpoch] if an interval is currently in progress.
+///
+/// If [forceReset] is true or no cycle is active, starts a fresh interval.
+/// Enforces quiet night hours (10:00 PM to 8:00 AM).
+DateTime? computeNextZekrOccurrence({
+  required DateTime now,
+  required int intervalMinutes,
+  int? currentScheduledEpoch,
+  int? lastShownEpoch,
+  bool forceReset = false,
+}) {
+  if (intervalMinutes <= 0) return null;
+
+  // 1. Preserve active future countdown if not forceReset
+  if (!forceReset && currentScheduledEpoch != null && currentScheduledEpoch > 0) {
+    final currentTarget =
+        DateTime.fromMillisecondsSinceEpoch(currentScheduledEpoch);
+    if (currentTarget.isAfter(now)) {
+      return null; // Preserves running countdown
+    }
+  }
+
+  // 2. Determine remaining delay in minutes from last shown timestamp
+  int targetDelayMinutes = intervalMinutes;
+  if (!forceReset && lastShownEpoch != null && lastShownEpoch > 0) {
+    final elapsed = now
+        .difference(DateTime.fromMillisecondsSinceEpoch(lastShownEpoch))
+        .inMinutes;
+    if (elapsed >= 0 && elapsed < intervalMinutes) {
+      final remaining = intervalMinutes - elapsed;
+      if (remaining > 0) {
+        targetDelayMinutes = remaining;
+      }
+    }
+  }
+
+  // 3. Enforce quiet night hours (10:00 PM to 8:00 AM)
+  if (now.hour >= 22 || now.hour < 8) {
+    DateTime target8AM;
+    if (now.hour >= 22) {
+      final tomorrow = now.add(const Duration(days: 1));
+      target8AM = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 8, 0);
+    } else {
+      target8AM = DateTime(now.year, now.month, now.day, 8, 0);
+    }
+    return target8AM;
+  }
+
+  // 4. Daytime scheduling: check if candidate lands into quiet hours
+  final candidate = now.add(Duration(minutes: targetDelayMinutes));
+  if (candidate.hour >= 22) {
+    final tomorrow = now.add(const Duration(days: 1));
+    return DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 8, 0);
+  }
+
+  return candidate;
+}
+
+/// Schedules a single Islamic reminder with explicit reboot persistence parameters
+/// and stores its occurrence epoch in SharedPreferences for freshness evaluation.
+Future<void> scheduleSingleIslamicReminder(
+    int slotId, SharedPreferences prefs) async {
+  final nextTarget = computeNextOccurrence(slotId, null, prefs);
+  await prefs.setInt(
+      'scheduled_occurrence_epoch_$slotId', nextTarget.millisecondsSinceEpoch);
+
+  bool hasExact = true;
+  try {
+    hasExact = await Permission.scheduleExactAlarm.isGranted;
+  } catch (_) {}
+
+  try {
+    await AndroidAlarmManager.oneShotAt(
+      nextTarget,
+      slotId,
+      azkarReminderCallback,
+      exact: hasExact,
+      wakeup: true,
+      rescheduleOnReboot: true,
+      allowWhileIdle: true,
+    );
+    debugPrint(
+        '[BackgroundEngine] Scheduled Islamic reminder slot $slotId (exact=$hasExact) for $nextTarget');
+  } catch (e) {
+    debugPrint(
+        '[BackgroundEngine] scheduleSingleIslamicReminder error: $e. Falling back to inexact alarm.');
+    try {
+      await AndroidAlarmManager.oneShotAt(
+        nextTarget,
+        slotId,
+        azkarReminderCallback,
+        exact: false,
+        wakeup: true,
+        rescheduleOnReboot: true,
+        allowWhileIdle: true,
+      );
+    } catch (err) {
+      debugPrint('[BackgroundEngine] Fallback scheduling failed: $err');
+    }
+  }
+}
+
+// ── Azkar & Islamic Reminder Callback ────────────────────────────────────────
+
 @pragma('vm:entry-point')
 void azkarReminderCallback(int id) async {
   WidgetsFlutterBinding.ensureInitialized();
   DartPluginRegistrant.ensureInitialized();
   try {
-    final bool isMorning = id == 300;
-    final String title = isMorning ? '🌅 حان وقت أذكار الصباح' : '🌙 حان وقت أذكار المساء والنوم';
-    final String body = isMorning
-        ? '«أصبحنا وأصبح الملك لله، والحمد لله»'
-        : '«باسمك ربي وضعت جنبي وبك أرفعه» تلاوة سورة الملك';
-    final String expandedText = isMorning
-        ? '«أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير»\n\n✨ حصّن يومك وبركة نهارك بالذكر والتسبيح.. اضغط هنا لقراءة أذكار الصباح كاملة.'
-        : '«باسمك ربي وضعت جنبي وبك أرفعه، فإن أمسكت نفسي فارحمها وإن أرسلتها فاحفظها بما تحفظ به عبادك الصالحين»\n\n✨ تلاوة سورة الملك المنجية من عذاب القبر.. اضغط هنا لقراءة أذكار النوم وسورة الملك.';
-    final String summary = isMorning ? '📖 أذكار الصباح' : '📖 أذكار النوم وسورة الملك';
-    final soundName = isMorning ? 'azkarsabah' : 'azkarmassa';
-    final channelId = isMorning ? 'azkar_sabah_voice_channel' : 'azkar_massa_voice_channel';
-    final payload = isMorning ? 'morning_azkar' : 'evening_azkar';
+    final prefs = await SharedPreferences.getInstance();
+    final bool enabled = prefs.getBool('notifications_enabled') ?? true;
+    if (!enabled) {
+      debugPrint(
+          '[azkarReminderCallback] Notifications disabled by user. Suppressing id: $id');
+      return;
+    }
+
+    // Normalize legacy IDs (300 -> 1, 301 -> 4)
+    final slotId = (id == 300) ? 1 : ((id == 301) ? 4 : id);
+
+    final scheduledEpoch =
+        prefs.getInt('scheduled_occurrence_epoch_$slotId') ?? 0;
+    final now = DateTime.now();
+
+    // 1. Missing or uninitialized timestamp check:
+    if (scheduledEpoch <= 0) {
+      debugPrint(
+          '[azkarReminderCallback] Missing scheduled epoch for slot $slotId. Silently rescheduling next occurrence.');
+      await scheduleSingleIslamicReminder(slotId, prefs);
+      return;
+    }
+
+    final scheduledTime = DateTime.fromMillisecondsSinceEpoch(scheduledEpoch);
+    final lateness = now.difference(scheduledTime);
+
+    // 2. Strict 60-minute freshness guard (must never arrive early or > 60m late):
+    if (lateness.isNegative || lateness > const Duration(minutes: 60)) {
+      debugPrint(
+          '[azkarReminderCallback] Out-of-window occurrence for slot $slotId (lateness: ${lateness.inSeconds}s). Silently discarding without notification.');
+      await scheduleSingleIslamicReminder(slotId, prefs);
+      return;
+    }
+
+    // 3. Reminder is fresh (within 60-minute window) -> Deliver notification
+    final appLang = prefs.getString('app_language');
+    final content = IslamicReminderStrings.getReminder(slotId, appLang);
 
     final plugin = FlutterLocalNotificationsPlugin();
     const androidSettings =
@@ -464,15 +668,32 @@ void azkarReminderCallback(int id) async {
     final androidImplementation = plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
 
+    final bool isVoiceSlot = (slotId == 1 || slotId == 4);
+    final String channelId = (slotId == 1)
+        ? 'azkar_sabah_voice_channel'
+        : (slotId == 4
+            ? 'azkar_massa_voice_channel'
+            : 'islamic_reminders_channel');
+    final String channelName = (slotId == 1)
+        ? 'Morning Azkar Voice'
+        : (slotId == 4 ? 'Evening/Night Azkar Voice' : 'Islamic Reminders');
+    final String? soundName = (slotId == 1)
+        ? 'azkarsabah'
+        : (slotId == 4 ? 'azkarmassa' : null);
+
     if (androidImplementation != null) {
       await androidImplementation.createNotificationChannel(
         AndroidNotificationChannel(
           channelId,
-          isMorning ? 'Morning Azkar Voice' : 'Evening/Night Azkar Voice',
-          description: 'Human voice reminder with expanded Azkar cards',
-          importance: Importance.max,
+          channelName,
+          description: isVoiceSlot
+              ? 'Human voice reminder with expanded Azkar cards'
+              : 'Sunnah, Duha, and Islamic reminders',
+          importance: isVoiceSlot ? Importance.max : Importance.high,
           playSound: true,
-          sound: RawResourceAndroidNotificationSound(soundName),
+          sound: soundName != null
+              ? RawResourceAndroidNotificationSound(soundName)
+              : null,
           enableVibration: true,
         ),
       );
@@ -480,36 +701,48 @@ void azkarReminderCallback(int id) async {
 
     final androidDetails = AndroidNotificationDetails(
       channelId,
-      isMorning ? 'Morning Azkar Voice' : 'Evening/Night Azkar Voice',
-      channelDescription: 'Human voice reminder with expanded Azkar cards',
-      importance: Importance.max,
+      channelName,
+      channelDescription: isVoiceSlot
+          ? 'Human voice reminder with expanded Azkar cards'
+          : 'Sunnah, Duha, and Islamic reminders',
+      importance: isVoiceSlot ? Importance.max : Importance.high,
       priority: Priority.high,
       playSound: true,
-      sound: RawResourceAndroidNotificationSound(soundName),
+      sound: soundName != null
+          ? RawResourceAndroidNotificationSound(soundName)
+          : null,
       category: AndroidNotificationCategory.reminder,
       visibility: NotificationVisibility.public,
-      styleInformation: BigTextStyleInformation(
-        expandedText,
-        contentTitle: title,
-        summaryText: summary,
-      ),
-      actions: <AndroidNotificationAction>[
-        AndroidNotificationAction(
-          isMorning ? 'open_morning' : 'open_evening',
-          isMorning ? '📖 فتح أذكار الصباح' : '📖 فتح أذكار النوم',
-          showsUserInterface: true,
-        ),
-      ],
+      styleInformation: content.expandedText != null
+          ? BigTextStyleInformation(
+              content.expandedText!,
+              contentTitle: content.title,
+              summaryText: content.summary,
+            )
+          : BigTextStyleInformation(content.body),
+      actions: content.actionLabel != null
+          ? <AndroidNotificationAction>[
+              AndroidNotificationAction(
+                (slotId == 1) ? 'open_morning' : 'open_sleep',
+                content.actionLabel!,
+                showsUserInterface: true,
+              ),
+            ]
+          : null,
     );
 
     await plugin.show(
-      id,
-      title,
-      body,
+      slotId,
+      content.title,
+      content.body,
       NotificationDetails(android: androidDetails),
-      payload: payload,
+      payload: content.payload,
     );
-    debugPrint('[azkarReminderCallback] Rich notification shown for id: $id ($soundName)');
+    debugPrint(
+        '[azkarReminderCallback] Notification shown for slot $slotId in language: ${IslamicReminderStrings.normalizeLang(appLang)}');
+
+    // 4. Reschedule next occurrence
+    await scheduleSingleIslamicReminder(slotId, prefs);
   } catch (e, stack) {
     debugPrint('[azkarReminderCallback] Error: $e');
     debugPrint(stack.toString());
@@ -524,9 +757,20 @@ void zekrNotificationCallback(int id) async {
   DartPluginRegistrant.ensureInitialized();
   try {
     final now = DateTime.now();
-    // Quiet hours: do NOT show periodic notification between 10:00 PM and 8:00 AM
+    final prefs = await SharedPreferences.getInstance();
+    final bool enabled = prefs.getBool('notifications_enabled') ?? true;
+    if (!enabled) return;
+
+    final int interval = prefs.getInt('notification_interval') ?? 60;
+    final int lastShownEpoch = prefs.getInt('last_zekr_shown_timestamp') ?? 0;
+
+    // 1. Quiet hours: do NOT show periodic notification between 10:00 PM and 8:00 AM
     if (now.hour < 8 || now.hour >= 22) {
       debugPrint('[zekrNotificationCallback] Quiet night hours (10 PM - 8 AM). Skipping notification.');
+    } else if (lastShownEpoch > 0 &&
+        now.difference(DateTime.fromMillisecondsSinceEpoch(lastShownEpoch)).inMinutes < interval) {
+      // 2. Prevent reboot backlog: If interval has not yet elapsed since last display, skip
+      debugPrint('[zekrNotificationCallback] Dhikr notification shown recently. Skipping reboot burst.');
     } else {
       final zekrService = AzkarService();
       final contextualZekr = await zekrService.getPeriodicSmartZekr();
@@ -572,7 +816,10 @@ void zekrNotificationCallback(int id) async {
           title,
           zekr,
           NotificationDetails(android: androidDetails),
+          payload: 'periodic_dhikr',
         );
+        await prefs.setInt('last_zekr_shown_timestamp', now.millisecondsSinceEpoch);
+        debugPrint('[zekrNotificationCallback] Periodic Dhikr notification shown.');
       }
     }
   } catch (e) {
@@ -586,6 +833,16 @@ void zekrNotificationCallback(int id) async {
         final now = DateTime.now();
         int nextDelayMinutes = interval;
 
+        // If Dhikr was shown recently, schedule for the remaining minutes in the cycle
+        final int lastShown = prefs.getInt('last_zekr_shown_timestamp') ?? 0;
+        if (lastShown > 0) {
+          final elapsed = now.difference(DateTime.fromMillisecondsSinceEpoch(lastShown)).inMinutes;
+          if (elapsed < interval) {
+            final remaining = interval - elapsed;
+            if (remaining > 0) nextDelayMinutes = remaining;
+          }
+        }
+
         // If currently in night hours (10 PM to 8 AM), target 8:00 AM next morning
         if (now.hour >= 22 || now.hour < 8) {
           DateTime target8AM;
@@ -598,8 +855,8 @@ void zekrNotificationCallback(int id) async {
           nextDelayMinutes = target8AM.difference(now).inMinutes;
           if (nextDelayMinutes <= 0) nextDelayMinutes = 1;
         } else {
-          // Daytime: check if now + interval would land past 22:00
-          final nextTime = now.add(Duration(minutes: interval));
+          // Daytime: check if now + nextDelayMinutes would land past 22:00
+          final nextTime = now.add(Duration(minutes: nextDelayMinutes));
           if (nextTime.hour >= 22) {
             final tomorrow = now.add(const Duration(days: 1));
             final target8AM = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 8, 0);
@@ -608,7 +865,8 @@ void zekrNotificationCallback(int id) async {
           }
         }
 
-        await BackgroundEngine().scheduleZekrNotification(nextDelayMinutes);
+        await BackgroundEngine().scheduleZekrNotification(nextDelayMinutes, true);
+        debugPrint('[zekrNotificationCallback] Rescheduled next Periodic Dhikr in $nextDelayMinutes mins.');
       }
     } catch (e) {
       debugPrint('[zekrNotificationCallback] Reschedule error: $e');
@@ -635,26 +893,130 @@ class BackgroundEngine {
     _initialized = true;
   }
 
-  /// Schedules a Zekr Notification alarm
-  Future<void> scheduleZekrNotification(int minutes) async {
+  /// Schedules a Zekr Notification alarm with explicit reboot persistence.
+  /// If [forceReset] is false and an alarm is already scheduled in the future,
+  /// the active cycle is preserved to prevent app opens or resumes from
+  /// postponing the next Dhikr notification.
+  Future<void> scheduleZekrNotification(
+      [int? minutes, bool forceReset = false]) async {
     if (!Platform.isAndroid) return;
-    await AndroidAlarmManager.cancel(888);
-    if (minutes <= 0) return;
-    await AndroidAlarmManager.oneShot(
-      Duration(minutes: minutes),
-      888,
-      zekrNotificationCallback,
-      exact: true,
-      wakeup: true,
-      rescheduleOnReboot: true,
-      allowWhileIdle: true,
+    final prefs = await SharedPreferences.getInstance();
+    final bool enabled = prefs.getBool('notifications_enabled') ?? true;
+    if (!enabled) return;
+
+    final int interval = minutes ?? prefs.getInt('notification_interval') ?? 60;
+    if (interval <= 0) return;
+
+    final now = DateTime.now();
+    final currentEpoch = prefs.getInt('scheduled_occurrence_epoch_888');
+    final lastShownEpoch = prefs.getInt('last_zekr_shown_timestamp');
+
+    final nextTarget = computeNextZekrOccurrence(
+      now: now,
+      intervalMinutes: interval,
+      currentScheduledEpoch: currentEpoch,
+      lastShownEpoch: lastShownEpoch,
+      forceReset: forceReset,
     );
+
+    if (nextTarget == null) {
+      if (currentEpoch != null && currentEpoch > 0) {
+        final currentTarget =
+            DateTime.fromMillisecondsSinceEpoch(currentEpoch);
+        debugPrint(
+            '[BackgroundEngine] Preserving active Dhikr countdown to $currentTarget (no reset on resume).');
+      }
+      return;
+    }
+
+    final targetTime = nextTarget;
+
+    await AndroidAlarmManager.cancel(888);
+    await prefs.setInt(
+        'scheduled_occurrence_epoch_888', targetTime.millisecondsSinceEpoch);
+
+    bool hasExact = true;
+    try {
+      hasExact = await Permission.scheduleExactAlarm.isGranted;
+    } catch (_) {}
+
+    try {
+      await AndroidAlarmManager.oneShotAt(
+        targetTime,
+        888,
+        zekrNotificationCallback,
+        exact: hasExact,
+        wakeup: true,
+        rescheduleOnReboot: true,
+        allowWhileIdle: true,
+      );
+      debugPrint(
+          '[BackgroundEngine] Scheduled Dhikr slot 888 for $targetTime (exact=$hasExact, delay=${targetTime.difference(now).inMinutes}m)');
+    } catch (e) {
+      debugPrint(
+          '[BackgroundEngine] scheduleZekrNotification error: $e. Falling back to inexact.');
+      try {
+        await AndroidAlarmManager.oneShotAt(
+          targetTime,
+          888,
+          zekrNotificationCallback,
+          exact: false,
+          wakeup: true,
+          rescheduleOnReboot: true,
+          allowWhileIdle: true,
+        );
+      } catch (err) {
+        debugPrint('[BackgroundEngine] Fallback zekr scheduling failed: $err');
+      }
+    }
   }
 
-  /// Cancels Zekr Notification alarm
+  /// Cancels Zekr Notification alarm and removes persistent epoch
   Future<void> cancelZekrNotification() async {
     if (!Platform.isAndroid) return;
     await AndroidAlarmManager.cancel(888);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('scheduled_occurrence_epoch_888');
+  }
+
+  /// Schedules unified Islamic reminders (Slots 1, 2, 3, 4, 10, 11, 12)
+  /// with explicit reboot persistence and occurrence timestamps.
+  Future<void> scheduleIslamicReminders() async {
+    if (!Platform.isAndroid) return;
+    final prefs = await SharedPreferences.getInstance();
+    final bool enabled = prefs.getBool('notifications_enabled') ?? true;
+    if (!enabled) return;
+
+    // Purge legacy duplicate alarm IDs (300, 301)
+    await AndroidAlarmManager.cancel(300);
+    await AndroidAlarmManager.cancel(301);
+
+    final reminderSlots = [1, 2, 3, 4, 10, 11, 12];
+    final now = DateTime.now();
+
+    for (final slotId in reminderSlots) {
+      final currentEpoch =
+          prefs.getInt('scheduled_occurrence_epoch_$slotId') ?? 0;
+      if (currentEpoch > 0) {
+        final scheduledTime = DateTime.fromMillisecondsSinceEpoch(currentEpoch);
+        if (scheduledTime.isAfter(now)) {
+          // Already scheduled in the future; keep it to prevent unnecessary churn
+          continue;
+        }
+      }
+      await scheduleSingleIslamicReminder(slotId, prefs);
+    }
+  }
+
+  /// Targeted cancellation of only in-scope non-Athan Islamic reminders
+  Future<void> cancelIslamicReminders() async {
+    if (!Platform.isAndroid) return;
+    final reminderSlots = [1, 2, 3, 4, 10, 11, 12, 300, 301];
+    for (final slotId in reminderSlots) {
+      try {
+        await AndroidAlarmManager.cancel(slotId);
+      } catch (_) {}
+    }
   }
 
   /// Cancels a specific alarm by ID (both native and backup AlarmManager alarms)
@@ -935,79 +1297,33 @@ class BackgroundEngine {
           }
         }
 
-        // 3. Morning Azkar Voice Reminder (7:00 AM)
+        // 3. Islamic Reminders (Unified Single Authority)
+        // Legacy duplicate slots 300 & 301 are cancelled; unified slots 1 & 4 scheduled
         if (prayer == PrayerName.fajr) {
-          DateTime morningVoiceTime = DateTime(
-            targetEntry.time.toLocal().year,
-            targetEntry.time.toLocal().month,
-            targetEntry.time.toLocal().day,
-            7,
-            0,
-          );
-          if (morningVoiceTime.isBefore(now)) {
-            final tomorrowEntry = prayerEntries.firstWhere(
-              (e) => e.time.toLocal().isAfter(targetEntry!.time.toLocal()),
-              orElse: () => targetEntry!,
-            );
-            morningVoiceTime = DateTime(
-              tomorrowEntry.time.toLocal().year,
-              tomorrowEntry.time.toLocal().month,
-              tomorrowEntry.time.toLocal().day,
-              7,
-              0,
-            );
-          }
-          if (morningVoiceTime.isAfter(now)) {
-            await AndroidAlarmManager.oneShotAt(
-              morningVoiceTime,
-              300,
-              azkarReminderCallback,
-              exact: true,
-              wakeup: true,
-              rescheduleOnReboot: true,
-              alarmClock: true,
-              allowWhileIdle: true,
-            );
-          }
+          await AndroidAlarmManager.cancel(300);
+          await AndroidAlarmManager.cancel(301);
+          await scheduleIslamicReminders();
         }
 
-        // 4. Night Azkar Voice Reminder (50 mins after Isha prayer)
+        // 4. Sleep Azkar & Surah Al-Mulk (50 mins after Isha prayer)
         if (prayer == PrayerName.isha) {
           final nightAzkarTime =
               targetEntry.time.add(const Duration(minutes: 50)).toLocal();
-
-          if (nightAzkarTime.isBefore(now)) {
-            final tomorrowEntry = prayerEntries.firstWhere(
-              (e) => e.time.toLocal().isAfter(targetEntry!.time.toLocal()),
-              orElse: () => targetEntry!,
-            );
-            if (tomorrowEntry != targetEntry) {
-              final tomorrowNightTime =
-                  tomorrowEntry.time.add(const Duration(minutes: 50)).toLocal();
-              if (tomorrowNightTime.isAfter(now)) {
-                await AndroidAlarmManager.oneShotAt(
-                  tomorrowNightTime,
-                  301,
-                  azkarReminderCallback,
-                  exact: true,
-                  wakeup: true,
-                  rescheduleOnReboot: true,
-                  alarmClock: true,
-                  allowWhileIdle: true,
-                );
-              }
-            }
-          } else {
+          if (nightAzkarTime.isAfter(now)) {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setInt('scheduled_occurrence_epoch_4',
+                nightAzkarTime.millisecondsSinceEpoch);
             await AndroidAlarmManager.oneShotAt(
               nightAzkarTime,
-              301,
+              4,
               azkarReminderCallback,
               exact: true,
               wakeup: true,
               rescheduleOnReboot: true,
-              alarmClock: true,
               allowWhileIdle: true,
             );
+            debugPrint(
+                '[BackgroundEngine] Scheduled Sleep Azkar slot 4 at Isha+50m: $nightAzkarTime');
           }
         }
 

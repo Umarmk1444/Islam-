@@ -15,6 +15,7 @@ import '../features/prayer_times/presentation/controllers/prayer_controller.dart
 import '../features/prayer_times/presentation/screens/permissions_setup_screen.dart';
 import '../services/app_update_service.dart';
 import '../services/permission_health_service.dart';
+import '../core/services/background_engine.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MainNavigationScreen
@@ -111,6 +112,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       PermissionHealthService.checkHealth();
+      BackgroundEngine().scheduleIslamicReminders();
+      SharedPreferences.getInstance().then((prefs) {
+        final bool enabled = prefs.getBool('notifications_enabled') ?? true;
+        final int interval = prefs.getInt('notification_interval') ?? 60;
+        if (enabled && interval > 0) {
+          BackgroundEngine().scheduleZekrNotification(interval);
+        }
+      });
     }
   }
 
