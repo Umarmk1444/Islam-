@@ -508,40 +508,41 @@ DateTime computeNextOccurrence(int slotId,
 /// Calculates the target DateTime for Slot 888 (Periodic Daytime Dhikr).
 ///
 /// If [forceReset] is false and [currentScheduledEpoch] is a valid future timestamp,
-/// returns `null` to indicate that the running countdown must be preserved without
-/// postponing the next occurrence or re-arming the alarm.
+/// preserves that exact future target DateTime so the active cycle is not postponed,
+/// while allowing the scheduler to re-arm the OS AlarmManager if Android cleared it
+/// (e.g. after SCHEDULE_EXACT_ALARM permission revocation and restoration).
 ///
 /// If [forceReset] is false and [currentScheduledEpoch] is inactive, calculates
 /// the remaining time from [lastShownEpoch] if an interval is currently in progress.
 ///
 /// If [forceReset] is true or no cycle is active, starts a fresh interval.
 /// Enforces quiet night hours (10:00 PM to 8:00 AM).
-DateTime? computeNextZekrOccurrence({
+DateTime computeNextZekrOccurrence({
   required DateTime now,
   required int intervalMinutes,
   int? currentScheduledEpoch,
   int? lastShownEpoch,
   bool forceReset = false,
 }) {
-  if (intervalMinutes <= 0) return null;
+  final safeInterval = intervalMinutes <= 0 ? 60 : intervalMinutes;
 
   // 1. Preserve active future countdown if not forceReset
   if (!forceReset && currentScheduledEpoch != null && currentScheduledEpoch > 0) {
     final currentTarget =
         DateTime.fromMillisecondsSinceEpoch(currentScheduledEpoch);
     if (currentTarget.isAfter(now)) {
-      return null; // Preserves running countdown
+      return currentTarget; // Preserves running countdown with exact target time!
     }
   }
 
   // 2. Determine remaining delay in minutes from last shown timestamp
-  int targetDelayMinutes = intervalMinutes;
+  int targetDelayMinutes = safeInterval;
   if (!forceReset && lastShownEpoch != null && lastShownEpoch > 0) {
     final elapsed = now
         .difference(DateTime.fromMillisecondsSinceEpoch(lastShownEpoch))
         .inMinutes;
-    if (elapsed >= 0 && elapsed < intervalMinutes) {
-      final remaining = intervalMinutes - elapsed;
+    if (elapsed >= 0 && elapsed < safeInterval) {
+      final remaining = safeInterval - elapsed;
       if (remaining > 0) {
         targetDelayMinutes = remaining;
       }
@@ -572,9 +573,10 @@ DateTime? computeNextZekrOccurrence({
 
 /// Schedules a single Islamic reminder with explicit reboot persistence parameters
 /// and stores its occurrence epoch in SharedPreferences for freshness evaluation.
+/// If [explicitTarget] is provided, re-arms the alarm for that exact timestamp.
 Future<void> scheduleSingleIslamicReminder(
-    int slotId, SharedPreferences prefs) async {
-  final nextTarget = computeNextOccurrence(slotId, null, prefs);
+    int slotId, SharedPreferences prefs, [DateTime? explicitTarget]) async {
+  final nextTarget = explicitTarget ?? computeNextOccurrence(slotId, null, prefs);
   await prefs.setInt(
       'scheduled_occurrence_epoch_$slotId', nextTarget.millisecondsSinceEpoch);
 
@@ -911,25 +913,13 @@ class BackgroundEngine {
     final currentEpoch = prefs.getInt('scheduled_occurrence_epoch_888');
     final lastShownEpoch = prefs.getInt('last_zekr_shown_timestamp');
 
-    final nextTarget = computeNextZekrOccurrence(
+    final targetTime = computeNextZekrOccurrence(
       now: now,
       intervalMinutes: interval,
       currentScheduledEpoch: currentEpoch,
       lastShownEpoch: lastShownEpoch,
       forceReset: forceReset,
     );
-
-    if (nextTarget == null) {
-      if (currentEpoch != null && currentEpoch > 0) {
-        final currentTarget =
-            DateTime.fromMillisecondsSinceEpoch(currentEpoch);
-        debugPrint(
-            '[BackgroundEngine] Preserving active Dhikr countdown to $currentTarget (no reset on resume).');
-      }
-      return;
-    }
-
-    final targetTime = nextTarget;
 
     await AndroidAlarmManager.cancel(888);
     await prefs.setInt(
@@ -1000,7 +990,8 @@ class BackgroundEngine {
       if (currentEpoch > 0) {
         final scheduledTime = DateTime.fromMillisecondsSinceEpoch(currentEpoch);
         if (scheduledTime.isAfter(now)) {
-          // Already scheduled in the future; keep it to prevent unnecessary churn
+          // Re-arm OS AlarmManager with current exact permission while preserving exact future target
+          await scheduleSingleIslamicReminder(slotId, prefs, scheduledTime);
           continue;
         }
       }

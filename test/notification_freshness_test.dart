@@ -222,7 +222,7 @@ void main() {
       expect(target, DateTime(2026, 10, 15, 11, 0));
     });
 
-    test('App resume at T0 + 20m does NOT postpone target (returns null to preserve active cycle)', () {
+    test('App resume at T0 + 20m does NOT postpone target (returns exact original target for AlarmManager re-arming)', () {
       final t0 = DateTime(2026, 10, 15, 10, 0);
       final scheduledTarget = DateTime(2026, 10, 15, 11, 0);
       final resumeTime = t0.add(const Duration(minutes: 20)); // 10:20 AM
@@ -235,12 +235,12 @@ void main() {
         forceReset: false,
       );
 
-      // null signals: do NOT reschedule, do NOT cancel, keep original 11:00 AM alarm
-      expect(result, isNull,
-          reason: 'App resume must preserve active cycle without postponing target');
+      // Returns identical 11:00 AM target: re-arms AlarmManager without postponing
+      expect(result, scheduledTarget,
+          reason: 'App resume must preserve active cycle target for AlarmManager re-registration');
     });
 
-    test('Repeated app resumes at 10:10, 10:25, 10:40, 10:55 never postpone or duplicate alarm', () {
+    test('Repeated app resumes at 10:10, 10:25, 10:40, 10:55 never postpone target', () {
       final scheduledTarget = DateTime(2026, 10, 15, 11, 0);
       final resumeMoments = [
         DateTime(2026, 10, 15, 10, 10),
@@ -257,25 +257,25 @@ void main() {
           lastShownEpoch: DateTime(2026, 10, 15, 10, 0).millisecondsSinceEpoch,
           forceReset: false,
         );
-        expect(result, isNull,
-            reason: 'Resume at $moment must preserve existing 11:00 target');
+        expect(result, scheduledTarget,
+            reason: 'Resume at $moment must preserve existing 11:00 target without postponement');
       }
     });
 
-    test('Return from Android Settings preserves original cycle', () {
-      final scheduledTarget = DateTime(2026, 10, 15, 14, 0);
-      final returnFromSettings = DateTime(2026, 10, 15, 13, 15);
+    test('Return from Android Settings (e.g. permission restore) re-registers identical target time', () {
+      final scheduledTarget = DateTime(2026, 10, 15, 19, 0); // 7:00 PM target
+      final returnFromSettings = DateTime(2026, 10, 15, 18, 5); // 6:05 PM restore
 
       final result = computeNextZekrOccurrence(
         now: returnFromSettings,
         intervalMinutes: 60,
         currentScheduledEpoch: scheduledTarget.millisecondsSinceEpoch,
-        lastShownEpoch: DateTime(2026, 10, 15, 13, 0).millisecondsSinceEpoch,
+        lastShownEpoch: DateTime(2026, 10, 15, 18, 0).millisecondsSinceEpoch,
         forceReset: false,
       );
 
-      expect(result, isNull,
-          reason: 'Return from Android settings must not reset Dhikr countdown');
+      expect(result, scheduledTarget,
+          reason: 'Permission restore must preserve identical 19:00 target so AlarmManager is re-armed without reset');
     });
 
     test('If epoch is missing, calculates remaining time from last_zekr_shown_timestamp', () {
