@@ -12,7 +12,7 @@
 
 <br />
 
-[📲 Download on Google Play](https://play.google.com/store/apps/details?id=com.umer.quranzone) • [🐛 Report Bug](https://github.com/Umarmk1444/Islam-/issues) • [✨ Request Feature](https://github.com/Umarmk1444/Islam-/issues)
+[📲 Download on Google Play](https://play.google.com/store/apps/details?id=com.umer.quranzone) • [🐛 Report Bug](https://github.com/Umarmk1444/QuranZone/issues) • [✨ Request Feature](https://github.com/Umarmk1444/QuranZone/issues)
 
 </div>
 
@@ -71,5 +71,5 @@ To run and build this project locally, ensure you have the [Flutter SDK](https:/
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/Umarmk1444/Islam-.git](https://github.com/Umarmk1444/Islam-.git)
-   cd Islam-
+   git clone https://github.com/Umarmk1444/QuranZone.git
+   cd QuranZone
