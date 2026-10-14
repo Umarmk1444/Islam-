@@ -173,7 +173,7 @@ void athanAlarmCallback(int id) async {
 
     final plugin = FlutterLocalNotificationsPlugin();
     const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('ic_notification');
     const initSettings = InitializationSettings(android: androidSettings);
     await plugin.initialize(initSettings);
 
@@ -199,6 +199,9 @@ void athanAlarmCallback(int id) async {
       channelDescription: 'Notification before Adhan time',
       importance: Importance.high,
       priority: Priority.high,
+      icon: 'ic_notification',
+      color: Color(0xFF0D9488),
+      largeIcon: DrawableResourceAndroidBitmap('ic_notification_large'),
       sound: RawResourceAndroidNotificationSound('salah'),
       playSound: true,
       category: AndroidNotificationCategory.alarm,

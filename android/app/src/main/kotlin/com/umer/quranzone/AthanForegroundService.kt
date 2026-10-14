@@ -18,7 +18,9 @@ import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
+import android.graphics.BitmapFactory
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import java.io.File
 import java.util.Timer
 import java.util.TimerTask
@@ -310,7 +312,9 @@ class AthanForegroundService : Service() {
             .setContentTitle("🕌 $displayName Prayer")
             .setContentText("Tap ■ Stop Athan to silence")   // collapsed-state hint
             .setStyle(bigTextStyle)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setColor(ContextCompat.getColor(this, R.color.notification_icon_color))
+            .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_notification_large))
             .setOngoing(true)               // sticky — cannot swipe on Android ≤ 12
             .setAutoCancel(false)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
