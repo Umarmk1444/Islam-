@@ -8,11 +8,11 @@
 [![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
 [![Platform](https://img.shields.io/badge/Platform-Android_API_21+-green?style=for-the-badge&logo=android&logoColor=white)](https://play.google.com/store/apps/details?id=com.umer.quranzone)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
-[![Open Source](https://img.shields.io/badge/Open_Source-❤️-blueviolet?style=for-the-badge)](https://github.com/Umarmk1444/QuranZone)
+[![Open Source](https://img.shields.io/badge/Open_Source-❤️-blueviolet?style=for-the-badge)](https://github.com/UmerMK/QuranZone)
 
 <br />
 
-[📲 Download on Google Play](https://play.google.com/store/apps/details?id=com.umer.quranzone) • [⭐ Star Repository](https://github.com/Umarmk1444/QuranZone) • [🐛 Report Bug](https://github.com/Umarmk1444/QuranZone/issues) • [💡 Request Feature](https://github.com/Umarmk1444/QuranZone/issues)
+[📲 Download on Google Play](https://play.google.com/store/apps/details?id=com.umer.quranzone) • [⭐ Star Repository](https://github.com/UmerMK/QuranZone) • [🐛 Report Bug](https://github.com/UmerMK/QuranZone/issues) • [💡 Request Feature](https://github.com/UmerMK/QuranZone/issues)
 
 <p align="center">
   <b>English</b> • <b>العربية</b> • <b>አማርኛ (Amharic)</b> • <b>Afaan Oromoo</b>
@@ -197,7 +197,7 @@ Quran Zone implements the latest Android Material notification design guidelines
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/Umarmk1444/QuranZone.git
+git clone https://github.com/UmerMK/QuranZone.git
 cd QuranZone
 ```
 
@@ -236,7 +236,7 @@ cd android
 
 Contributions to **Quran Zone** are welcome! Whether fixing a bug, adding translations, improving performance, or proposing a new feature:
 
-1. **Fork** the repository: [https://github.com/Umarmk1444/QuranZone/fork](https://github.com/Umarmk1444/QuranZone/fork)
+1. **Fork** the repository: [https://github.com/UmerMK/QuranZone/fork](https://github.com/UmerMK/QuranZone/fork)
 2. **Create a branch**: `git checkout -b feature/amazing-feature`
 3. **Commit your changes**: `git commit -m 'feat: add amazing new feature'`
 4. **Push to your branch**: `git push origin feature/amazing-feature`
@@ -252,7 +252,7 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 <div align="center">
 
-**Developed with dedication for the Muslim Ummah by [Umarmk1444](https://github.com/Umarmk1444)**  
+**Developed with dedication for the Muslim Ummah by [UmerMK](https://github.com/UmerMK)**  
 *May Allah accept this work as a perpetual charity (Sadaqah Jariyah).*
 
 [![Google Play Store](https://img.shields.io/badge/Google_Play-Install_Quran_Zone-34A853?style=for-the-badge&logo=googleplay&logoColor=white)](https://play.google.com/store/apps/details?id=com.umer.quranzone)
