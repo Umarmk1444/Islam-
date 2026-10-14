@@ -157,7 +157,7 @@ lib/
 ├── screens/                               # 33+ feature screens and custom UI views
 ├── services/
 │   ├── azkar_service.dart                 # Hisn Al-Muslim database provider
-│   ├── hadith_service.dart                # Kutub al-Tis'ah query engine
+│   ├── hadith_service.dart                # 10 Canonical Hadith collections query engine
 │   ├── muezzin_manager.dart               # Audio player engine for reciters & Adhan
 │   ├── notification_service.dart          # FlutterLocalNotifications plugin manager
 │   └── quran_radio_service.dart           # 185+ live radio station streaming provider
