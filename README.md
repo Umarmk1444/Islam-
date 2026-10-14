@@ -26,7 +26,7 @@
 
 **Quran Zone** is a modern, high-performance, offline-first mobile application designed for Muslims worldwide. Built with **Flutter**, **Dart**, and native **Kotlin**, it combines authentic Islamic scholarship with modern mobile engineering. 
 
-Whether studying the Holy Quran with word-by-word synchronized audio, researching classical Hadith from the 9 major canonical collections, learning Arabic phonetics with the interactive Noorani Qaida, or relying on native Adhan audio alarms that trigger accurately even when the phone is locked—**Quran Zone** delivers a distraction-free, reliable experience completely free of charge.
+Whether studying the Holy Quran with word-by-word synchronized audio, researching authentic Hadith from the 10 canonical collections, learning Arabic phonetics with the interactive Noorani Qaida, or relying on native Adhan audio alarms that trigger accurately even when the phone is locked—**Quran Zone** delivers a distraction-free, reliable experience completely free of charge.
 
 ---
 
@@ -49,19 +49,24 @@ Whether studying the Holy Quran with word-by-word synchronized audio, researchin
 
 ---
 
-### 📚 2. Kutub al-Tis'ah Hadith Encyclopedia
-Full offline integration of the **Nine Canonical Books of Hadith (كتب الحديث التسعة)**, stored in an optimized local SQLite database:
-1. **Sahih al-Bukhari (صحيح البخاري)**
-2. **Sahih Muslim (صحيح مسلم)**
-3. **Sunan Abi Dawud (سنن أبي داود)**
-4. **Jami` at-Tirmidhi (جامع الترمذي)**
-5. **Sunan an-Nasa'i (سنن النسائي)**
-6. **Sunan Ibn Majah (سنن ابن ماجه)**
-7. **Muwatta Malik (موطأ مالك)**
-8. **Musnad Ahmad (مسند أحمد)**
-9. **Sunan ad-Darimi (سنن الدارمي)**
+### 📚 2. Grand Hadith Encyclopedia (موسوعة الحديث الشريف - 10 Canonical Collections)
+Full offline integration of **10 major Hadith collections (40,937 noble Hadiths)**, stored in an optimized local SQLite database (`hadith_library.db`):
 
-- **Features**: Chapter indexing, Hadith grading verification (Sahih, Hasan, Da'if), narrator chains (Isnad), and lightning-fast full-text search.
+#### 📜 The Six Canonical Books (الكتب الستة المعتمدة):
+1. **Sahih al-Bukhari (صحيح البخاري)** — Imam Muhammad al-Bukhari *(7,277 Hadiths)*
+2. **Sahih Muslim (صحيح مسلم)** — Imam Muslim ibn al-Hajjaj *(7,368 Hadiths)*
+3. **Sunan an-Nasa'i (سنن النسائي)** — Imam Ahmad an-Nasa'i *(5,768 Hadiths)*
+4. **Sunan Abi Dawud (سنن أبي داود)** — Imam Abu Dawud as-Sijistani *(5,276 Hadiths)*
+5. **Jami` at-Tirmidhi (جامع الترمذي)** — Imam Muhammad at-Tirmidhi *(4,053 Hadiths)*
+6. **Sunan Ibn Majah (سنن ابن ماجه)** — Imam Muhammad Ibn Majah *(4,345 Hadiths)*
+
+#### 📖 Major Compilations & Supplementary Masterworks (المصنفات والجوامع الكبرى):
+7. **Muwatta Malik (موطأ مالك)** — Imam Malik ibn Anas *(1,861 Hadiths)*
+8. **Riyad as-Salihin (رياض الصالحين)** — Imam Yahya ibn Sharaf an-Nawawi *(1,896 Hadiths)*
+9. **Al-Adab Al-Mufrad (الأدب المفرد)** — Imam Muhammad al-Bukhari *(1,326 Hadiths)*
+10. **Bulugh al-Maram (بلوغ المرام من أدلة الأحكام)** — Al-Hafiz Ibn Hajar al-Asqalani *(1,767 Hadiths)*
+
+- **Features**: Complete Sanad (chains of narration), Matn (text), chapter-by-chapter indexing, Hadith grading verification (Sahih, Hasan, Da'if), instant offline search, and one-tap storage management (~187 MB offline pack).
 
 ---
 
